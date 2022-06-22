@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {Navbar as BootstrapNavbar, Nav} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
-import Button from './Button'
+import LinkButton from './LinkButton'
 import logo from '../resources/logo.svg';
 
 class Navbar extends Component {

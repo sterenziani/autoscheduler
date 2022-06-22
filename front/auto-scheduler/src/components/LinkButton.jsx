@@ -18,7 +18,7 @@ import { Translation } from 'react-i18next';
     />
 */
 
-const Button = props => {
+const LinkButton = props => {
     const { href, text, textKey, ...other } = props
 
     return href ? (
@@ -30,4 +30,4 @@ const Button = props => {
     );
 }
 
-export default Button;
+export default LinkButton;
