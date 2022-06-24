@@ -3,15 +3,18 @@ import {useParams, BrowserRouter as Router, Routes, Route} from 'react-router-do
 import Spinner from 'react-bootstrap/Spinner';
 import Navbar from './components/Navbar';
 import SearchForm from './components/SearchForm'
+import SearchResults from './components/SearchResults'
+import NoMatch from './components/NoMatch'
 import './resources/style.scss';
 
 function App() {
   return (
     <Router>
       <Navbar/>
-      <SearchForm/>
       <Routes>
-        <Route path="/" exact/>
+        <Route path="/" element={<SearchForm/>}/>
+        <Route path="/results" element={<SearchResults/>}/>
+        <Route path="*" element={<NoMatch/>} />
       </Routes>
     </Router>
   );

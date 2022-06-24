@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import {Button, Form, Spinner} from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
 import {Translation} from "react-i18next";
 import {Link} from 'react-router-dom';
-import LinkButton from './LinkButton'
 
-const DAYS = ['M', 'T', 'W', 'TH', 'F', 'SAT', 'SUN'];
-const DEFAULT_DATE = {day:"SUN", startTime:"01:00", endTime:"01:01"}
+const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
+const DEFAULT_DATE = {day:DAYS[0], startTime:"01:00", endTime:"01:01"}
 
 class SearchForm extends Component {
   state = {
-    programs: [{id:'S18', name:'S18 - Informática'}, {id:'I03', name:'I03 - Industrial'}],
-    periods: [{id:'2022-1Q', name:'2022-1Q'}, {id:'2022-2Q', name:'2022-2Q'}],
+    programs: [{id:'S18', internalId:'S18', name:'Informática'}, {id:'I03', internalId:'I03', name:'Industrial'}],
+    periods: [{id:'2022-1Q', internalId:'2022-1Q', name:'2022-1Q'}, {id:'2022-2Q', internalId:'2022-2Q', name:'2022-2Q'}],
     params: {
       title: '',
       program: undefined,
@@ -19,7 +19,7 @@ class SearchForm extends Component {
       hours: 24,
       reduceDays: true,
       prioritizeUnlocks: true,
-      unavailableTimeSlots: [DEFAULT_DATE]
+      unavailableTimeSlots: [JSON.parse(JSON.stringify(DEFAULT_DATE))]  // Clone DEFAULT_DATE
     }
   }
 
@@ -83,12 +83,30 @@ class SearchForm extends Component {
 
   onClickPlusSign(e){
     let paramsCopy = Object.assign({}, this.state.params);
-    paramsCopy.unavailableTimeSlots.push(DEFAULT_DATE);
+    paramsCopy.unavailableTimeSlots.push(JSON.parse(JSON.stringify(DEFAULT_DATE))); // Clone DEFAULT_DATE
     this.setState({params: paramsCopy});
   }
 
-  sendForm(e){
-    console.log(this.state.params);
+  getPath() {
+    let path = "results";
+    if(!this.state.params.program){
+      this.state.params.program = this.state.programs[0];
+    }
+    if(!this.state.params.period){
+      this.state.params.period = this.state.periods[0];
+    }
+    path += "?program="+this.state.params.program.id;
+    path += "&period="+this.state.params.period.id;
+    path += "&hours="+this.state.params.hours;
+    path += "&reduceDays="+this.state.params.reduceDays;
+    path += "&prioritizeUnlocks="+this.state.params.prioritizeUnlocks;
+    if(this.state.params.unavailableTimeSlots){
+      this.state.params.unavailableTimeSlots.forEach(slot => {
+        if(slot.startTime < slot.endTime)
+          path += "&unavailable="+slot.day+"-"+slot.startTime+"-"+slot.endTime;
+      });
+    }
+    return path;
   }
 
   render(){
@@ -108,7 +126,7 @@ class SearchForm extends Component {
               </div>
               <div className="col-8 text-center">
                 <Form.Select aria-label="Default select example" value={this.state.params.programs} onChange={this.onChangePrograms.bind(this)}>
-                  { this.state.programs.map(p => (<option key={p.id} value={p.id}>{p.name}</option>)) }
+                  { this.state.programs.map(p => (<option key={p.id} value={p.id}>{p.internalId+" - "+p.name}</option>)) }
                 </Form.Select>
               </div>
           </Form.Group>
@@ -188,7 +206,9 @@ class SearchForm extends Component {
           </Form.Group>
 
           <div className="text-center">
-            <Button className="btn btn-primary mt-3" onClick={this.sendForm.bind(this)}><Translation>{t => t("submit")}</Translation></Button>
+            <LinkContainer to={ this.getPath() }>
+            <Button className="btn btn-primary mt-3"><Translation>{t => t("submit")}</Translation></Button>
+            </LinkContainer>
           </div>
         </Form>
       </React.Fragment>
