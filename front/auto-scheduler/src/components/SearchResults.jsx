@@ -13,7 +13,7 @@ class SearchResults extends Component {
     loading: true,
     error: false,
     status: null,
-    games: []
+    schedules: []
   };
 
   componentDidMount() {
@@ -31,9 +31,8 @@ class SearchResults extends Component {
         });
       }
       else {
-        console.log(data)
         this.setState({
-          availableClasses: data,
+          schedules: data,
           loading: false,
         });
       }
@@ -44,8 +43,8 @@ class SearchResults extends Component {
     if(!props)
       props = this.props;
     const params = {
-      program: props.query.get("hours"),
-      period: props.query.get("program"),
+      program: props.query.get("program"),
+      term: props.query.get("term"),
       hours: props.query.get("hours"),
       reduceDays: props.query.get("reduceDays"),
       prioritizeUnlocks: props.query.get("prioritizeUnlocks"),
@@ -72,15 +71,26 @@ class SearchResults extends Component {
           <Helmet><title>Results - AutoScheduler</title></Helmet>
         </HelmetProvider>
         <div>
-          <ul>
-            {this.state.games.map((g) => {
-              return (
-                <li key={g.id}>
-                  {g.title} {g.firstName}
-                </li>
-              );
-            })}
-          </ul>
+        {
+          this.state.schedules.map((s, idx) => {
+            return(
+              <div key={"schedule-"+idx}>
+                <h1>Schedule #{1+idx}</h1>
+                <p>{s.days} días, {s.hours} hrs total, {s.earliest}-{s.latest}</p>
+                <ul>
+                {
+                  s.courseClasses.map((c, cidx) => {
+                    return( <li key={"ci-"+cidx}>
+                              {c.course} - {c.courseName} ({c.courseClass})
+                              <ul>{c.lectures.map((l, lidx) => {return(<li key={"li-"+lidx}>{l.day}: {l.startTime}-{l.endTime} ({l.building})</li>);})}</ul>
+                            </li>);
+                  })
+                }
+                </ul>
+              </div>
+            );
+          }
+        )}
         </div>
       </React.Fragment>
     );

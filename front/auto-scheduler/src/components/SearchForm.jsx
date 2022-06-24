@@ -11,11 +11,11 @@ const DEFAULT_DATE = {day:DAYS[0], startTime:"01:00", endTime:"01:01"}
 class SearchForm extends Component {
   state = {
     programs: [{id:'S18', internalId:'S18', name:'Informática'}, {id:'I03', internalId:'I03', name:'Industrial'}],
-    periods: [{id:'2022-1Q', internalId:'2022-1Q', name:'2022-1Q'}, {id:'2022-2Q', internalId:'2022-2Q', name:'2022-2Q'}],
+    terms: [{id:'2022-1Q', internalId:'2022-1Q', name:'2022-1Q'}, {id:'2022-2Q', internalId:'2022-2Q', name:'2022-2Q'}],
     params: {
       title: '',
       program: undefined,
-      period: undefined,
+      term: undefined,
       hours: 24,
       reduceDays: true,
       prioritizeUnlocks: true,
@@ -92,11 +92,11 @@ class SearchForm extends Component {
     if(!this.state.params.program){
       this.state.params.program = this.state.programs[0];
     }
-    if(!this.state.params.period){
-      this.state.params.period = this.state.periods[0];
+    if(!this.state.params.term){
+      this.state.params.term = this.state.terms[0];
     }
     path += "?program="+this.state.params.program.id;
-    path += "&period="+this.state.params.period.id;
+    path += "&term="+this.state.params.term.id;
     path += "&hours="+this.state.params.hours;
     path += "&reduceDays="+this.state.params.reduceDays;
     path += "&prioritizeUnlocks="+this.state.params.prioritizeUnlocks;
@@ -131,15 +131,15 @@ class SearchForm extends Component {
               </div>
           </Form.Group>
 
-          <Form.Group controlId="period" className="row mx-auto form-row">
+          <Form.Group controlId="term" className="row mx-auto form-row">
               <div className="col-4 text-end my-auto text-break">
                 <Form.Label className="my-0">
-                  <h5 className="my-0"><strong><Translation>{t => t("search.period")}</Translation></strong></h5>
+                  <h5 className="my-0"><strong><Translation>{t => t("search.term")}</Translation></strong></h5>
                 </Form.Label>
               </div>
               <div className="col-8 text-center">
-                <Form.Select aria-label="Default select example" value={this.state.params.periods} onChange={this.onChangePrograms.bind(this)}>
-                  { this.state.periods.map(p => (<option key={p.id} value={p.id}>{p.name}</option>)) }
+                <Form.Select aria-label="Default select example" value={this.state.params.terms} onChange={this.onChangePrograms.bind(this)}>
+                  { this.state.terms.map(p => (<option key={p.id} value={p.id}>{p.name}</option>)) }
                 </Form.Select>
               </div>
           </Form.Group>

@@ -1,4 +1,5 @@
 import { TIMEOUT } from './ApiConstants';
+import SgaConstants from '../resources/SgaConstants';
 
 /*
 const getUsers = () =>
@@ -41,7 +42,7 @@ const paramsToQuery = (params) => {
   let query = ""
   if(params){
       query += "?program="+params.program;
-      query += "&period="+params.period;
+      query += "&term="+params.term;
       query += "&hours="+params.hours;
       query += "&reduceDays="+params.reduceDays;
       query += "&prioritizeUnlocks="+params.prioritizeUnlocks;
@@ -54,16 +55,8 @@ const paramsToQuery = (params) => {
   return query
 }
 
-const getSchedules = (params) =>
-  new Promise((resolve, reject) => {
-    const query = paramsToQuery(params);
-    var availableClasses = getAvailableClasses(params.userAsking);
-    availableClasses = filterUnattendableClasses(availableClasses, params.unavailableTimeSlots);
-    var schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays);
-    setTimeout(() => resolve(schedules), 250);
-  });
-
 /*
+TO USE ONCE ALGORITHM IS MOVED TO BACK-END
 const getSchedules = async (params) => {
     try{
       const query = paramsToQuery(params);
@@ -80,6 +73,18 @@ const getSchedules = async (params) => {
 }
 */
 
+// TEMPORARY FIX FOR PROTOTYPE
+const getSchedules = (params) =>
+  new Promise((resolve, reject) => {
+    const query = paramsToQuery(params);
+    let availableClasses = getAvailableClasses(params.userAsking); // Gets the classes the user is enabled to be in
+    availableClasses = filterUnattendableClasses(availableClasses, params.unavailableTimeSlots); // Deletes classes that conflict with busy time
+    calculateDurationOfEachClass(availableClasses); // Updates classes with time spent in each
+
+    let schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays); // Returns sorted array
+    setTimeout(() => resolve(schedules), 250);
+  });
+
 const ApiService = {
   getGames    : getGames,
   getSchedules: getSchedules
@@ -93,124 +98,10 @@ export default ApiService;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
-let courses = [
-  {
-    id: '31.08',
-    internalId: '31.08',
-    name: 'Sistemas de Representación'
-  },
-  {
-    id: '93.26',
-    internalId: '93.26',
-    name: 'Análisis Matemático I'
-  },
-  {
-    id: '93.58',
-    internalId: '93.58',
-    name: 'Algebra'
-  },
-  {
-    id: '72.31',
-    internalId: '72.31',
-    name: 'Programación Imperativa',
-    requirements: ['93.58']
-  },
-  {
-    id: '93.28',
-    internalId: '93.28',
-    name: 'Análisis Matemático II',
-    requirements: ['93.58', '93.26']
-  },
-  {
-    id: '93.41',
-    internalId: '93.41',
-    name: 'Física I',
-    requirements: ['93.26']
-  }
-]
-
-let courseClasses = [
-  {
-    course: '31.08',
-    period: '2022-1Q',
-    courseClass: 'S',
-    lectures: [{day: DAYS[3], startTime:"14:00", endTime:"17:00", building:"Madero"}]
-  },
-  {
-    course: '31.08',
-    period: '2022-1Q',
-    courseClass: 'K',
-    lectures: [{day: DAYS[4], startTime:"14:00", endTime:"17:00", building:"Madero"}]
-  },
-  {
-    course: '93.26',
-    period: '2022-1Q',
-    courseClass: 'S',
-    lectures: [{day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"},
-                {day: DAYS[4], startTime:"08:00", endTime:"11:00", building:"Madero"}]
-  },
-  {
-    course: '93.58',
-    period: '2022-1Q',
-    courseClass: 'S',
-    lectures: [{day: DAYS[2], startTime:"09:00", endTime:"13:00", building:"Madero"},
-                {day: DAYS[4], startTime:"11:00", endTime:"14:00", building:"Madero"},
-                {day: DAYS[5], startTime:"14:00", endTime:"16:00", building:"Madero"}]
-  },
-  {
-    course: '72.31',
-    period: '2022-1Q',
-    courseClass: 'S',
-    lectures: [{day: DAYS[2], startTime:"18:00", endTime:"19:30", building:"Madero"},
-                {day: DAYS[3], startTime:"08:30", endTime:"10:00", building:"Madero"},
-                {day: DAYS[5], startTime:"09:00", endTime:"11:00", building:"Madero"},
-                {day: DAYS[5], startTime:"14:00", endTime:"18:00", building:"Madero"}]
-  },
-  {
-    course: '93.28',
-    period: '2022-1Q',
-    courseClass: 'S1',
-    lectures: [{day: DAYS[1], startTime:"12:00", endTime:"14:00", building:"Madero"},
-                {day: DAYS[2], startTime:"13:00", endTime:"15:00", building:"Madero"},
-                {day: DAYS[4], startTime:"12:00", endTime:"14:00", building:"Madero"}]
-  },
-  {
-    course: '93.28',
-    period: '2022-1Q',
-    courseClass: 'S2',
-    lectures: [{day: DAYS[1], startTime:"12:00", endTime:"14:00", building:"Madero"},
-                {day: DAYS[2], startTime:"13:00", endTime:"15:00", building:"Madero"},
-                {day: DAYS[4], startTime:"15:00", endTime:"17:00", building:"Madero"}]
-  },
-  {
-    course: '93.41',
-    period: '2022-1Q',
-    courseClass: 'A',
-    lectures: [{day: DAYS[1], startTime:"14:00", endTime:"16:00", building:"Madero"},
-                {day: DAYS[2], startTime:"08:00", endTime:"10:00", building:"Madero"},
-                {day: DAYS[3], startTime:"10:00", endTime:"12:00", building:"Madero"}]
-  },
-  {
-    course: '93.41',
-    period: '2022-1Q',
-    courseClass: 'S',
-    lectures: [{day: DAYS[1], startTime:"16:00", endTime:"18:00", building:"Madero"},
-                {day: DAYS[2], startTime:"16:00", endTime:"18:00", building:"Madero"},
-                {day: DAYS[3], startTime:"16:00", endTime:"18:00", building:"Madero"}]
-  }
-]
-
-let finishedCourses = [
-  {
-    student: 'Student',
-    courses: ['93.58', '93.26']
-  }
-]
-
 const getAvailableClasses = (student) => {
-  const passedCourses = finishedCourses.find(c => c.student === student).courses;
-  const availableCourses = courses.filter(c => {
+  const map = calculateImportanceOfEachCourse(SgaConstants.informaticaCourses)
+  const passedCourses = SgaConstants.finishedCourses.find(c => c.student === student).courses;
+  const availableCourses = SgaConstants.informaticaCourses.filter(c => {
                                             if(passedCourses.includes(c.id))
                                               return false;
                                             if(c.requirements)
@@ -219,7 +110,11 @@ const getAvailableClasses = (student) => {
                                           });
   let availableCourseCodes = []
   availableCourses.forEach(c => availableCourseCodes.push(c.id))
-  const availableClasses = courseClasses.filter(com => availableCourseCodes.includes(com.course));
+  const availableClasses = SgaConstants.courseClasses.filter(com => availableCourseCodes.includes(com.course));
+  availableClasses.forEach(c => {
+    c.unlockables = (map[c.course])?map[c.course]:0
+    c.courseName = SgaConstants.informaticaCourses.find(s => s.id === c.course).name
+  }) // Adds importance of that course to the class
   return availableClasses;
 }
 
@@ -233,8 +128,8 @@ const filterUnattendableClasses = (availableClasses, unavailableTimeSlots) => {
 }
 
 const areTimeSlotsCompatible = (slotsA, slotsB) => {
-  for(var t of slotsA){
-    for(var l of slotsB){
+  for(let t of slotsA){
+    for(let l of slotsB){
       if(l.day === t.day)
       {
         if(t.startTime <= l.startTime && l.startTime < t.endTime)
@@ -247,7 +142,103 @@ const areTimeSlotsCompatible = (slotsA, slotsB) => {
   return true
 }
 
-const getBestSchedules = (availableClasses, hours, unlocks, days) => {
-  // TO DO: Implement Algorithm
-  return availableClasses
+const calculateImportanceOfEachCourse = (programCourses) => {
+  let map = {}
+  programCourses.forEach(c => {
+    if(c.requirements)
+      c.requirements.forEach(r => {
+        if(!map[r])
+          map[r] = 0
+        map[r] += 1
+      })
+  })
+  /*
+  programCourses.forEach(c => {
+    if(map[c.id])
+      c.unlockables = map[c.id]
+    else
+      c.unlockables = 0
+  })
+  */
+  return map
+}
+
+const calculateDurationOfEachClass = (classes) => {
+  classes.forEach(c => {
+    c.weeklyHours = 0
+    c.days = new Set()
+    c.earliest = "23:59"
+    c.latest = "00:00"
+    c.lectures.forEach(l => {
+      let startTime = l.startTime.split(/\D+/);
+      let endTime = l.endTime.split(/\D+/);
+      startTime = (startTime[0]*60 +startTime[1]*1)
+      endTime = (endTime[0]*60 +endTime[1]*1)
+      c.weeklyHours += (endTime-startTime)/60
+      c.days.add(l.day)
+      if(l.startTime < c.earliest)
+        c.earliest = l.startTime
+      if(l.endTime > c.latest)
+        c.latest = l.endTime
+    });
+  })
+}
+
+const getBestSchedules = (availableClasses, desiredHours, prioritizeUnlocks, reduceDays) => {
+  const courseCombinations = getCourseCombinations(availableClasses)
+  let schedules = []
+  courseCombinations.forEach(combo => {
+    let lectureHours = 0
+    let days = new Set()
+    let unlockables = 0
+    let earliest = '23:59'
+    let latest = '00:00'
+    combo.forEach(c =>{
+      lectureHours += c.weeklyHours
+      unlockables += c.unlockables
+      days.add(c.days)
+      if(c.earliest < earliest)
+        earliest = c.earliest
+      if(c.latest > latest)
+        latest = c.latest
+    })
+
+    let score = -Math.abs(desiredHours-lectureHours)
+    if(reduceDays)
+      score += (7-days.size)*2
+    if(prioritizeUnlocks)
+      score += unlockables
+    schedules.push({courseClasses: combo, score: score, hours: lectureHours, days: days.size, earliest:earliest, latest:latest})
+  })
+  return schedules.sort((a, b) => {return b.score - a.score;}).slice(0, 10);
+}
+
+const getCourseCombinations = (arr = []) => {
+  const combine = (sub, ind) => {
+    let result = []
+    let i, l, p;
+    for (i = ind, l = arr.length; i < l; i++) {
+      p = sub.slice(0);
+      p.push(arr[i]);
+      result = result.concat(combine(p, i + 1));
+      if(isValidSchedule(p))
+        result.push(p);
+    };
+    return result;
+  }
+  return combine([], 0);
+};
+
+const isValidSchedule = (courseClasses) => {
+  for(let c1 of courseClasses){
+    for(let c2 of courseClasses){
+      // Same course, different class
+      if(c1.course === c2.course && c1.courseClass != c2.courseClass)
+        return false;
+      // Lectures overlap
+      if(c1 != c2 && !areTimeSlotsCompatible(c1.lectures, c2.lectures))
+        return false;
+    };
+  }
+  return true;
 }
