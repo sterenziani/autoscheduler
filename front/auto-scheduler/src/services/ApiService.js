@@ -76,7 +76,6 @@ const getSchedules = async (params) => {
 // TEMPORARY FIX FOR PROTOTYPE
 const getSchedules = (params) =>
   new Promise((resolve, reject) => {
-    const query = paramsToQuery(params);
     let availableClasses = getAvailableClasses(params.userAsking); // Gets the classes the user is enabled to be in
     availableClasses = filterUnattendableClasses(availableClasses, params.unavailableTimeSlots); // Deletes classes that conflict with busy time
     calculateDurationOfEachClass(availableClasses); // Updates classes with time spent in each
@@ -110,7 +109,7 @@ const getAvailableClasses = (student) => {
                                           });
   let availableCourseCodes = []
   availableCourses.forEach(c => availableCourseCodes.push(c.id))
-  const availableClasses = SgaConstants.courseClasses.filter(com => availableCourseCodes.includes(com.course));
+  const availableClasses = SgaConstants.courseClasses2022A.filter(com => availableCourseCodes.includes(com.course));
   availableClasses.forEach(c => {
     c.unlockables = (map[c.course])?map[c.course]:0
     c.courseName = SgaConstants.informaticaCourses.find(s => s.id === c.course).name
@@ -196,7 +195,7 @@ const getBestSchedules = (availableClasses, desiredHours, prioritizeUnlocks, red
     combo.forEach(c =>{
       lectureHours += c.weeklyHours
       unlockables += c.unlockables
-      days.add(c.days)
+      days = new Set([...days, ...c.days])
       if(c.earliest < earliest)
         earliest = c.earliest
       if(c.latest > latest)
@@ -205,7 +204,7 @@ const getBestSchedules = (availableClasses, desiredHours, prioritizeUnlocks, red
 
     let score = -Math.abs(desiredHours-lectureHours)
     if(reduceDays)
-      score += (7-days.size)*2
+      score += (7-days.size)*4
     if(prioritizeUnlocks)
       score += unlockables
     schedules.push({courseClasses: combo, score: score, hours: lectureHours, days: days.size, earliest:earliest, latest:latest})
@@ -233,10 +232,10 @@ const isValidSchedule = (courseClasses) => {
   for(let c1 of courseClasses){
     for(let c2 of courseClasses){
       // Same course, different class
-      if(c1.course === c2.course && c1.courseClass != c2.courseClass)
+      if(c1.course === c2.course && c1.courseClass !== c2.courseClass)
         return false;
       // Lectures overlap
-      if(c1 != c2 && !areTimeSlotsCompatible(c1.lectures, c2.lectures))
+      if(c1 !== c2 && !areTimeSlotsCompatible(c1.lectures, c2.lectures))
         return false;
     };
   }

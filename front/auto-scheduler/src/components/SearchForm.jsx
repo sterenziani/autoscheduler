@@ -13,7 +13,6 @@ class SearchForm extends Component {
     programs: [{id:'S18', internalId:'S18', name:'Informática'}, {id:'I03', internalId:'I03', name:'Industrial'}],
     terms: [{id:'2022-1Q', internalId:'2022-1Q', name:'2022-1Q'}, {id:'2022-2Q', internalId:'2022-2Q', name:'2022-2Q'}],
     params: {
-      title: '',
       program: undefined,
       term: undefined,
       hours: 24,
@@ -43,13 +42,13 @@ class SearchForm extends Component {
 
   onChangePrioritize(e){
     let paramsCopy = Object.assign({}, this.state.params);
-    paramsCopy.prioritizeUnlocks = e.target.value;
+    paramsCopy.prioritizeUnlocks = e.target.checked;
     this.setState({params: paramsCopy});
   }
 
   onChangeReduceDays(e){
     let paramsCopy = Object.assign({}, this.state.params);
-    paramsCopy.reduceDays = e.target.value;
+    paramsCopy.reduceDays = e.target.checked;
     this.setState({params: paramsCopy});
   }
 
@@ -162,7 +161,7 @@ class SearchForm extends Component {
               </Form.Label>
             </div>
             <div className="col-8 d-flex align-items-start align-items-center">
-              <Form.Check className="m-0" onChange={this.onChangePrioritize.bind(this)}/>
+              <Form.Check checked={this.state.params.prioritizeUnlocks} className="m-0" onChange={this.onChangePrioritize.bind(this)}/>
             </div>
           </Form.Group>
 
@@ -173,7 +172,7 @@ class SearchForm extends Component {
               </Form.Label>
             </div>
             <div className="col-8 d-flex align-items-start align-items-center">
-              <Form.Check className="m-0" onChange={this.onChangeReduceDays.bind(this)}/>
+              <Form.Check checked={this.state.params.reduceDays} className="m-0" onChange={this.onChangeReduceDays.bind(this)}/>
             </div>
           </Form.Group>
 

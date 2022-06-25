@@ -1,0 +1,25 @@
+{
+  "search":{
+    "program":"Program",
+    "term":"Term",
+    "hoursPerWeek":"Weekly hours",
+    "prioritizeUnlocks":"Prioritize unlockables",
+    "reduceDays":"Reduce days",
+    "unavailableSlots":"Timeslots to avoid"
+  },
+  "days":{
+    "M":"Monday",
+    "T":"Tuesday",
+    "W":"Wednesday",
+    "TH":"Thursday",
+    "F":"Friday",
+    "SAT":"Saturday",
+    "SUN":"Sunday"
+  },
+  "results":{
+    "scheduleNumber": "Schedule #{{value}}",
+    "recap": "{{days}} days, {{hours}} hours total",
+    "timeRange": "Lectures range from {{earliest}} to {{latest}}"
+  },
+  "submit": "Search"
+}

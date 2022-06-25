@@ -1,0 +1,25 @@
+{
+  "search":{
+    "program":"Carrera",
+    "term":"Período",
+    "hoursPerWeek":"Horas semanales",
+    "prioritizeUnlocks":"Priorizar correlativas",
+    "reduceDays":"Reducir días",
+    "unavailableSlots":"Horarios a evitar"
+  },
+  "days":{
+    "M":"Lunes",
+    "T":"Martes",
+    "W":"Miércoles",
+    "TH":"Jueves",
+    "F":"Viernes",
+    "SAT":"Sábado",
+    "SUN":"Domingo"
+  },
+  "results":{
+    "scheduleNumber": "Cronograma #{{value}}",
+    "recap": "{{days}} días, {{hours}} horas en total",
+    "timeRange": "Horarios de {{earliest}} a {{latest}}"
+  },
+  "submit": "Buscar"
+}

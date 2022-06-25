@@ -8,6 +8,8 @@ import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import withQuery from '../hoc/withQuery';
 
+const DAYS_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
 class SearchResults extends Component {
   state = {
     loading: true,
@@ -75,14 +77,22 @@ class SearchResults extends Component {
           this.state.schedules.map((s, idx) => {
             return(
               <div key={"schedule-"+idx}>
-                <h1>Schedule #{1+idx}</h1>
-                <p>{s.days} días, {s.hours} hrs total, {s.earliest}-{s.latest}</p>
+                <h1><Translation>{t => t("results.scheduleNumber", {value:1+idx})}</Translation></h1>
+                <p>
+                  <Translation>{t => t("results.recap", {days:s.days, hours:s.hours})}</Translation><br/>
+                  <Translation>{t => t("results.timeRange", {earliest:s.earliest, latest:s.latest})}</Translation>
+                </p>
                 <ul>
                 {
                   s.courseClasses.map((c, cidx) => {
                     return( <li key={"ci-"+cidx}>
                               {c.course} - {c.courseName} ({c.courseClass})
-                              <ul>{c.lectures.map((l, lidx) => {return(<li key={"li-"+lidx}>{l.day}: {l.startTime}-{l.endTime} ({l.building})</li>);})}</ul>
+                              <ul>{c.lectures.map((l, lidx) => {
+                                return(
+                                  <li key={"li-"+lidx}>
+                                    <b><Translation>{t => t("days."+l.day)}</Translation>:</b> {l.startTime}-{l.endTime} ({l.building})
+                                  </li>
+                                );})}</ul>
                             </li>);
                   })
                 }
