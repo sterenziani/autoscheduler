@@ -235,10 +235,10 @@ const getCourseCombinations = (arr = []) => {
 };
 
 const isValidSchedule = (courseClasses) => {
-  for(let c1 of courseClasses){
-    for(let c2 of courseClasses){
+  for(let [i1,c1] of courseClasses.entries()){
+    for(let [i2,c2] of courseClasses.entries()){
       // Same course, different class
-      if(c1.course === c2.course && c1.courseClass !== c2.courseClass)
+      if(c1.course === c2.course && i1 !== i2)
         return false;
       // Lectures overlap
       if(c1 !== c2 && !areTimeSlotsCompatible(c1.lectures, c2.lectures))

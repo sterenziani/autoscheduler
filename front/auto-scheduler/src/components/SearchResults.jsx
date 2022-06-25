@@ -34,7 +34,6 @@ class SearchResults extends Component {
         });
       }
       else {
-        var timetables = []
         var tables = []
         data.forEach((s, idx) => {
           tables.push(this.drawTable(this.getTimeTable(s), Number(data[idx].earliest.split(":")[0])-1, Number(data[idx].latest.split(":")[0])+1))
