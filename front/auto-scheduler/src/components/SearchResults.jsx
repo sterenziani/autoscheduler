@@ -36,7 +36,7 @@ class SearchResults extends Component {
       else {
         var tables = []
         data.forEach((s, idx) => {
-          tables.push(this.drawTable(this.getTimeTable(s), Number(data[idx].earliest.split(":")[0])-1, Number(data[idx].latest.split(":")[0])+1))
+          tables.push(this.drawTable(this.getTimeTable(s), Number(data[idx].earliest.split(":")[0])-1, Number(data[idx].latest.split(":")[0])+1, idx))
         });
         this.setState({
           schedules: data,
@@ -86,15 +86,15 @@ class SearchResults extends Component {
     return timeTable
   }
 
-  drawTable(timeTable, earliest, latest){
+  drawTable(timeTable, earliest, latest, id){
     return(
-      <table className="table table-bordered text-center">
+      <table key={"t-"+id} className="table table-bordered text-center">
         <thead>
           <tr className="bg-primary border-dark text-white">
             <th className="text-uppercase"></th>
             {
               DAYS.map(d => {
-                return(<th className="text-uppercase"><Translation>{t => t("days."+d)}</Translation></th>)})
+                return(<th key={"t-"+id+"-d-"+d} className="text-uppercase"><Translation>{t => t("days."+d)}</Translation></th>)})
             }
           </tr>
         </thead>
@@ -124,11 +124,10 @@ class SearchResults extends Component {
                   else
                     contents[d] = <td className="text-uppercase bg-black"></td>
                 })
-                const ret = <tr key={"h-"+h} className="border-dark">
-                              <td className="text-uppercase bg-primary text-white">{h+":00"}</td>
-                              { DAYS.map(d => contents[d]) }
-                            </tr>
-                return(ret)
+                return(<tr key={"h-"+h} className="border-dark">
+                          <td className="text-uppercase bg-primary text-white">{h+":00"}</td>
+                          {DAYS.map(d => <React.Fragment key={"id-"+id+"d-"+d+"h-"+h}>{contents[d]}</React.Fragment>)}
+                        </tr>)
               }
             })
           }
