@@ -6,7 +6,17 @@ $warning: #FFAD66;
 $danger: #EF476F;
 $light: #f8f9fa;
 $dark: #343a40;
+$disabled: #cad2c5;
 $background: #DCF1EC;
+
+$color0: #FFADAD;
+$color1: #A0C4FF;
+$color2: #FDFFB6;
+$color3: #CAFFBF;
+$color4: #FFD6A5;
+$color5: #9BF6FF;
+$color6: #FFC6FF;
+$color7: #BDB2FF;
 
 $theme-colors: (
   primary: $primary,
@@ -17,6 +27,8 @@ $theme-colors: (
   danger: $danger,
   light: $light,
   dark: $dark,
+  black: #000000,
+  white: #FFFFFF,
 );
 
 .color-primary{
@@ -25,6 +37,42 @@ $theme-colors: (
 
 .color-secondary{
   color: $secondary !important;
+}
+
+.color-disabled{
+  color: $disabled !important;
+}
+
+.bg-color-0{
+  background-color: $color0 !important;
+}
+
+.bg-color-1{
+  background-color: $color1 !important;
+}
+
+.bg-color-2{
+  background-color: $color2 !important;
+}
+
+.bg-color-3{
+  background-color: $color3 !important;
+}
+
+.bg-color-4{
+  background-color: $color4 !important;
+}
+
+.bg-color-5{
+  background-color: $color5 !important;
+}
+
+.bg-color-6{
+  background-color: $color6 !important;
+}
+
+.bg-color-7{
+  background-color: $color7 !important;
 }
 
 .form-row{
@@ -61,13 +109,13 @@ $theme-colors: (
   min-height: 50px;
 }
 
+.arrow-button-big{
+  font-size: 2.5rem !important;
+}
+
 // Ensure light blue background in all pages
 .app-container{
   background-color: $background;
-}
-
-body > #root > div {
-  height: 100vh;
 }
 
 html,body {

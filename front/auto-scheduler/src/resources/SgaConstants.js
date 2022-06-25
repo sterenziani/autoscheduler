@@ -118,7 +118,7 @@ var courseClasses2022A = [
   {
     course: '93.26', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"},
-                {day: DAYS[4], startTime:"08:00", endTime:"11:00", building:"Madero"}]
+                {day: DAYS[5], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
     course: '93.58', term: '2022-1Q', courseClass: 'S',

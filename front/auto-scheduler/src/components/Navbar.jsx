@@ -9,11 +9,11 @@ class Navbar extends Component {
     return (
       <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight">
         <BootstrapNavbar.Brand as={ Link } to="/">
-            <div className="text-secondary">AutoScheduler</div>
+            <div className="ms-5 my-2">
+              <b className="text-light">Auto</b>
+              <b className="text-secondary">Scheduler</b>
+            </div>
         </BootstrapNavbar.Brand>
-        <Nav className="text-danger mr-auto flex-grow-1 d-flex my-3">
-            Hola Mundo
-        </Nav>
       </BootstrapNavbar>
     );
   }
