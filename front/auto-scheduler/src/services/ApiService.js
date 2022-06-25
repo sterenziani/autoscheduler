@@ -111,9 +111,9 @@ const getAvailableClasses = (student) => {
   availableCourses.forEach(c => availableCourseCodes.push(c.id))
   const availableClasses = SgaConstants.courseClasses2022A.filter(com => availableCourseCodes.includes(com.course));
   availableClasses.forEach(c => {
-    c.unlockables = (map[c.course])?map[c.course]:0
+    c.unlockables = (map[c.course])?map[c.course]:0 // Adds importance of that course to the class
     c.courseName = SgaConstants.informaticaCourses.find(s => s.id === c.course).name
-  }) // Adds importance of that course to the class
+  })
   return availableClasses;
 }
 
@@ -147,19 +147,25 @@ const calculateImportanceOfEachCourse = (programCourses) => {
     if(c.requirements)
       c.requirements.forEach(r => {
         if(!map[r])
-          map[r] = 0
-        map[r] += 1
+          map[r] = []
+        map[r].push(c)
       })
   })
-  /*
-  programCourses.forEach(c => {
-    if(map[c.id])
-      c.unlockables = map[c.id]
-    else
-      c.unlockables = 0
+  let importanceMap = {}
+  for(const key in map)
+    importanceMap[key] = importanceRec(map, key)
+  programCourses.forEach(c => {c.unlockables = (map[c.id])? map[c.id]:0})
+  return importanceMap
+}
+
+const importanceRec = (map, c) => {
+  if(!map[c])
+    return 0
+  let resp = map[c].length
+  map[c].forEach(u => {
+    resp += importanceRec(map, u)
   })
-  */
-  return map
+  return resp
 }
 
 const calculateDurationOfEachClass = (classes) => {
@@ -204,7 +210,7 @@ const getBestSchedules = (availableClasses, desiredHours, prioritizeUnlocks, red
 
     let score = -Math.abs(desiredHours-lectureHours)
     if(reduceDays)
-      score += (7-days.size)*4
+      score += (7-days.size)*3.5
     if(prioritizeUnlocks)
       score += unlockables
     schedules.push({courseClasses: combo, score: score, hours: lectureHours, days: days.size, earliest:earliest, latest:latest})

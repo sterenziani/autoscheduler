@@ -95,7 +95,7 @@ var courseClasses2022A = [
     lectures: [{day: DAYS[2], startTime:"11:00", endTime:"14:00", building:"Madero"}]
   },
   {
-    course: '31.08', term: '2022-1Q', courseClass: 'A',
+    course: '31.08', term: '2022-1Q', courseClass: 'B',
     lectures: [{day: DAYS[2], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
@@ -230,8 +230,20 @@ var courseClasses2022A = [
 
 var finishedCourses = [
   {
-    student: 'Student',
-    courses: ['93.58', '93.26']
+    student: 'Newcomer',
+    courses: []
+  },
+  {
+    student: 'Algebra',
+    courses: ['93.58', '72.03']
+  },
+  {
+    student: '1C',
+    courses: ['93.58', '93.26', '72.03', '31.08', '94.24']
+  },
+  {
+    student: '2C',
+    courses: ['93.58', '93.26', '72.03', '31.08', '94.24', '72.31', '93.59', '93.28', '93.41']
   }
 ]
 

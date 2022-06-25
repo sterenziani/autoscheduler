@@ -51,7 +51,7 @@ class SearchResults extends Component {
       reduceDays: props.query.get("reduceDays"),
       prioritizeUnlocks: props.query.get("prioritizeUnlocks"),
       unavailableTimeSlots: props.query.getAll("unavailable"),
-      userAsking: 'Student'
+      userAsking: props.query.get("userAsking"),
     }
     this.setState({params: params});
     return params;

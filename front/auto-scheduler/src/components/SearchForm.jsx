@@ -86,7 +86,7 @@ class SearchForm extends Component {
     this.setState({params: paramsCopy});
   }
 
-  getPath() {
+  getPath(studentName) {
     let path = "results";
     if(!this.state.params.program){
       this.state.params.program = this.state.programs[0];
@@ -99,6 +99,7 @@ class SearchForm extends Component {
     path += "&hours="+this.state.params.hours;
     path += "&reduceDays="+this.state.params.reduceDays;
     path += "&prioritizeUnlocks="+this.state.params.prioritizeUnlocks;
+    path += "&userAsking="+studentName;
     if(this.state.params.unavailableTimeSlots){
       this.state.params.unavailableTimeSlots.forEach(slot => {
         if(slot.startTime < slot.endTime)
@@ -205,8 +206,23 @@ class SearchForm extends Component {
           </Form.Group>
 
           <div className="text-center">
-            <LinkContainer to={ this.getPath() }>
-            <Button className="btn btn-primary mt-3"><Translation>{t => t("submit")}</Translation></Button>
+            <LinkContainer to={ this.getPath('Newcomer') }>
+            <Button className="btn btn-primary mt-3">Newcomer</Button>
+            </LinkContainer>
+          </div>
+          <div className="text-center">
+            <LinkContainer to={ this.getPath('Algebra') }>
+            <Button className="btn btn-primary mt-3">Algebra + Intro Inf</Button>
+            </LinkContainer>
+          </div>
+          <div className="text-center">
+            <LinkContainer to={ this.getPath('1C') }>
+            <Button className="btn btn-primary mt-3">1° Semester Done</Button>
+            </LinkContainer>
+          </div>
+          <div className="text-center">
+            <LinkContainer to={ this.getPath('2C') }>
+            <Button className="btn btn-primary mt-3">2° Semester Done</Button>
             </LinkContainer>
           </div>
         </Form>
