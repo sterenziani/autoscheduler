@@ -1,4 +1,14 @@
 {
+  "tabs":{
+    "courseLog": "Cursos Aprobados",
+    "findSchedule": "Buscar Cronogramas"
+  },
+  "modal":{
+    "deleteCourse":"Eliminando materia",
+    "areYouSure":"¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?"",
+    "cancel":"Cancelar",
+    "confirm":"Eliminar"
+  },
   "search":{
     "program":"Carrera",
     "term":"Período",
@@ -21,5 +31,6 @@
     "recap": "{{days}} días, {{hours}} horas en total",
     "timeRange": "Horarios de {{earliest}} a {{latest}}"
   },
+  "emptyCourseLog": "No items in this list.",
   "submit": "Buscar"
 }

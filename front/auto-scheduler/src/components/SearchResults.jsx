@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import {Button, Spinner} from 'react-bootstrap';
+import {Spinner} from 'react-bootstrap';
 import {Translation} from "react-i18next";
-import {Link} from 'react-router-dom';
-import LinkButton from './LinkButton'
 import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import withQuery from '../hoc/withQuery';
@@ -129,6 +127,7 @@ class SearchResults extends Component {
                           {DAYS.map(d => <React.Fragment key={"id-"+id+"d-"+d+"h-"+h}>{contents[d]}</React.Fragment>)}
                         </tr>)
               }
+              return(<></>)
             })
           }
         </tbody>
@@ -158,7 +157,7 @@ class SearchResults extends Component {
         <HelmetProvider>
           <Helmet><title>Results - AutoScheduler</title></Helmet>
         </HelmetProvider>
-        <div className="m-5">
+        <div className="m-5 text-black">
           <div className="d-flex justify-content-center align-items-center">
             {
               (this.state.scheduleIndex > 0)? [<i key="back-e" className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big color-primary" onClick={this.onClickLeftArrow.bind(this)}></i>]

@@ -18,6 +18,23 @@ $color5: #9BF6FF;
 $color6: #FFC6FF;
 $color7: #BDB2FF;
 
+// This is for tab styles
+$nav-link-padding-y:                .5rem;
+$nav-link-padding-x:                1rem;
+$nav-link-font-size:                null;
+$nav-link-font-weight:              null;
+$nav-link-color:                    $primary;
+$nav-tabs-link-active-color:        $secondary;
+$nav-tabs-link-active-bg:           $primary;
+$nav-link-hover-color:              $secondary;
+$nav-link-disabled-color:           $disabled;
+$nav-link-transition:               color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+$nav-tabs-link-hover-border-color:  $primary;
+$nav-tabs-link-active-border-color: $primary;
+$nav-tabs-border-color:             $primary;
+$nav-tabs-border-width:             .1rem;
+$nav-tabs-border-radius:            .5rem;
+
 $theme-colors: (
   primary: $primary,
   secondary: $secondary,
@@ -28,6 +45,7 @@ $theme-colors: (
   light: $light,
   dark: $dark,
   black: #000000,
+  grey: #CAD2C5,
   white: #FFFFFF,
 );
 
@@ -41,6 +59,10 @@ $theme-colors: (
 
 .color-disabled{
   color: $disabled !important;
+}
+
+.color-white{
+  color: #FFFFFF !important;
 }
 
 .bg-color-0{
@@ -87,6 +109,14 @@ $theme-colors: (
   max-height: 30px;
 }
 
+.form-check-input:checked{
+  background-color: $secondary !important;
+}
+
+.form-check-input:checked{
+  border-color: #FFFFFF;
+}
+
 .daypicker{
   min-width: 100px;
 }
@@ -113,14 +143,21 @@ $theme-colors: (
   font-size: 2.5rem !important;
 }
 
+.plus-button-big{
+  font-size: 2rem !important;
+}
+
 // Ensure light blue background in all pages
 .app-container{
   background-color: $background;
 }
 
+table { font-size: 0.95vw; }
+
 html,body {
   padding: 0;
   margin: 0;
+  color: #FFFFFF !important;
   background-color: $background;
 }
 

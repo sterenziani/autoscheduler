@@ -1,9 +1,8 @@
-import React, { Component, Suspense } from 'react';
-import {useParams, BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import Spinner from 'react-bootstrap/Spinner';
+import React from 'react';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Navbar from './components/Navbar';
-import SearchForm from './components/SearchForm'
 import SearchResults from './components/SearchResults'
+import MainPageUser from './pages/MainPageUser'
 import NoMatch from './components/NoMatch'
 import './resources/style.scss';
 
@@ -12,7 +11,7 @@ function App() {
     <Router>
       <Navbar/>
       <Routes>
-        <Route path="/" element={<SearchForm/>}/>
+        <Route path="/" element={<MainPageUser/>}/>
         <Route path="/results" element={<SearchResults/>}/>
         <Route path="*" element={<NoMatch/>} />
       </Routes>

@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import { Helmet, HelmetProvider } from "react-helmet-async";
 import {Button, Form, Spinner} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import {Translation} from "react-i18next";
-import {Link} from 'react-router-dom';
 
 const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
 const DEFAULT_DATE = {day:DAYS[0], startTime:"01:00", endTime:"01:01"}
@@ -112,12 +110,7 @@ class SearchForm extends Component {
   render(){
     return (
       <React.Fragment>
-        <HelmetProvider>
-          <Helmet><title>Search - AutoScheduler</title></Helmet>
-        </HelmetProvider>
-
-        <Form className="p-3 mx-auto text-center">
-
+        <Form className="p-3 mx-auto text-center color-white">
           <Form.Group controlId="program" className="row mx-auto form-row">
               <div className="col-4 text-end my-auto text-break">
                 <Form.Label className="my-0">
@@ -162,7 +155,7 @@ class SearchForm extends Component {
               </Form.Label>
             </div>
             <div className="col-8 d-flex align-items-start align-items-center">
-              <Form.Check checked={this.state.params.prioritizeUnlocks} className="m-0" onChange={this.onChangePrioritize.bind(this)}/>
+              <Form.Check checked={this.state.params.prioritizeUnlocks} className="color-secondary m-0" onChange={this.onChangePrioritize.bind(this)}/>
             </div>
           </Form.Group>
 
@@ -195,34 +188,34 @@ class SearchForm extends Component {
                       <h5 className="my-0"><strong>-</strong></h5>
                       <input type="time" id={"end-"+index} className="mx-2 timepicker" value={this.state.params.unavailableTimeSlots[index].endTime} onChange={this.onChangeEndTime.bind(this)}/>
                     </div>
-                    <i className="bi bi-trash-fill btn color-primary" id={"trash-"+index} onClick={this.onClickTrashCan.bind(this)}></i>
+                    <i className="bi bi-trash-fill btn color-white" id={"trash-"+index} onClick={this.onClickTrashCan.bind(this)}></i>
                   </div>
                 ))
               }
               <div className="mx-auto align-items-center plus-button-container clickable">
-                <i className="bi bi-plus-circle-fill btn btn-lg color-primary" onClick={this.onClickPlusSign.bind(this)}></i>
+                <i className="bi bi-plus-circle-fill btn btn-lg color-white" onClick={this.onClickPlusSign.bind(this)}></i>
               </div>
             </div>
           </Form.Group>
 
           <div className="text-center">
             <LinkContainer to={ this.getPath('Newcomer') }>
-            <Button className="btn btn-primary mt-3">Newcomer</Button>
+            <Button className="btn btn-secondary mt-3">Newcomer</Button>
             </LinkContainer>
           </div>
           <div className="text-center">
             <LinkContainer to={ this.getPath('Algebra') }>
-            <Button className="btn btn-primary mt-3">Algebra + Intro Inf</Button>
+            <Button className="btn btn-secondary mt-3">Algebra + Intro Inf</Button>
             </LinkContainer>
           </div>
           <div className="text-center">
             <LinkContainer to={ this.getPath('1C') }>
-            <Button className="btn btn-primary mt-3">1° Semester Done</Button>
+            <Button className="btn btn-secondary mt-3">1° Semester Done</Button>
             </LinkContainer>
           </div>
           <div className="text-center">
             <LinkContainer to={ this.getPath('2C') }>
-            <Button className="btn btn-primary mt-3">2° Semester Done</Button>
+            <Button className="btn btn-secondary mt-3">2° Semester Done</Button>
             </LinkContainer>
           </div>
         </Form>

@@ -1,4 +1,14 @@
 {
+  "tabs":{
+    "courseLog": "COURSE LOG",
+    "findSchedule": "FIND A SCHEDULE"
+  },
+  "modal":{
+    "deleteCourse":"Deleting course",
+    "areYouSure":"Are you sure you want to delete course '{{code}} - {{name}}'?",
+    "cancel":"Cancel",
+    "confirm":"Delete"
+  },
   "search":{
     "program":"Program",
     "term":"Term",
@@ -21,5 +31,6 @@
     "recap": "{{days}} days, {{hours}} hours total",
     "timeRange": "Lectures range from {{earliest}} to {{latest}}"
   },
+  "emptyList": "No items in this list.",
   "submit": "Search"
 }
