@@ -1,26 +1,41 @@
 import React, { Component } from 'react';
 import {Button, Modal, Spinner} from 'react-bootstrap';
 import {Translation} from "react-i18next";
+import ApiService from '../services/ApiService';
+import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 
 class CourseList extends Component {
   state = {
-    showModal: false,
-    university: true,
-    courses: [
-      {id: '93.26', internalId: '93.26', name: 'Análisis Matemático I'},
-      {id: '93.58', internalId: '93.58', name: 'Algebra'},
-      {id: '72.03', internalId: '72.03', name: 'Introducción a la Informática'}
-    ]
+    loading: true,
+    error: false,
+    showDeleteModal: false,
+    user: this.props.user,
+    courses: null
+  }
+
+  componentDidUpdate() {
+    ApiService.getFinishedCourses(this.state.user.name).then((data) => {
+      let findError = null;
+      if (data && data.status && data.status !== OK && data.status !== CREATED) {
+        findError = data.status;
+      }
+      if(findError) {
+        this.setState({
+          loading: false,
+          error: true,
+          status: findError,
+        });
+      }
+      else {
+        this.setState({
+          courses: data,
+          loading: false,
+        });
+      }
+    });
   }
 
   onClickPencil(e){
-  }
-
-  onClickPlusSign(e){
-    let coursesCopy = Object.assign({}, this.state.courses);
-    // TO DO: if University, go to Create
-    // TO DO: if Student, add to list
-    this.setState({courses: coursesCopy});
   }
 
   deleteCourse(){
@@ -32,20 +47,28 @@ class CourseList extends Component {
       if(entry.id === this.state.courseToDelete.id)
         coursesCopy.splice(index, 1);
     })
-    this.setState({courses: coursesCopy, showModal: !this.state.showModal, courseToDelete: {}});
+    this.setState({courses: coursesCopy, showDeleteModal: !this.state.showDeleteModal, courseToDelete: {}});
   }
 
-  switchModal(){
-    this.setState({ showModal: !this.state.showModal,
+  switchDeleteModal(){
+    this.setState({ showDeleteModal: !this.state.showDeleteModal,
                     courseToDelete: {}});
   }
 
-  switchModalParam(e){
-    this.setState({ showModal: !this.state.showModal,
+  switchDeleteModalParam(e){
+    this.setState({ showDeleteModal: !this.state.showDeleteModal,
                     courseToDelete: e});
   }
 
   render(){
+    if (this.state.loading === true) {
+      return  <div className="mx-auto py-3">
+                <Spinner animation="border"/>
+              </div>
+    }
+    if(this.state.error) {
+      return <h1>ERROR {this.state.error}</h1>
+    }
     return (
       <React.Fragment>
         <div className="pt-4">
@@ -56,28 +79,28 @@ class CourseList extends Component {
                   <div className="col-2 m-auto">{entry.internalId}</div>
                   <div className="col-6 m-auto">{entry.name}</div>
                   {
-                    this.state.university? [
+                    this.state.user.type="university"? [
                     <div key={"pencil-div-"+index} className="col-2 m-auto">
                       <i className="bi bi-pencil-fill btn btn-lg color-white" id={"edit-"+index} onClick={this.onClickPencil.bind(this)}></i>
                     </div>]:[]
                   }
-                  <div className="col-2 m-auto"><i className="bi bi-trash-fill btn btn-lg color-white" id={"trash-"+index} onClick={() => {this.switchModalParam(entry)}}></i></div>
+                  <div className="col-2 m-auto"><i className="bi bi-trash-fill btn btn-lg color-white" id={"trash-"+index} onClick={() => {this.switchDeleteModalParam(entry)}}></i></div>
                 </div>
               ))
-            ] : [<div><Translation>{t => t("emptyList")}</Translation></div>]
+            ] : [<div key="empty-list"><Translation>{t => t("emptyList")}</Translation></div>]
           }
         </div>
-        <Modal show={this.state.showModal} onHide={() => this.switchModal()} className="color-warning text-black">
+        <Modal show={this.state.showDeleteModal} onHide={() => this.switchDeleteModal()} className="color-warning text-black">
           <Modal.Header closeButton>
             <Modal.Title><Translation>{t => t("modal.deleteCourse")}</Translation></Modal.Title>
           </Modal.Header>
           <Modal.Body><Translation>{t => t("modal.areYouSure", {code:this.state.courseToDelete.internalId, name:this.state.courseToDelete.name})}</Translation></Modal.Body>
           <Modal.Footer>
-            <Button variant="grey" onClick={() => {this.switchModal()}}>
+            <Button variant="grey" onClick={() => {this.switchDeleteModal()}}>
               <Translation>{t => t("modal.cancel")}</Translation>
             </Button>
             <Button variant="danger" onClick={() => {this.deleteCourse(this.state.courseToDelete)}}>
-              <Translation>{t => t("modal.confirm")}</Translation>
+              <Translation>{t => t("modal.delete")}</Translation>
             </Button>
           </Modal.Footer>
         </Modal>

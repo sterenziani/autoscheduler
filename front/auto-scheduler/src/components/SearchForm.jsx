@@ -20,15 +20,15 @@ class SearchForm extends Component {
     }
   }
 
-  onChangeTitle(e){
-    let paramsCopy = Object.assign({}, this.state.params);
-    paramsCopy.title = e.target.value;
-    this.setState({params: paramsCopy});
-  }
-
   onChangePrograms(e){
     let paramsCopy = Object.assign({}, this.state.params);
     paramsCopy.program = e.target.value;
+    this.setState({params: paramsCopy});
+  }
+
+  onChangeTerms(e){
+    let paramsCopy = Object.assign({}, this.state.params);
+    paramsCopy.term = e.target.value;
     this.setState({params: paramsCopy});
   }
 
@@ -118,7 +118,7 @@ class SearchForm extends Component {
                 </Form.Label>
               </div>
               <div className="col-8 text-center">
-                <Form.Select aria-label="Default select example" value={this.state.params.programs} onChange={this.onChangePrograms.bind(this)}>
+                <Form.Select aria-label="Default select example" value={this.state.params.program} onChange={this.onChangePrograms.bind(this)}>
                   { this.state.programs.map(p => (<option key={p.id} value={p.id}>{p.internalId+" - "+p.name}</option>)) }
                 </Form.Select>
               </div>
@@ -131,7 +131,7 @@ class SearchForm extends Component {
                 </Form.Label>
               </div>
               <div className="col-8 text-center">
-                <Form.Select aria-label="Default select example" value={this.state.params.terms} onChange={this.onChangePrograms.bind(this)}>
+                <Form.Select aria-label="Default select example" value={this.state.params.term} onChange={this.onChangeTerms.bind(this)}>
                   { this.state.terms.map(p => (<option key={p.id} value={p.id}>{p.name}</option>)) }
                 </Form.Select>
               </div>

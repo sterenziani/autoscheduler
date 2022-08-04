@@ -74,6 +74,16 @@ const getSchedules = async (params) => {
 */
 
 // TEMPORARY FIX FOR PROTOTYPE
+const getActiveUser = () =>
+  new Promise((resolve, reject) => {
+    let user = {
+                "id": 1, "type":"student", "email": "student@itba.edu.ar",
+                "name": "1C", "university": { "id":1, "name":"ITBA" },
+                "program": { "id":1, "name":"S10 - Ingeniería Informática"}
+              }
+    setTimeout(() => resolve(user), 250);
+  });
+
 const getSchedules = (params) =>
   new Promise((resolve, reject) => {
     let availableClasses = getAvailableClasses(params.userAsking); // Gets the classes the user is enabled to be in
@@ -84,9 +94,58 @@ const getSchedules = (params) =>
     setTimeout(() => resolve(schedules), 250);
   });
 
+const getPrograms = (universityId) =>
+  new Promise((resolve, reject) => {
+    let programs =  [
+                        { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
+                        { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
+                        { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
+                    ]
+    setTimeout(() => resolve(programs), 250);
+  });
+
+const getRemainingCoursesProgram = (user, programId) =>
+  new Promise((resolve, reject) => {
+    let courses =   [
+                      [
+                        {"id": "72.03", "internalId": "72.03", "name": "Introducción a la Informática"},
+                        {"id": "93.58", "internalId": "93.58", "name": "Algebra"},
+                        {"id": "72.31", "internalId": "72.31", "name": "Programación Imperativa", "requirements": ["93.58", "72.03"]}
+                      ],
+                      [
+                        {"id": "93.59", "internalId": "93.59", "name": "Algebra Lineal"}
+                      ],
+                      []
+                    ]
+    setTimeout(() => resolve(courses[programId-1]), 250);
+  });
+
+const getFinishedCourses = (student) =>
+  new Promise((resolve, reject) => {
+    let courseCodes = SgaConstants.finishedCourses.find(c => c.student === student).courses
+    let courses = SgaConstants.informaticaCourses.filter(c => {
+                                              if(courseCodes.includes(c.id))
+                                                return true;
+                                              return false;
+                                            });
+    setTimeout(() => resolve(courses), 250);
+  });
+
+const addFinishedCourse = (student, course) =>
+  new Promise((resolve, reject) => {
+    let courseCodes = SgaConstants.finishedCourses.find(c => c.student === student.name).courses
+    courseCodes.push(course)
+    setTimeout(() => resolve(courseCodes), 250);
+  });
+
 const ApiService = {
   getGames    : getGames,
-  getSchedules: getSchedules
+  getActiveUser: getActiveUser,
+  getSchedules: getSchedules,
+  getPrograms: getPrograms,
+  getRemainingCoursesProgram: getRemainingCoursesProgram,
+  getFinishedCourses: getFinishedCourses,
+  addFinishedCourse: addFinishedCourse
 };
 
 export default ApiService;

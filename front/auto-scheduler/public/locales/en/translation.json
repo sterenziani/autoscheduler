@@ -5,9 +5,12 @@
   },
   "modal":{
     "deleteCourse":"Deleting course",
+    "addCourse":"Adding course",
     "areYouSure":"Are you sure you want to delete course '{{code}} - {{name}}'?",
+    "noRemainingCourses":"This plan has no remaining courses available",
     "cancel":"Cancel",
-    "confirm":"Delete"
+    "delete":"Delete",
+    "add":"Add"
   },
   "search":{
     "program":"Program",
@@ -29,7 +32,8 @@
   "results":{
     "scheduleNumber": "Schedule #{{value}}",
     "recap": "{{days}} days, {{hours}} hours total",
-    "timeRange": "Lectures range from {{earliest}} to {{latest}}"
+    "timeRange": "Lectures range from {{earliest}} to {{latest}}",
+    "newSearch": "Try a different search"
   },
   "emptyList": "No items in this list.",
   "submit": "Search"

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import {Spinner} from 'react-bootstrap';
+import {Spinner, Button} from 'react-bootstrap';
 import {Translation} from "react-i18next";
 import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
@@ -181,10 +181,10 @@ class SearchResults extends Component {
             </div>
           </div>
           <div className="my-3 d-flex justify-content-center align-items-center">
-            <ul>
+            <ul className="list-unstyled row container justify-content-center">
             {
               this.state.schedules[this.state.scheduleIndex].courseClasses.map((c, cidx) => {
-                return( <li key={"ci-"+cidx}>
+                return( <li key={"ci-"+cidx} className="list-item col border border-primary py-2">
                           {c.course} - {c.courseName} ({c.courseClass})
                           <ul>{c.lectures.map((l, lidx) => {
                             return(
@@ -197,6 +197,7 @@ class SearchResults extends Component {
             }
             </ul>
           </div>
+          <div className="text-center"><Button><Translation>{t => t("results.newSearch")}</Translation></Button></div>
         </div>
       </React.Fragment>
     );

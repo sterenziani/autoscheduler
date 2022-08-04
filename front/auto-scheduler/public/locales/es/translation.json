@@ -5,9 +5,12 @@
   },
   "modal":{
     "deleteCourse":"Eliminando materia",
+    "addCourse":"Añadiendo materia",
     "areYouSure":"¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?"",
+    "noRemainingCourses":"No quedan materias correspondientes a este plan",
     "cancel":"Cancelar",
-    "confirm":"Eliminar"
+    "delete":"Eliminar",
+    "add":"Añadir"
   },
   "search":{
     "program":"Carrera",
@@ -29,7 +32,8 @@
   "results":{
     "scheduleNumber": "Cronograma #{{value}}",
     "recap": "{{days}} días, {{hours}} horas en total",
-    "timeRange": "Horarios de {{earliest}} a {{latest}}"
+    "timeRange": "Horarios de {{earliest}} a {{latest}}",
+    "newSearch": "Realizar una nueva búsqueda"
   },
   "emptyCourseLog": "No items in this list.",
   "submit": "Buscar"
