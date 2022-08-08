@@ -12,6 +12,7 @@ class SearchForm extends Component {
   state = {
     loading: true,
     error: false,
+    user: undefined,
     params: {
       program: undefined,
       term: undefined,
@@ -148,8 +149,10 @@ class SearchForm extends Component {
         findError = data.status;
       if(findError)
         this.setState({ loading: false, error: true, status: findError});
-      else
+      else{
+        this.setState({ user: data });
         this.loadProgramsAndTerms(data.university.id)
+      }
     });
   }
 
