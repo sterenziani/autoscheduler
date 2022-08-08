@@ -131,10 +131,19 @@ const getFinishedCourses = (student) =>
     setTimeout(() => resolve(courses), 250);
   });
 
-const addFinishedCourse = (student, course) =>
+const addFinishedCourse = (student, courseId) =>
   new Promise((resolve, reject) => {
     let courseCodes = SgaConstants.finishedCourses.find(c => c.student === student.name).courses
-    courseCodes.push(course)
+    courseCodes.push(courseId)
+    setTimeout(() => resolve(courseCodes), 250);
+  });
+
+const deleteFinishedCourse = (student, courseId) =>
+  new Promise((resolve, reject) => {
+    let courseCodes = SgaConstants.finishedCourses.find(c => c.student === student.name).courses
+    console.log(courseCodes)
+    courseCodes.splice(courseCodes.indexOf(courseId), 1)
+    console.log(courseCodes)
     setTimeout(() => resolve(courseCodes), 250);
   });
 
@@ -145,7 +154,8 @@ const ApiService = {
   getPrograms: getPrograms,
   getRemainingCoursesProgram: getRemainingCoursesProgram,
   getFinishedCourses: getFinishedCourses,
-  addFinishedCourse: addFinishedCourse
+  addFinishedCourse: addFinishedCourse,
+  deleteFinishedCourse: deleteFinishedCourse
 };
 
 export default ApiService;

@@ -144,7 +144,7 @@ class StudentCourseLog extends Component {
                   <Translation>{t => t("modal.cancel")}</Translation>
                 </Button>
                 {
-                  this.state.courseToAdd&&this.state.courseToAdd!=""? [
+                  this.state.courseToAdd&&this.state.courseToAdd!==""? [
                     <Button key="enabled-add" variant="secondary" onClick={() => {this.addCourse(this.state.courseToAdd)}}>
                       <Translation>{t => t("modal.add")}</Translation>
                     </Button>

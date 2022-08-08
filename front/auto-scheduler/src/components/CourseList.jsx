@@ -14,25 +14,27 @@ class CourseList extends Component {
   }
 
   componentDidUpdate() {
-    ApiService.getFinishedCourses(this.state.user.name).then((data) => {
-      let findError = null;
-      if (data && data.status && data.status !== OK && data.status !== CREATED) {
-        findError = data.status;
-      }
-      if(findError) {
-        this.setState({
-          loading: false,
-          error: true,
-          status: findError,
-        });
-      }
-      else {
-        this.setState({
-          courses: data,
-          loading: false,
-        });
-      }
-    });
+    if(this.state.user.type === "student"){
+      ApiService.getFinishedCourses(this.state.user.name).then((data) => {
+        let findError = null;
+        if (data && data.status && data.status !== OK && data.status !== CREATED) {
+          findError = data.status;
+        }
+        if(findError) {
+          this.setState({
+            loading: false,
+            error: true,
+            status: findError,
+          });
+        }
+        else {
+          this.setState({
+            courses: data,
+            loading: false,
+          });
+        }
+      });
+    }
   }
 
   onClickPencil(e){
@@ -42,6 +44,10 @@ class CourseList extends Component {
     if(!this.state.courseToDelete)
       return;
     console.log("Requesting deletion of course "+this.state.courseToDelete.internalId)
+    if(this.state.user.type == "student")
+      ApiService.deleteFinishedCourse(this.state.user, this.state.courseToDelete.id)
+    else
+      console.log("TO DO")
     let coursesCopy = Object.assign({}, this.state).courses;
     coursesCopy.forEach((entry, index) => {
       if(entry.id === this.state.courseToDelete.id)
@@ -79,7 +85,7 @@ class CourseList extends Component {
                   <div className="col-2 m-auto">{entry.internalId}</div>
                   <div className="col-6 m-auto">{entry.name}</div>
                   {
-                    this.state.user.type="university"? [
+                    this.state.user.type==="university"? [
                     <div key={"pencil-div-"+index} className="col-2 m-auto">
                       <i className="bi bi-pencil-fill btn btn-lg color-white" id={"edit-"+index} onClick={this.onClickPencil.bind(this)}></i>
                     </div>]:[]
