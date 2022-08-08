@@ -97,11 +97,20 @@ const getSchedules = (params) =>
 const getPrograms = (universityId) =>
   new Promise((resolve, reject) => {
     let programs =  [
-                        { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
-                        { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
-                        { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
+                      { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
+                      { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
+                      { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
                     ]
     setTimeout(() => resolve(programs), 250);
+  });
+
+const getTerms = (universityId) =>
+  new Promise((resolve, reject) => {
+    let terms =   [
+                    { "id": 1, "internalId": "2021-2Q", "name": "2° Cuatrimestre 2021", "startDate": "2021-08-01"},
+                    { "id": 2, "internalId": "2022-1Q", "name": "1° Cuatrimestre 2022", "startDate": "2022-03-01"}
+                  ]
+    setTimeout(() => resolve(terms), 250);
   });
 
 const getRemainingCoursesProgram = (user, programId) =>
@@ -152,6 +161,7 @@ const ApiService = {
   getActiveUser: getActiveUser,
   getSchedules: getSchedules,
   getPrograms: getPrograms,
+  getTerms: getTerms,
   getRemainingCoursesProgram: getRemainingCoursesProgram,
   getFinishedCourses: getFinishedCourses,
   addFinishedCourse: addFinishedCourse,

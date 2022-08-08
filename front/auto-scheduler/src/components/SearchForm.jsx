@@ -2,14 +2,16 @@ import React, { Component } from 'react';
 import {Button, Form, Spinner} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import {Translation} from "react-i18next";
+import ApiService from '../services/ApiService';
+import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 
 const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
 const DEFAULT_DATE = {day:DAYS[0], startTime:"01:00", endTime:"01:01"}
 
 class SearchForm extends Component {
   state = {
-    programs: [{id:'S18', internalId:'S18', name:'Informática'}, {id:'I03', internalId:'I03', name:'Industrial'}],
-    terms: [{id:'2022-1Q', internalId:'2022-1Q', name:'2022-1Q'}, {id:'2022-2Q', internalId:'2022-2Q', name:'2022-2Q'}],
+    loading: true,
+    error: false,
     params: {
       program: undefined,
       term: undefined,
@@ -92,8 +94,8 @@ class SearchForm extends Component {
     if(!this.state.params.term){
       this.state.params.term = this.state.terms[0];
     }
-    path += "?program="+this.state.params.program.id;
-    path += "&term="+this.state.params.term.id;
+    path += "?program="+this.state.params.program;
+    path += "&term="+this.state.params.term;
     path += "&hours="+this.state.params.hours;
     path += "&reduceDays="+this.state.params.reduceDays;
     path += "&prioritizeUnlocks="+this.state.params.prioritizeUnlocks;
@@ -107,7 +109,59 @@ class SearchForm extends Component {
     return path;
   }
 
+  loadProgramsAndTerms(university){
+    ApiService.getPrograms(university).then((dataProg) => {
+      let findError = null;
+      if (dataProg && dataProg.status && dataProg.status !== OK && dataProg.status !== CREATED)
+        findError = dataProg.status;
+      if(findError) {
+        this.setState({ loading: false, error: true, status: findError});
+      }
+      else {
+        ApiService.getTerms(university).then((dataTerm) => {
+          let findError = null;
+          if (dataTerm && dataTerm.status && dataTerm.status !== OK && dataTerm.status !== CREATED)
+            findError = dataTerm.status;
+          if(findError) {
+            this.setState({ loading: false, error: true, status: findError});
+          }
+          else {
+            let paramsCopy = Object.assign({}, this.state.params);
+            paramsCopy.program = dataProg[0].id;
+            paramsCopy.term = dataTerm[0].id;
+            this.setState({
+              programs:dataProg,
+              terms: dataTerm,
+              params: paramsCopy,
+              loading: false
+            });
+          }
+        });
+      }
+    });
+  }
+
+  componentDidMount() {
+    ApiService.getActiveUser().then((data) => {
+      let findError = null;
+      if (data && data.status && data.status !== OK && data.status !== CREATED)
+        findError = data.status;
+      if(findError)
+        this.setState({ loading: false, error: true, status: findError});
+      else
+        this.loadProgramsAndTerms(data.university.id)
+    });
+  }
+
   render(){
+    if (this.state.loading === true) {
+      return  <div className="mx-auto py-3">
+                <Spinner animation="border"/>
+              </div>
+    }
+    if(this.state.error) {
+      return <h1>ERROR {this.state.error}</h1>
+    }
     return (
       <React.Fragment>
         <Form className="p-3 mx-auto text-center color-white">

@@ -43,7 +43,6 @@ class CourseList extends Component {
   deleteCourse(){
     if(!this.state.courseToDelete)
       return;
-    console.log("Requesting deletion of course "+this.state.courseToDelete.internalId)
     if(this.state.user.type == "student")
       ApiService.deleteFinishedCourse(this.state.user, this.state.courseToDelete.id)
     else
