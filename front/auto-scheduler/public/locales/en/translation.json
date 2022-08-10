@@ -1,7 +1,50 @@
 {
+  "register":{
+    "email":"Email",
+    "password": "Password",
+    "repeatPassword": "Repeat password",
+    "name":"Name",
+    "school":"School",
+    "program":"Program",
+    "pleaseContact": "After registering your account, please contact us at {{email}} with proof so we can review your application and add you to our list of schools.",
+    "submit": "Create account",
+    "placeholders": {
+      "emailStudent": "student@university.edu",
+      "emailUniversity": "dean@university.edu",
+      "password": "",
+      "name": "AutoScheduler University"
+    },
+    "errors": {
+      "badConnection": "Could not connect. Check your internet connection and try again.",
+      "email":{
+        "maxLength": "Your email address must not exceed 100 characters.",
+        "invalidEmail": "Please introduce a valid email address.",
+        "isRequired": "This field is required."
+      },
+      "password":{
+        "requiredLength": "Your password must contain at least 6 characters.",
+        "maxLength": "Your password must not exceed 100 characters.",
+        "isRequired": "This field is required."
+      },
+      "repeatPassword":{
+        "isRequired": "Please reenter your password.",
+        "passwordsMismatch": "Passwords don't match."
+      },
+      "name":{
+        "requiredLength": "Your school's name must contain at least 4 characters.",
+        "maxLength": "Your school's name must not exceed 100 characters.",
+        "isRequired": "This field is required."
+      },
+      "school":{
+        "programNotSelected": "Please select the school and program you are enrolled in."
+      }
+    }
+  },
   "tabs":{
     "courseLog": "COURSE LOG",
-    "findSchedule": "FIND A SCHEDULE"
+    "findSchedule": "FIND A SCHEDULE",
+    "iAmStudent": "I AM A STUDENT",
+    "iAmUniversty": "I AM A UNIVERSITY"
   },
   "modal":{
     "deleteCourse":"Deleting course",

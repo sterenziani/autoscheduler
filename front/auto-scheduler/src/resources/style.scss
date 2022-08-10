@@ -100,6 +100,13 @@ $theme-colors: (
 .form-row{
   max-width: 120vh;
   margin: 1%;
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.form-error{
+  color: $danger;
+  font-style: italic;
 }
 
 .checkbox{
@@ -115,6 +122,10 @@ $theme-colors: (
 
 .form-check-input:checked{
   border-color: #FFFFFF;
+}
+
+.borderless-tabs{
+  --bs-nav-tabs-border-width: 0rem !important;
 }
 
 .bi {

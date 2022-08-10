@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SearchResults from './components/SearchResults'
 import MainPageUser from './pages/MainPageUser'
+import SignUpPage from './pages/SignUpPage'
 import NoMatch from './components/NoMatch'
 import './resources/style.scss';
 
@@ -12,6 +13,7 @@ function App() {
       <Navbar/>
       <Routes>
         <Route path="/" element={<MainPageUser/>}/>
+        <Route path="/register" element={<SignUpPage/>}/>
         <Route path="/results" element={<SearchResults/>}/>
         <Route path="*" element={<NoMatch/>} />
       </Routes>

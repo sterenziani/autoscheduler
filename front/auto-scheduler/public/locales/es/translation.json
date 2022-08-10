@@ -1,7 +1,50 @@
 {
+  "register":{
+    "email":"Email",
+    "password": "Contraseña",
+    "repeatPassword": "Repetir contraseña",
+    "name":"Nombre",
+    "school":"Instituto",
+    "program":"Carrera",
+    "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de institutos.",
+    "submit": "Crear cuenta",
+    "placeholders": {
+      "emailStudent": "alumno@university.edu",
+      "emailUniversity": "rector@university.edu",
+      "password": "",
+      "name": "AutoScheduler University"
+    },
+    "errors": {
+      "badConnection": "Error al conectarse. Revise su conexión a internet.",
+      "email":{
+        "maxLength": "Su email no puede contener más de 100 caracteres.",
+        "invalidEmail": "Ingrese una dirección de email válida.",
+        "isRequired": "Este campo es obligatorio."
+      },
+      "password":{
+        "requiredLength": "Su contraseña debe contener al menos 6 caracteres.",
+        "maxLength": "Su contraseña no debe exceder los 100 caracteres.",
+        "isRequired": "Este campo es obligatorio."
+      },
+      "repeatPassword":{
+        "isRequired": "Introduzca su contraseña una vez más."
+        "passwordsMismatch": "Las contraseñas no coinciden."
+      },
+      "name":{
+        "requiredLength": "El nombre de su instituto debe contener al menos 4 caracteres.",
+        "maxLength": "El nombre de su instituto no debe exceder los 100 caracteres.",
+        "isRequired": "Este campo es obligatorio."
+      },
+      "school":{
+        "programNotSelected": "Seleccione el instituto y carrera en la que esté inscripto."
+      }
+    }
+  },
   "tabs":{
-    "courseLog": "Cursos Aprobados",
-    "findSchedule": "Buscar Cronogramas"
+    "courseLog": "CURSOS APROBADOS",
+    "findSchedule": "BUSCAR CRONOGRAMAS"
+    "iAmStudent": "SOY ESTUDIANTE",
+    "iAmUniversty": "SOY UNA UNIVERSIDAD"
   },
   "modal":{
     "deleteCourse":"Eliminando materia",

@@ -13,7 +13,7 @@ class MainPageUser extends Component {
           <Helmet><title>Search - AutoScheduler</title></Helmet>
         </HelmetProvider>
         <div className="container mt-5">
-          <Tabs defaultActiveKey="schedule_form" fill>
+          <Tabs className="borderless-tabs" defaultActiveKey="schedule_form" fill>
             <Tab className="text-center" eventKey="classes" title={<Translation>{t => t("tabs.courseLog")}</Translation>}>
               <div className="bg-primary"><StudentCourseLog/></div>
             </Tab>

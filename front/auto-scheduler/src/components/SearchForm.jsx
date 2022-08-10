@@ -89,14 +89,10 @@ class SearchForm extends Component {
 
   getPath(studentName) {
     let path = "results";
-    if(!this.state.params.program){
-      this.state.params.program = this.state.programs[0];
-    }
-    if(!this.state.params.term){
-      this.state.params.term = this.state.terms[0];
-    }
-    path += "?program="+this.state.params.program;
-    path += "&term="+this.state.params.term;
+    var prog = (this.state.params.program)? this.state.params.program:this.state.programs[0];
+    var term = (this.state.params.term)? this.state.params.term:this.state.terms[0];
+    path += "?program="+prog;
+    path += "&term="+term;
     path += "&hours="+this.state.params.hours;
     path += "&reduceDays="+this.state.params.reduceDays;
     path += "&prioritizeUnlocks="+this.state.params.prioritizeUnlocks;

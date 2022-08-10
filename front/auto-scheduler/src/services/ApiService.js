@@ -1,4 +1,4 @@
-import { TIMEOUT } from './ApiConstants';
+import { CREATED, CONFLICT, TIMEOUT, OK } from './ApiConstants';
 import SgaConstants from '../resources/SgaConstants';
 
 /*
@@ -74,11 +74,48 @@ const getSchedules = async (params) => {
 */
 
 // TEMPORARY FIX FOR PROTOTYPE
+const registerStudent = async(email, password, universityId, programId) => {
+  try {
+    const newUser = { "type":"student", "email": email, "password": password, "university": universityId, "program": programId}
+    //const registerEndpoint = endpoint + '/register';
+    //const response = await api.post(registerEndpoint, newUser, { headers: {contentType : "application/json"} });
+    return { status : CREATED }//response.status }
+  } catch(e) {
+    if (e.response){
+      if(e.response.status === CONFLICT)
+        return { status: CONFLICT, conflicts: e.response.data}
+      return { status : e.response.status }
+    }
+    else
+      return { status : TIMEOUT }
+  }
+}
+
+const login = async (username, password) => {
+  try {
+    /*
+    const response = await api.get(logInEndpoint, {headers : {authorization : 'Basic ' + btoa(username + ":" + password)}})
+    if(response.status === UNAUTHORIZED)
+      return { status: UNAUTHORIZED }
+    token = response.headers.authorization;
+    userStore.user = response.data;
+    TokenStore.setToken(token);
+    UserStore.setUser(userStore.user);
+    */
+    return { status: OK }
+    } catch(e) {
+      if (e.response)
+        return { status: e.response.status }
+      else
+        return { status: TIMEOUT }
+  }
+}
+
 const getActiveUser = () =>
   new Promise((resolve, reject) => {
     let user = {
                 "id": 1, "type":"student", "email": "student@itba.edu.ar",
-                "name": "1C", "university": { "id":1, "name":"ITBA" },
+                "name": "1C", "university": { "id":9, "name":"Instituto Tecnológico de Buenos Aires" },
                 "program": { "id":1, "name":"S10 - Ingeniería Informática"}
               }
     setTimeout(() => resolve(user), 250);
@@ -94,14 +131,44 @@ const getSchedules = (params) =>
     setTimeout(() => resolve(schedules), 250);
   });
 
-const getPrograms = (universityId) =>
+const getUniversities = () =>
   new Promise((resolve, reject) => {
     let programs =  [
-                      { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
-                      { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
-                      { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
+                      { "id": 9, "name": "Instituto Tecnológico de Buenos Aires"},
+                      { "id": 1, "name": "Academia para Astronautas"},
+                      { "id": 2, "name": "Bachiller para Bochincheros"},
+                      { "id": 3, "name": "Colegio Nacional de las Artes"},
+                      { "id": 4, "name": "DaVinci"},
+                      { "id": 5, "name": "Escuela Nacional de Estudiantes"},
+                      { "id": 6, "name": "Facultad Nacional del Frisbee"},
+                      { "id": 7, "name": "Universidad Gonzalo Gonzales"},
+                      { "id": 8, "name": "Universidad Humberto Primo"},
+                      { "id": 10, "name": "Instituto Julian Weich"},
+                      { "id": 11, "name": "Universidad Kevingston"},
+                      { "id": 12, "name": "Liceo Lisa Lissani"},
+                      { "id": 13, "name": "Universidad de la Milanesa"},
+                      { "id": 14, "name": "Universidad Nacional de Nicaragua"},
+                      { "id": 15, "name": "Universidad Ortodoxa"},
+                      { "id": 16, "name": "Politécnico de Buenos Aires"},
+                      { "id": 17, "name": "Universidad Católica de Quebec"},
+                      { "id": 18, "name": "Rectorado para Rectores"},
+                      { "id": 19, "name": "Universidad Siglo 21"},
+                      { "id": 20, "name": "UTN"},
                     ]
     setTimeout(() => resolve(programs), 250);
+  });
+
+const getPrograms = (universityId) =>
+  new Promise((resolve, reject) => {
+    let programs =  [ [], [], [], [], [], [], [], [], [],
+                      [
+                        { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
+                        { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
+                        { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
+                      ],
+                      [], [], [], [], [], [], [], [], [], [], []
+                    ]
+    setTimeout(() => resolve(programs[universityId]), 250);
   });
 
 const getTerms = (universityId) =>
@@ -158,8 +225,11 @@ const deleteFinishedCourse = (student, courseId) =>
 
 const ApiService = {
   getGames    : getGames,
+  registerStudent: registerStudent,
+  login: login,
   getActiveUser: getActiveUser,
   getSchedules: getSchedules,
+  getUniversities: getUniversities,
   getPrograms: getPrograms,
   getTerms: getTerms,
   getRemainingCoursesProgram: getRemainingCoursesProgram,
