@@ -1,4 +1,4 @@
-import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, OK } from './ApiConstants';
+import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, NOT_FOUND, OK } from './ApiConstants';
 import SgaConstants from '../resources/SgaConstants';
 
 /*
@@ -128,6 +128,18 @@ const login = async (username, password) => {
   }
 }
 
+const requestPasswordChangeToken = async (username, password) => {
+  try {
+    // Hacer algo
+    return { status: CREATED }
+    } catch(e) {
+      if (e.response)
+        return { status: e.response.status }
+      else
+        return { status: TIMEOUT }
+  }
+}
+
 const getActiveUser = () =>
   new Promise((resolve, reject) => {
     let user = {
@@ -245,6 +257,7 @@ const ApiService = {
   registerStudent: registerStudent,
   registerUniversity: registerUniversity,
   login: login,
+  requestPasswordChangeToken: requestPasswordChangeToken,
   getActiveUser: getActiveUser,
   getSchedules: getSchedules,
   getUniversities: getUniversities,

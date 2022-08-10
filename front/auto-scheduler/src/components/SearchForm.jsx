@@ -250,26 +250,27 @@ class SearchForm extends Component {
               </div>
             </div>
           </Form.Group>
-
-          <div className="text-center">
+          <div className="row">
+          <div className="col text-center">
             <LinkContainer to={ this.getPath('Newcomer') }>
             <Button className="btn btn-secondary mt-3">Newcomer</Button>
             </LinkContainer>
           </div>
-          <div className="text-center">
+          <div className="col text-center">
             <LinkContainer to={ this.getPath('Algebra') }>
             <Button className="btn btn-secondary mt-3">Algebra + Intro Inf</Button>
             </LinkContainer>
           </div>
-          <div className="text-center">
+          <div className="col text-center">
             <LinkContainer to={ this.getPath('1C') }>
             <Button className="btn btn-secondary mt-3">1° Semester Done</Button>
             </LinkContainer>
           </div>
-          <div className="text-center">
+          <div className="col text-center">
             <LinkContainer to={ this.getPath('2C') }>
             <Button className="btn btn-secondary mt-3">2° Semester Done</Button>
             </LinkContainer>
+          </div>
           </div>
         </Form>
       </React.Fragment>

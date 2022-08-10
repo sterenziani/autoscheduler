@@ -180,24 +180,24 @@ class SignUpStudentForm extends Component {
             (this.state.loading)? <div className="mx-auto py-3"><Spinner animation="border"/></div> :
               (this.state.error)? <h1>ERROR {this.state.error}</h1> : <>
               <Form.Group controlId="school" className="row mx-auto form-row">
-                  <div className="col-4 text-end my-auto text-break ">
+                  <div className="col-3 text-end my-auto text-break ">
                     <Form.Label className="my-0">
                       <h5 className="my-0"><strong><Translation>{t => t("register.school")}</Translation></strong></h5>
                     </Form.Label>
                   </div>
-                  <div className="col-8 text-center">
+                  <div className="col-9 text-center">
                     <Form.Select aria-label="School select" value={this.state.params.school} onChange={this.onChangeSchools.bind(this)}>
                       { this.state.universities.map(u => (<option key={u.id} value={u.id}>{u.name}</option>)) }
                     </Form.Select>
                   </div>
               </Form.Group>
               <Form.Group controlId="program" className="row mx-auto form-row">
-                  <div className="col-4 text-end my-auto text-break">
+                  <div className="col-3 text-end my-auto text-break">
                     <Form.Label className="my-0">
                       <h5 className="my-0"><strong><Translation>{t => t("register.program")}</Translation></strong></h5>
                     </Form.Label>
                   </div>
-                  <div className="col-8 text-center">
+                  <div className="col-9 text-center">
                     <Form.Select aria-label="Program select" value={this.state.params.program} onChange={this.onChangePrograms.bind(this)}>
                       { this.state.programs.map(p => (<option key={p.id} value={p.id}>{p.internalId+" - "+p.name}</option>)) }
                     </Form.Select>

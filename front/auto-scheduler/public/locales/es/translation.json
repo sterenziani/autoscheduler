@@ -11,6 +11,7 @@
     "placeholders": {
       "emailStudent": "alumno@university.edu",
       "emailUniversity": "rector@university.edu",
+      "email": "example@university.com",
       "password": "",
       "name": "AutoScheduler University"
     },
@@ -42,6 +43,10 @@
   },
   "login":{
     "submit": "Iniciar Sesión",
+    "forgotPassword": "¿Olvidó su contraseña?",
+    "recoverPasswordDescription": "Ingrese su dirección de email y lo ayudaremos a recuperar su cuenta.",
+    "emailSent": "Se ha enviado un email a su casilla con instrucciones para recuperar su cuenta. El mensaje puede demorar en llegar.",
+    "emailNotFound": "La dirección de email ingresada no corresponde a ninguna cuenta de AutoScheduler.",
     "errors":{
       "loginFailed": "Email y/o contraseña incorrecto.",
       "externalLoginFailed": "Ha ocurrido un error. Inicie sesión manualmente.",
@@ -62,7 +67,8 @@
     "noRemainingCourses":"No quedan materias correspondientes a este plan",
     "cancel":"Cancelar",
     "delete":"Eliminar",
-    "add":"Añadir"
+    "add":"Añadir",
+    "send": "Enviar"
   },
   "search":{
     "program":"Carrera",
