@@ -107,7 +107,7 @@ class SearchResults extends Component {
                   {
                     let c = timeTable[d][h]
                     if(timeTable[d][h].startHour === h)
-                      contents[d] = <td className={"align-middle bg-color-"+c.color} rowSpan={c.duration}>
+                      contents[d] = <td className={"day-column align-middle bg-color-"+c.color} rowSpan={c.duration}>
                                       <div>
                                         <div className="col">
                                           <b>{c.courseClass.course} - {c.courseClass.courseName}</b>
@@ -120,7 +120,7 @@ class SearchResults extends Component {
                                     </td>
                   }
                   else
-                    contents[d] = <td className="text-uppercase bg-black"></td>
+                    contents[d] = <td className="day-column text-uppercase bg-black"></td>
                 })
                 return(<tr key={"h-"+h} className="border-dark">
                           <td className="text-uppercase bg-primary text-white">{h+":00"}</td>

@@ -128,6 +128,11 @@ $theme-colors: (
   --bs-nav-tabs-border-width: 0rem !important;
 }
 
+.day-column{
+  min-width: 7rem !important;
+  max-width: 7rem !important;
+}
+
 .bi {
   border: 0px !important;
 }
