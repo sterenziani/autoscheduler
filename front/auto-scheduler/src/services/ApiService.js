@@ -1,4 +1,4 @@
-import { CREATED, CONFLICT, TIMEOUT, OK } from './ApiConstants';
+import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, OK } from './ApiConstants';
 import SgaConstants from '../resources/SgaConstants';
 
 /*
@@ -77,6 +77,23 @@ const getSchedules = async (params) => {
 const registerStudent = async(email, password, universityId, programId) => {
   try {
     const newUser = { "type":"student", "email": email, "password": password, "university": universityId, "program": programId}
+    //const registerEndpoint = endpoint + '/register';
+    //const response = await api.post(registerEndpoint, newUser, { headers: {contentType : "application/json"} });
+    return { status : CREATED }//response.status }
+  } catch(e) {
+    if (e.response){
+      if(e.response.status === CONFLICT)
+        return { status: CONFLICT, conflicts: e.response.data}
+      return { status : e.response.status }
+    }
+    else
+      return { status : TIMEOUT }
+  }
+}
+
+const registerUniversity = async(email, password, name) => {
+  try {
+    const newUser = { "type":"university", "email": email, "password": password, "name": name}
     //const registerEndpoint = endpoint + '/register';
     //const response = await api.post(registerEndpoint, newUser, { headers: {contentType : "application/json"} });
     return { status : CREATED }//response.status }
@@ -226,6 +243,7 @@ const deleteFinishedCourse = (student, courseId) =>
 const ApiService = {
   getGames    : getGames,
   registerStudent: registerStudent,
+  registerUniversity: registerUniversity,
   login: login,
   getActiveUser: getActiveUser,
   getSchedules: getSchedules,

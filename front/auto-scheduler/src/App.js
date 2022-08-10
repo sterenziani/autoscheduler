@@ -14,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPageUser/>}/>
         <Route path="/register" element={<SignUpPage/>}/>
+        <Route path="/login" element={<SignUpPage login/>}/>
         <Route path="/results" element={<SearchResults/>}/>
         <Route path="*" element={<NoMatch/>} />
       </Routes>

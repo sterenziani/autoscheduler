@@ -88,11 +88,10 @@ class SignUpUniversityForm extends Component {
       <Formik initialValues = {{ email: '', password: '', repeat_password: '', name: '' }} validationSchema={SignUpSchema} onSubmit = {this.onSubmit}>
       {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting}) => (
         <Form className="p-3 mx-auto text-center color-white" onSubmit={ handleSubmit }>
+          <FontAwesomeIcon size='3x' icon={faBuildingColumns}/>
           {
             this.state.bad_connection && <p className="form-error"><Translation>{t => t("register.errors.badConnection")}</Translation></p>
           }
-          <FontAwesomeIcon size='3x' icon={faBuildingColumns}/>
-
           <FormInputField type="text" label="register.name" name="name" placeholder="register.placeholders.name"
               value={ values.name } error={ errors.name } touched={ touched.name }
               onChange={ handleChange } onBlur={ handleBlur }

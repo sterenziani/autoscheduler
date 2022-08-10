@@ -40,11 +40,20 @@
       }
     }
   },
+  "login":{
+    "submit": "Sign In",
+    "errors":{
+      "loginFailed": "Incorrect email and/or password.",
+      "externalLoginFailed": "Failed to log you in automatically, please log in manually.",
+      "badConnection": "Could not connect. Check your internet connection and try again."
+    }
+  },
   "tabs":{
     "courseLog": "COURSE LOG",
     "findSchedule": "FIND A SCHEDULE",
-    "iAmStudent": "I AM A STUDENT",
-    "iAmUniversty": "I AM A UNIVERSITY"
+    "iAmStudent": "REGISTER AS A STUDENT",
+    "iAmUniversty": "REGISTER AS A UNIVERSITY",
+    "login": "Sign In"
   },
   "modal":{
     "deleteCourse":"Deleting course",

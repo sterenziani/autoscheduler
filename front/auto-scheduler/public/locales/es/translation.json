@@ -40,11 +40,20 @@
       }
     }
   },
+  "login":{
+    "submit": "Iniciar Sesión",
+    "errors":{
+      "loginFailed": "Email y/o contraseña incorrecto.",
+      "externalLoginFailed": "Ha ocurrido un error. Inicie sesión manualmente.",
+      "badConnection": "Error al conectarse. Revise su conexión a internet."
+    }
+  },
   "tabs":{
     "courseLog": "CURSOS APROBADOS",
     "findSchedule": "BUSCAR CRONOGRAMAS"
-    "iAmStudent": "SOY ESTUDIANTE",
-    "iAmUniversty": "SOY UNA UNIVERSIDAD"
+    "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
+    "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
+    "login": "Iniciar Sesión"
   },
   "modal":{
     "deleteCourse":"Eliminando materia",
