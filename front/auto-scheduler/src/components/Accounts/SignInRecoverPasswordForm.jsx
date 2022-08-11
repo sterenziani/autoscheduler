@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import {Button, Form, Modal} from 'react-bootstrap';
 import {Translation} from "react-i18next";
-import ApiService from '../services/ApiService';
-import { OK, CREATED, NOT_FOUND, TIMEOUT, CONFLICT, UNAUTHORIZED } from '../services/ApiConstants';
-
-import FormInputField from './FormInputField';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+
+import ApiService from '../../services/ApiService';
+import { OK, CREATED, NOT_FOUND, TIMEOUT, CONFLICT, UNAUTHORIZED } from '../../services/ApiConstants';
+import FormInputField from '../FormInputField';
 
 const SignInSchema = Yup.object().shape({
   email: Yup

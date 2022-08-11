@@ -58,7 +58,11 @@
     "findSchedule": "FIND A SCHEDULE",
     "iAmStudent": "REGISTER AS A STUDENT",
     "iAmUniversty": "REGISTER AS A UNIVERSITY",
-    "login": "Sign In"
+    "login": "Sign In",
+    "programs": "PROGRAMS",
+    "terms": "TERMS",
+    "courses": "COURSES",
+    "buildings": "BUILDINGS"
   },
   "modal":{
     "deleteCourse":"Deleting course",
@@ -92,6 +96,9 @@
     "recap": "{{days}} days, {{hours}} hours total",
     "timeRange": "Lectures range from {{earliest}} to {{latest}}",
     "newSearch": "Try a different search"
+  },
+  "home": {
+    "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with this school so we can verify the account and add your school to our list."
   },
   "emptyList": "No items in this list.",
   "submit": "Search"

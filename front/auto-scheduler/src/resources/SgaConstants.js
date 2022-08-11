@@ -242,9 +242,39 @@ var finishedCourses = [
   }
 ]
 
+var courses = [
+                [
+                  {"id": "72.03", "internalId": "72.03", "name": "Introducción a la Informática"},
+                  {"id": "93.58", "internalId": "93.58", "name": "Algebra"},
+                  {"id": "72.31", "internalId": "72.31", "name": "Programación Imperativa", "requirements": ["93.58", "72.03"]}
+                ],
+                [
+                  {"id": "93.59", "internalId": "93.59", "name": "Algebra Lineal"}
+                ],
+                []
+              ]
+
+var terms = [
+              { "id": 1, "internalId": "2021-2Q", "name": "2° Cuatrimestre 2021", "startDate": "2021-08-01"},
+              { "id": 2, "internalId": "2022-1Q", "name": "1° Cuatrimestre 2022", "startDate": "2022-03-01"}
+            ]
+
+var programs = [
+                [], [], [], [], [], [], [], [], [],
+                [
+                  { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
+                  { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
+                  { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
+                ],
+                [], [], [], [], [], [], [], [], [], [], []
+              ]
+
 const SgaConstants = {
   informaticaCourses: informaticaCourses,
   courseClasses2022A: courseClasses2022A,
-  finishedCourses: finishedCourses
+  finishedCourses: finishedCourses,
+  programs: programs,
+  terms: terms,
+  courses: courses
 };
 export default SgaConstants;

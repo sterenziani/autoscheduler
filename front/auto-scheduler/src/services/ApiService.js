@@ -142,12 +142,16 @@ const requestPasswordChangeToken = async (username, password) => {
 
 const getActiveUser = () =>
   new Promise((resolve, reject) => {
-    let user = {
-                "id": 1, "type":"student", "email": "student@itba.edu.ar",
-                "name": "1C", "university": { "id":9, "name":"Instituto Tecnológico de Buenos Aires" },
-                "program": { "id":1, "name":"S10 - Ingeniería Informática"}
-              }
-    setTimeout(() => resolve(user), 250);
+    const student = {
+      "id": 1, "type":"student", "email": "student@itba.edu.ar",
+      "name": "1C", "university": { "id":9, "name":"Instituto Tecnológico de Buenos Aires" },
+      "program": { "id":1, "name":"S10 - Ingeniería Informática"}
+    }
+    const university = {
+      "id": 9, "type":"university", "email": "rector@itba.edu.ar",
+      "name": "Instituto Tecnológico de Buenos Aires", "verified": false
+    }
+    setTimeout(() => resolve(university), 250);
   });
 
 const getSchedules = (params) =>
@@ -189,39 +193,19 @@ const getUniversities = () =>
 
 const getPrograms = (universityId) =>
   new Promise((resolve, reject) => {
-    let programs =  [ [], [], [], [], [], [], [], [], [],
-                      [
-                        { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
-                        { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
-                        { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
-                      ],
-                      [], [], [], [], [], [], [], [], [], [], []
-                    ]
+    let programs = SgaConstants.programs
     setTimeout(() => resolve(programs[universityId]), 250);
   });
 
 const getTerms = (universityId) =>
   new Promise((resolve, reject) => {
-    let terms =   [
-                    { "id": 1, "internalId": "2021-2Q", "name": "2° Cuatrimestre 2021", "startDate": "2021-08-01"},
-                    { "id": 2, "internalId": "2022-1Q", "name": "1° Cuatrimestre 2022", "startDate": "2022-03-01"}
-                  ]
+    let terms = SgaConstants.terms
     setTimeout(() => resolve(terms), 250);
   });
 
 const getRemainingCoursesProgram = (user, programId) =>
   new Promise((resolve, reject) => {
-    let courses =   [
-                      [
-                        {"id": "72.03", "internalId": "72.03", "name": "Introducción a la Informática"},
-                        {"id": "93.58", "internalId": "93.58", "name": "Algebra"},
-                        {"id": "72.31", "internalId": "72.31", "name": "Programación Imperativa", "requirements": ["93.58", "72.03"]}
-                      ],
-                      [
-                        {"id": "93.59", "internalId": "93.59", "name": "Algebra Lineal"}
-                      ],
-                      []
-                    ]
+    let courses = SgaConstants.courses
     setTimeout(() => resolve(courses[programId-1]), 250);
   });
 
@@ -246,10 +230,15 @@ const addFinishedCourse = (student, courseId) =>
 const deleteFinishedCourse = (student, courseId) =>
   new Promise((resolve, reject) => {
     let courseCodes = SgaConstants.finishedCourses.find(c => c.student === student.name).courses
-    console.log(courseCodes)
     courseCodes.splice(courseCodes.indexOf(courseId), 1)
-    console.log(courseCodes)
     setTimeout(() => resolve(courseCodes), 250);
+  });
+
+const deleteProgram = (programId) =>
+  new Promise((resolve, reject) => {
+    let programs = SgaConstants.programs[9]
+    programs.splice(programs.indexOf(programId), 1)
+    setTimeout(() => resolve(programs), 250);
   });
 
 const ApiService = {
@@ -266,7 +255,8 @@ const ApiService = {
   getRemainingCoursesProgram: getRemainingCoursesProgram,
   getFinishedCourses: getFinishedCourses,
   addFinishedCourse: addFinishedCourse,
-  deleteFinishedCourse: deleteFinishedCourse
+  deleteFinishedCourse: deleteFinishedCourse,
+  deleteProgram: deleteProgram
 };
 
 export default ApiService;

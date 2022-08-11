@@ -2,15 +2,15 @@ import React, { Component } from 'react';
 import {Button, Form, Modal} from 'react-bootstrap';
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import {Translation} from "react-i18next";
-import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT, CONFLICT, UNAUTHORIZED } from '../services/ApiConstants';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faKey } from '@fortawesome/free-solid-svg-icons';
-
-import FormInputField from './FormInputField';
-import SignInRecoverPasswordForm from './SignInRecoverPasswordForm';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+
+import ApiService from '../../services/ApiService';
+import { OK, CREATED, TIMEOUT, CONFLICT, UNAUTHORIZED } from '../../services/ApiConstants';
+import FormInputField from '../FormInputField';
+import SignInRecoverPasswordForm from './SignInRecoverPasswordForm';
 
 const SignInSchema = Yup.object().shape({
     email: Yup

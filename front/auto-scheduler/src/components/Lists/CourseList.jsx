@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import {Button, Modal, Spinner} from 'react-bootstrap';
 import {Translation} from "react-i18next";
-import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import ApiService from '../../services/ApiService';
+import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
 
 class CourseList extends Component {
   state = {
@@ -17,22 +17,12 @@ class CourseList extends Component {
     if(this.state.user.type === "student"){
       ApiService.getFinishedCourses(this.state.user.name).then((data) => {
         let findError = null;
-        if (data && data.status && data.status !== OK && data.status !== CREATED) {
+        if (data && data.status && data.status !== OK && data.status !== CREATED)
           findError = data.status;
-        }
-        if(findError) {
-          this.setState({
-            loading: false,
-            error: true,
-            status: findError,
-          });
-        }
-        else {
-          this.setState({
-            courses: data,
-            loading: false,
-          });
-        }
+        if(findError)
+          this.setState({loading: false, error: true, status: findError});
+        else
+          this.setState({courses: data, loading: false});
       });
     }
   }
@@ -48,10 +38,6 @@ class CourseList extends Component {
     else
       console.log("TO DO")
     let coursesCopy = Object.assign({}, this.state).courses;
-    coursesCopy.forEach((entry, index) => {
-      if(entry.id === this.state.courseToDelete.id)
-        coursesCopy.splice(index, 1);
-    })
     this.setState({courses: coursesCopy, showDeleteModal: !this.state.showDeleteModal, courseToDelete: {}});
   }
 

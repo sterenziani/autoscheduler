@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import CourseList from './CourseList'
 import {Translation} from "react-i18next";
 import {Button, Modal, Form} from 'react-bootstrap';
-import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import ApiService from '../../services/ApiService';
+import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import CourseList from './CourseList'
 
 class StudentCourseLog extends Component {
   state = {

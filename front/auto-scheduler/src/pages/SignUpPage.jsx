@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import {Translation} from "react-i18next";
 import {Tabs, Tab} from 'react-bootstrap';
-import SignUpStudentForm from '../components/SignUpStudentForm'
-import SignUpUniversityForm from '../components/SignUpUniversityForm'
-import SignInForm from '../components/SignInForm'
+import SignUpStudentForm from '../components/Accounts/SignUpStudentForm'
+import SignUpUniversityForm from '../components/Accounts/SignUpUniversityForm'
+import SignInForm from '../components/Accounts/SignInForm'
 
 class SignUpPage extends Component {
   render(){

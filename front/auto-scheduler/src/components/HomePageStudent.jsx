@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import {Tabs, Tab} from 'react-bootstrap';
 import {Translation} from "react-i18next";
-import StudentCourseLog from '../components/StudentCourseLog'
 import SearchForm from '../components/SearchForm'
+import StudentCourseLog from '../components/Lists/StudentCourseLog'
 
-class MainPageUser extends Component {
+class HomePageStudent extends Component {
   render(){
     return(
       <React.Fragment>
@@ -27,4 +27,4 @@ class MainPageUser extends Component {
   }
 }
 
-export default MainPageUser;
+export default HomePageStudent;

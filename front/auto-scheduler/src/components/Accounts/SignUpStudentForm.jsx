@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import {Button, Form, Spinner} from 'react-bootstrap';
-import {Translation} from "react-i18next";
-import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT, CONFLICT } from '../services/ApiConstants';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
-
-import FormInputField from './FormInputField';
+import {Translation} from "react-i18next";
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+
+import ApiService from '../../services/ApiService';
+import { OK, CREATED, TIMEOUT, CONFLICT } from '../../services/ApiConstants';
+import FormInputField from '../FormInputField';
 
 const SignUpSchema = Yup.object().shape({
     email: Yup

@@ -58,7 +58,11 @@
     "findSchedule": "BUSCAR CRONOGRAMAS"
     "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
     "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
-    "login": "Iniciar Sesión"
+    "login": "Iniciar Sesión",
+    "programs": "CARRERAS",
+    "terms": "PERÍODOS",
+    "courses": "CURSOS",
+    "buildings": "SEDES"
   },
   "modal":{
     "deleteCourse":"Eliminando materia",
@@ -92,6 +96,9 @@
     "recap": "{{days}} días, {{hours}} horas en total",
     "timeRange": "Horarios de {{earliest}} a {{latest}}",
     "newSearch": "Realizar una nueva búsqueda"
+  },
+  "home": {
+    "getVerified": "Su instituto aún no ha sido verificado. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir el instituto a nuestra lista."
   },
   "emptyCourseLog": "No items in this list.",
   "submit": "Buscar"
