@@ -13,6 +13,7 @@ class StudentCourseLog extends Component {
     selectedProgram: {},
     courses: [],
     courseToAdd: "",
+    coursesAdded: 0,
     loading: true,
     showAddModal: false
   }
@@ -86,10 +87,7 @@ class StudentCourseLog extends Component {
   }
 
   switchAddModal(){
-    this.setState({
-                    showAddModal: !this.state.showAddModal,
-                    selectedProgram: this.state.programs[0]
-                  });
+    this.setState({showAddModal: !this.state.showAddModal, selectedProgram: this.state.programs[0]});
   }
 
   onChangePrograms(e){
@@ -108,7 +106,7 @@ class StudentCourseLog extends Component {
     this.setState({ loading: true, });
     ApiService.addFinishedCourse(this.state.user, this.state.courseToAdd).then((data) => {
       this.switchAddModal()
-      this.setState({ loading: false });
+      this.setState({ coursesAdded: this.state.coursesAdded+1, loading: false });
     });
   }
 
@@ -116,7 +114,7 @@ class StudentCourseLog extends Component {
     return (
       <React.Fragment>
         {
-          this.state.user? [<CourseList key="course-list" user={this.state.user}/>] : []
+          this.state.user? [<CourseList key={"list-"+this.state.coursesAdded} user={this.state.user}/>] : []
         }
         {
           this.state.programs? [

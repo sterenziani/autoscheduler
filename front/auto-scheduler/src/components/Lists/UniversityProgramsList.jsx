@@ -4,7 +4,7 @@ import {Translation} from "react-i18next";
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
 
-class ProgramsList extends Component {
+class UniversityProgramsList extends Component {
   state = {
     loading: true,
     error: false,
@@ -14,10 +14,6 @@ class ProgramsList extends Component {
   }
 
   componentDidMount() {
-    this.loadPrograms()
-  }
-
-  componentDidUpdate() {
     this.loadPrograms()
   }
 
@@ -44,7 +40,7 @@ class ProgramsList extends Component {
   deleteProgram(){
     if(!this.state.programToDelete)
       return;
-    ApiService.deleteProgram(this.state.programToDelete.id).then((data) => {
+    ApiService.deleteProgram(this.state.programToDelete).then((data) => {
       console.log(data)
     })
     let programsCopy = Object.assign({}, this.state).programs;
@@ -52,13 +48,12 @@ class ProgramsList extends Component {
   }
 
   switchDeleteModal(){
-    this.setState({ showDeleteModal: !this.state.showDeleteModal,
-                    programToDelete: {}});
+    this.setState({ showDeleteModal: !this.state.showDeleteModal, programToDelete: {}});
   }
 
   switchDeleteModalParam(e){
-    this.setState({ showDeleteModal: !this.state.showDeleteModal,
-                    programToDelete: e});
+    console.log(e)
+    this.setState({ showDeleteModal: !this.state.showDeleteModal, programToDelete: e});
   }
 
   render(){
@@ -105,4 +100,4 @@ class ProgramsList extends Component {
   }
 }
 
-export default ProgramsList;
+export default UniversityProgramsList;

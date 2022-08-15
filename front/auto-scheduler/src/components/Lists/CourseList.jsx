@@ -13,7 +13,15 @@ class CourseList extends Component {
     courses: null
   }
 
-  componentDidUpdate() {
+  componentDidMount(){
+    this.loadCourses()
+  }
+
+  redirectToEdit(id){
+    console.log("Redirect to /courses/"+id)
+  }
+
+  loadCourses(){
     if(this.state.user.type === "student"){
       ApiService.getFinishedCourses(this.state.user.name).then((data) => {
         let findError = null;
@@ -25,9 +33,18 @@ class CourseList extends Component {
           this.setState({courses: data, loading: false});
       });
     }
-  }
-
-  onClickPencil(e){
+    else if(this.state.user.type == "university"){
+      ApiService.getCourses(this.state.user.id).then((data) => {
+        let findError = null;
+        if (data && data.status && data.status !== OK && data.status !== CREATED)
+          findError = data.status;
+        if(findError)
+          this.setState({loading: false, error: true, status: findError});
+        else{
+          this.setState({courses: data, loading: false});
+        }
+      });
+    }
   }
 
   deleteCourse(){
@@ -35,20 +52,19 @@ class CourseList extends Component {
       return;
     if(this.state.user.type == "student")
       ApiService.deleteFinishedCourse(this.state.user, this.state.courseToDelete.id)
-    else
-      console.log("TO DO")
+    else if(this.state.user.type == "university")
+      ApiService.deleteCourse(this.state.courseToDelete)
     let coursesCopy = Object.assign({}, this.state).courses;
     this.setState({courses: coursesCopy, showDeleteModal: !this.state.showDeleteModal, courseToDelete: {}});
+    this.loadCourses();
   }
 
   switchDeleteModal(){
-    this.setState({ showDeleteModal: !this.state.showDeleteModal,
-                    courseToDelete: {}});
+    this.setState({ showDeleteModal: !this.state.showDeleteModal, courseToDelete: {}});
   }
 
   switchDeleteModalParam(e){
-    this.setState({ showDeleteModal: !this.state.showDeleteModal,
-                    courseToDelete: e});
+    this.setState({ showDeleteModal: !this.state.showDeleteModal, courseToDelete: e});
   }
 
   render(){
@@ -72,7 +88,7 @@ class CourseList extends Component {
                   {
                     this.state.user.type==="university"? [
                     <div key={"pencil-div-"+index} className="col-2 m-auto">
-                      <i className="bi bi-pencil-fill btn btn-lg color-white" id={"edit-"+index} onClick={this.onClickPencil.bind(this)}></i>
+                      <i className="bi bi-pencil-fill btn btn-lg color-white" id={"edit-"+index} onClick={() => {this.redirectToEdit(entry.id)}}></i>
                     </div>]:[]
                   }
                   <div className="col-2 m-auto"><i className="bi bi-trash-fill btn btn-lg color-white" id={"trash-"+index} onClick={() => {this.switchDeleteModalParam(entry)}}></i></div>

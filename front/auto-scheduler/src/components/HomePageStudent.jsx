@@ -15,10 +15,10 @@ class HomePageStudent extends Component {
         <div className="container mt-5">
           <Tabs className="borderless-tabs" defaultActiveKey="schedule_form" fill>
             <Tab className="text-center" eventKey="classes" title={<Translation>{t => t("tabs.courseLog")}</Translation>}>
-              <div className="bg-primary"><StudentCourseLog/></div>
+              <div className="bg-primary rounded-bottom"><StudentCourseLog/></div>
             </Tab>
             <Tab className="text-center" eventKey="schedule_form" title={<Translation>{t => t("tabs.findSchedule")}</Translation>}>
-              <div className="bg-primary"><SearchForm/></div>
+              <div className="bg-primary rounded-bottom"><SearchForm/></div>
             </Tab>
           </Tabs>
         </div>

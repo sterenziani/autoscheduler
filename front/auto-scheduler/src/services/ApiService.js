@@ -197,6 +197,12 @@ const getPrograms = (universityId) =>
     setTimeout(() => resolve(programs[universityId]), 250);
   });
 
+const getCourses = (universityId) =>
+  new Promise((resolve, reject) => {
+    let courses = SgaConstants.courses
+    setTimeout(() => resolve(courses[universityId]), 250);
+  });
+
 const getTerms = (universityId) =>
   new Promise((resolve, reject) => {
     let terms = SgaConstants.terms
@@ -205,7 +211,7 @@ const getTerms = (universityId) =>
 
 const getRemainingCoursesProgram = (user, programId) =>
   new Promise((resolve, reject) => {
-    let courses = SgaConstants.courses
+    let courses = SgaConstants.remainingCourses
     setTimeout(() => resolve(courses[programId-1]), 250);
   });
 
@@ -234,11 +240,18 @@ const deleteFinishedCourse = (student, courseId) =>
     setTimeout(() => resolve(courseCodes), 250);
   });
 
-const deleteProgram = (programId) =>
+const deleteProgram = (program) =>
   new Promise((resolve, reject) => {
     let programs = SgaConstants.programs[9]
-    programs.splice(programs.indexOf(programId), 1)
+    programs.splice(programs.indexOf(program), 1)
     setTimeout(() => resolve(programs), 250);
+  });
+
+const deleteCourse = (course) =>
+  new Promise((resolve, reject) => {
+    let courses = SgaConstants.courses[9]
+    courses.splice(courses.indexOf(course), 1)
+    setTimeout(() => resolve(courses), 250);
   });
 
 const ApiService = {
@@ -256,7 +269,9 @@ const ApiService = {
   getFinishedCourses: getFinishedCourses,
   addFinishedCourse: addFinishedCourse,
   deleteFinishedCourse: deleteFinishedCourse,
-  deleteProgram: deleteProgram
+  deleteProgram: deleteProgram,
+  getCourses: getCourses,
+  deleteCourse: deleteCourse
 };
 
 export default ApiService;

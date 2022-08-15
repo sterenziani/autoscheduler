@@ -242,14 +242,14 @@ var finishedCourses = [
   }
 ]
 
-var courses = [
+var remainingCourses = [
                 [
                   {"id": "72.03", "internalId": "72.03", "name": "Introducción a la Informática"},
                   {"id": "93.58", "internalId": "93.58", "name": "Algebra"},
                   {"id": "72.31", "internalId": "72.31", "name": "Programación Imperativa", "requirements": ["93.58", "72.03"]}
                 ],
                 [
-                  {"id": "93.59", "internalId": "93.59", "name": "Algebra Lineal"}
+                  {"id": "93.99", "internalId": "93.99", "name": "Algebra Lineal"}
                 ],
                 []
               ]
@@ -269,10 +269,17 @@ var programs = [
                 [], [], [], [], [], [], [], [], [], [], []
               ]
 
+var courses = [
+                [], [], [], [], [], [], [], [], [],
+                [...informaticaCourses, {"id": "93.99", "internalId": "93.99", "name": "Algebra Lineal"}],
+                [], [], [], [], [], [], [], [], [], [], []
+              ]
+
 const SgaConstants = {
   informaticaCourses: informaticaCourses,
   courseClasses2022A: courseClasses2022A,
   finishedCourses: finishedCourses,
+  remainingCourses: remainingCourses,
   programs: programs,
   terms: terms,
   courses: courses
