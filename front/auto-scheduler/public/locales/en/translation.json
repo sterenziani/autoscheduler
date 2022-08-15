@@ -101,5 +101,6 @@
     "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with this school so we can verify the account and add your school to our list."
   },
   "emptyList": "No items in this list.",
+  "minutes": "{{minutes}} mins",
   "submit": "Search"
 }

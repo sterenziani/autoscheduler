@@ -40,9 +40,7 @@ class UniversityProgramsList extends Component {
   deleteProgram(){
     if(!this.state.programToDelete)
       return;
-    ApiService.deleteProgram(this.state.programToDelete).then((data) => {
-      console.log(data)
-    })
+    ApiService.deleteProgram(this.state.programToDelete)
     let programsCopy = Object.assign({}, this.state).programs;
     this.setState({programs: programsCopy, showDeleteModal: !this.state.showDeleteModal, programToDelete: {}});
   }
@@ -52,7 +50,6 @@ class UniversityProgramsList extends Component {
   }
 
   switchDeleteModalParam(e){
-    console.log(e)
     this.setState({ showDeleteModal: !this.state.showDeleteModal, programToDelete: e});
   }
 

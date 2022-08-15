@@ -100,6 +100,7 @@
   "home": {
     "getVerified": "Su instituto aún no ha sido verificado. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir el instituto a nuestra lista."
   },
-  "emptyCourseLog": "No items in this list.",
+  "emptyCourseLog": "No hay elementos en esta lista.",
+  "minutes": "{{minutes}} mins",
   "submit": "Buscar"
 }

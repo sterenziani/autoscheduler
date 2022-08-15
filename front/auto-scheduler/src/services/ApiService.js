@@ -209,6 +209,12 @@ const getTerms = (universityId) =>
     setTimeout(() => resolve(terms), 250);
   });
 
+const getBuildings = (universityId) =>
+  new Promise((resolve, reject) => {
+    let buildings = SgaConstants.buildings
+    setTimeout(() => resolve(buildings[universityId]), 250);
+  });
+
 const getRemainingCoursesProgram = (user, programId) =>
   new Promise((resolve, reject) => {
     let courses = SgaConstants.remainingCourses
@@ -254,6 +260,13 @@ const deleteCourse = (course) =>
     setTimeout(() => resolve(courses), 250);
   });
 
+const deleteBuilding = (building) =>
+  new Promise((resolve, reject) => {
+    let buildings = SgaConstants.buildings[9]
+    buildings.splice(buildings.indexOf(building), 1)
+    setTimeout(() => resolve(buildings), 250);
+  });
+
 const ApiService = {
   getGames    : getGames,
   registerStudent: registerStudent,
@@ -265,13 +278,15 @@ const ApiService = {
   getUniversities: getUniversities,
   getPrograms: getPrograms,
   getTerms: getTerms,
+  getBuildings: getBuildings,
   getRemainingCoursesProgram: getRemainingCoursesProgram,
   getFinishedCourses: getFinishedCourses,
   addFinishedCourse: addFinishedCourse,
   deleteFinishedCourse: deleteFinishedCourse,
   deleteProgram: deleteProgram,
   getCourses: getCourses,
-  deleteCourse: deleteCourse
+  deleteCourse: deleteCourse,
+  deleteBuilding: deleteBuilding
 };
 
 export default ApiService;
