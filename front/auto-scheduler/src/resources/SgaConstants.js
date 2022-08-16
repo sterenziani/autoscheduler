@@ -275,6 +275,41 @@ var courses = [
                 [], [], [], [], [], [], [], [], [], [], []
               ]
 
+var buildings = [
+                [], [], [], [], [], [], [], [], [],
+                [
+                  { "id": 1, "internalId": "SDT", "name": "Sede Distrito Tecnológico",
+                    "distances": [
+                      {"building": {"name": "SDF"}, "time": 30},
+                      {"building": {"name": "SR"}, "time": 10},
+                      {"building": {"name": "V"}, "time": 10}
+                    ]
+                  },
+                  { "id": 2, "internalId": "SDF", "name": "Sede Distrito Financiero",
+                    "distances": [
+                      {"building": {"name": "SDT"}, "time": 30},
+                      {"building": {"name": "SR"}, "time": 35},
+                      {"building": {"name": "V"}, "time": 10}
+                    ]
+                  },
+                  { "id": 3, "internalId": "SR", "name": "Sede Rectorado",
+                    "distances": [
+                      {"building": {"name": "SDT"}, "time": 10},
+                      {"building": {"name": "SDF"}, "time": 35},
+                      {"building": {"name": "V"}, "time": 10}
+                    ]
+                  },
+                  { "id": 4, "internalId": "V", "name": "Virtual",
+                    "distances": [
+                      {"building": {"name": "SDF"}, "time": 30},
+                      {"building": {"name": "SR"}, "time": 10},
+                      {"building": {"name": "SDT"}, "time": 10}
+                    ]
+                  }
+                ],
+                [], [], [], [], [], [], [], [], [], [], []
+              ]
+
 const SgaConstants = {
   informaticaCourses: informaticaCourses,
   courseClasses2022A: courseClasses2022A,
@@ -282,6 +317,7 @@ const SgaConstants = {
   remainingCourses: remainingCourses,
   programs: programs,
   terms: terms,
-  courses: courses
+  courses: courses,
+  buildings: buildings
 };
 export default SgaConstants;
