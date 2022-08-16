@@ -267,6 +267,29 @@ const deleteBuilding = (building) =>
     setTimeout(() => resolve(buildings), 250);
   });
 
+const deleteTerm = (term) =>
+  new Promise((resolve, reject) => {
+    let terms = SgaConstants.terms
+    terms.splice(terms.indexOf(term), 1)
+    setTimeout(() => resolve(terms), 250);
+  });
+
+const publishTerm = (term) => {
+    let terms = SgaConstants.terms
+    let found_term = terms[terms.indexOf(term)]
+    if(found_term)
+      found_term.published = true
+    return { status: OK }
+  }
+
+const unpublishTerm = (term) => {
+    let terms = SgaConstants.terms
+    let found_term = terms[terms.indexOf(term)]
+    if(found_term)
+      found_term.published = false
+    return { status: OK }
+  }
+
 const ApiService = {
   getGames    : getGames,
   registerStudent: registerStudent,
@@ -286,7 +309,10 @@ const ApiService = {
   deleteProgram: deleteProgram,
   getCourses: getCourses,
   deleteCourse: deleteCourse,
-  deleteBuilding: deleteBuilding
+  deleteBuilding: deleteBuilding,
+  deleteTerm: deleteTerm,
+  publishTerm: publishTerm,
+  unpublishTerm: unpublishTerm
 };
 
 export default ApiService;

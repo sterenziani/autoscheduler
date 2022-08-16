@@ -255,8 +255,9 @@ var remainingCourses = [
               ]
 
 var terms = [
-              { "id": 1, "internalId": "2021-2Q", "name": "2° Cuatrimestre 2021", "startDate": "2021-08-01"},
-              { "id": 2, "internalId": "2022-1Q", "name": "1° Cuatrimestre 2022", "startDate": "2022-03-01"}
+              { "id": 1, "internalId": "2021-2Q", "name": "2° Cuatrimestre 2021", "startDate": "2021-08-01", "published": true},
+              { "id": 2, "internalId": "2022-1Q", "name": "1° Cuatrimestre 2022", "startDate": "2022-03-01", "published": true},
+              { "id": 3, "internalId": "2022-2Q", "name": "2° Cuatrimestre 2022", "startDate": "2022-08-01", "published": false}
             ]
 
 var programs = [

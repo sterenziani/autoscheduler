@@ -5,6 +5,7 @@ import {Translation} from "react-i18next";
 import UniversityProgramsList from './Lists/UniversityProgramsList'
 import UniversityCoursesList from './Lists/UniversityCoursesList'
 import UniversityBuildingsList from './Lists/UniversityBuildingsList'
+import UniversityTermsList from './Lists/UniversityTermsList'
 
 const CONTACT_EMAIL = "juan@autoscheduler.com"
 
@@ -31,7 +32,7 @@ class HomePageUniversity extends Component {
               <div className="bg-primary rounded-bottom"><UniversityCoursesList user={this.props.user}/></div>
             </Tab>
             <Tab className="text-center" eventKey="terms" title={<Translation>{t => t("tabs.terms")}</Translation>}>
-              <div className="bg-primary rounded-bottom">TERMS</div>
+              <div className="bg-primary rounded-bottom"><UniversityTermsList user={this.props.user}/></div>
             </Tab>
           </Tabs>
         </div>

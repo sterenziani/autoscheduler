@@ -109,6 +109,10 @@ $theme-colors: (
   font-style: italic;
 }
 
+.list-row{
+  --bs-border-opacity: .5 !important;
+}
+
 .checkbox{
   height: 100%;
   width: 100%;
@@ -178,7 +182,17 @@ html,body {
   padding: 0;
   margin: 0;
   color: #FFFFFF !important;
-  background-color: $background;
+  background-color: $background !important;
+  min-width : 100%;
+  background-repeat:no-repeat;
+  overflow-x: hidden;
+}
+
+.btn-wrap-text {
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+  text-overflow: ellipsis;
 }
 
 @import "~bootstrap";
