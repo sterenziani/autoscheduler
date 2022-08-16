@@ -1,5 +1,6 @@
 import express, {Application} from 'express';
 import * as dotenv from "dotenv";
+import {HomeRoutes} from "./routes/home.routes";
 
 class App {
 	public app: Application;
@@ -21,7 +22,7 @@ class App {
 	}
 
 	private setRoutes() {
-		// TODO: create routes
+		this.app.use('/', new HomeRoutes().router);
 	}
 }
 
