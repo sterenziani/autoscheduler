@@ -175,11 +175,15 @@ class SearchResults extends Component {
               :[<i key="back-d" className="bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big disabled color-disabled"></i>]
             }
           </div>
-          <div className="container my-3 justify-content-center align-items-center">
-            <div className="table-responsive">
-            { this.state.tables[this.state.scheduleIndex] }
+          {
+            window.innerWidth>1000 &&
+            <div className="container my-3 justify-content-center align-items-center">
+              <div className="table-responsive">
+              { this.state.tables[this.state.scheduleIndex] }
+              </div>
             </div>
-          </div>
+          }
+
           <div className="my-3 d-flex justify-content-center align-items-center">
             <ul className="list-unstyled row container justify-content-center">
             {

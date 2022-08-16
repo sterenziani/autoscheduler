@@ -78,7 +78,7 @@ class UniversityTermsList extends Component {
           { this.state.terms && this.state.terms.length>0?
             [
               this.state.terms.map((entry,index) => (
-                <Row key={"row-"+index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 mx-2 my-3 justify-content-center">
+                <Row key={"row-"+index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
                   <div className="m-auto">{entry.internalId}</div>
                   <div className="m-auto">{entry.name}</div>
                   <div className="m-auto">{entry.startDate}</div>

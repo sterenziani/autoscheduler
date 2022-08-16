@@ -11,7 +11,7 @@ i18n
     whitelist                : ["en", "es"],
     supportedLngs            : ["en", "es"],
     nonExplicitSupportedLngs : true,
-    fallbackLng              : "es",
+    fallbackLng              : "en",
     load                     : "languageOnly",
     interpolation: {
       escapeValue: false

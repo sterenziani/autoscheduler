@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Form, Spinner} from 'react-bootstrap';
+import {Button, Form, Spinner, Row} from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import {Translation} from "react-i18next";
 import ApiService from '../services/ApiService';
@@ -232,17 +232,15 @@ class SearchForm extends Component {
             <div className="col-8 align-items-start align-items-center">
               {
                 this.state.params.unavailableTimeSlots.map((entry,index) => (
-                  <div key={index} className="d-md-flex align-items-center">
-                    <Form.Select id={"day-"+index} className="daypicker my-1" value={this.state.params.unavailableTimeSlots[index].day} onChange={this.onChangeDay.bind(this)}>
+                  <Row key={"timerow-"+index} xs={1} md={6} className="list-row pb-2 pt-3 justify-content-center">
+                    <Form.Select id={"day-"+index} className="w-auto mx-1" value={this.state.params.unavailableTimeSlots[index].day} onChange={this.onChangeDay.bind(this)}>
                       { DAYS.map(p => (<option key={p} value={p}>{<Translation>{t => t("days."+p)}</Translation>}</option>)) }
                     </Form.Select>
-                    <div className="d-flex my-1 align-items-start align-items-center">
-                      <input type="time" id={"start-"+index} className="mx-2 timepicker" value={this.state.params.unavailableTimeSlots[index].startTime} onChange={this.onChangeStartTime.bind(this)}/>
-                      <h5 className="my-0"><strong>-</strong></h5>
-                      <input type="time" id={"end-"+index} className="mx-2 timepicker" value={this.state.params.unavailableTimeSlots[index].endTime} onChange={this.onChangeEndTime.bind(this)}/>
-                    </div>
-                    <i className="bi bi-trash-fill btn color-white" id={"trash-"+index} onClick={this.onClickTrashCan.bind(this)}></i>
-                  </div>
+                    <input type="time" id={"start-"+index} className="w-auto timepicker" value={this.state.params.unavailableTimeSlots[index].startTime} onChange={this.onChangeStartTime.bind(this)}/>
+                    <h5 className="my-auto w-auto"><strong>-</strong></h5>
+                    <input type="time" id={"end-"+index} className="w-auto timepicker" value={this.state.params.unavailableTimeSlots[index].endTime} onChange={this.onChangeEndTime.bind(this)}/>
+                    <i className="bi bi-trash-fill btn color-white w-auto my-auto mx-2" id={"trash-"+index} onClick={this.onClickTrashCan.bind(this)}></i>
+                  </Row>
                 ))
               }
               <div className="mx-auto align-items-center plus-button-container clickable">

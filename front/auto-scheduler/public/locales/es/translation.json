@@ -28,7 +28,7 @@
         "isRequired": "Este campo es obligatorio."
       },
       "repeatPassword":{
-        "isRequired": "Introduzca su contraseña una vez más."
+        "isRequired": "Introduzca su contraseña una vez más.",
         "passwordsMismatch": "Las contraseñas no coinciden."
       },
       "name":{
@@ -55,7 +55,7 @@
   },
   "tabs":{
     "courseLog": "CURSOS APROBADOS",
-    "findSchedule": "BUSCAR CRONOGRAMAS"
+    "findSchedule": "BUSCAR CRONOGRAMAS",
     "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
     "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
     "login": "Iniciar Sesión",
@@ -67,7 +67,7 @@
   "modal":{
     "deleteCourse":"Eliminando materia",
     "addCourse":"Añadiendo materia",
-    "areYouSure":"¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?"",
+    "areYouSure":"¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?",
     "noRemainingCourses":"No quedan materias correspondientes a este plan",
     "cancel":"Cancelar",
     "delete":"Eliminar",
@@ -99,6 +99,10 @@
   },
   "home": {
     "getVerified": "Su instituto aún no ha sido verificado. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir el instituto a nuestra lista."
+  },
+  "terms":{
+    "hide": "Ocultar",
+    "publish": "Publicar"
   },
   "emptyCourseLog": "No hay elementos en esta lista.",
   "minutes": "{{minutes}} mins",
