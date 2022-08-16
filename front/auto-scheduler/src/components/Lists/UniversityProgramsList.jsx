@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Modal, Spinner} from 'react-bootstrap';
+import {Button, Modal, Spinner, Row} from 'react-bootstrap';
 import {Translation} from "react-i18next";
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
@@ -64,13 +64,13 @@ class UniversityProgramsList extends Component {
           { this.state.programs && this.state.programs.length>0?
             [
               this.state.programs.map((entry,index) => (
-                <div key={index} className="row">
-                  <div className="col-2 m-auto"></div>
-                  <div className="col-6 m-auto"><a className="text-white" href={"/programs/"+entry.id}>{entry.internalId+" - "+entry.name}</a></div>
-                  <div className="col-1 m-auto"><i className="bi bi-pencil-fill btn btn-lg color-white" id={"edit-"+index} onClick={() => {this.redirectToEdit(entry.id)}}></i></div>
-                  <div className="col-1 m-auto"><i className="bi bi-trash-fill btn btn-lg color-white" id={"trash-"+index} onClick={() => {this.switchDeleteModalParam(entry)}}></i></div>
-                  <div className="col-2 m-auto"></div>
-                </div>
+                <Row key={"row-"+index} xs={1} md={3} className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center">
+                  <div className="my-auto w-50"><a className="text-white" href={"/programs/"+entry.id}>{entry.internalId+" - "+entry.name}</a></div>
+                  <div className="d-flex my-auto justify-content-center">
+                    <i className="bi bi-pencil-fill btn btn-lg text-white" id={"edit-"+index} onClick={() => {this.redirectToEdit(entry.id)}}></i>
+                    <i className="bi bi-trash-fill btn btn-lg text-white" id={"trash-"+index} onClick={() => {this.switchDeleteModalParam(entry)}}></i>
+                  </div>
+                </Row>
               ))
             ] : [<div key="empty-list"><Translation>{t => t("emptyList")}</Translation></div>]
           }

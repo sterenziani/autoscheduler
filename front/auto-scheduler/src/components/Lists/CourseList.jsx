@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Modal, Spinner} from 'react-bootstrap';
+import {Button, Modal, Spinner, Row} from 'react-bootstrap';
 import {Translation} from "react-i18next";
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
@@ -82,17 +82,17 @@ class CourseList extends Component {
           { this.state.courses && this.state.courses.length>0?
             [
               this.state.courses.map((entry,index) => (
-                <div key={index} className="row">
-                  <div className="col-2 m-auto">{entry.internalId}</div>
-                  <div className="col-6 m-auto">{entry.name}</div>
+                <Row key={"row-"+index} xs={1} md={4} className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center">
+                  <div className="my-auto">{entry.internalId}</div>
+                  <div className="my-auto w-min-50">{entry.name}</div>
+                  <div className="d-flexmy-auto justify-content-center">
                   {
                     this.state.user.type==="university"? [
-                    <div key={"pencil-div-"+index} className="col-2 m-auto">
-                      <i className="bi bi-pencil-fill btn btn-lg color-white" id={"edit-"+index} onClick={() => {this.redirectToEdit(entry.id)}}></i>
-                    </div>]:[]
+                    <i key={"pencil-"+index} className="bi bi-pencil-fill btn btn-lg text-white" id={"edit-"+index} onClick={() => {this.redirectToEdit(entry.id)}}></i>]:[]
                   }
-                  <div className="col-2 m-auto"><i className="bi bi-trash-fill btn btn-lg color-white" id={"trash-"+index} onClick={() => {this.switchDeleteModalParam(entry)}}></i></div>
-                </div>
+                    <i className="bi bi-trash-fill btn btn-lg text-white" id={"trash-"+index} onClick={() => {this.switchDeleteModalParam(entry)}}></i>
+                  </div>
+                </Row>
               ))
             ] : [<div key="empty-list"><Translation>{t => t("emptyList")}</Translation></div>]
           }

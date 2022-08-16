@@ -110,7 +110,7 @@ $theme-colors: (
 }
 
 .list-row{
-  --bs-border-opacity: .5 !important;
+  --bs-border-opacity: .25 !important;
 }
 
 .checkbox{
@@ -143,6 +143,10 @@ $theme-colors: (
 
 .daypicker{
   min-width: 100px;
+}
+
+.w-min-50{
+  min-width: 50% !important;
 }
 
 .timepicker{
