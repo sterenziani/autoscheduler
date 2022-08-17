@@ -33,7 +33,7 @@ class CourseList extends Component {
           this.setState({courses: data, loading: false});
       });
     }
-    else if(this.state.user.type == "university"){
+    else if(this.state.user.type === "university"){
       ApiService.getCourses(this.state.user.id).then((data) => {
         let findError = null;
         if (data && data.status && data.status !== OK && data.status !== CREATED)
@@ -50,9 +50,9 @@ class CourseList extends Component {
   deleteCourse(){
     if(!this.state.courseToDelete)
       return;
-    if(this.state.user.type == "student")
+    if(this.state.user.type === "student")
       ApiService.deleteFinishedCourse(this.state.user, this.state.courseToDelete.id)
-    else if(this.state.user.type == "university")
+    else if(this.state.user.type === "university")
       ApiService.deleteCourse(this.state.courseToDelete)
     let coursesCopy = Object.assign({}, this.state).courses;
     this.setState({courses: coursesCopy, showDeleteModal: !this.state.showDeleteModal, courseToDelete: {}});

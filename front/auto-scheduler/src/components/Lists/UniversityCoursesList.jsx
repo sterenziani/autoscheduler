@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import {Translation} from "react-i18next";
-import {Button, Modal, Spinner} from 'react-bootstrap';
-import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import {Button, Modal} from 'react-bootstrap';
 import CourseList from './CourseList'
 
 class StudentCoursesList extends Component {

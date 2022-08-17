@@ -122,12 +122,12 @@ class SearchResults extends Component {
                   else
                     contents[d] = <td className="day-column text-uppercase bg-black"></td>
                 })
-                return(<tr key={"h-"+h} className="border-dark">
+                return(<tr key={"id-"+id+"h"+h} className="border-dark">
                           <td className="text-uppercase bg-primary text-white">{h+":00"}</td>
                           {DAYS.map(d => <React.Fragment key={"id-"+id+"d-"+d+"h-"+h}>{contents[d]}</React.Fragment>)}
                         </tr>)
               }
-              return(<></>)
+              return(<tr className="border-dark" key={"id-"+id+"h"+h}></tr>)
             })
           }
         </tbody>

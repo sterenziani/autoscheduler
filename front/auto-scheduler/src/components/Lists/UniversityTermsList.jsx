@@ -10,7 +10,8 @@ class UniversityTermsList extends Component {
     error: false,
     showDeleteModal: false,
     user: this.props.user,
-    terms: null
+    terms: null,
+    changingPublishStatus: []
   }
 
   componentDidMount() {
@@ -18,15 +19,15 @@ class UniversityTermsList extends Component {
   }
 
   loadTerms(){
-    console.log("LOADING")
     ApiService.getTerms(this.state.user.id).then((data) => {
       let findError = null;
       if (data && data.status && data.status !== OK && data.status !== CREATED)
         findError = data.status;
       if(findError)
         this.setState({loading: false, error: true, status: findError});
-      else
-        this.setState({terms: data, loading: false});
+      else{
+        this.setState({terms: data, loading: false, changingPublishStatus: new Array(data.length).fill(false)});
+      }
     });
   }
 
@@ -38,17 +39,20 @@ class UniversityTermsList extends Component {
     console.log("Redirect to /terms/new")
   }
 
-  async switchTermStatus(term){
-    this.setState({loading: true});
+  async switchTermStatus(index){
+    const term = this.state.terms[index]
+    this.state.changingPublishStatus[index] = true;
+    this.setState({});
     let resp;
     if(term.published)
       resp = await ApiService.unpublishTerm(term);
     else
       resp = await ApiService.publishTerm(term);
-    if(resp.status == OK)
+    if(resp.status === OK)
       this.loadTerms()
     else
-      this.setState({error:true, status:resp.status, loading: false});
+      this.setState({error:true, status:resp.status});
+    this.state.changingPublishStatus[index] = false;
   }
 
   deleteTerm(){
@@ -88,14 +92,16 @@ class UniversityTermsList extends Component {
                   </div>
                   <div className="my-auto p-0 d-flex justify-content-center">
                   {
+                    this.state.changingPublishStatus[index]? [<div key={"spinner-"+index} className="mx-auto"><Spinner animation="border"/></div>] : [
                     entry.published? [
-                        <Button key={"button-hide-"+index} className="btn-wrap-text" variant="success" onClick={() => {this.switchTermStatus(entry)}}>
+                        <Button key={"button-hide-"+index} className="btn-wrap-text" variant="success" onClick={() => {this.switchTermStatus(index)}}>
                           <Translation>{t => t("terms.hide")}</Translation>
                         </Button>] : [
-                        <Button key={"button-publish-"+index} className="btn-wrap-text" variant="warning" onClick={() => {this.switchTermStatus(entry)}}>
+                        <Button key={"button-publish-"+index} className="btn-wrap-text" variant="warning" onClick={() => {this.switchTermStatus(index)}}>
                           <Translation>{t => t("terms.publish")}</Translation>
                         </Button>
                       ]
+                    ]
                   }
                   </div>
                 </Row>

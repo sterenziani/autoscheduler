@@ -1,6 +1,10 @@
 import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, NOT_FOUND, OK } from './ApiConstants';
 import SgaConstants from '../resources/SgaConstants';
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /*
 const getUsers = () =>
   new Promise((resolve, reject) => {
@@ -274,7 +278,7 @@ const deleteTerm = (term) =>
     setTimeout(() => resolve(terms), 250);
   });
 
-const publishTerm = (term) => {
+async function publishTerm(term) {
     let terms = SgaConstants.terms
     let found_term = terms[terms.indexOf(term)]
     if(found_term)
@@ -282,7 +286,7 @@ const publishTerm = (term) => {
     return { status: OK }
   }
 
-const unpublishTerm = (term) => {
+async function unpublishTerm(term) {
     let terms = SgaConstants.terms
     let found_term = terms[terms.indexOf(term)]
     if(found_term)
