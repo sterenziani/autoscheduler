@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Translation} from "react-i18next";
-import {Button, Modal, Form} from 'react-bootstrap';
+import {Button, Modal, Form, Spinner} from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
 import CourseList from './CourseList'
@@ -111,6 +111,10 @@ class StudentCourseLog extends Component {
   }
 
   render(){
+    if(this.state.loading === true)
+      return <div className="mx-auto py-3"><Spinner animation="border"/></div>
+    if(this.state.error)
+      return <h1>ERROR {this.state.error}</h1>
     return (
       <React.Fragment>
         {

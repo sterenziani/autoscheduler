@@ -18,7 +18,7 @@ class CourseList extends Component {
   }
 
   redirectToEdit(id){
-    console.log("Redirect to /courses/"+id)
+    console.log("Redirect to /courses/"+id+"/edit")
   }
 
   loadCourses(){
@@ -84,7 +84,11 @@ class CourseList extends Component {
               this.state.courses.map((entry,index) => (
                 <Row key={"row-"+index} xs={1} md={4} className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center">
                   <div className="my-auto">{entry.internalId}</div>
-                  <div className="my-auto w-min-50">{entry.name}</div>
+                  <div className="my-auto w-min-50">
+                  {
+                    this.state.user.type==="university"? [<a key={"link-"+entry.id} className="text-white" href={"/courses/"+entry.id}>{entry.name}</a>] : [<div key={"nada-"+entry.id}>{entry.name}</div>]
+                  }
+                  </div>
                   <div className="d-flexmy-auto justify-content-center">
                   {
                     this.state.user.type==="university"? [

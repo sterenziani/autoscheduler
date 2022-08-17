@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import {Tabs, Tab} from 'react-bootstrap';
+import {Tabs, Tab, Spinner} from 'react-bootstrap';
 import {Translation} from "react-i18next";
 import HomePageUniversity from '../components/HomePageUniversity'
 import HomePageStudent from '../components/HomePageStudent'
@@ -22,11 +22,17 @@ class HomePage extends Component {
       if(findError)
         this.setState({ loading: false, error: true, status: findError });
       else
-        this.setState({ user: data });
+        this.setState({ loading: false, user: data });
     });
   }
 
   render(){
+    if(this.state.loading === true)
+      return <div style={{position: 'absolute', left: '50%', top: '50%',transform: 'translate(-50%, -50%)'}}>
+                <Spinner animation="border" variant="primary" />
+              </div>
+    if(this.state.error)
+      return <h1>ERROR {this.state.error}</h1>
     return(
       <React.Fragment>
         <HelmetProvider>

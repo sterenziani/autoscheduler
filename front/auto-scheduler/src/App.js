@@ -1,9 +1,10 @@
 import React from 'react';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Navbar from './components/Navbar';
-import SearchResults from './components/SearchResults'
+import SearchResults from './pages/SearchResults'
 import HomePage from './pages/HomePage'
 import SignUpPage from './pages/SignUpPage'
+import CoursePage from './pages/CoursePage'
 import NoMatch from './components/NoMatch'
 import './resources/style.scss';
 
@@ -16,6 +17,7 @@ function App() {
         <Route path="/register" element={<SignUpPage/>}/>
         <Route path="/login" element={<SignUpPage login/>}/>
         <Route path="/results" element={<SearchResults/>}/>
+        <Route path="/courses/:id" element={<CoursePage/>}/>
         <Route path="*" element={<NoMatch/>} />
       </Routes>
     </Router>

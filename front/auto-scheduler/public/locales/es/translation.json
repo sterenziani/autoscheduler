@@ -62,7 +62,9 @@
     "programs": "CARRERAS",
     "terms": "PERÍODOS",
     "courses": "CURSOS",
-    "buildings": "SEDES"
+    "buildings": "SEDES",
+    "requiredCourses": "CORRELATIVAS",
+    "courseClasses": "COMISIONES"
   },
   "modal":{
     "deleteCourse":"Eliminando materia",
@@ -105,6 +107,8 @@
     "publish": "Publicar"
   },
   "emptyCourseLog": "No hay elementos en esta lista.",
+  "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",
   "minutes": "{{minutes}} mins",
+  "edit": "Editar",
   "submit": "Buscar"
 }

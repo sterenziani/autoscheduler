@@ -1,6 +1,8 @@
 import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, NOT_FOUND, OK } from './ApiConstants';
 import SgaConstants from '../resources/SgaConstants';
 
+const RESOLVE_DELAY = 250
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -9,9 +11,9 @@ function sleep(ms) {
 const getUsers = () =>
   new Promise((resolve, reject) => {
     if (!users) {
-      return setTimeout(() => reject(new Error('Users not found')), 2); // wait for 250ms
+      return setTimeout(() => reject(new Error('Users not found')), 2); // wait for RESOLVE_DELAYms
     }
-    setTimeout(() => resolve(Object.values(users)), 250);
+    setTimeout(() => resolve(Object.values(users)), RESOLVE_DELAY);
   });
 
 const getUser = (id) =>
@@ -21,10 +23,10 @@ const getUser = (id) =>
     if (!user) {
       return setTimeout(
         () => reject(new Error('User not found')),
-        250
+        RESOLVE_DELAY
       );
     }
-    setTimeout(() => resolve(users[id]), 250);
+    setTimeout(() => resolve(users[id]), RESOLVE_DELAY);
   });
   */
 
@@ -155,7 +157,7 @@ const getActiveUser = () =>
       "id": 9, "type":"university", "email": "rector@itba.edu.ar",
       "name": "Instituto Tecnológico de Buenos Aires", "verified": false
     }
-    setTimeout(() => resolve(university), 250);
+    setTimeout(() => resolve(university), RESOLVE_DELAY);
   });
 
 const getSchedules = (params) =>
@@ -165,7 +167,7 @@ const getSchedules = (params) =>
     calculateDurationOfEachClass(availableClasses); // Updates classes with time spent in each
 
     let schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays); // Returns sorted array
-    setTimeout(() => resolve(schedules), 250);
+    setTimeout(() => resolve(schedules), RESOLVE_DELAY);
   });
 
 const getUniversities = () =>
@@ -192,37 +194,49 @@ const getUniversities = () =>
                       { "id": 19, "name": "Universidad Siglo 21"},
                       { "id": 20, "name": "UTN"},
                     ]
-    setTimeout(() => resolve(programs), 250);
+    setTimeout(() => resolve(programs), RESOLVE_DELAY);
+  });
+
+const getCourse = (courseId) =>
+  new Promise((resolve, reject) => {
+    let course = SgaConstants.courses[9].find(c => c.id === courseId)
+    setTimeout(() => resolve(course), RESOLVE_DELAY);
+  });
+
+const getRequiredCourses = (courseId) =>
+  new Promise((resolve, reject) => {
+    let course = SgaConstants.courses[9]
+    setTimeout(() => resolve(course), RESOLVE_DELAY);
   });
 
 const getPrograms = (universityId) =>
   new Promise((resolve, reject) => {
     let programs = SgaConstants.programs
-    setTimeout(() => resolve(programs[universityId]), 250);
+    setTimeout(() => resolve(programs[universityId]), RESOLVE_DELAY);
   });
 
 const getCourses = (universityId) =>
   new Promise((resolve, reject) => {
     let courses = SgaConstants.courses
-    setTimeout(() => resolve(courses[universityId]), 250);
+    setTimeout(() => resolve(courses[universityId]), RESOLVE_DELAY);
   });
 
 const getTerms = (universityId) =>
   new Promise((resolve, reject) => {
     let terms = SgaConstants.terms
-    setTimeout(() => resolve(terms), 250);
+    setTimeout(() => resolve(terms), RESOLVE_DELAY);
   });
 
 const getBuildings = (universityId) =>
   new Promise((resolve, reject) => {
     let buildings = SgaConstants.buildings
-    setTimeout(() => resolve(buildings[universityId]), 250);
+    setTimeout(() => resolve(buildings[universityId]), RESOLVE_DELAY);
   });
 
 const getRemainingCoursesProgram = (user, programId) =>
   new Promise((resolve, reject) => {
     let courses = SgaConstants.remainingCourses
-    setTimeout(() => resolve(courses[programId-1]), 250);
+    setTimeout(() => resolve(courses[programId-1]), RESOLVE_DELAY);
   });
 
 const getFinishedCourses = (student) =>
@@ -233,49 +247,49 @@ const getFinishedCourses = (student) =>
                                                 return true;
                                               return false;
                                             });
-    setTimeout(() => resolve(courses), 250);
+    setTimeout(() => resolve(courses), RESOLVE_DELAY);
   });
 
 const addFinishedCourse = (student, courseId) =>
   new Promise((resolve, reject) => {
     let courseCodes = SgaConstants.finishedCourses.find(c => c.student === student.name).courses
     courseCodes.push(courseId)
-    setTimeout(() => resolve(courseCodes), 250);
+    setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
   });
 
 const deleteFinishedCourse = (student, courseId) =>
   new Promise((resolve, reject) => {
     let courseCodes = SgaConstants.finishedCourses.find(c => c.student === student.name).courses
     courseCodes.splice(courseCodes.indexOf(courseId), 1)
-    setTimeout(() => resolve(courseCodes), 250);
+    setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
   });
 
 const deleteProgram = (program) =>
   new Promise((resolve, reject) => {
     let programs = SgaConstants.programs[9]
     programs.splice(programs.indexOf(program), 1)
-    setTimeout(() => resolve(programs), 250);
+    setTimeout(() => resolve(programs), RESOLVE_DELAY);
   });
 
 const deleteCourse = (course) =>
   new Promise((resolve, reject) => {
     let courses = SgaConstants.courses[9]
     courses.splice(courses.indexOf(course), 1)
-    setTimeout(() => resolve(courses), 250);
+    setTimeout(() => resolve(courses), RESOLVE_DELAY);
   });
 
 const deleteBuilding = (building) =>
   new Promise((resolve, reject) => {
     let buildings = SgaConstants.buildings[9]
     buildings.splice(buildings.indexOf(building), 1)
-    setTimeout(() => resolve(buildings), 250);
+    setTimeout(() => resolve(buildings), RESOLVE_DELAY);
   });
 
 const deleteTerm = (term) =>
   new Promise((resolve, reject) => {
     let terms = SgaConstants.terms
     terms.splice(terms.indexOf(term), 1)
-    setTimeout(() => resolve(terms), 250);
+    setTimeout(() => resolve(terms), RESOLVE_DELAY);
   });
 
 async function publishTerm(term) {
@@ -308,6 +322,8 @@ const ApiService = {
   getBuildings: getBuildings,
   getRemainingCoursesProgram: getRemainingCoursesProgram,
   getFinishedCourses: getFinishedCourses,
+  getCourse: getCourse,
+  getRequiredCourses: getRequiredCourses,
   addFinishedCourse: addFinishedCourse,
   deleteFinishedCourse: deleteFinishedCourse,
   deleteProgram: deleteProgram,

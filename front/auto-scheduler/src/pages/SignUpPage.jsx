@@ -13,16 +13,16 @@ class SignUpPage extends Component {
         <HelmetProvider>
           <Helmet><title>Register - AutoScheduler</title></Helmet>
         </HelmetProvider>
-        <div className="container mt-5">
+        <div className="container my-5">
           <Tabs className="borderless-tabs" defaultActiveKey={this.props.login? "log_in":"i_am_student"} fill>
             <Tab className="text-center" eventKey="i_am_student" title={<Translation>{t => t("tabs.iAmStudent")}</Translation>}>
-              <div className="bg-primary"><SignUpStudentForm/></div>
+              <div className="bg-primary rounded-bottom"><SignUpStudentForm/></div>
             </Tab>
             <Tab className="text-center" eventKey="log_in" title={<Translation>{t => t("tabs.login")}</Translation>}>
-              <div className="bg-primary"><SignInForm/></div>
+              <div className="bg-primary rounded-bottom"><SignInForm/></div>
             </Tab>
             <Tab className="text-center" eventKey="i_am_university" title={<Translation>{t => t("tabs.iAmUniversty")}</Translation>}>
-              <div className="bg-primary"><SignUpUniversityForm/></div>
+              <div className="bg-primary rounded-bottom"><SignUpUniversityForm/></div>
             </Tab>
           </Tabs>
         </div>

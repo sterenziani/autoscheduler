@@ -62,7 +62,9 @@
     "programs": "PROGRAMS",
     "terms": "TERMS",
     "courses": "COURSES",
-    "buildings": "BUILDINGS"
+    "buildings": "BUILDINGS",
+    "requiredCourses": "REQUIRED COURSES",
+    "courseClasses": "CLASSES"
   },
   "modal":{
     "deleteCourse":"Deleting course",
@@ -105,6 +107,8 @@
     "publish": "Publish"
   },
   "emptyList": "No items in this list.",
+  "noRequiredCourses": "This course can be taken at any point.",
   "minutes": "{{minutes}} mins",
+  "edit": "Edit",
   "submit": "Search"
 }

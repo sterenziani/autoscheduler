@@ -154,9 +154,7 @@ class SearchForm extends Component {
 
   render(){
     if (this.state.loading === true) {
-      return  <div className="mx-auto py-3">
-                <Spinner animation="border"/>
-              </div>
+      return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     }
     if(this.state.error) {
       return <h1>ERROR {this.state.error}</h1>
