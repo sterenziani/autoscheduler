@@ -13,7 +13,6 @@ class StudentCourseLog extends Component {
     selectedProgram: {},
     courses: [],
     courseToAdd: "",
-    coursesAdded: 0,
     loading: true,
     showAddModal: false
   }
@@ -52,11 +51,7 @@ class StudentCourseLog extends Component {
         });
       }
       else {
-        this.setState({
-          programs: data,
-          selectedProgram: data[0].id,
-          loading: false
-        });
+        this.setState({programs: data, selectedProgram: this.state.user.program.id});
         this.loadCourses(data[0].id)
       }
     });
@@ -87,12 +82,11 @@ class StudentCourseLog extends Component {
   }
 
   switchAddModal(){
-    this.setState({showAddModal: !this.state.showAddModal, selectedProgram: this.state.programs[0]});
+    this.setState({showAddModal: !this.state.showAddModal});
   }
 
   onChangePrograms(e){
     var selectedProgram = e.target.value
-    this.setState({ loading: true });
     this.loadCourses(selectedProgram)
   }
 
@@ -106,7 +100,7 @@ class StudentCourseLog extends Component {
     this.setState({ loading: true, });
     ApiService.addFinishedCourse(this.state.user, this.state.courseToAdd).then((data) => {
       this.switchAddModal()
-      this.setState({ coursesAdded: this.state.coursesAdded+1, loading: false });
+      this.loadCourses(this.state.selectedProgram)
     });
   }
 
@@ -118,7 +112,7 @@ class StudentCourseLog extends Component {
     return (
       <React.Fragment>
         {
-          this.state.user? [<CourseList key={"list-"+this.state.coursesAdded} user={this.state.user}/>] : []
+          this.state.user? [<CourseList key={"list"} user={this.state.user}/>] : []
         }
         {
           this.state.programs? [

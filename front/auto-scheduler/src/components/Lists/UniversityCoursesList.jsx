@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import {Translation} from "react-i18next";
-import {Button, Modal} from 'react-bootstrap';
 import CourseList from './CourseList'
 
 class StudentCoursesList extends Component {

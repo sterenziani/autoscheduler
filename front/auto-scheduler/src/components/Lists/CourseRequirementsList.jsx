@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import {Button, Modal, Spinner, Row} from 'react-bootstrap';
+import {Spinner, Row} from 'react-bootstrap';
 import {Translation} from "react-i18next";
-import ApiService from '../services/ApiService';
-import LinkButton from './LinkButton'
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import ApiService from '../../services/ApiService';
+import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import LinkButton from '../LinkButton'
 
-class CourseList extends Component {
+class CourseRequirementsList extends Component {
   state = {
     loading: true,
     error: false,
@@ -77,4 +77,4 @@ class CourseList extends Component {
   }
 }
 
-export default CourseList;
+export default CourseRequirementsList;

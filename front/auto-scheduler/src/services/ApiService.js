@@ -209,6 +209,12 @@ const getRequiredCourses = (courseId) =>
     setTimeout(() => resolve(course), RESOLVE_DELAY);
   });
 
+const getCourseClassesForTerm = (courseId, termId) =>
+  new Promise((resolve, reject) => {
+    const availableClasses = SgaConstants.courseClasses[termId].filter(com => com.course === courseId);
+    setTimeout(() => resolve(availableClasses), RESOLVE_DELAY);
+  });
+
 const getPrograms = (universityId) =>
   new Promise((resolve, reject) => {
     let programs = SgaConstants.programs
@@ -285,6 +291,13 @@ const deleteBuilding = (building) =>
     setTimeout(() => resolve(buildings), RESOLVE_DELAY);
   });
 
+const deleteCourseClass = (courseClass) =>
+  new Promise((resolve, reject) => {
+    let classes = SgaConstants.courseClasses
+    Object.values(classes).forEach(termClasses => termClasses.splice(termClasses.indexOf(courseClass), 1))
+    setTimeout(() => resolve(classes), RESOLVE_DELAY);
+  });
+
 const deleteTerm = (term) =>
   new Promise((resolve, reject) => {
     let terms = SgaConstants.terms
@@ -324,6 +337,7 @@ const ApiService = {
   getFinishedCourses: getFinishedCourses,
   getCourse: getCourse,
   getRequiredCourses: getRequiredCourses,
+  getCourseClassesForTerm: getCourseClassesForTerm,
   addFinishedCourse: addFinishedCourse,
   deleteFinishedCourse: deleteFinishedCourse,
   deleteProgram: deleteProgram,
@@ -331,6 +345,7 @@ const ApiService = {
   deleteCourse: deleteCourse,
   deleteBuilding: deleteBuilding,
   deleteTerm: deleteTerm,
+  deleteCourseClass: deleteCourseClass,
   publishTerm: publishTerm,
   unpublishTerm: unpublishTerm
 };

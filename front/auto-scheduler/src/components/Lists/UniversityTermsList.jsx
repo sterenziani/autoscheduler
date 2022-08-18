@@ -116,7 +116,7 @@ class UniversityTermsList extends Component {
           <Modal.Header closeButton>
             <Modal.Title><Translation>{t => t("modal.deleteTerm")}</Translation></Modal.Title>
           </Modal.Header>
-          <Modal.Body><Translation>{t => t("modal.areYouSure", {code:this.state.termToDelete.internalId, name:this.state.termToDelete.name})}</Translation></Modal.Body>
+          <Modal.Body><Translation>{t => t("modal.areYouSureTerm", {code:this.state.termToDelete.internalId, name:this.state.termToDelete.name})}</Translation></Modal.Body>
           <Modal.Footer>
             <Button variant="grey" onClick={() => {this.switchDeleteModal()}}>
               <Translation>{t => t("modal.cancel")}</Translation>

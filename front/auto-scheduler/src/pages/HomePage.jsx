@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import {Tabs, Tab, Spinner} from 'react-bootstrap';
-import {Translation} from "react-i18next";
+import {Spinner} from 'react-bootstrap';
 import HomePageUniversity from '../components/HomePageUniversity'
 import HomePageStudent from '../components/HomePageStudent'
 import ApiService from '../services/ApiService';
@@ -39,10 +38,10 @@ class HomePage extends Component {
           <Helmet><title>AutoScheduler</title></Helmet>
         </HelmetProvider>
         {
-          (this.state.user && this.state.user.type=="student" && <HomePageStudent/>)
+          (this.state.user && this.state.user.type==="student" && <HomePageStudent/>)
         }
         {
-          (this.state.user && this.state.user.type=="university" && <HomePageUniversity user={this.state.user}/>)
+          (this.state.user && this.state.user.type==="university" && <HomePageUniversity user={this.state.user}/>)
         }
       </React.Fragment>
     );

@@ -40,7 +40,7 @@ var informaticaCourses = [
     requirements: ['72.31']
   },
   {
-    id: '72.32', internalId: '72.32', name: 'Programación Orientada a Objetos',
+    id: '72.33', internalId: '72.33', name: 'Programación Orientada a Objetos',
     requirements: ['72.31']
   },
   {
@@ -71,157 +71,254 @@ var informaticaCourses = [
 
 var courseClasses2022A = [
   {
-    course: '12.09', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '12.09', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[5], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '72.03', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '72.03', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[1], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '94.24', term: '2022-1Q', courseClass: 'A',
+    id: 1, course: '94.24', term: '2022-1Q', courseClass: 'A',
     lectures: [{day: DAYS[1], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '94.24', term: '2022-1Q', courseClass: 'B',
+    id: 1, course: '94.24', term: '2022-1Q', courseClass: 'B',
     lectures: [{day: DAYS[3], startTime:"11:00", endTime:"14:00", building:"Madero"}]
   },
   {
-    course: '94.24', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '94.24', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[1], startTime:"14:00", endTime:"17:00", building:"Madero"}]
   },
   {
-    course: '31.08', term: '2022-1Q', courseClass: 'A',
+    id: 1, course: '31.08', term: '2022-1Q', courseClass: 'A',
     lectures: [{day: DAYS[2], startTime:"11:00", endTime:"14:00", building:"Madero"}]
   },
   {
-    course: '31.08', term: '2022-1Q', courseClass: 'B',
+    id: 1, course: '31.08', term: '2022-1Q', courseClass: 'B',
     lectures: [{day: DAYS[2], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '31.08', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '31.08', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[3], startTime:"14:00", endTime:"17:00", building:"Madero"}]
   },
   {
-    course: '31.08', term: '2022-1Q', courseClass: 'K',
+    id: 1, course: '31.08', term: '2022-1Q', courseClass: 'K',
     lectures: [{day: DAYS[4], startTime:"14:00", endTime:"17:00", building:"Madero"}]
   },
   {
-    course: '72.32', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '72.32', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '72.33', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '72.33', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[3], startTime:"14:00", endTime:"17:00", building:"Madero"},
                 {day: DAYS[4], startTime:"18:00", endTime:"21:00", building:"Madero"}]
   },
   {
-    course: '93.26', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '93.26', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"},
                 {day: DAYS[5], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '93.58', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '93.58', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[2], startTime:"09:00", endTime:"13:00", building:"Madero"},
                 {day: DAYS[4], startTime:"11:00", endTime:"14:00", building:"Madero"},
                 {day: DAYS[5], startTime:"14:00", endTime:"16:00", building:"Madero"}]
   },
   {
-    course: '72.31', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '72.31', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[2], startTime:"18:00", endTime:"19:30", building:"Madero"},
                 {day: DAYS[3], startTime:"08:30", endTime:"10:00", building:"Madero"},
                 {day: DAYS[5], startTime:"09:00", endTime:"11:00", building:"Madero"},
                 {day: DAYS[5], startTime:"14:00", endTime:"18:00", building:"Madero"}]
   },
   {
-    course: '93.28', term: '2022-1Q', courseClass: 'S1',
+    id: 1, course: '93.28', term: '2022-1Q', courseClass: 'S1',
     lectures: [{day: DAYS[1], startTime:"12:00", endTime:"14:00", building:"Madero"},
                 {day: DAYS[2], startTime:"13:00", endTime:"15:00", building:"Madero"},
                 {day: DAYS[4], startTime:"12:00", endTime:"14:00", building:"Madero"}]
   },
   {
-    course: '93.28', term: '2022-1Q', courseClass: 'S2',
+    id: 1, course: '93.28', term: '2022-1Q', courseClass: 'S2',
     lectures: [{day: DAYS[1], startTime:"12:00", endTime:"14:00", building:"Madero"},
                 {day: DAYS[2], startTime:"13:00", endTime:"15:00", building:"Madero"},
                 {day: DAYS[4], startTime:"15:00", endTime:"17:00", building:"Madero"}]
   },
   {
-    course: '93.41', term: '2022-1Q', courseClass: 'A',
+    id: 1, course: '93.41', term: '2022-1Q', courseClass: 'A',
     lectures: [{day: DAYS[1], startTime:"14:00", endTime:"16:00", building:"Madero"},
                 {day: DAYS[2], startTime:"08:00", endTime:"10:00", building:"Madero"},
                 {day: DAYS[3], startTime:"10:00", endTime:"12:00", building:"Madero"}]
   },
   {
-    course: '93.41', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '93.41', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[1], startTime:"16:00", endTime:"18:00", building:"Madero"},
                 {day: DAYS[2], startTime:"16:00", endTime:"18:00", building:"Madero"},
                 {day: DAYS[3], startTime:"16:00", endTime:"18:00", building:"Madero"}]
   },
   {
-    course: '93.59', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '93.59', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[1], startTime:"08:00", endTime:"11:00", building:"Madero"},
                 {day: DAYS[2], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '93.35', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '93.35', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[1], startTime:"11:00", endTime:"13:00", building:"Madero"},
                 {day: DAYS[2], startTime:"09:00", endTime:"11:00", building:"Madero"},
                 {day: DAYS[2], startTime:"14:00", endTime:"16:00", building:"Madero"}]
   },
   {
-    course: '93.35', term: '2022-1Q', courseClass: 'S1',
+    id: 1, course: '93.35', term: '2022-1Q', courseClass: 'S1',
     lectures: [{day: DAYS[1], startTime:"14:00", endTime:"16:00", building:"Madero"},
                 {day: DAYS[2], startTime:"09:00", endTime:"11:00", building:"Madero"},
                 {day: DAYS[2], startTime:"14:00", endTime:"16:00", building:"Madero"}]
   },
   {
-    course: '93.42', term: '2022-1Q', courseClass: 'A',
+    id: 1, course: '93.42', term: '2022-1Q', courseClass: 'A',
     lectures: [{day: DAYS[1], startTime:"11:00", endTime:"13:00", building:"Madero"},
                 {day: DAYS[2], startTime:"08:00", endTime:"12:00", building:"Madero"}]
   },
   {
-    course: '93.42', term: '2022-1Q', courseClass: 'B',
+    id: 1, course: '93.42', term: '2022-1Q', courseClass: 'B',
     lectures: [{day: DAYS[3], startTime:"11:00", endTime:"15:00", building:"Madero"},
                 {day: DAYS[4], startTime:"08:00", endTime:"10:00", building:"Madero"}]
   },
   {
-    course: '93.42', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '93.42', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[2], startTime:"12:00", endTime:"14:00", building:"Madero"},
                 {day: DAYS[4], startTime:"08:00", endTime:"12:00", building:"Madero"}]
   },
   {
-    course: '72.08', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '72.08', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[1], startTime:"16:00", endTime:"19:00", building:"Madero"},
                 {day: DAYS[3], startTime:"16:00", endTime:"19:00", building:"Madero"}]
   },
   {
-    course: '72.34', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '72.34', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[1], startTime:"08:00", endTime:"11:00", building:"Madero"},
                 {day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"}]
   },
   {
-    course: '93.24', term: '2022-1Q', courseClass: 'SKE',
+    id: 1, course: '93.24', term: '2022-1Q', courseClass: 'SKE',
     lectures: [{day: DAYS[1], startTime:"11:00", endTime:"13:00", building:"Madero"},
                 {day: DAYS[2], startTime:"11:00", endTime:"13:00", building:"Madero"},
                 {day: DAYS[4], startTime:"11:00", endTime:"13:00", building:"Madero"}]
   },
   {
-    course: '93.43', term: '2022-1Q', courseClass: 'A',
+    id: 1, course: '93.43', term: '2022-1Q', courseClass: 'A',
     lectures: [{day: DAYS[3], startTime:"09:00", endTime:"13:00", building:"Madero"},
                 {day: DAYS[4], startTime:"16:00", endTime:"18:00", building:"Madero"}]
   },
   {
-    course: '93.43', term: '2022-1Q', courseClass: 'D',
+    id: 1, course: '93.43', term: '2022-1Q', courseClass: 'D',
     lectures: [{day: DAYS[3], startTime:"10:00", endTime:"12:00", building:"Madero"},
                 {day: DAYS[4], startTime:"17:00", endTime:"19:00", building:"Madero"},
                 {day: DAYS[5], startTime:"11:00", endTime:"13:00", building:"Madero"}]
   },
   {
-    course: '93.43', term: '2022-1Q', courseClass: 'S',
+    id: 1, course: '93.43', term: '2022-1Q', courseClass: 'S',
     lectures: [{day: DAYS[4], startTime:"14:00", endTime:"18:00", building:"Madero"},
                 {day: DAYS[5], startTime:"14:00", endTime:"16:00", building:"Madero"}]
   },
 ]
+
+var courseClasses2021B = [
+  {
+    id: 1, course: '12.09', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[5], startTime:"08:00", endTime:"11:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '72.03', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[1], startTime:"08:00", endTime:"11:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '94.24', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[1], startTime:"14:00", endTime:"17:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '31.08', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[3], startTime:"14:00", endTime:"17:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '72.32', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '72.33', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[3], startTime:"14:00", endTime:"17:00", building:"Madero"},
+                {day: DAYS[4], startTime:"18:00", endTime:"21:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.26', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"},
+                {day: DAYS[5], startTime:"08:00", endTime:"11:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.58', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[2], startTime:"09:00", endTime:"13:00", building:"Madero"},
+                {day: DAYS[4], startTime:"11:00", endTime:"14:00", building:"Madero"},
+                {day: DAYS[5], startTime:"14:00", endTime:"16:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '72.31', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[2], startTime:"18:00", endTime:"19:30", building:"Madero"},
+                {day: DAYS[3], startTime:"08:30", endTime:"10:00", building:"Madero"},
+                {day: DAYS[5], startTime:"09:00", endTime:"11:00", building:"Madero"},
+                {day: DAYS[5], startTime:"14:00", endTime:"18:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.28', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[2], startTime:"12:00", endTime:"14:00", building:"Madero"},
+                {day: DAYS[3], startTime:"13:00", endTime:"15:00", building:"Madero"},
+                {day: DAYS[4], startTime:"12:00", endTime:"14:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.41', term: '2022-1Q', courseClass: 'A',
+    lectures: [{day: DAYS[1], startTime:"14:00", endTime:"16:00", building:"Madero"},
+                {day: DAYS[2], startTime:"08:00", endTime:"10:00", building:"Madero"},
+                {day: DAYS[3], startTime:"10:00", endTime:"12:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.59', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[1], startTime:"08:00", endTime:"11:00", building:"Madero"},
+                {day: DAYS[2], startTime:"08:00", endTime:"11:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.35', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[1], startTime:"11:00", endTime:"13:00", building:"Madero"},
+                {day: DAYS[2], startTime:"09:00", endTime:"11:00", building:"Madero"},
+                {day: DAYS[2], startTime:"14:00", endTime:"16:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.42', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[2], startTime:"12:00", endTime:"14:00", building:"Madero"},
+                {day: DAYS[4], startTime:"08:00", endTime:"12:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '72.08', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[1], startTime:"16:00", endTime:"19:00", building:"Madero"},
+                {day: DAYS[3], startTime:"16:00", endTime:"19:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '72.34', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[1], startTime:"08:00", endTime:"11:00", building:"Madero"},
+                {day: DAYS[3], startTime:"08:00", endTime:"11:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.24', term: '2022-1Q', courseClass: 'SKE',
+    lectures: [{day: DAYS[1], startTime:"11:00", endTime:"13:00", building:"Madero"},
+                {day: DAYS[2], startTime:"11:00", endTime:"13:00", building:"Madero"},
+                {day: DAYS[4], startTime:"11:00", endTime:"13:00", building:"Madero"}]
+  },
+  {
+    id: 1, course: '93.43', term: '2022-1Q', courseClass: 'S',
+    lectures: [{day: DAYS[4], startTime:"14:00", endTime:"18:00", building:"Madero"},
+                {day: DAYS[5], startTime:"14:00", endTime:"16:00", building:"Madero"}]
+  },
+]
+
+var courseClasses = {6: courseClasses2021B, 5: courseClasses2022A, 7: []}
 
 var finishedCourses = [
   {
@@ -243,11 +340,7 @@ var finishedCourses = [
 ]
 
 var remainingCourses = [
-                [
-                  {"id": "72.03", "internalId": "72.03", "name": "Introducción a la Informática"},
-                  {"id": "93.58", "internalId": "93.58", "name": "Algebra"},
-                  {"id": "72.31", "internalId": "72.31", "name": "Programación Imperativa", "requirements": ["93.58", "72.03"]}
-                ],
+                informaticaCourses,
                 [
                   {"id": "93.99", "internalId": "93.99", "name": "Algebra Lineal"}
                 ],
@@ -255,16 +348,16 @@ var remainingCourses = [
               ]
 
 var terms = [
-              { "id": 1, "internalId": "2021-2Q", "name": "2° Cuatrimestre 2021", "startDate": "2021-08-01", "published": true},
-              { "id": 2, "internalId": "2022-1Q", "name": "1° Cuatrimestre 2022", "startDate": "2022-03-01", "published": true},
-              { "id": 3, "internalId": "2022-2Q", "name": "2° Cuatrimestre 2022", "startDate": "2022-08-01", "published": false}
+              { "id": 6, "internalId": "2021-2Q", "name": "2° Cuatrimestre 2021", "startDate": "2021-08-01", "published": true},
+              { "id": 5, "internalId": "2022-1Q", "name": "1° Cuatrimestre 2022", "startDate": "2022-03-01", "published": true},
+              { "id": 7, "internalId": "2022-2Q", "name": "2° Cuatrimestre 2022", "startDate": "2022-08-01", "published": false}
             ]
 
 var programs = [
                 [], [], [], [], [], [], [], [], [],
                 [
-                  { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
                   { "id": 2, "internalId": "I22", "name": "Ingeniería Industrial"},
+                  { "id": 1, "internalId": "S10", "name": "Ingeniería Informática"},
                   { "id": 3, "internalId": "I13", "name": "Ingeniería Industrial"}
                 ],
                 [], [], [], [], [], [], [], [], [], [], []
@@ -314,6 +407,7 @@ var buildings = [
 const SgaConstants = {
   informaticaCourses: informaticaCourses,
   courseClasses2022A: courseClasses2022A,
+  courseClasses: courseClasses,
   finishedCourses: finishedCourses,
   remainingCourses: remainingCourses,
   programs: programs,

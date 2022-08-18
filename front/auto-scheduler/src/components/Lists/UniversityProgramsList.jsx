@@ -82,7 +82,7 @@ class UniversityProgramsList extends Component {
           <Modal.Header closeButton>
             <Modal.Title><Translation>{t => t("modal.deleteProgram")}</Translation></Modal.Title>
           </Modal.Header>
-          <Modal.Body><Translation>{t => t("modal.areYouSure", {code:this.state.programToDelete.internalId, name:this.state.programToDelete.name})}</Translation></Modal.Body>
+          <Modal.Body><Translation>{t => t("modal.areYouSureProgram", {code:this.state.programToDelete.internalId, name:this.state.programToDelete.name})}</Translation></Modal.Body>
           <Modal.Footer>
             <Button variant="grey" onClick={() => {this.switchDeleteModal()}}>
               <Translation>{t => t("modal.cancel")}</Translation>

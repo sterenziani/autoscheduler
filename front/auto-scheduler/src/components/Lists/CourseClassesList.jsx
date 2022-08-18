@@ -4,53 +4,57 @@ import {Translation} from "react-i18next";
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
 
-class UniversityBuildingsList extends Component {
+class CourseClassesList extends Component {
   state = {
     loading: true,
     error: false,
-    showDeleteModal: false,
     user: this.props.user,
-    buildings: null
+    course: this.props.course,
+    term: this.props.term,
+    termClasses: null,
+    courseClassToDelete: null,
+    showDeleteModal: false
   }
 
   componentDidMount() {
-    this.loadBuildings()
+    this.loadClasses()
   }
 
-  loadBuildings(){
-    ApiService.getBuildings(this.state.user.id).then((data) => {
+  loadClasses(){
+    ApiService.getCourseClassesForTerm(this.state.course.id, this.state.term.id).then((data) => {
       let findError = null;
       if (data && data.status && data.status !== OK && data.status !== CREATED)
         findError = data.status;
       if(findError)
         this.setState({loading: false, error: true, status: findError});
       else
-        this.setState({buildings: data, loading: false});
+        this.setState({termClasses: data, loading: false});
     });
   }
 
   redirectToEdit(id){
-    console.log("Redirect to /buildings/"+id)
+    console.log("Redirect to /classes/"+id)
   }
 
   redirectToCreate(){
-    console.log("Redirect to /buildings/new")
+    console.log("Redirect to /classes/new")
   }
 
-  deleteBuilding(){
-    if(!this.state.buildingToDelete)
+  deleteCourseClass(){
+    if(!this.state.courseClassToDelete)
       return;
-    ApiService.deleteBuilding(this.state.buildingToDelete)
-    let buildingsCopy = Object.assign({}, this.state).buildings;
-    this.setState({buildings: buildingsCopy, showDeleteModal: !this.state.showDeleteModal, buildingToDelete: {}});
+    ApiService.deleteCourseClass(this.state.courseClassToDelete)
+    let courseClasssCopy = Object.assign({}, this.state).courseClasss;
+    this.setState({courseClasss: courseClasssCopy, showDeleteModal: !this.state.showDeleteModal, courseClassToDelete: {}});
+    this.loadClasses()
   }
 
   switchDeleteModal(){
-    this.setState({showDeleteModal: !this.state.showDeleteModal, buildingToDelete: {}});
+    this.setState({showDeleteModal: !this.state.showDeleteModal, courseClassToDelete: {}});
   }
 
   switchDeleteModalParam(e){
-    this.setState({showDeleteModal: !this.state.showDeleteModal, buildingToDelete: e});
+    this.setState({showDeleteModal: !this.state.showDeleteModal, courseClassToDelete: e});
   }
 
   render(){
@@ -61,17 +65,17 @@ class UniversityBuildingsList extends Component {
     return (
       <React.Fragment>
         <div className="pt-4">
-          { this.state.buildings && this.state.buildings.length>0?
+          { this.state.termClasses && this.state.termClasses.length>0?
             [
-              <div key="buildings-list" className="my-3 container">
+              <div key="courseClasss-list" className="my-3 container">
                 <Row xs={1} md={2} lg={3} className="g-4 m-auto justify-content-center">
                 {
-                  this.state.buildings.map((entry,index) => (
+                  this.state.termClasses.map((entry,index) => (
                     <Card key={"card-"+index} className="m-3 p-0">
                       <Card.Header className="bg-white text-primary text-start py-0 pe-0 me-0">
                         <div className="d-flex ms-1">
                           <div className="text-start my-auto me-auto">
-                            <Card.Title className="m-0 h6">{entry.internalId+" - "+entry.name}</Card.Title>
+                            <Card.Title className="m-0 h6">{entry.courseClass}</Card.Title>
                           </div>
                           <div className="d-flex my-auto text-center">
                             <i className="bi bi-pencil-fill btn btn-lg" id={"edit-"+index} onClick={() => {this.redirectToEdit(entry.id)}}></i>
@@ -81,10 +85,9 @@ class UniversityBuildingsList extends Component {
                       </Card.Header>
                       <Card.Body className="bg-grey text-black">
                       {
-                        entry.distances.map((b, bidx) => (
-                          <Row key={"row-"+index+"-"+bidx}>
-                            <Col className="text-end">{b.building.name}</Col>
-                            <Col className="text-start"><Translation>{t => t("minutes", {"minutes": b.time})}</Translation></Col>
+                        entry.lectures.map((l, lidx) => (
+                          <Row key={"row-"+index+"-"+lidx}>
+                            <Col className="text-start"><b><Translation>{t => t("days."+l.day)}</Translation>:</b> {l.startTime}-{l.endTime} ({l.building})</Col>
                           </Row>
                         ))
                       }
@@ -102,14 +105,14 @@ class UniversityBuildingsList extends Component {
         </div>
         <Modal show={this.state.showDeleteModal} onHide={() => this.switchDeleteModal()} className="color-warning text-black">
           <Modal.Header closeButton>
-            <Modal.Title><Translation>{t => t("modal.deleteBuilding")}</Translation></Modal.Title>
+            <Modal.Title><Translation>{t => t("modal.deleteCourseClass")}</Translation></Modal.Title>
           </Modal.Header>
-          <Modal.Body><Translation>{t => t("modal.areYouSureBuilding", {code:this.state.buildingToDelete.internalId, name:this.state.buildingToDelete.name})}</Translation></Modal.Body>
+          <Modal.Body><Translation>{t => t("modal.areYouSureClass", {code:this.state.course.internalId, name:this.state.course.name, class:this.state.courseClassToDelete.courseClass, term:this.state.term.name})}</Translation></Modal.Body>
           <Modal.Footer>
             <Button variant="grey" onClick={() => {this.switchDeleteModal()}}>
               <Translation>{t => t("modal.cancel")}</Translation>
             </Button>
-            <Button variant="danger" onClick={() => {this.deleteBuilding(this.state.buildingToDelete)}}>
+            <Button variant="danger" onClick={() => {this.deleteCourseClass(this.state.courseClassToDelete)}}>
               <Translation>{t => t("modal.delete")}</Translation>
             </Button>
           </Modal.Footer>
@@ -119,4 +122,4 @@ class UniversityBuildingsList extends Component {
   }
 }
 
-export default UniversityBuildingsList;
+export default CourseClassesList;

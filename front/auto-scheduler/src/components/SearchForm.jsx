@@ -169,7 +169,7 @@ class SearchForm extends Component {
                 </Form.Label>
               </div>
               <div className="col-8 text-center">
-                <Form.Select aria-label="Default select example" value={this.state.params.program} onChange={this.onChangePrograms.bind(this)}>
+                <Form.Select value={this.state.params.program} onChange={this.onChangePrograms.bind(this)}>
                   { this.state.programs.map(p => (<option key={p.id} value={p.id}>{p.internalId+" - "+p.name}</option>)) }
                 </Form.Select>
               </div>
@@ -182,7 +182,7 @@ class SearchForm extends Component {
                 </Form.Label>
               </div>
               <div className="col-8 text-center">
-                <Form.Select aria-label="Default select example" value={this.state.params.term} onChange={this.onChangeTerms.bind(this)}>
+                <Form.Select value={this.state.params.term} onChange={this.onChangeTerms.bind(this)}>
                   { this.state.terms.map(p => (<option key={p.id} value={p.id}>{p.name}</option>)) }
                 </Form.Select>
               </div>
