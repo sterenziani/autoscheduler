@@ -1,122 +1,122 @@
 {
-  "register":{
-    "email":"Email",
-    "password": "Password",
-    "repeatPassword": "Repeat password",
-    "name":"Name",
-    "school":"School",
-    "program":"Program",
-    "pleaseContact": "After registering your account, please contact us at {{email}} with proof so we can review your application and add you to our list of schools.",
-    "submit": "Create account",
-    "placeholders": {
-      "emailStudent": "student@university.edu",
-      "emailUniversity": "dean@university.edu",
-      "email": "example@university.com",
-      "password": "",
-      "name": "AutoScheduler University"
+    "register": {
+        "email": "Email",
+        "password": "Password",
+        "repeatPassword": "Repeat password",
+        "name": "Name",
+        "school": "School",
+        "program": "Program",
+        "pleaseContact": "After registering your account, please contact us at {{email}} with proof so we can review your application and add you to our list of schools.",
+        "submit": "Create account",
+        "placeholders": {
+            "emailStudent": "student@university.edu",
+            "emailUniversity": "dean@university.edu",
+            "email": "example@university.com",
+            "password": "",
+            "name": "AutoScheduler University"
+        },
+        "errors": {
+            "badConnection": "Could not connect. Check your internet connection and try again.",
+            "email": {
+                "maxLength": "Your email address must not exceed 100 characters.",
+                "invalidEmail": "Please introduce a valid email address.",
+                "isRequired": "This field is required."
+            },
+            "password": {
+                "requiredLength": "Your password must contain at least 6 characters.",
+                "maxLength": "Your password must not exceed 100 characters.",
+                "isRequired": "This field is required."
+            },
+            "repeatPassword": {
+                "isRequired": "Please reenter your password.",
+                "passwordsMismatch": "Passwords don't match."
+            },
+            "name": {
+                "requiredLength": "Your school's name must contain at least 4 characters.",
+                "maxLength": "Your school's name must not exceed 100 characters.",
+                "isRequired": "This field is required."
+            },
+            "school": {
+                "programNotSelected": "Please select the school and program you are enrolled in."
+            }
+        }
     },
-    "errors": {
-      "badConnection": "Could not connect. Check your internet connection and try again.",
-      "email":{
-        "maxLength": "Your email address must not exceed 100 characters.",
-        "invalidEmail": "Please introduce a valid email address.",
-        "isRequired": "This field is required."
-      },
-      "password":{
-        "requiredLength": "Your password must contain at least 6 characters.",
-        "maxLength": "Your password must not exceed 100 characters.",
-        "isRequired": "This field is required."
-      },
-      "repeatPassword":{
-        "isRequired": "Please reenter your password.",
-        "passwordsMismatch": "Passwords don't match."
-      },
-      "name":{
-        "requiredLength": "Your school's name must contain at least 4 characters.",
-        "maxLength": "Your school's name must not exceed 100 characters.",
-        "isRequired": "This field is required."
-      },
-      "school":{
-        "programNotSelected": "Please select the school and program you are enrolled in."
-      }
-    }
-  },
-  "login":{
-    "submit": "Sign In",
-    "forgotPassword": "Forgot your password?",
-    "recoverPasswordDescription": "Type in your email address and we'll help you recover your account.",
-    "emailSent": "An email has been sent to your inbox with instructions on what to do next. The message may take a while to deliver.",
-    "emailNotFound": "The provided email address is not associated to any AutoScheduler account.",
-    "errors":{
-      "loginFailed": "Incorrect email and/or password.",
-      "externalLoginFailed": "Failed to log you in automatically, please log in manually.",
-      "badConnection": "Could not connect. Check your internet connection and try again."
-    }
-  },
-  "tabs":{
-    "courseLog": "COURSE LOG",
-    "findSchedule": "FIND A SCHEDULE",
-    "iAmStudent": "REGISTER AS A STUDENT",
-    "iAmUniversty": "REGISTER AS A UNIVERSITY",
-    "login": "Sign In",
-    "programs": "PROGRAMS",
-    "terms": "TERMS",
-    "courses": "COURSES",
-    "buildings": "BUILDINGS",
-    "requiredCourses": "REQUIRED COURSES",
-    "courseClasses": "CLASSES"
-  },
-  "modal":{
-    "deleteCourse":"Deleting course",
-    "deleteProgram": "Deleting program",
-    "deleteCourseClass":"Deleting class",
-    "deleteBuilding":"Deleting building",
-    "deleteTerm":"Deleting term",
-    "addCourse":"Adding course",
-    "areYouSureCourse":"Are you sure you want to delete course '{{code}} - {{name}}'?",
-    "areYouSureProgram":"Are you sure you want to delete the program '{{code}} - {{name}}'?",
-    "areYouSureClass":"Are you sure you want to delete class {{class}} for course '{{code}} - {{name}}' in term {{term}}?",
-    "areYouSureBuilding":"Are you sure you want to delete the building '{{code}} - {{name}}'?",
-    "areYouSureTerm":"Are you sure you want to delete the term '{{code}} - {{name}}'?",
-    "noRemainingCourses":"This plan has no remaining courses available",
-    "cancel":"Cancel",
-    "delete":"Delete",
-    "add":"Add",
-    "send": "Send"
-  },
-  "search":{
-    "program":"Program",
-    "term":"Term",
-    "hoursPerWeek":"Weekly hours",
-    "prioritizeUnlocks":"Prioritize unlockables",
-    "reduceDays":"Reduce days",
-    "unavailableSlots":"Timeslots to avoid"
-  },
-  "days":{
-    "M":"Monday",
-    "T":"Tuesday",
-    "W":"Wednesday",
-    "TH":"Thursday",
-    "F":"Friday",
-    "SAT":"Saturday",
-    "SUN":"Sunday"
-  },
-  "results":{
-    "scheduleNumber": "Schedule #{{value}}",
-    "recap": "{{days}} days, {{hours}} hours total",
-    "timeRange": "Lectures range from {{earliest}} to {{latest}}",
-    "newSearch": "Try a different search"
-  },
-  "home": {
-    "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with this school so we can verify the account and add your school to our list."
-  },
-  "terms":{
-    "hide": "Hide",
-    "publish": "Publish"
-  },
-  "emptyList": "No items in this list.",
-  "noRequiredCourses": "This course can be taken at any point.",
-  "minutes": "{{minutes}} mins",
-  "edit": "Edit",
-  "submit": "Search"
+    "login": {
+        "submit": "Sign In",
+        "forgotPassword": "Forgot your password?",
+        "recoverPasswordDescription": "Type in your email address and we'll help you recover your account.",
+        "emailSent": "An email has been sent to your inbox with instructions on what to do next. The message may take a while to deliver.",
+        "emailNotFound": "The provided email address is not associated to any AutoScheduler account.",
+        "errors": {
+            "loginFailed": "Incorrect email and/or password.",
+            "externalLoginFailed": "Failed to log you in automatically, please log in manually.",
+            "badConnection": "Could not connect. Check your internet connection and try again."
+        }
+    },
+    "tabs": {
+        "courseLog": "COURSE LOG",
+        "findSchedule": "FIND A SCHEDULE",
+        "iAmStudent": "REGISTER AS A STUDENT",
+        "iAmUniversty": "REGISTER AS A UNIVERSITY",
+        "login": "Sign In",
+        "programs": "PROGRAMS",
+        "terms": "TERMS",
+        "courses": "COURSES",
+        "buildings": "BUILDINGS",
+        "requiredCourses": "REQUIRED COURSES",
+        "courseClasses": "CLASSES"
+    },
+    "modal": {
+        "deleteCourse": "Deleting course",
+        "deleteProgram": "Deleting program",
+        "deleteCourseClass": "Deleting class",
+        "deleteBuilding": "Deleting building",
+        "deleteTerm": "Deleting term",
+        "addCourse": "Adding course",
+        "areYouSureCourse": "Are you sure you want to delete course '{{code}} - {{name}}'?",
+        "areYouSureProgram": "Are you sure you want to delete the program '{{code}} - {{name}}'?",
+        "areYouSureClass": "Are you sure you want to delete class {{class}} for course '{{code}} - {{name}}' in term {{term}}?",
+        "areYouSureBuilding": "Are you sure you want to delete the building '{{code}} - {{name}}'?",
+        "areYouSureTerm": "Are you sure you want to delete the term '{{code}} - {{name}}'?",
+        "noRemainingCourses": "This plan has no remaining courses available",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "add": "Add",
+        "send": "Send"
+    },
+    "search": {
+        "program": "Program",
+        "term": "Term",
+        "hoursPerWeek": "Weekly hours",
+        "prioritizeUnlocks": "Prioritize unlockables",
+        "reduceDays": "Reduce days",
+        "unavailableSlots": "Timeslots to avoid"
+    },
+    "days": {
+        "M": "Monday",
+        "T": "Tuesday",
+        "W": "Wednesday",
+        "TH": "Thursday",
+        "F": "Friday",
+        "SAT": "Saturday",
+        "SUN": "Sunday"
+    },
+    "results": {
+        "scheduleNumber": "Schedule #{{value}}",
+        "recap": "{{days}} days, {{hours}} hours total",
+        "timeRange": "Lectures range from {{earliest}} to {{latest}}",
+        "newSearch": "Try a different search"
+    },
+    "home": {
+        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with this school so we can verify the account and add your school to our list."
+    },
+    "terms": {
+        "hide": "Hide",
+        "publish": "Publish"
+    },
+    "emptyList": "No items in this list.",
+    "noRequiredCourses": "This course can be taken at any point.",
+    "minutes": "{{minutes}} mins",
+    "edit": "Edit",
+    "submit": "Search"
 }

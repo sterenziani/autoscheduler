@@ -1,6 +1,6 @@
 import React from 'react';
-import {Button as BootstrapButton} from 'react-bootstrap';
-import {LinkContainer} from 'react-router-bootstrap';
+import { Button as BootstrapButton } from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
 import { Translation } from 'react-i18next';
 
 /*
@@ -18,16 +18,21 @@ import { Translation } from 'react-i18next';
     />
 */
 
-const LinkButton = props => {
-    const { href, text, textKey, ...other } = props
+const LinkButton = (props) => {
+    const { href, text, textKey, ...other } = props;
 
     return href ? (
         <LinkContainer to={href}>
-            <BootstrapButton { ...other }>{text ? (text) : (<Translation>{ t => t(`${textKey}`) }</Translation>)}</BootstrapButton>
+            <BootstrapButton {...other}>
+                {text ? text : <Translation>{(t) => t(`${textKey}`)}</Translation>}
+            </BootstrapButton>
         </LinkContainer>
     ) : (
-        <BootstrapButton { ...other }> {text ? (text) : (<Translation>{ t => t(`${textKey}`) }</Translation>)}</BootstrapButton>
+        <BootstrapButton {...other}>
+            {' '}
+            {text ? text : <Translation>{(t) => t(`${textKey}`)}</Translation>}
+        </BootstrapButton>
     );
-}
+};
 
 export default LinkButton;

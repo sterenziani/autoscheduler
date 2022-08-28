@@ -1,29 +1,29 @@
-import express, {Application} from 'express';
-import * as dotenv from "dotenv";
-import {HomeRoutes} from "./routes/home.routes";
+import express, { Application } from 'express';
+import * as dotenv from 'dotenv';
+import { HomeRoutes } from './routes/home.routes';
 
 class App {
-	public app: Application;
+    public app: Application;
 
-	constructor() {
-		this.app = express();
+    constructor() {
+        this.app = express();
 
-		this.setConfig();
-		this.setRoutes();
-		this.initializeErrorHandling();
-	}
+        this.setConfig();
+        this.setRoutes();
+        this.initializeErrorHandling();
+    }
 
-	private setConfig() {
-		dotenv.config();
-	}
+    private setConfig() {
+        dotenv.config();
+    }
 
-	private initializeErrorHandling() {
-		// TODO: create error handling middleware
-	}
+    private initializeErrorHandling() {
+        // TODO: create error handling middleware
+    }
 
-	private setRoutes() {
-		this.app.use('/', new HomeRoutes().router);
-	}
+    private setRoutes() {
+        this.app.use('/', new HomeRoutes().router);
+    }
 }
 
 export default new App().app;

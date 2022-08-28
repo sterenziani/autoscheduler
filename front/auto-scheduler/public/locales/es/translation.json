@@ -1,122 +1,122 @@
 {
-  "register":{
-    "email":"Email",
-    "password": "Contraseña",
-    "repeatPassword": "Repetir contraseña",
-    "name":"Nombre",
-    "school":"Instituto",
-    "program":"Carrera",
-    "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de institutos.",
-    "submit": "Crear cuenta",
-    "placeholders": {
-      "emailStudent": "alumno@university.edu",
-      "emailUniversity": "rector@university.edu",
-      "email": "example@university.com",
-      "password": "",
-      "name": "AutoScheduler University"
+    "register": {
+        "email": "Email",
+        "password": "Contraseña",
+        "repeatPassword": "Repetir contraseña",
+        "name": "Nombre",
+        "school": "Instituto",
+        "program": "Carrera",
+        "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de institutos.",
+        "submit": "Crear cuenta",
+        "placeholders": {
+            "emailStudent": "alumno@university.edu",
+            "emailUniversity": "rector@university.edu",
+            "email": "example@university.com",
+            "password": "",
+            "name": "AutoScheduler University"
+        },
+        "errors": {
+            "badConnection": "Error al conectarse. Revise su conexión a internet.",
+            "email": {
+                "maxLength": "Su email no puede contener más de 100 caracteres.",
+                "invalidEmail": "Ingrese una dirección de email válida.",
+                "isRequired": "Este campo es obligatorio."
+            },
+            "password": {
+                "requiredLength": "Su contraseña debe contener al menos 6 caracteres.",
+                "maxLength": "Su contraseña no debe exceder los 100 caracteres.",
+                "isRequired": "Este campo es obligatorio."
+            },
+            "repeatPassword": {
+                "isRequired": "Introduzca su contraseña una vez más.",
+                "passwordsMismatch": "Las contraseñas no coinciden."
+            },
+            "name": {
+                "requiredLength": "El nombre de su instituto debe contener al menos 4 caracteres.",
+                "maxLength": "El nombre de su instituto no debe exceder los 100 caracteres.",
+                "isRequired": "Este campo es obligatorio."
+            },
+            "school": {
+                "programNotSelected": "Seleccione el instituto y carrera en la que esté inscripto."
+            }
+        }
     },
-    "errors": {
-      "badConnection": "Error al conectarse. Revise su conexión a internet.",
-      "email":{
-        "maxLength": "Su email no puede contener más de 100 caracteres.",
-        "invalidEmail": "Ingrese una dirección de email válida.",
-        "isRequired": "Este campo es obligatorio."
-      },
-      "password":{
-        "requiredLength": "Su contraseña debe contener al menos 6 caracteres.",
-        "maxLength": "Su contraseña no debe exceder los 100 caracteres.",
-        "isRequired": "Este campo es obligatorio."
-      },
-      "repeatPassword":{
-        "isRequired": "Introduzca su contraseña una vez más.",
-        "passwordsMismatch": "Las contraseñas no coinciden."
-      },
-      "name":{
-        "requiredLength": "El nombre de su instituto debe contener al menos 4 caracteres.",
-        "maxLength": "El nombre de su instituto no debe exceder los 100 caracteres.",
-        "isRequired": "Este campo es obligatorio."
-      },
-      "school":{
-        "programNotSelected": "Seleccione el instituto y carrera en la que esté inscripto."
-      }
-    }
-  },
-  "login":{
-    "submit": "Iniciar Sesión",
-    "forgotPassword": "¿Olvidó su contraseña?",
-    "recoverPasswordDescription": "Ingrese su dirección de email y lo ayudaremos a recuperar su cuenta.",
-    "emailSent": "Se ha enviado un email a su casilla con instrucciones para recuperar su cuenta. El mensaje puede demorar en llegar.",
-    "emailNotFound": "La dirección de email ingresada no corresponde a ninguna cuenta de AutoScheduler.",
-    "errors":{
-      "loginFailed": "Email y/o contraseña incorrecto.",
-      "externalLoginFailed": "Ha ocurrido un error. Inicie sesión manualmente.",
-      "badConnection": "Error al conectarse. Revise su conexión a internet."
-    }
-  },
-  "tabs":{
-    "courseLog": "CURSOS APROBADOS",
-    "findSchedule": "BUSCAR CRONOGRAMAS",
-    "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
-    "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
-    "login": "Iniciar Sesión",
-    "programs": "CARRERAS",
-    "terms": "PERÍODOS",
-    "courses": "CURSOS",
-    "buildings": "SEDES",
-    "requiredCourses": "CORRELATIVAS",
-    "courseClasses": "COMISIONES"
-  },
-  "modal":{
-    "deleteCourse":"Eliminando materia",
-    "deleteProgram": "Eliminando carrera",
-    "deleteCourseClass":"Eliminando comisión",
-    "deleteBuilding":"Eliminando sede",
-    "deleteTerm":"Eliminando período",
-    "addCourse":"Añadiendo materia",
-    "areYouSureCourse":"¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?",
-    "areYouSureProgram":"¿Seguro que desea eliminar la carrera '{{code}} - {{name}}'?",
-    "areYouSureClass":"¿Seguro que desea eliminar la comisión {{class}} de la materia '{{code}} - {{name}}' del período {{term}}?",
-    "areYouSureBuilding":"¿Seguro que desea eliminar la sede '{{code}} - {{name}}'?",
-    "areYouSureTerm":"¿Seguro que desea eliminar el período '{{code}} - {{name}}'?",
-    "noRemainingCourses":"No quedan materias correspondientes a este plan",
-    "cancel":"Cancelar",
-    "delete":"Eliminar",
-    "add":"Añadir",
-    "send": "Enviar"
-  },
-  "search":{
-    "program":"Carrera",
-    "term":"Período",
-    "hoursPerWeek":"Horas semanales",
-    "prioritizeUnlocks":"Priorizar correlativas",
-    "reduceDays":"Reducir días",
-    "unavailableSlots":"Horarios a evitar"
-  },
-  "days":{
-    "M":"Lunes",
-    "T":"Martes",
-    "W":"Miércoles",
-    "TH":"Jueves",
-    "F":"Viernes",
-    "SAT":"Sábado",
-    "SUN":"Domingo"
-  },
-  "results":{
-    "scheduleNumber": "Cronograma #{{value}}",
-    "recap": "{{days}} días, {{hours}} horas en total",
-    "timeRange": "Horarios de {{earliest}} a {{latest}}",
-    "newSearch": "Realizar una nueva búsqueda"
-  },
-  "home": {
-    "getVerified": "Su instituto aún no ha sido verificado. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir el instituto a nuestra lista."
-  },
-  "terms":{
-    "hide": "Ocultar",
-    "publish": "Publicar"
-  },
-  "emptyCourseLog": "No hay elementos en esta lista.",
-  "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",
-  "minutes": "{{minutes}} mins",
-  "edit": "Editar",
-  "submit": "Buscar"
+    "login": {
+        "submit": "Iniciar Sesión",
+        "forgotPassword": "¿Olvidó su contraseña?",
+        "recoverPasswordDescription": "Ingrese su dirección de email y lo ayudaremos a recuperar su cuenta.",
+        "emailSent": "Se ha enviado un email a su casilla con instrucciones para recuperar su cuenta. El mensaje puede demorar en llegar.",
+        "emailNotFound": "La dirección de email ingresada no corresponde a ninguna cuenta de AutoScheduler.",
+        "errors": {
+            "loginFailed": "Email y/o contraseña incorrecto.",
+            "externalLoginFailed": "Ha ocurrido un error. Inicie sesión manualmente.",
+            "badConnection": "Error al conectarse. Revise su conexión a internet."
+        }
+    },
+    "tabs": {
+        "courseLog": "CURSOS APROBADOS",
+        "findSchedule": "BUSCAR CRONOGRAMAS",
+        "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
+        "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
+        "login": "Iniciar Sesión",
+        "programs": "CARRERAS",
+        "terms": "PERÍODOS",
+        "courses": "CURSOS",
+        "buildings": "SEDES",
+        "requiredCourses": "CORRELATIVAS",
+        "courseClasses": "COMISIONES"
+    },
+    "modal": {
+        "deleteCourse": "Eliminando materia",
+        "deleteProgram": "Eliminando carrera",
+        "deleteCourseClass": "Eliminando comisión",
+        "deleteBuilding": "Eliminando sede",
+        "deleteTerm": "Eliminando período",
+        "addCourse": "Añadiendo materia",
+        "areYouSureCourse": "¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?",
+        "areYouSureProgram": "¿Seguro que desea eliminar la carrera '{{code}} - {{name}}'?",
+        "areYouSureClass": "¿Seguro que desea eliminar la comisión {{class}} de la materia '{{code}} - {{name}}' del período {{term}}?",
+        "areYouSureBuilding": "¿Seguro que desea eliminar la sede '{{code}} - {{name}}'?",
+        "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'?",
+        "noRemainingCourses": "No quedan materias correspondientes a este plan",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "add": "Añadir",
+        "send": "Enviar"
+    },
+    "search": {
+        "program": "Carrera",
+        "term": "Período",
+        "hoursPerWeek": "Horas semanales",
+        "prioritizeUnlocks": "Priorizar correlativas",
+        "reduceDays": "Reducir días",
+        "unavailableSlots": "Horarios a evitar"
+    },
+    "days": {
+        "M": "Lunes",
+        "T": "Martes",
+        "W": "Miércoles",
+        "TH": "Jueves",
+        "F": "Viernes",
+        "SAT": "Sábado",
+        "SUN": "Domingo"
+    },
+    "results": {
+        "scheduleNumber": "Cronograma #{{value}}",
+        "recap": "{{days}} días, {{hours}} horas en total",
+        "timeRange": "Horarios de {{earliest}} a {{latest}}",
+        "newSearch": "Realizar una nueva búsqueda"
+    },
+    "home": {
+        "getVerified": "Su instituto aún no ha sido verificado. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir el instituto a nuestra lista."
+    },
+    "terms": {
+        "hide": "Ocultar",
+        "publish": "Publicar"
+    },
+    "emptyCourseLog": "No hay elementos en esta lista.",
+    "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",
+    "minutes": "{{minutes}} mins",
+    "edit": "Editar",
+    "submit": "Buscar"
 }
