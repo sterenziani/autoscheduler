@@ -132,7 +132,7 @@ const login = async (username, password) => {
     }
 };
 
-const requestPasswordChangeToken = async (username, password) => {
+const requestPasswordChangeToken = async (username) => {
     try {
         // Hacer algo
         return { status: CREATED };
@@ -168,13 +168,13 @@ const getSchedules = (params) =>
         availableClasses = filterUnattendableClasses(availableClasses, params.unavailableTimeSlots); // Deletes classes that conflict with busy time
         calculateDurationOfEachClass(availableClasses); // Updates classes with time spent in each
 
-        let schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays); // Returns sorted array
+        const schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays); // Returns sorted array
         setTimeout(() => resolve(schedules), RESOLVE_DELAY);
     });
 
 const getUniversities = () =>
     new Promise((resolve, reject) => {
-        let programs = [
+        const programs = [
             { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
             { id: 1, name: 'Academia para Astronautas' },
             { id: 2, name: 'Bachiller para Bochincheros' },
@@ -201,13 +201,13 @@ const getUniversities = () =>
 
 const getCourse = (courseId) =>
     new Promise((resolve, reject) => {
-        let course = SgaConstants.courses[9].find((c) => c.id === courseId);
+        const course = SgaConstants.courses[9].find((c) => c.id === courseId);
         setTimeout(() => resolve(course), RESOLVE_DELAY);
     });
 
 const getRequiredCourses = (courseId) =>
     new Promise((resolve, reject) => {
-        let course = SgaConstants.courses[9];
+        const course = SgaConstants.courses[9];
         setTimeout(() => resolve(course), RESOLVE_DELAY);
     });
 
@@ -219,38 +219,38 @@ const getCourseClassesForTerm = (courseId, termId) =>
 
 const getPrograms = (universityId) =>
     new Promise((resolve, reject) => {
-        let programs = SgaConstants.programs;
+        const programs = SgaConstants.programs;
         setTimeout(() => resolve(programs[universityId]), RESOLVE_DELAY);
     });
 
 const getCourses = (universityId) =>
     new Promise((resolve, reject) => {
-        let courses = SgaConstants.courses;
+        const courses = SgaConstants.courses;
         setTimeout(() => resolve(courses[universityId]), RESOLVE_DELAY);
     });
 
 const getTerms = (universityId) =>
     new Promise((resolve, reject) => {
-        let terms = SgaConstants.terms;
+        const terms = SgaConstants.terms;
         setTimeout(() => resolve(terms), RESOLVE_DELAY);
     });
 
 const getBuildings = (universityId) =>
     new Promise((resolve, reject) => {
-        let buildings = SgaConstants.buildings;
+        const buildings = SgaConstants.buildings;
         setTimeout(() => resolve(buildings[universityId]), RESOLVE_DELAY);
     });
 
 const getRemainingCoursesProgram = (user, programId) =>
     new Promise((resolve, reject) => {
-        let courses = SgaConstants.remainingCourses;
+        const courses = SgaConstants.remainingCourses;
         setTimeout(() => resolve(courses[programId - 1]), RESOLVE_DELAY);
     });
 
 const getFinishedCourses = (student) =>
     new Promise((resolve, reject) => {
-        let courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student).courses;
-        let courses = SgaConstants.informaticaCourses.filter((c) => {
+        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student).courses;
+        const courses = SgaConstants.informaticaCourses.filter((c) => {
             if (courseCodes.includes(c.id)) return true;
             return false;
         });
@@ -259,63 +259,63 @@ const getFinishedCourses = (student) =>
 
 const addFinishedCourse = (student, courseId) =>
     new Promise((resolve, reject) => {
-        let courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
+        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
         courseCodes.push(courseId);
         setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
     });
 
 const deleteFinishedCourse = (student, courseId) =>
     new Promise((resolve, reject) => {
-        let courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
+        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
         courseCodes.splice(courseCodes.indexOf(courseId), 1);
         setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
     });
 
 const deleteProgram = (program) =>
     new Promise((resolve, reject) => {
-        let programs = SgaConstants.programs[9];
+        const programs = SgaConstants.programs[9];
         programs.splice(programs.indexOf(program), 1);
         setTimeout(() => resolve(programs), RESOLVE_DELAY);
     });
 
 const deleteCourse = (course) =>
     new Promise((resolve, reject) => {
-        let courses = SgaConstants.courses[9];
+        const courses = SgaConstants.courses[9];
         courses.splice(courses.indexOf(course), 1);
         setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
 
 const deleteBuilding = (building) =>
     new Promise((resolve, reject) => {
-        let buildings = SgaConstants.buildings[9];
+        const buildings = SgaConstants.buildings[9];
         buildings.splice(buildings.indexOf(building), 1);
         setTimeout(() => resolve(buildings), RESOLVE_DELAY);
     });
 
 const deleteCourseClass = (courseClass) =>
     new Promise((resolve, reject) => {
-        let classes = SgaConstants.courseClasses;
+        const classes = SgaConstants.courseClasses;
         Object.values(classes).forEach((termClasses) => termClasses.splice(termClasses.indexOf(courseClass), 1));
         setTimeout(() => resolve(classes), RESOLVE_DELAY);
     });
 
 const deleteTerm = (term) =>
     new Promise((resolve, reject) => {
-        let terms = SgaConstants.terms;
+        const terms = SgaConstants.terms;
         terms.splice(terms.indexOf(term), 1);
         setTimeout(() => resolve(terms), RESOLVE_DELAY);
     });
 
 async function publishTerm(term) {
-    let terms = SgaConstants.terms;
-    let found_term = terms[terms.indexOf(term)];
+    const terms = SgaConstants.terms;
+    const found_term = terms[terms.indexOf(term)];
     if (found_term) found_term.published = true;
     return { status: OK };
 }
 
 async function unpublishTerm(term) {
-    let terms = SgaConstants.terms;
-    let found_term = terms[terms.indexOf(term)];
+    const terms = SgaConstants.terms;
+    const found_term = terms[terms.indexOf(term)];
     if (found_term) found_term.published = false;
     return { status: OK };
 }
@@ -365,7 +365,7 @@ const getAvailableClasses = (student) => {
         if (c.requirements) return c.requirements.every((req) => passedCourses.includes(req));
         return true;
     });
-    let availableCourseCodes = [];
+    const availableCourseCodes = [];
     availableCourses.forEach((c) => availableCourseCodes.push(c.id));
     const availableClasses = SgaConstants.courseClasses2022A.filter((com) => availableCourseCodes.includes(com.course));
     availableClasses.forEach((c) => {
@@ -376,7 +376,7 @@ const getAvailableClasses = (student) => {
 };
 
 const filterUnattendableClasses = (availableClasses, unavailableTimeSlots) => {
-    let busySlots = [];
+    const busySlots = [];
     unavailableTimeSlots.forEach((t) => {
         t = t.split('-');
         busySlots.push({ day: t[0], startTime: t[1], endTime: t[2] });
@@ -385,8 +385,8 @@ const filterUnattendableClasses = (availableClasses, unavailableTimeSlots) => {
 };
 
 const areTimeSlotsCompatible = (slotsA, slotsB) => {
-    for (let t of slotsA) {
-        for (let l of slotsB) {
+    for (const t of slotsA) {
+        for (const l of slotsB) {
             if (l.day === t.day) {
                 if (t.startTime <= l.startTime && l.startTime < t.endTime) return false;
                 if (l.startTime <= t.startTime && t.startTime < l.endTime) return false;
@@ -397,7 +397,7 @@ const areTimeSlotsCompatible = (slotsA, slotsB) => {
 };
 
 const calculateImportanceOfEachCourse = (programCourses) => {
-    let map = {};
+    const map = {};
     programCourses.forEach((c) => {
         if (c.requirements)
             c.requirements.forEach((r) => {
@@ -405,7 +405,7 @@ const calculateImportanceOfEachCourse = (programCourses) => {
                 map[r].push(c);
             });
     });
-    let importanceMap = {};
+    const importanceMap = {};
     for (const key in map) importanceMap[key] = importanceRec(map, key);
     programCourses.forEach((c) => {
         c.unlockables = map[c.id] ? map[c.id] : 0;
@@ -443,7 +443,7 @@ const calculateDurationOfEachClass = (classes) => {
 
 const getBestSchedules = (availableClasses, desiredHours, prioritizeUnlocks, reduceDays) => {
     const courseCombinations = getCourseCombinations(availableClasses);
-    let schedules = [];
+    const schedules = [];
     courseCombinations.forEach((combo) => {
         let lectureHours = 0;
         let days = new Set();
@@ -493,8 +493,8 @@ const getCourseCombinations = (arr = []) => {
 };
 
 const isValidSchedule = (courseClasses) => {
-    for (let [i1, c1] of courseClasses.entries()) {
-        for (let [i2, c2] of courseClasses.entries()) {
+    for (const [i1, c1] of courseClasses.entries()) {
+        for (const [i2, c2] of courseClasses.entries()) {
             // Same course, different class
             if (c1.course === c2.course && i1 !== i2) return false;
             // Lectures overlap

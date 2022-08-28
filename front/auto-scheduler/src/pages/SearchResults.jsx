@@ -18,7 +18,7 @@ class SearchResults extends Component {
     };
 
     componentDidMount() {
-        let params = this.readParams();
+        const params = this.readParams();
         ApiService.getSchedules(params).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED) {
@@ -78,10 +78,10 @@ class SearchResults extends Component {
             classColors[c.course] = colorIndex % 8;
             colorIndex++;
             c.lectures.forEach((l) => {
-                let startTime = l.startTime.split(':');
-                let endTime = l.endTime.split(':');
-                let startHour = startTime[1] >= '50' ? Number(startTime[0]) + 1 : Number(startTime[0]);
-                let endHour = endTime[1] <= '10' ? Number(endTime[0]) : Number(endTime[0]) + 1;
+                const startTime = l.startTime.split(':');
+                const endTime = l.endTime.split(':');
+                const startHour = startTime[1] >= '50' ? Number(startTime[0]) + 1 : Number(startTime[0]);
+                const endHour = endTime[1] <= '10' ? Number(endTime[0]) : Number(endTime[0]) + 1;
                 for (let i = startHour; i < endHour; i++)
                     timeTable[l.day][i] = {
                         lecture: l,
@@ -116,7 +116,7 @@ class SearchResults extends Component {
                             var contents = {};
                             DAYS.forEach((d) => {
                                 if (timeTable[d][h]) {
-                                    let c = timeTable[d][h];
+                                    const c = timeTable[d][h];
                                     if (timeTable[d][h].startHour === h)
                                         contents[d] = (
                                             <td
