@@ -1,6 +1,8 @@
 import express, { Application } from 'express';
 import * as dotenv from 'dotenv';
 import { HomeRoutes } from './routes/home.routes';
+import ErrorHandlerMiddleware from './middlewares/errorHandler.middleware';
+import cors from 'cors';
 
 class App {
     public app: Application;
@@ -15,14 +17,17 @@ class App {
 
     private setConfig() {
         dotenv.config();
+        this.app.use(express.json({ limit: '25mb' }));
+        this.app.use(express.urlencoded({ limit: '25mb', extended: true }));
+        this.app.use(cors());
     }
 
     private initializeErrorHandling() {
-        // TODO: create error handling middleware
+        this.app.use(ErrorHandlerMiddleware);
     }
 
     private setRoutes() {
-        this.app.use('/', new HomeRoutes().router);
+        this.app.use('/api/', new HomeRoutes().router);
     }
 }
 

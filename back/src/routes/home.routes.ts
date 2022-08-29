@@ -1,4 +1,5 @@
-import { Router, urlencoded } from 'express';
+import { Router } from 'express';
+import { urlencoded } from 'body-parser';
 import { HomeController } from '../controllers/home.controller';
 import cors from 'cors';
 

@@ -1,0 +1,1 @@
+export const DEFAULT_AUTH_TOKEN_EXPIRE_TIME = '6h';
