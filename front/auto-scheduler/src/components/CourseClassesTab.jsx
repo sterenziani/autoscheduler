@@ -29,7 +29,7 @@ class CourseClassesTab extends Component {
     }
 
     onChangeTerms(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         this.setState({ selectedTerm: this.state.terms.filter((t) => t.id == e.target.value)[0] });
     }
 

@@ -24,65 +24,65 @@ class SearchForm extends Component {
     };
 
     onChangePrograms(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.program = e.target.value;
         this.setState({ params: paramsCopy });
     }
 
     onChangeTerms(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.term = e.target.value;
         this.setState({ params: paramsCopy });
     }
 
     onChangeHours(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.hours = parseInt(e.target.value);
         this.setState({ params: paramsCopy });
     }
 
     onChangePrioritize(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.prioritizeUnlocks = e.target.checked;
         this.setState({ params: paramsCopy });
     }
 
     onChangeReduceDays(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.reduceDays = e.target.checked;
         this.setState({ params: paramsCopy });
     }
 
     onChangeDay(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
-        let index = e.target.id.match(/\d/g)[0];
+        const paramsCopy = Object.assign({}, this.state.params);
+        const index = e.target.id.match(/\d/g)[0];
         paramsCopy.unavailableTimeSlots[index].day = e.target.value;
         this.setState({ params: paramsCopy });
     }
 
     onChangeStartTime(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
-        let index = e.target.id.match(/\d/g)[0];
+        const paramsCopy = Object.assign({}, this.state.params);
+        const index = e.target.id.match(/\d/g)[0];
         paramsCopy.unavailableTimeSlots[index].startTime = e.target.value;
         this.setState({ params: paramsCopy });
     }
 
     onChangeEndTime(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
-        let index = e.target.id.match(/\d/g)[0];
+        const paramsCopy = Object.assign({}, this.state.params);
+        const index = e.target.id.match(/\d/g)[0];
         paramsCopy.unavailableTimeSlots[index].endTime = e.target.value;
         this.setState({ params: paramsCopy });
     }
 
     onClickTrashCan(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
-        let index = e.target.id.match(/\d/g)[0];
+        const paramsCopy = Object.assign({}, this.state.params);
+        const index = e.target.id.match(/\d/g)[0];
         paramsCopy.unavailableTimeSlots.splice(index, 1);
         this.setState({ params: paramsCopy });
     }
 
     onClickPlusSign(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.unavailableTimeSlots.push(JSON.parse(JSON.stringify(DEFAULT_DATE))); // Clone DEFAULT_DATE
         this.setState({ params: paramsCopy });
     }
@@ -121,7 +121,7 @@ class SearchForm extends Component {
                     if (findError) {
                         this.setState({ loading: false, error: true, status: findError });
                     } else {
-                        let paramsCopy = Object.assign({}, this.state.params);
+                        const paramsCopy = Object.assign({}, this.state.params);
                         paramsCopy.program = dataProg[0].id;
                         paramsCopy.term = dataTerm[0].id;
                         this.setState({

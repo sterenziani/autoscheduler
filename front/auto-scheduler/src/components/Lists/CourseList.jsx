@@ -46,7 +46,7 @@ class CourseList extends Component {
         if (this.state.user.type === 'student')
             ApiService.deleteFinishedCourse(this.state.user, this.state.courseToDelete.id);
         else if (this.state.user.type === 'university') ApiService.deleteCourse(this.state.courseToDelete);
-        let coursesCopy = Object.assign({}, this.state).courses;
+        const coursesCopy = Object.assign({}, this.state).courses;
         this.setState({ courses: coursesCopy, showDeleteModal: !this.state.showDeleteModal, courseToDelete: {} });
         this.loadCourses();
     }

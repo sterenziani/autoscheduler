@@ -37,7 +37,7 @@ class UniversityBuildingsList extends Component {
     deleteBuilding() {
         if (!this.state.buildingToDelete) return;
         ApiService.deleteBuilding(this.state.buildingToDelete);
-        let buildingsCopy = Object.assign({}, this.state).buildings;
+        const buildingsCopy = Object.assign({}, this.state).buildings;
         this.setState({ buildings: buildingsCopy, showDeleteModal: !this.state.showDeleteModal, buildingToDelete: {} });
     }
 

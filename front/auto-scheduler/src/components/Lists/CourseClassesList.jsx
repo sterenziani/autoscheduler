@@ -40,7 +40,7 @@ class CourseClassesList extends Component {
     deleteCourseClass() {
         if (!this.state.courseClassToDelete) return;
         ApiService.deleteCourseClass(this.state.courseClassToDelete);
-        let courseClasssCopy = Object.assign({}, this.state).courseClasss;
+        const courseClasssCopy = Object.assign({}, this.state).courseClasss;
         this.setState({
             courseClasss: courseClasssCopy,
             showDeleteModal: !this.state.showDeleteModal,

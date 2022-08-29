@@ -41,7 +41,7 @@ class SignUpStudentForm extends Component {
     };
 
     onChangeSchools(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.school = e.target.value;
         paramsCopy.program = undefined;
         this.setState({ params: paramsCopy, loading: true });
@@ -49,7 +49,7 @@ class SignUpStudentForm extends Component {
     }
 
     onChangePrograms(e) {
-        let paramsCopy = Object.assign({}, this.state.params);
+        const paramsCopy = Object.assign({}, this.state.params);
         paramsCopy.program = e.target.value;
         this.setState({ params: paramsCopy });
     }
@@ -67,7 +67,7 @@ class SignUpStudentForm extends Component {
                         findError = dataProg.status;
                     if (findError) this.setState({ loading: false, error: true, status: findError });
                     else {
-                        let paramsCopy = Object.assign({}, this.state.params);
+                        const paramsCopy = Object.assign({}, this.state.params);
                         paramsCopy.school = data[0].id;
                         paramsCopy.program = dataProg && dataProg.length > 0 ? dataProg[0].id : undefined;
                         this.setState({
@@ -89,7 +89,7 @@ class SignUpStudentForm extends Component {
             if (findError) {
                 this.setState({ loading: false, error: true, status: findError });
             } else {
-                let paramsCopy = Object.assign({}, this.state.params);
+                const paramsCopy = Object.assign({}, this.state.params);
                 paramsCopy.program = data && data.length > 0 ? data[0].id : undefined;
                 this.setState({ programs: data, params: paramsCopy, loading: false, programError: false });
             }

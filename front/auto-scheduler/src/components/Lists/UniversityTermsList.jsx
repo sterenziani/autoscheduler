@@ -56,7 +56,7 @@ class UniversityTermsList extends Component {
     deleteTerm() {
         if (!this.state.termToDelete) return;
         ApiService.deleteTerm(this.state.termToDelete);
-        let termsCopy = Object.assign({}, this.state).terms;
+        const termsCopy = Object.assign({}, this.state).terms;
         this.setState({ terms: termsCopy, showDeleteModal: !this.state.showDeleteModal, termToDelete: {} });
     }
 
