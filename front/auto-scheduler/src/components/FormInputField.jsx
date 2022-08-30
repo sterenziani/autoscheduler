@@ -21,7 +21,7 @@ const FormInputField = (props) => {
                 <div className="col-9">
                     <Form.Control type={type} placeholder={t(`${placeholder}`)} name={name} {...other} />
                     <p key={label + 'error'} className="form-error text-start my-0">
-                        {error && touched && t(`${error}`)}
+                        {error && touched && t(`${status}`)}
                     </p>
                 </div>
             </Form.Group>

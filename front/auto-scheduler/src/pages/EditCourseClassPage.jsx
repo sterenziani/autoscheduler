@@ -55,6 +55,7 @@ function EditCourseClassPage(props) {
             }
         }
         execute();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[user, courseClass, courses, terms, buildings])
 
     const loadUser = async () => {
@@ -209,7 +210,7 @@ function EditCourseClassPage(props) {
             <Spinner animation="border" variant="primary" />
         </div>
     if (error)
-        return <h1>ERROR {error}</h1>;
+        return <h1>ERROR {status}</h1>;
     return (
         <React.Fragment>
             <HelmetProvider>

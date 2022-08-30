@@ -3,10 +3,6 @@ import SgaConstants from '../resources/SgaConstants';
 
 const RESOLVE_DELAY = 250;
 
-function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 /*
 const getUsers = () =>
   new Promise((resolve, reject) => {
@@ -207,7 +203,7 @@ const getCourse = (courseId) =>
 
 const getCourseClass = (classId) =>
     new Promise((resolve, reject) => {
-        let courseClass = Object.values(SgaConstants.courseClasses).flat().filter((com) => com.id == classId);
+        const courseClass = Object.values(SgaConstants.courseClasses).flat().filter((com) => com.id == classId);
         if(!courseClass)
             return { status: NOT_FOUND }
         setTimeout(() => resolve(courseClass[0]), RESOLVE_DELAY);

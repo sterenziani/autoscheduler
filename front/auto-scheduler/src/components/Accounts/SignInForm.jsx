@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Translation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
