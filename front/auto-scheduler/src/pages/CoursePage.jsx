@@ -48,6 +48,10 @@ class CoursePage extends Component {
                     </Helmet>
                 </HelmetProvider>
                 <div className="container my-5">
+                    <div className="mb-3 text-center text-primary">
+                        <h6 className="m-0">{this.state.course.internalId}</h6>
+                        <h2 className="">{this.state.course.name}</h2>
+                    </div>
                     <Tabs className="borderless-tabs" defaultActiveKey={'classes'} fill>
                         <Tab
                             className="text-center"

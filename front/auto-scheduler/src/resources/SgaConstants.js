@@ -1,4 +1,4 @@
-const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
+import {DAYS} from "../services/SystemConstants"
 
 var informaticaCourses = [
     {
@@ -553,7 +553,7 @@ var courseClasses2021B = [
         ],
     },
     {
-        id: 1,
+        id: 2,
         course: '93.43',
         term: '2022-1Q',
         courseClass: 'S',

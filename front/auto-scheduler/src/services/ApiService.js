@@ -205,6 +205,14 @@ const getCourse = (courseId) =>
         setTimeout(() => resolve(course), RESOLVE_DELAY);
     });
 
+const getCourseClass = (classId) =>
+    new Promise((resolve, reject) => {
+        let courseClass = Object.values(SgaConstants.courseClasses).flat().filter((com) => com.id == classId);
+        if(!courseClass)
+            return { status: NOT_FOUND }
+        setTimeout(() => resolve(courseClass[0]), RESOLVE_DELAY);
+    });
+
 const getRequiredCourses = (courseId) =>
     new Promise((resolve, reject) => {
         const course = SgaConstants.courses[9];
@@ -223,13 +231,13 @@ const getPrograms = (universityId) =>
         setTimeout(() => resolve(programs[universityId]), RESOLVE_DELAY);
     });
 
-const getCourses = (universityId) =>
+const getCourses = async (universityId) =>
     new Promise((resolve, reject) => {
         const courses = SgaConstants.courses;
         setTimeout(() => resolve(courses[universityId]), RESOLVE_DELAY);
     });
 
-const getTerms = (universityId) =>
+const getTerms = async (universityId) =>
     new Promise((resolve, reject) => {
         const terms = SgaConstants.terms;
         setTimeout(() => resolve(terms), RESOLVE_DELAY);
@@ -320,6 +328,18 @@ async function unpublishTerm(term) {
     return { status: OK };
 }
 
+const saveCourseClass = async (id, course, term, name, lectures) => {
+    try {
+        if(id)
+            return { status: OK };
+        else
+            return { status: CREATED };
+    } catch (e) {
+        if (e.response) return { status: e.response.status };
+        else return { status: TIMEOUT };
+    }
+}
+
 const ApiService = {
     getGames: getGames,
     registerStudent: registerStudent,
@@ -341,12 +361,14 @@ const ApiService = {
     deleteFinishedCourse: deleteFinishedCourse,
     deleteProgram: deleteProgram,
     getCourses: getCourses,
+    getCourseClass: getCourseClass,
     deleteCourse: deleteCourse,
     deleteBuilding: deleteBuilding,
     deleteTerm: deleteTerm,
     deleteCourseClass: deleteCourseClass,
     publishTerm: publishTerm,
     unpublishTerm: unpublishTerm,
+    saveCourseClass: saveCourseClass
 };
 
 export default ApiService;

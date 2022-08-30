@@ -4,9 +4,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { Translation } from 'react-i18next';
 import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
-
-const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
-const DEFAULT_DATE = { day: DAYS[0], startTime: '01:00', endTime: '01:01' };
+import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 
 class SearchForm extends Component {
     state = {

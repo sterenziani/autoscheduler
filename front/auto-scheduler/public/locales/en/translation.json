@@ -1,5 +1,6 @@
 {
     "register": {
+        "register": "Sign Up",
         "email": "Email",
         "password": "Password",
         "repeatPassword": "Repeat password",
@@ -114,7 +115,16 @@
         "hide": "Hide",
         "publish": "Publish"
     },
-    "emptyList": "No items in this list.",
+    "forms":{
+        "createClass":"Create class",
+        "editClass":"Edit class",
+        "course":"Course",
+        "term":"Term",
+        "className":"Class name",
+        "lectures":"Schedule",
+        "save":"Save"
+    },
+    "emptyCourseLog": "No items in this list.",
     "noRequiredCourses": "This course can be taken at any point.",
     "minutes": "{{minutes}} mins",
     "edit": "Edit",

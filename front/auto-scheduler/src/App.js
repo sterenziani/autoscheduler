@@ -5,6 +5,7 @@ import SearchResults from './pages/SearchResults';
 import HomePage from './pages/HomePage';
 import SignUpPage from './pages/SignUpPage';
 import CoursePage from './pages/CoursePage';
+import EditCourseClassPage from './pages/EditCourseClassPage';
 import NoMatch from './components/NoMatch';
 import './resources/style.scss';
 
@@ -18,6 +19,8 @@ function App() {
                 <Route path="/login" element={<SignUpPage login />} />
                 <Route path="/results" element={<SearchResults />} />
                 <Route path="/courses/:id" element={<CoursePage />} />
+                <Route path="/classes/:id" element={<EditCourseClassPage />} />
+                <Route path="/classes/new" element={<EditCourseClassPage />} />
                 <Route path="*" element={<NoMatch />} />
             </Routes>
         </Router>

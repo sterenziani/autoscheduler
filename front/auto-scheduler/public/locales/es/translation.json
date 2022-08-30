@@ -1,5 +1,6 @@
 {
     "register": {
+        "register": "Registrarse",
         "email": "Email",
         "password": "Contraseña",
         "repeatPassword": "Repetir contraseña",
@@ -113,6 +114,15 @@
     "terms": {
         "hide": "Ocultar",
         "publish": "Publicar"
+    },
+    "forms":{
+        "createClass":"Crear comisión",
+        "editClass":"Editar comisión",
+        "course":"Materia",
+        "term":"Período",
+        "className":"Nombre de comisión",
+        "lectures":"Horarios",
+        "save":"Guardar"
     },
     "emptyCourseLog": "No hay elementos en esta lista.",
     "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",

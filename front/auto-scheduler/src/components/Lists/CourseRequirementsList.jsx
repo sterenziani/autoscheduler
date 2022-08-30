@@ -12,24 +12,24 @@ function CourseRequirementsList(props) {
     const [course] = useState(props.course);
     const [courses,setCourses] = useState(null);
 
-    // ComponentDidUpdate
+    // ComponentDidMount
     useEffect( () => {
-      if (course){
-        ApiService.getRequiredCourses(course.id).then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-              setCourses(data)
-              setLoading(false)
-            }
-        });
-      }
-  },[course])
+        if (course){
+            ApiService.getRequiredCourses(course.id).then((data) => {
+                let findError = null;
+                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                  setCourses(data)
+                  setLoading(false)
+                }
+            });
+        }
+    },[course])
 
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>;
