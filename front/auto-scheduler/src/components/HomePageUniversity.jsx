@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Alert } from 'react-bootstrap';
-import { Translation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import UniversityProgramsList from './Lists/UniversityProgramsList';
 import UniversityCoursesList from './Lists/UniversityCoursesList';
 import UniversityBuildingsList from './Lists/UniversityBuildingsList';
@@ -9,63 +9,56 @@ import UniversityTermsList from './Lists/UniversityTermsList';
 
 const CONTACT_EMAIL = 'juan@autoscheduler.com';
 
-class HomePageUniversity extends Component {
-    render() {
-        return (
-            <React.Fragment>
-                <HelmetProvider>
-                    <Helmet>
-                        <title>AutoScheduler</title>
-                    </Helmet>
-                </HelmetProvider>
-                {this.props.user && !this.props.user.verified && (
-                    <Alert className="m-5" variant="danger">
-                        <Translation>{(t) => t('home.getVerified', { email: CONTACT_EMAIL })}</Translation>
-                    </Alert>
-                )}
-                <div className="container my-5">
-                    <Tabs className="borderless-tabs" defaultActiveKey="programs" fill>
-                        <Tab
-                            className="text-center"
-                            eventKey="buildings"
-                            title={<Translation>{(t) => t('tabs.buildings')}</Translation>}
-                        >
-                            <div className="bg-primary rounded-bottom">
-                                <UniversityBuildingsList user={this.props.user} />
-                            </div>
-                        </Tab>
-                        <Tab
-                            className="text-center"
-                            eventKey="programs"
-                            title={<Translation>{(t) => t('tabs.programs')}</Translation>}
-                        >
-                            <div className="bg-primary rounded-bottom">
-                                <UniversityProgramsList user={this.props.user} />
-                            </div>
-                        </Tab>
-                        <Tab
-                            className="text-center"
-                            eventKey="courses"
-                            title={<Translation>{(t) => t('tabs.courses')}</Translation>}
-                        >
-                            <div className="bg-primary rounded-bottom">
-                                <UniversityCoursesList user={this.props.user} />
-                            </div>
-                        </Tab>
-                        <Tab
-                            className="text-center"
-                            eventKey="terms"
-                            title={<Translation>{(t) => t('tabs.terms')}</Translation>}
-                        >
-                            <div className="bg-primary rounded-bottom">
-                                <UniversityTermsList user={this.props.user} />
-                            </div>
-                        </Tab>
-                    </Tabs>
-                </div>
-            </React.Fragment>
-        );
-    }
+function HomePageUniversity(props) {
+    const {t} = useTranslation()
+    return (
+        <React.Fragment>
+            <HelmetProvider>
+                <Helmet><title>AutoScheduler</title></Helmet>
+            </HelmetProvider>
+            {props.user && !props.user.verified && (
+                <Alert className="m-5" variant="danger">
+                    {t('home.getVerified', { email: CONTACT_EMAIL })}
+                </Alert>
+            )}
+            <div className="container my-5">
+                <Tabs className="borderless-tabs" defaultActiveKey="programs" fill>
+                    <Tab
+                        className="text-center" eventKey="buildings"
+                        title={t('tabs.buildings')}
+                    >
+                        <div className="bg-primary rounded-bottom">
+                            <UniversityBuildingsList user={props.user} />
+                        </div>
+                    </Tab>
+                    <Tab
+                        className="text-center" eventKey="programs"
+                        title={t('tabs.programs')}
+                    >
+                        <div className="bg-primary rounded-bottom">
+                            <UniversityProgramsList user={props.user} />
+                        </div>
+                    </Tab>
+                    <Tab
+                        className="text-center" eventKey="courses"
+                        title={t('tabs.courses')}
+                    >
+                        <div className="bg-primary rounded-bottom">
+                            <UniversityCoursesList user={props.user} />
+                        </div>
+                    </Tab>
+                    <Tab
+                        className="text-center" eventKey="terms"
+                        title={t('tabs.terms')}
+                    >
+                        <div className="bg-primary rounded-bottom">
+                            <UniversityTermsList user={props.user} />
+                        </div>
+                    </Tab>
+                </Tabs>
+            </div>
+        </React.Fragment>
+    );
 }
 
 export default HomePageUniversity;

@@ -86,6 +86,7 @@
         "send": "Send"
     },
     "search": {
+        "search": "Search",
         "program": "Program",
         "term": "Term",
         "hoursPerWeek": "Weekly hours",
@@ -124,9 +125,10 @@
         "lectures":"Schedule",
         "save":"Save"
     },
-    "emptyCourseLog": "No items in this list.",
+    "emptyList": "No items in this list.",
     "noRequiredCourses": "This course can be taken at any point.",
     "minutes": "{{minutes}} mins",
     "edit": "Edit",
-    "submit": "Search"
+    "submit": "Search",
+    "logout": "Log out"
 }

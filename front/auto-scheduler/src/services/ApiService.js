@@ -155,7 +155,7 @@ const getActiveUser = () =>
             name: 'Instituto Tecnológico de Buenos Aires',
             verified: false,
         };
-        setTimeout(() => resolve(university), RESOLVE_DELAY);
+        setTimeout(() => resolve(student), RESOLVE_DELAY);
     });
 
 const getSchedules = (params) =>

@@ -86,6 +86,7 @@
         "send": "Enviar"
     },
     "search": {
+        "search": "Búsqueda",
         "program": "Carrera",
         "term": "Período",
         "hoursPerWeek": "Horas semanales",
@@ -124,9 +125,10 @@
         "lectures":"Horarios",
         "save":"Guardar"
     },
-    "emptyCourseLog": "No hay elementos en esta lista.",
+    "emptyList": "No hay elementos en esta lista.",
     "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",
     "minutes": "{{minutes}} mins",
     "edit": "Editar",
-    "submit": "Buscar"
+    "submit": "Buscar",
+    "logout": "Cerrar sesión"
 }

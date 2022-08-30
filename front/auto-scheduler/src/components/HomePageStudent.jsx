@@ -1,44 +1,29 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab } from 'react-bootstrap';
-import { Translation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import SearchForm from '../components/SearchForm';
 import StudentCourseLog from '../components/Lists/StudentCourseLog';
 
-class HomePageStudent extends Component {
-    render() {
-        return (
-            <React.Fragment>
-                <HelmetProvider>
-                    <Helmet>
-                        <title>Search - AutoScheduler</title>
-                    </Helmet>
-                </HelmetProvider>
-                <div className="container mt-5">
-                    <Tabs className="borderless-tabs" defaultActiveKey="schedule_form" fill>
-                        <Tab
-                            className="text-center"
-                            eventKey="classes"
-                            title={<Translation>{(t) => t('tabs.courseLog')}</Translation>}
-                        >
-                            <div className="bg-primary rounded-bottom">
-                                <StudentCourseLog />
-                            </div>
-                        </Tab>
-                        <Tab
-                            className="text-center"
-                            eventKey="schedule_form"
-                            title={<Translation>{(t) => t('tabs.findSchedule')}</Translation>}
-                        >
-                            <div className="bg-primary rounded-bottom">
-                                <SearchForm />
-                            </div>
-                        </Tab>
-                    </Tabs>
-                </div>
-            </React.Fragment>
-        );
-    }
+function HomePageStudent(props) {
+    const {t} = useTranslation()
+    return (
+        <React.Fragment>
+            <HelmetProvider>
+                <Helmet><title>{t("search.search") +" - AutoScheduler"}</title></Helmet>
+            </HelmetProvider>
+            <div className="container mt-5">
+                <Tabs className="borderless-tabs" defaultActiveKey="schedule_form" fill>
+                    <Tab className="text-center" eventKey="classes" title={t('tabs.courseLog')}>
+                        <div className="bg-primary rounded-bottom"><StudentCourseLog/></div>
+                    </Tab>
+                    <Tab className="text-center" eventKey="schedule_form" title={t('tabs.findSchedule')}>
+                        <div className="bg-primary rounded-bottom"><SearchForm/></div>
+                    </Tab>
+                </Tabs>
+            </div>
+        </React.Fragment>
+    );
 }
 
 export default HomePageStudent;
