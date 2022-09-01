@@ -2,7 +2,7 @@ import IUserMapper from '../mappers/interfaces/user.mapper';
 import { IUser } from '../models/user.model';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
-import UserMapperFactory from "../mappers/factories/userMapper.factory";
+import UserMapperFactory from '../mappers/factories/userMapper.factory';
 
 class UserService {
     private static instance: UserService;
@@ -19,7 +19,14 @@ class UserService {
         return UserService.instance;
     };
 
-    // common methods
+    // public methods
+
+    async getUser(id: string): Promise<IUser> {
+        const user: IUser | null = await this.userMapper.getUserById(id);
+        if (!user) throw new GenericException(ERRORS.NOT_FOUND.USER);
+
+        return user;
+    }
 
     async getUserByEmail(email: string): Promise<IUser> {
         const user: IUser | null = await this.userMapper.getUserByEmail(email);

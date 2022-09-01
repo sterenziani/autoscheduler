@@ -1,6 +1,4 @@
-import { IErrorData } from '../interfaces/error.interface';
-
-export const ERRORS: { [status: string]: { [data: string]: IErrorData } } = {
+export const ERRORS = {
     BAD_REQUEST: {
         GENERAL: { status: 400, code: 'BAD_REQUEST', message: 'Bad Request' },
         INVALID_LOGIN: { status: 400, code: 'INVALID_LOGIN', message: 'Incorrect username or password' },
@@ -11,6 +9,11 @@ export const ERRORS: { [status: string]: { [data: string]: IErrorData } } = {
     },
     FORBIDDEN: {
         GENERAL: { status: 403, code: 'FORBIDDEN', message: 'Forbidden' },
+        ROLE_MISMATCH: {
+            status: 403,
+            code: 'ROLE_MISMATCH',
+            message: "Authenticated user's role doesn't match required role",
+        },
     },
     NOT_FOUND: {
         GENERAL: { status: 404, code: 'NOT_FOUND', message: 'Not Found' },

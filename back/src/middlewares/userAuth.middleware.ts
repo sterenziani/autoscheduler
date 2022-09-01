@@ -5,8 +5,8 @@ import UserAuthService from '../services/auth.service';
 import httpException from '../exceptions/http.exception';
 
 const userAuthMiddleware = (req: Request, res: Response, next: NextFunction): void => {
-    const authHeader = req.headers['Authorization'] as string;
-    if (!authHeader || !authHeader.toLowerCase().match(/^bearer ([^\s]*)/))
+    const authHeader = req.get('authorization');
+    if (!authHeader || !authHeader.match(/^bearer ([^\s]*)/i))
         throw new GenericException(ERRORS.UNAUTHORIZED.MISSING_TOKEN);
 
     // getting last element

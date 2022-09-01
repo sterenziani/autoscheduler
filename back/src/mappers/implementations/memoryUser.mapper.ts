@@ -1,6 +1,6 @@
-import {IUser} from '../../models/user.model';
-import IUserMapper from "../interfaces/user.mapper";
-import {ROLES} from "../../constants/general.constants";
+import { IUser } from '../../models/user.model';
+import IUserMapper from '../interfaces/user.mapper';
+import { ROLES } from '../../constants/general.constants';
 
 class MemoryUserMapper implements IUserMapper {
     private static instance: IUserMapper;

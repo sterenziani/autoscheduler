@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import * as dotenv from 'dotenv';
 import { HomeRoutes } from './routes/home.routes';
+import { StudentRoutes } from './routes/student.routes';
 import ErrorHandlerMiddleware from './middlewares/errorHandler.middleware';
 import cors from 'cors';
 
@@ -28,6 +29,7 @@ class App {
 
     private setRoutes() {
         this.app.use('/api/', new HomeRoutes().router);
+        this.app.use('/api/student', new StudentRoutes().router);
     }
 }
 
