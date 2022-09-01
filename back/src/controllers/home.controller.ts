@@ -1,7 +1,5 @@
 import { RequestHandler } from 'express';
 import UserAuthService from '../services/auth.service';
-import { stringInEnum } from '../helpers/collection.helper';
-import { ROLES } from '../constants/general.constants';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 
@@ -19,14 +17,13 @@ export class HomeController {
     public login: RequestHandler = async (req, res, next) => {
         const email = req.body.email;
         const password = req.body.password;
-        const role = req.body.role;
 
-        if (!email || !password || !stringInEnum(ROLES, role)) {
+        if (!email || !password) {
             return next(new GenericException(ERRORS.BAD_REQUEST.GENERAL));
         }
 
         try {
-            const jwt: string = await this.userAuthService.login(email, password, role);
+            const jwt: string = await this.userAuthService.login(email, password);
             res.status(204).set('Authorization', jwt).send();
         } catch (e) {
             next(e);

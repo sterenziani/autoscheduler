@@ -2,13 +2,22 @@ import IUserMapper from '../mappers/interfaces/user.mapper';
 import { IUser } from '../models/user.model';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
+import UserMapperFactory from "../mappers/factories/userMapper.factory";
 
-abstract class UserService {
-    userMapper: IUserMapper;
+class UserService {
+    private static instance: UserService;
+    private userMapper: IUserMapper;
 
-    protected constructor(userMapper: IUserMapper) {
-        this.userMapper = userMapper;
+    constructor() {
+        this.userMapper = UserMapperFactory.get();
     }
+
+    static getInstance = (): UserService => {
+        if (!UserService.instance) {
+            UserService.instance = new UserService();
+        }
+        return UserService.instance;
+    };
 
     // common methods
 
