@@ -1,7 +1,8 @@
 import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, NOT_FOUND, OK } from './ApiConstants';
 import SgaConstants from '../resources/SgaConstants';
-
-const RESOLVE_DELAY = 250;
+import api from './api'
+import AuthService from './AuthService'
+const RESOLVE_DELAY = 2500;
 
 /*
 const getUsers = () =>
@@ -111,21 +112,7 @@ const registerUniversity = async (email, password, name) => {
 };
 
 const login = async (username, password) => {
-    try {
-        /*
-    const response = await api.get(logInEndpoint, {headers : {authorization : 'Basic ' + btoa(username + ":" + password)}})
-    if(response.status === UNAUTHORIZED)
-      return { status: UNAUTHORIZED }
-    token = response.headers.authorization;
-    userStore.user = response.data;
-    TokenStore.setToken(token);
-    UserStore.setUser(userStore.user);
-    */
-        return { status: OK };
-    } catch (e) {
-        if (e.response) return { status: e.response.status };
-        else return { status: TIMEOUT };
-    }
+    return AuthService.logIn(username, password)
 };
 
 const requestPasswordChangeToken = async (username) => {
@@ -155,7 +142,7 @@ const getActiveUser = () =>
             name: 'Instituto Tecnológico de Buenos Aires',
             verified: false,
         };
-        setTimeout(() => resolve(student), RESOLVE_DELAY);
+        setTimeout(() => resolve(university), RESOLVE_DELAY);
     });
 
 const getSchedules = (params) =>

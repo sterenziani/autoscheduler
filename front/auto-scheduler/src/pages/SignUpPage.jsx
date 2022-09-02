@@ -12,7 +12,7 @@ function SignUpPage(props) {
     return (
         <React.Fragment>
             <HelmetProvider>
-                <Helmet><title>{t("register.register")+" - AutoScheduler"}</title></Helmet>
+                <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
             <div className="container my-5">
                 <Tabs

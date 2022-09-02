@@ -104,6 +104,7 @@
         "SUN": "Sunday"
     },
     "results": {
+        "results": "Results",
         "scheduleNumber": "Schedule #{{value}}",
         "recap": "{{days}} days, {{hours}} hours total",
         "timeRange": "Lectures range from {{earliest}} to {{latest}}",

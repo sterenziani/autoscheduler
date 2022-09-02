@@ -150,6 +150,7 @@ function SearchForm(props) {
                 loadProgramsAndTerms(data.university.id);
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     if (loading === true)

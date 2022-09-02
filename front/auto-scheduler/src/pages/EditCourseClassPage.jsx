@@ -10,7 +10,7 @@ import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 function EditCourseClassPage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
-    let {id} = useParams()
+    const {id} = useParams()
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);

@@ -104,6 +104,7 @@
         "SUN": "Domingo"
     },
     "results": {
+        "results": "Resultados",
         "scheduleNumber": "Cronograma #{{value}}",
         "recap": "{{days}} días, {{hours}} horas en total",
         "timeRange": "Horarios de {{earliest}} a {{latest}}",

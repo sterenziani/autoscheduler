@@ -166,7 +166,7 @@ function SearchResults(props) {
     return (
         <React.Fragment>
             <HelmetProvider>
-                <Helmet><title>{t("results") +" - AutoScheduler"}</title></Helmet>
+                <Helmet><title>{t("results.results") +" - AutoScheduler"}</title></Helmet>
             </HelmetProvider>
             <div className="m-5 text-black">
                 <div className="d-flex justify-content-center align-items-center">

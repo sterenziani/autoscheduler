@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Translation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faKey } from '@fortawesome/free-solid-svg-icons';
@@ -26,7 +25,8 @@ class SignInForm extends Component {
     };
 
     authenticate = async (values, setSubmitting) => {
-        const { status } = await ApiService.login(values.username, values.password);
+        const { status } = await ApiService.login(values.email, values.password);
+        console.log("Status: " +status)
         switch (status) {
             case OK:
                 console.log('Redirect');
@@ -55,11 +55,6 @@ class SignInForm extends Component {
     render() {
         return (
             <React.Fragment>
-                <HelmetProvider>
-                    <Helmet>
-                        <title>Log In - AutoScheduler</title>
-                    </Helmet>
-                </HelmetProvider>
                 <Formik
                     initialValues={{ email: '', password: '' }}
                     validationSchema={SignInSchema}
