@@ -1,30 +1,26 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import CourseList from './CourseList';
+import { useNavigate } from "react-router-dom";
 
-class StudentCoursesList extends Component {
-    state = {
-        user: this.props.user,
-    };
+function StudentCoursesList(props){
+    const navigate = useNavigate()
+    const [user, setUser] = useState(props.user)
 
-    redirectToCreate() {
-        console.log('Redirect to /courses/new');
+    const redirectToCreate = () => {
+        navigate('/courses/new');
     }
 
-    render() {
-        return (
-            <React.Fragment>
-                {this.state.user ? [<CourseList key="course-list" user={this.state.user} />] : []}
-                <div className="mx-auto align-items-center plus-button-container clickable">
-                    <i
-                        className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"
-                        onClick={() => {
-                            this.redirectToCreate();
-                        }}
-                    ></i>
-                </div>
-            </React.Fragment>
-        );
-    }
+    return (
+        <React.Fragment>
+            {user ? [<CourseList key="course-list" user={user} />] : []}
+            <div className="mx-auto align-items-center plus-button-container clickable">
+                <i
+                    className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"
+                    onClick={() => redirectToCreate()}
+                ></i>
+            </div>
+        </React.Fragment>
+    );
 }
 
 export default StudentCoursesList;

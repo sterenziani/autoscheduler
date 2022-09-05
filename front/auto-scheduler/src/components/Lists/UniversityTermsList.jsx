@@ -1,206 +1,187 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Modal, Spinner, Row } from 'react-bootstrap';
-import { Translation } from 'react-i18next';
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
 
-class UniversityTermsList extends Component {
-    state = {
-        loading: true,
-        error: false,
-        showDeleteModal: false,
-        user: this.props.user,
-        terms: null,
-        changingPublishStatus: [],
-    };
+function UniversityTermsList(props) {
+    const {t} = useTranslation();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [status, setStatus] = useState(null);
+    const [user, setUser] = useState(props.user);
+    const [terms, setTerms] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [changingPublishStatus, setChangingPublishStatus] = useState([]);
+    const [termToDelete, setTermToDelete] = useState();
 
-    componentDidMount() {
-        this.loadTerms();
-    }
+    useEffect(() => {
+        async function execute() {
+            await Promise.all([loadTerms()]);
+        }
+        execute();
+    }, [])
 
-    loadTerms() {
-        ApiService.getTerms(this.state.user.id).then((data) => {
+    const loadTerms = () => {
+        ApiService.getTerms(user.id).then((data) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
-            if (findError) this.setState({ loading: false, error: true, status: findError });
-            else {
-                this.setState({
-                    terms: data,
-                    loading: false,
-                    changingPublishStatus: new Array(data.length).fill(false),
-                });
+            if (data && data.status && data.status !== OK && data.status !== CREATED)
+                findError = data.status;
+            if (findError){
+                setError(true)
+                setStatus(findError)
             }
+            else{
+                setTerms(data)
+                setChangingPublishStatus(new Array(data.length).fill(false))
+            }
+            setLoading(false)
         });
     }
 
-    redirectToEdit(id) {
-        console.log('Redirect to /terms/' + id);
+    const redirectToEdit = (id) => {
+        navigate("/terms/"+id);
     }
 
-    redirectToCreate() {
-        console.log('Redirect to /terms/new');
+    const redirectToCreate = () => {
+        navigate("/terms/new");
     }
 
-    async switchTermStatus(index) {
-        const term = this.state.terms[index];
-        this.state.changingPublishStatus[index] = true;
-        this.setState({});
+    const switchTermStatus = async (index) => {
+        const term = terms[index];
+        const changingPublishStatusCopy = Object.assign({}, changingPublishStatus)
+        changingPublishStatusCopy[index] = true;
+        setChangingPublishStatus(changingPublishStatusCopy)
         let resp;
-        if (term.published) resp = await ApiService.unpublishTerm(term);
-        else resp = await ApiService.publishTerm(term);
-        if (resp.status === OK) this.loadTerms();
-        else this.setState({ error: true, status: resp.status });
-        this.state.changingPublishStatus[index] = false;
+        if (term.published)
+            resp = await ApiService.unpublishTerm(term);
+        else
+            resp = await ApiService.publishTerm(term);
+        if (resp.status === OK)
+            loadTerms();
+        else{
+            setError(true)
+            setStatus(resp.status)
+        }
     }
 
-    deleteTerm() {
-        if (!this.state.termToDelete) return;
-        ApiService.deleteTerm(this.state.termToDelete);
-        const termsCopy = Object.assign({}, this.state).terms;
-        this.setState({ terms: termsCopy, showDeleteModal: !this.state.showDeleteModal, termToDelete: {} });
+    const deleteTerm = () => {
+        if (!termToDelete) return;
+        ApiService.deleteTerm(termToDelete);
+        closeDeleteModal()
     }
 
-    switchDeleteModal() {
-        this.setState({ showDeleteModal: !this.state.showDeleteModal, termToDelete: {} });
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false)
+        setTermToDelete(undefined)
     }
 
-    switchDeleteModalParam(e) {
-        this.setState({ showDeleteModal: !this.state.showDeleteModal, termToDelete: e });
+    const openDeleteModal = (e) => {
+        setShowDeleteModal(true)
+        setTermToDelete(e)
     }
 
-    render() {
-        if (this.state.loading === true)
-            return (
-                <div className="mx-auto py-3">
-                    <Spinner animation="border" />
-                </div>
-            );
-        if (this.state.error) return <h1>ERROR {this.state.error}</h1>;
-        return (
-            <React.Fragment>
-                <div className="pt-4">
-                    {this.state.terms && this.state.terms.length > 0
-                        ? [
-                              this.state.terms.map((entry, index) => (
-                                  <Row
-                                      key={'row-' + index}
-                                      xs={1}
-                                      md={6}
-                                      className="border-bottom border-grey list-row pb-3 my-3 justify-content-center"
-                                  >
-                                      <div className="m-auto">{entry.internalId}</div>
-                                      <div className="m-auto">{entry.name}</div>
-                                      <div className="m-auto">{entry.startDate}</div>
-                                      <div className="d-flex m-auto justify-content-center">
-                                          <i
-                                              className="bi bi-pencil-fill btn btn-lg text-white"
-                                              id={'edit-' + index}
-                                              onClick={() => {
-                                                  this.redirectToEdit(entry.id);
-                                              }}
-                                          ></i>
-                                          <i
-                                              className="bi bi-trash-fill btn btn-lg text-white"
-                                              id={'trash-' + index}
-                                              onClick={() => {
-                                                  this.switchDeleteModalParam(entry);
-                                              }}
-                                          ></i>
-                                      </div>
-                                      <div className="my-auto p-0 d-flex justify-content-center">
-                                          {this.state.changingPublishStatus[index]
-                                              ? [
-                                                    <div key={'spinner-' + index} className="mx-auto">
-                                                        <Spinner animation="border" />
-                                                    </div>,
-                                                ]
-                                              : [
-                                                    entry.published
-                                                        ? [
-                                                              <Button
-                                                                  key={'button-hide-' + index}
-                                                                  className="btn-wrap-text"
-                                                                  variant="success"
-                                                                  onClick={() => {
-                                                                      this.switchTermStatus(index);
-                                                                  }}
-                                                              >
-                                                                  <Translation>{(t) => t('terms.hide')}</Translation>
-                                                              </Button>,
-                                                          ]
-                                                        : [
-                                                              <Button
-                                                                  key={'button-publish-' + index}
-                                                                  className="btn-wrap-text"
-                                                                  variant="warning"
-                                                                  onClick={() => {
-                                                                      this.switchTermStatus(index);
-                                                                  }}
-                                                              >
-                                                                  <Translation>{(t) => t('terms.publish')}</Translation>
-                                                              </Button>,
-                                                          ],
-                                                ]}
-                                      </div>
-                                  </Row>
-                              )),
-                          ]
-                        : [
-                              <div key="empty-list">
-                                  <Translation>{(t) => t('emptyList')}</Translation>
-                              </div>,
-                          ]}
-                </div>
-                <div className="mx-auto align-items-center plus-button-container clickable">
-                    <i
-                        className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"
-                        onClick={() => {
-                            this.redirectToCreate();
-                        }}
-                    ></i>
-                </div>
-                <Modal
-                    show={this.state.showDeleteModal}
-                    onHide={() => this.switchDeleteModal()}
-                    className="color-warning text-black"
-                >
-                    <Modal.Header closeButton>
-                        <Modal.Title>
-                            <Translation>{(t) => t('modal.deleteTerm')}</Translation>
-                        </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Translation>
-                            {(t) =>
-                                t('modal.areYouSureTerm', {
-                                    code: this.state.termToDelete.internalId,
-                                    name: this.state.termToDelete.name,
-                                })
-                            }
-                        </Translation>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button
-                            variant="grey"
-                            onClick={() => {
-                                this.switchDeleteModal();
-                            }}
-                        >
-                            <Translation>{(t) => t('modal.cancel')}</Translation>
-                        </Button>
-                        <Button
-                            variant="danger"
-                            onClick={() => {
-                                this.deleteTerm(this.state.termToDelete);
-                            }}
-                        >
-                            <Translation>{(t) => t('modal.delete')}</Translation>
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            </React.Fragment>
-        );
-    }
+
+    if (loading === true)
+        return <div className="mx-auto py-3"><Spinner animation="border"/></div>
+    if (error)
+        return <h1>ERROR {status}</h1>;
+    return (
+        <React.Fragment>
+            <div className="pt-4">
+                {terms && terms.length > 0
+                    ? [
+                          terms.map((entry, index) => (
+                              <Row key={'row-' + index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
+                                  <div className="m-auto">{entry.internalId}</div>
+                                  <div className="m-auto">{entry.name}</div>
+                                  <div className="m-auto">{entry.startDate}</div>
+                                  <div className="d-flex m-auto justify-content-center">
+                                      <i
+                                          className="bi bi-pencil-fill btn btn-lg text-white"
+                                          id={'edit-' + index}
+                                          onClick={() => redirectToEdit(entry.id)}
+                                      ></i>
+                                      <i
+                                          className="bi bi-trash-fill btn btn-lg text-white"
+                                          id={'trash-' + index}
+                                          onClick={() => openDeleteModal(entry)}
+                                      ></i>
+                                  </div>
+                                  <div className="my-auto p-0 d-flex justify-content-center">
+                                      {changingPublishStatus[index]
+                                          ? [
+                                                <div key={'spinner-' + index} className="mx-auto">
+                                                    <Spinner animation="border" />
+                                                </div>,
+                                            ]
+                                          : [
+                                                entry.published
+                                                    ? [
+                                                          <Button
+                                                              key={'button-hide-' + index}
+                                                              className="btn-wrap-text"
+                                                              variant="success"
+                                                              onClick={() => switchTermStatus(index)}
+                                                          >
+                                                              {t('terms.hide')}
+                                                          </Button>,
+                                                      ]
+                                                    : [
+                                                          <Button
+                                                              key={'button-publish-' + index}
+                                                              className="btn-wrap-text"
+                                                              variant="warning"
+                                                              onClick={() => switchTermStatus(index)}
+                                                          >
+                                                              {t('terms.publish')}
+                                                          </Button>,
+                                                      ],
+                                            ]}
+                                  </div>
+                              </Row>
+                          )),
+                      ]
+                    : [
+                          <div key="empty-list">{t('emptyList')}</div>,
+                      ]}
+            </div>
+            <div className="mx-auto align-items-center plus-button-container clickable">
+                <i
+                    className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"
+                    onClick={() => redirectToCreate()}
+                ></i>
+            </div>
+            <Modal
+                show={showDeleteModal}
+                onHide={() => closeDeleteModal()}
+                className="color-warning text-black"
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('modal.deleteTerm')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                        {
+                            termToDelete &&
+                            t('modal.areYouSureTerm', {
+                                code: termToDelete.internalId,
+                                name: termToDelete.name,
+                            })
+                        }
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="grey" onClick={() => closeDeleteModal()}>
+                        {t('modal.cancel')}
+                    </Button>
+                    <Button variant="danger" onClick={() => deleteTerm(termToDelete)}>
+                        {t('modal.delete')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </React.Fragment>
+    );
 }
 
 export default UniversityTermsList;

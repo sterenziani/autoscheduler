@@ -63,18 +63,17 @@ function CourseList(props){
             ApiService.deleteFinishedCourse(user, courseToDelete.id);
         else if (user.type === 'university')
             ApiService.deleteCourse(courseToDelete);
-        setShowDeleteModal(!showDeleteModal)
-        setCourseToDelete(undefined)
+        closeDeleteModal()
         loadCourses();
     }
 
-    const switchDeleteModal = () => {
-        setShowDeleteModal(!showDeleteModal)
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false)
         setCourseToDelete(undefined)
     }
 
-    const switchDeleteModalParam = (e) => {
-        setShowDeleteModal(!showDeleteModal)
+    const openDeleteModal = (e) => {
+        setShowDeleteModal(true)
         setCourseToDelete(e)
     }
 
@@ -120,7 +119,7 @@ function CourseList(props){
                                       <i
                                           className="bi bi-trash-fill btn btn-lg text-white"
                                           id={'trash-' + index}
-                                          onClick={() => switchDeleteModalParam(entry)}
+                                          onClick={() => openDeleteModal(entry)}
                                       ></i>
                                   </div>
                               </Row>
@@ -132,7 +131,7 @@ function CourseList(props){
             </div>
             <Modal
                 show={showDeleteModal}
-                onHide={() => switchDeleteModal()}
+                onHide={() => closeDeleteModal()}
                 className="color-warning text-black"
             >
                 <Modal.Header closeButton>
@@ -148,7 +147,7 @@ function CourseList(props){
                     }
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="grey" onClick={() => switchDeleteModal()}>
+                    <Button variant="grey" onClick={() => closeDeleteModal()}>
                         {t('modal.cancel')}
                     </Button>
                     <Button variant="danger" onClick={() => deleteCourse(courseToDelete)}>

@@ -2,7 +2,7 @@ import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, NOT_FOUND, OK } from './ApiCo
 import SgaConstants from '../resources/SgaConstants';
 import api from './api'
 import AuthService from './AuthService'
-const RESOLVE_DELAY = 2500;
+const RESOLVE_DELAY = 250;
 
 /*
 const getUsers = () =>

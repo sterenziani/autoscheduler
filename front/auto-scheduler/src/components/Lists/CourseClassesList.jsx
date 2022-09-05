@@ -57,18 +57,18 @@ function CourseClassesList(props) {
             return;
         ApiService.deleteCourseClass(courseClassToDelete).then(() => {
             loadClasses()
-            switchDeleteModal()
+            closeDeleteModal()
             setCourseClassToDelete({})
         })
     }
 
-    const switchDeleteModal = () => {
-        setShowDeleteModal(!showDeleteModal)
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false)
         setCourseClassToDelete({})
     }
 
-    const switchDeleteModalParam = (e) => {
-        setShowDeleteModal(!showDeleteModal)
+    const openDeleteModal = (e) => {
+        setShowDeleteModal(true)
         setCourseClassToDelete(e)
     }
 
@@ -101,7 +101,7 @@ function CourseClassesList(props) {
                                                       <i
                                                           className="bi bi-trash-fill btn btn-lg"
                                                           id={'trash-' + index}
-                                                          onClick={() => switchDeleteModalParam(entry)}
+                                                          onClick={() => openDeleteModal(entry)}
                                                       ></i>
                                                   </div>
                                               </div>
@@ -136,7 +136,7 @@ function CourseClassesList(props) {
                     onClick={() => redirectToCreate()}
                 ></i>
             </div>
-            <Modal show={showDeleteModal} onHide={() => switchDeleteModal()} className="color-warning text-black">
+            <Modal show={showDeleteModal} onHide={() => closeDeleteModal()} className="color-warning text-black">
                 <Modal.Header closeButton>
                     <Modal.Title>{t('modal.deleteCourseClass')}</Modal.Title>
                 </Modal.Header>
@@ -151,7 +151,7 @@ function CourseClassesList(props) {
                         }
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="grey" onClick={() => switchDeleteModal()}>
+                    <Button variant="grey" onClick={() => closeDeleteModal()}>
                         {t('modal.cancel')}
                     </Button>
                     <Button variant="danger" onClick={() => deleteCourseClass(courseClassToDelete)}>
