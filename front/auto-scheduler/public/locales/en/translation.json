@@ -124,7 +124,14 @@
         "term":"Term",
         "className":"Class name",
         "lectures":"Schedule",
-        "save":"Save"
+        "save":"Save",
+        "errors":{
+            "courseClass":{
+                "minLength":"The class must have a name",
+                "maxLength":"The class name can't exceed 25 characters",
+                "isRequired":"The class must have a name"
+            }
+        }
     },
     "emptyList": "No items in this list.",
     "noRequiredCourses": "This course can be taken at any point.",

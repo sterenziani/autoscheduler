@@ -4,10 +4,20 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import FormInputField from '../components/FormInputField';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 
 function EditCourseClassPage(props) {
+    const CourseClassSchema = Yup.object().shape({
+        className: Yup.string()
+            .min(1, 'forms.errors.courseClass.minLength')
+            .max(25, 'forms.errors.courseClass.maxLength')
+            .required('forms.errors.courseClass.isRequired'),
+    });
+
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams()
@@ -24,6 +34,9 @@ function EditCourseClassPage(props) {
     const [selectedTerm, setSelectedTerm] = useState();
     const [className, setClassName] = useState();
     const [lectures, setLectures] = useState([]);
+
+    const [programError, setProgramError] = useState();
+    const [badConnection, setBadConnection] = useState();
 
     // ComponentDidMount
     useEffect( () => {
@@ -148,10 +161,6 @@ function EditCourseClassPage(props) {
         setSelectedTerm(e.target.value)
     }
 
-    const onChangeClassName = (e) => {
-        setClassName(e.target.value)
-    }
-
     const onChangeDay = (e) => {
         const index = e.target.id.match(/\d/g)[0];
         const lecturesCopy = Object.assign([], lectures);
@@ -193,17 +202,25 @@ function EditCourseClassPage(props) {
         setLectures(lecturesCopy)
     }
 
-    const onClickSaveButton = async () => {
-        setLoading(true)
-        const resp = await ApiService.saveCourseClass(selectedCourse, selectedTerm, className, lectures)
-        if(resp.status == OK || resp.status == CREATED)
-            navigate("/courses/"+selectedCourse);
-        else{
-            setLoading(false)
-            setError(true)
-            setStatus(resp.status)
+    const onSubmit = async (values, { setSubmitting, setFieldError }) => {
+        setSubmitting(true);
+        if (selectedCourse && selectedTerm && values.className)
+        {
+            const resp = await ApiService.saveCourseClass(selectedCourse, selectedTerm, values.className, lectures)
+            if(resp.status == OK || resp.status == CREATED)
+                navigate("/courses/"+selectedCourse);
+            else{
+                console.log(resp.status)
+                setError(true)
+                setStatus(resp.status)
+                setSubmitting(false);
+            }
         }
-    }
+        else {
+            setProgramError(true);
+            setSubmitting(false);
+        }
+    };
 
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
@@ -218,7 +235,9 @@ function EditCourseClassPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
-                <Form className="p-3 mx-auto text-center text-primary">
+                <Formik initialValues={{ className: className }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
+                {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+                <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <Form.Group controlId="course" className="row mx-auto form-row">
                         <div className="col-3 text-end my-auto text-break">
                             <Form.Label className="my-0">
@@ -251,16 +270,12 @@ function EditCourseClassPage(props) {
                         }
                         </div>
                     </Form.Group>
-                    <Form.Group controlId="name" className="row mx-auto form-row">
-                        <div className="col-3 text-end my-auto text-break">
-                            <Form.Label className="my-0">
-                                <h5 className="my-0"><strong>{t('forms.className')}</strong></h5>
-                            </Form.Label>
-                        </div>
-                        <div className="col-9 text-center">
-                            { <Form.Control type="text" value={className} onChange={onChangeClassName}/> }
-                        </div>
-                    </Form.Group>
+                    <FormInputField
+                        label="forms.className" name="className"
+                        placeholder="register.placeholders.className"
+                        value={values.className} error={errors.className}
+                        touched={touched.className} onChange={handleChange} onBlur={handleBlur}
+                    />
                     <Form.Group controlId="schedule" className="row mx-auto form-row">
                         <div className="col-3 text-end my-3 text-break">
                             <Form.Label className="my-0">
@@ -297,8 +312,10 @@ function EditCourseClassPage(props) {
                             </div>
                         </div>
                     </Form.Group>
+                    <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
-                <Button className="my-3" variant="secondary" onClick={onClickSaveButton}>{t("forms.save")}</Button>
+            )}
+            </Formik>
             </div>
         </React.Fragment>
     );

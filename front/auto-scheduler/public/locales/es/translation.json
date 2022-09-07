@@ -124,7 +124,14 @@
         "term":"Período",
         "className":"Nombre de comisión",
         "lectures":"Horarios",
-        "save":"Guardar"
+        "save":"Guardar",
+        "errors":{
+            "courseClass":{
+                "minLength":"La comisión debe tener un nombre",
+                "maxLength":"El nombre de la comisión no puede superar los 25 characters",
+                "isRequired":"La comisión debe tener un nombre"
+            }
+        }
     },
     "emptyList": "No hay elementos en esta lista.",
     "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",
