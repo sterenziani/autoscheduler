@@ -188,6 +188,12 @@ const getCourse = (courseId) =>
         setTimeout(() => resolve(course), RESOLVE_DELAY);
     });
 
+const getTerm = (termId) =>
+    new Promise((resolve, reject) => {
+        const term = SgaConstants.terms.find((t) => t.id == termId);
+        setTimeout(() => resolve(term), RESOLVE_DELAY);
+    });
+
 const getCourseClass = (classId) =>
     new Promise((resolve, reject) => {
         const courseClass = Object.values(SgaConstants.courseClasses).flat().filter((com) => com.id == classId);
@@ -323,6 +329,20 @@ const saveCourseClass = async (id, course, term, name, lectures) => {
     }
 }
 
+const saveTerm = async (id, name, internalId, startDate) => {
+    try {
+        if(id){
+            return { status: OK };
+        }
+        else{
+            return { status: CREATED };
+        }
+    } catch (e) {
+        if (e.response) return { status: e.response.status };
+        else return { status: TIMEOUT };
+    }
+}
+
 const ApiService = {
     getGames: getGames,
     registerStudent: registerStudent,
@@ -338,6 +358,7 @@ const ApiService = {
     getRemainingCoursesProgram: getRemainingCoursesProgram,
     getFinishedCourses: getFinishedCourses,
     getCourse: getCourse,
+    getTerm: getTerm,
     getRequiredCourses: getRequiredCourses,
     getCourseClassesForTerm: getCourseClassesForTerm,
     addFinishedCourse: addFinishedCourse,
@@ -351,7 +372,8 @@ const ApiService = {
     deleteCourseClass: deleteCourseClass,
     publishTerm: publishTerm,
     unpublishTerm: unpublishTerm,
-    saveCourseClass: saveCourseClass
+    saveCourseClass: saveCourseClass,
+    saveTerm: saveTerm
 };
 
 export default ApiService;

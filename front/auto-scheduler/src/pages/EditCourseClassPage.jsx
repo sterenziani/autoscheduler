@@ -272,7 +272,7 @@ function EditCourseClassPage(props) {
                     </Form.Group>
                     <FormInputField
                         label="forms.className" name="className"
-                        placeholder="register.placeholders.className"
+                        placeholder="forms.placeholders.className"
                         value={values.className} error={errors.className}
                         touched={touched.className} onChange={handleChange} onBlur={handleBlur}
                     />

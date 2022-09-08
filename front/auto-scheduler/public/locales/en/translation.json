@@ -124,12 +124,30 @@
         "term":"Term",
         "className":"Class name",
         "lectures":"Schedule",
+        "createTerm":"Create Term",
+        "editTerm":"Edit Term",
+        "startDate": "Start date",
+        "termName": "Nombre del período",
+        "termCode":"Term code/ID",
         "save":"Save",
+        "placeholders":{
+            "className":"Group X",
+            "termName": "Term X",
+            "termCode":"2022-S1"
+        },
         "errors":{
             "courseClass":{
-                "minLength":"The class must have a name",
-                "maxLength":"The class name can't exceed 25 characters",
-                "isRequired":"The class must have a name"
+                "minLength":"The class must have a name.",
+                "maxLength":"The class name can't exceed 25 characters.",
+                "isRequired":"The class must have a name."
+            },
+            "term":{
+                "minLength":"The term's name must be at least 3 characters long.",
+                "maxLength":"The term's name can't exceed 25 characters.",
+                "isRequired":"The term must have a name.",
+                "minCodeLength":"The term must have a code you identify it with.",
+                "maxCodeLength":"The term's code can't exceed 25 characters.",
+                "codeIsRequired":"The term must have a code you identify it with."
             }
         }
     },

@@ -124,12 +124,30 @@
         "term":"Período",
         "className":"Nombre de comisión",
         "lectures":"Horarios",
+        "createTerm":"Crear Período",
+        "editTerm":"Editar Período",
+        "startDate": "Fecha de inicio",
+        "termName": "Nombre del período",
+        "termCode":"Código/ID del período",
         "save":"Guardar",
+        "placeholders":{
+            "className":"Grupo X",
+            "termName": "Período X",
+            "termCode":"2022-C1"
+        },
         "errors":{
             "courseClass":{
-                "minLength":"La comisión debe tener un nombre",
-                "maxLength":"El nombre de la comisión no puede superar los 25 characters",
-                "isRequired":"La comisión debe tener un nombre"
+                "minLength":"La comisión debe tener un nombre.",
+                "maxLength":"El nombre de la comisión no puede superar los 25 characters.",
+                "isRequired":"La comisión debe tener un nombre."
+            },
+            "term":{
+                "minLength":"El nombre del período debe tener al menos 3 caracteres.",
+                "maxLength":"El nombre del período no puede superar los 25 characters.",
+                "isRequired":"El período debe tener un nombre.",
+                "minCodeLength":"El período necesita un código con el cual lo identifique.",
+                "maxCodeLength":"El código del período no puede superar los 25 characters.",
+                "codeIsRequired":"El período necesita un código con el cual lo identifique."
             }
         }
     },
