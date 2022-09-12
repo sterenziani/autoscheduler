@@ -79,7 +79,8 @@
         "areYouSureClass": "Are you sure you want to delete class {{class}} for course '{{code}} - {{name}}' in term {{term}}?",
         "areYouSureBuilding": "Are you sure you want to delete the building '{{code}} - {{name}}'?",
         "areYouSureTerm": "Are you sure you want to delete the term '{{code}} - {{name}}'?",
-        "noRemainingCourses": "This plan has no remaining courses available",
+        "noRemainingCoursesProgram": "This plan has no remaining courses available.",
+        "noRemainingCourses": "No remaining courses available.",
         "cancel": "Cancel",
         "delete": "Delete",
         "add": "Add",
@@ -127,13 +128,20 @@
         "createTerm":"Create Term",
         "editTerm":"Edit Term",
         "startDate": "Start date",
-        "termName": "Nombre del período",
+        "termName": "Term name",
         "termCode":"Term code/ID",
+        "editCourse":"Edit Course",
+        "createCourse":"Create Course",
+        "courseName":"Course name",
+        "courseCode":"Course code/ID",
+        "requirements":"Required courses",
         "save":"Save",
         "placeholders":{
             "className":"Group X",
             "termName": "Term X",
-            "termCode":"2022-S1"
+            "termCode":"2022-S1",
+            "courseName":"Example 101",
+            "courseCode":"01.01"
         },
         "errors":{
             "courseClass":{
@@ -148,6 +156,14 @@
                 "minCodeLength":"The term must have a code you identify it with.",
                 "maxCodeLength":"The term's code can't exceed 25 characters.",
                 "codeIsRequired":"The term must have a code you identify it with."
+            },
+            "course":{
+                "minCodeLength":"The course must have a code you identify it with.",
+                "maxCodeLength":"The course's code can't exceed 25 characters.",
+                "codeIsRequired":"The course must have a code you identify it with.",
+                "minNameLength":"The course's code must be at least 3 characters long.",
+                "maxNameLength":"The course's name can't exceed 25 characters.",
+                "nameIsRequired":"The course must have a name."
             }
         }
     },

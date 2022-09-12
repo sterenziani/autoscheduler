@@ -206,7 +206,7 @@ function EditCourseClassPage(props) {
         setSubmitting(true);
         if (selectedCourse && selectedTerm && values.className)
         {
-            const resp = await ApiService.saveCourseClass(selectedCourse, selectedTerm, values.className, lectures)
+            const resp = await ApiService.saveCourseClass(id, selectedCourse, selectedTerm, values.className, lectures)
             if(resp.status == OK || resp.status == CREATED)
                 navigate("/courses/"+selectedCourse);
             else{

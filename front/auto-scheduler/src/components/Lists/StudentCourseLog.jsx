@@ -150,12 +150,7 @@ function StudentCourseLog(props) {
                                   </Form.Select>
                                   {courses && courses.length > 0
                                       ? [
-                                            <Form.Select
-                                                key="course-select"
-                                                value={courseToAdd}
-                                                onChange={onChangeCourseToAdd}
-                                                className="m-2"
-                                            >
+                                            <Form.Select key="course-select" value={courseToAdd} onChange={onChangeCourseToAdd} className="m-2">
                                                 {courses.map((c) => (
                                                     <option key={c.id} value={c.id}>
                                                         {c.internalId + ' - ' + c.name}
@@ -165,7 +160,7 @@ function StudentCourseLog(props) {
                                         ]
                                       : [
                                             <div className="text-center" key="no-courses-message">
-                                                {t('modal.noRemainingCourses')}
+                                                {t('modal.noRemainingCoursesProgram')}
                                             </div>,
                                         ]}
                               </Modal.Body>
@@ -175,21 +170,12 @@ function StudentCourseLog(props) {
                                   </Button>
                                   {courseToAdd && courseToAdd !== ''
                                       ? [
-                                            <Button
-                                                key="enabled-add"
-                                                variant="secondary"
-                                                onClick={() => {addCourse(courseToAdd)}}
-                                            >
+                                            <Button key="enabled-add" variant="secondary" onClick={() => {addCourse(courseToAdd)}}>
                                                 {t('modal.add')}
                                             </Button>,
                                         ]
                                       : [
-                                            <Button
-                                                key="disabled-add"
-                                                disabled
-                                                variant="grey"
-                                                onClick={() => {addCourse(courseToAdd)}}
-                                            >
+                                            <Button key="disabled-add" disabled variant="grey" onClick={() => {addCourse(courseToAdd)}}>
                                                 {t('modal.add')}
                                             </Button>,
                                         ]}

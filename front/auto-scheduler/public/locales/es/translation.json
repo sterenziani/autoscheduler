@@ -55,14 +55,14 @@
         }
     },
     "tabs": {
-        "courseLog": "CURSOS APROBADOS",
+        "courseLog": "MATERIAS APROBADAS",
         "findSchedule": "BUSCAR CRONOGRAMAS",
         "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
         "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
         "login": "Iniciar Sesión",
         "programs": "CARRERAS",
         "terms": "PERÍODOS",
-        "courses": "CURSOS",
+        "courses": "MATERIAS",
         "buildings": "SEDES",
         "requiredCourses": "CORRELATIVAS",
         "courseClasses": "COMISIONES"
@@ -79,7 +79,8 @@
         "areYouSureClass": "¿Seguro que desea eliminar la comisión {{class}} de la materia '{{code}} - {{name}}' del período {{term}}?",
         "areYouSureBuilding": "¿Seguro que desea eliminar la sede '{{code}} - {{name}}'?",
         "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'?",
-        "noRemainingCourses": "No quedan materias correspondientes a este plan",
+        "noRemainingCoursesProgram": "No quedan materias correspondientes a este plan.",
+        "noRemainingCourses": "No quedan más materias.",
         "cancel": "Cancelar",
         "delete": "Eliminar",
         "add": "Añadir",
@@ -129,11 +130,18 @@
         "startDate": "Fecha de inicio",
         "termName": "Nombre del período",
         "termCode":"Código/ID del período",
+        "editCourse":"Editar Materia",
+        "createCourse":"Crear Materia",
+        "courseName":"Nombre de materia",
+        "courseCode":"Código/ID de la materia",
+        "requirements":"Correlativas",
         "save":"Guardar",
         "placeholders":{
             "className":"Grupo X",
             "termName": "Período X",
-            "termCode":"2022-C1"
+            "termCode":"2022-C1",
+            "courseName":"Ejemplos I",
+            "courseCode":"01.01"
         },
         "errors":{
             "courseClass":{
@@ -148,6 +156,14 @@
                 "minCodeLength":"El período necesita un código con el cual lo identifique.",
                 "maxCodeLength":"El código del período no puede superar los 25 characters.",
                 "codeIsRequired":"El período necesita un código con el cual lo identifique."
+            },
+            "course":{
+                "minCodeLength":"La materia debe tener un código con el cual la identifique.",
+                "maxCodeLength":"El código de la materia no debe superar los 25 caracteres.",
+                "codeIsRequired":"La materia debe tener un código con el cual la identifique.",
+                "minNameLength":"El nombre de la materia debe tener al menos 3 caracteres.",
+                "maxNameLength":"El nombre de la materia no puede superar los 25 characters.",
+                "nameIsRequired":"La materia debe tener un nombre."
             }
         }
     },

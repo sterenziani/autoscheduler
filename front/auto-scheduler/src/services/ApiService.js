@@ -343,6 +343,20 @@ const saveTerm = async (id, name, internalId, startDate) => {
     }
 }
 
+const saveCourse = async (id, name, internalId, requirements) => {
+    try {
+        if(id){
+            return { status: OK };
+        }
+        else{
+            return { status: CREATED };
+        }
+    } catch (e) {
+        if (e.response) return { status: e.response.status };
+        else return { status: TIMEOUT };
+    }
+}
+
 const ApiService = {
     getGames: getGames,
     registerStudent: registerStudent,
@@ -373,7 +387,8 @@ const ApiService = {
     publishTerm: publishTerm,
     unpublishTerm: unpublishTerm,
     saveCourseClass: saveCourseClass,
-    saveTerm: saveTerm
+    saveTerm: saveTerm,
+    saveCourse: saveCourse
 };
 
 export default ApiService;
