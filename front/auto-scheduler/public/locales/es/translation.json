@@ -162,7 +162,7 @@
                 "maxCodeLength":"El código de la materia no debe superar los 25 caracteres.",
                 "codeIsRequired":"La materia debe tener un código con el cual la identifique.",
                 "minNameLength":"El nombre de la materia debe tener al menos 3 caracteres.",
-                "maxNameLength":"El nombre de la materia no puede superar los 25 characters.",
+                "maxNameLength":"El nombre de la materia no puede superar los 50 characters.",
                 "nameIsRequired":"La materia debe tener un nombre."
             }
         }

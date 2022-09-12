@@ -18,7 +18,7 @@ function EditCoursePage(props) {
             .required('forms.errors.course.codeIsRequired'),
         courseName: Yup.string()
             .min(3, 'forms.errors.course.minNameLength')
-            .max(25, 'forms.errors.course.maxNameLength')
+            .max(50, 'forms.errors.course.maxNameLength')
             .required('forms.errors.course.nameIsRequired'),
     });
 
@@ -136,8 +136,12 @@ function EditCoursePage(props) {
         if (values.courseCode && values.courseName)
         {
             const resp = await ApiService.saveCourse(id, values.courseCode, values.courseName, requirements)
-            if(resp.status == OK || resp.status == CREATED)
-                navigate("/");
+            if(resp.status == OK || resp.status == CREATED){
+                if(id)
+                    navigate("/courses/"+id)
+                else
+                    navigate("/?tab=courses")
+            }
             else{
                 setError(true)
                 setStatus(resp.status)

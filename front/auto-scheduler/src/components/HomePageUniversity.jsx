@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import UniversityProgramsList from './Lists/UniversityProgramsList';
 import UniversityCoursesList from './Lists/UniversityCoursesList';
 import UniversityBuildingsList from './Lists/UniversityBuildingsList';
@@ -11,6 +12,8 @@ const CONTACT_EMAIL = 'juan@autoscheduler.com';
 
 function HomePageUniversity(props) {
     const {t} = useTranslation()
+    const query = new URLSearchParams(useLocation().search).get('tab')
+    const startingTab = query? query:"programs"
     return (
         <React.Fragment>
             <HelmetProvider>
@@ -22,7 +25,7 @@ function HomePageUniversity(props) {
                 </Alert>
             )}
             <div className="container my-5">
-                <Tabs className="borderless-tabs" defaultActiveKey="programs" fill>
+                <Tabs className="borderless-tabs" defaultActiveKey={startingTab} fill>
                     <Tab
                         className="text-center" eventKey="buildings"
                         title={t('tabs.buildings')}

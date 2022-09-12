@@ -100,7 +100,7 @@ function EditTermPage(props) {
         {
             const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.internalId, startDate)
             if(resp.status == OK || resp.status == CREATED)
-                navigate("/");
+                navigate("/?tab=terms");
             else{
                 setError(true)
                 setStatus(resp.status)

@@ -162,7 +162,7 @@
                 "maxCodeLength":"The course's code can't exceed 25 characters.",
                 "codeIsRequired":"The course must have a code you identify it with.",
                 "minNameLength":"The course's code must be at least 3 characters long.",
-                "maxNameLength":"The course's name can't exceed 25 characters.",
+                "maxNameLength":"The course's name can't exceed 50 characters.",
                 "nameIsRequired":"The course must have a name."
             }
         }
