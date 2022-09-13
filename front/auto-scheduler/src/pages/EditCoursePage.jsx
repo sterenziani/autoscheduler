@@ -7,6 +7,7 @@ import ApiService from '../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../components/FormInputField';
+import CourseListForm from '../components/Lists/CourseListForm';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 
@@ -35,10 +36,7 @@ function EditCoursePage(props) {
     const [course, setCourse] = useState(null);
     const [requirements, setRequirements] = useState([]);
     const [availableCourses, setAvailableCourses] = useState();
-
     const [courses, setCourses] = useState(null);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [courseToAdd,setCourseToAdd] = useState();
 
     // ComponentDidMount
     useEffect( () => {
@@ -66,7 +64,7 @@ function EditCoursePage(props) {
 
     useEffect( () => {
         setAvailableCourses(getFilteredCourses(requirements))
-    },[courses])
+    },[requirements])
 
     const loadUser = async () => {
         ApiService.getActiveUser().then((data) => {
@@ -154,12 +152,12 @@ function EditCoursePage(props) {
         }
     };
 
-    const getFilteredCourses = (requirements) => {
+    const getFilteredCourses = (coursesToRemove) => {
         let availableCourses = []
         if(courses)
         {
             availableCourses = courses.filter(function(item) {
-                const match = requirements.find((c) => c.id === item.id);
+                const match = coursesToRemove.find((c) => c.id === item.id);
                 return !match;
             });
             if(id){
@@ -171,31 +169,18 @@ function EditCoursePage(props) {
         return availableCourses
     }
 
-    const switchAddModal = () => {
-        setShowAddModal(!showAddModal)
-    }
-
-    const onChangeCourseToAdd = (e) => {
-        const course = courses.find((c) => c.id === e.target.value);
-        if(course)
-            setCourseToAdd(course)
-    }
-
     const onClickTrashCan = (e) => {
         const requirementsCopy = Object.assign([], requirements);
         requirementsCopy.splice(requirements.indexOf(e), 1);
         setRequirements(requirementsCopy)
-        setAvailableCourses(getFilteredCourses(requirementsCopy))
     }
 
-    const addCourse = () => {
+    const addRequiredCourse = (courseToAdd) => {
         if (!courseToAdd)
             return;
         const requirementsCopy = Object.assign([], requirements);
         requirementsCopy.push(courseToAdd);
         setRequirements(requirementsCopy)
-        setAvailableCourses(getFilteredCourses(requirementsCopy))
-        switchAddModal()
     }
 
     if (loading === true)
@@ -233,69 +218,13 @@ function EditCoursePage(props) {
                             </Form.Label>
                         </div>
                         <div className="col-9 align-items-start align-items-center">
-                            {
-                                requirements && requirements.length > 0? [
-                                        requirements.map((entry, index) => (
-                                            <Row
-                                                key={'row-' + index} xs={1} md={4}
-                                                className="border-bottom border-primary list-row px-5 pb-2 pt-3 justify-content-center"
-                                            >
-                                                <div className="my-auto">{entry.internalId}</div>
-                                                <div className="my-auto w-min-50">
-                                                    <a key={'link-' + entry.id} href={'/courses/' + entry.id}>
-                                                        {entry.name}
-                                                    </a>
-                                                </div>
-                                                <div className="d-flexmy-auto justify-content-center">
-                                                    <i
-                                                        className="bi bi-trash-fill btn btn-lg text-primary"
-                                                        id={'trash-' + index}
-                                                        onClick={() => onClickTrashCan(entry)}
-                                                    ></i>
-                                                </div>
-                                            </Row>
-                                        ))
-                                ]:[<div key="empty-list">{t('emptyList')}</div>]
-                            }
-                            <div className="mx-auto align-items-center plus-button-container clickable">
-                                <i className="me-3 bi bi-plus-circle-fill btn btn-lg color-primary" onClick={switchAddModal}></i>
-                            </div>
+                            <CourseListForm courses={courses}
+                                listedCourses={requirements} availableCourses={availableCourses}
+                                onClickTrashCan={onClickTrashCan} addCourse={addRequiredCourse}
+                            />
                         </div>
                     </Form.Group>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
-                    <Modal show={showAddModal} onHide={() => switchAddModal()} className="color-warning text-black">
-                        <Modal.Header closeButton>
-                            <Modal.Title>{t('modal.addCourse')}</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            {availableCourses && availableCourses.length > 0
-                                ? [
-                                      <Form.Select key="course-select" value={courseToAdd? courseToAdd.id:undefined} onChange={onChangeCourseToAdd} className="m-2">
-                                          {availableCourses.map((c) => (
-                                              <option key={c.id} value={c.id}>
-                                                  {c.internalId + ' - ' + c.name}
-                                              </option>
-                                          ))}
-                                      </Form.Select>,
-                                  ]
-                                : [
-                                      <div className="text-center" key="no-courses-message">
-                                          {t('modal.noRemainingCourses')}
-                                      </div>,
-                                  ]}
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="grey" onClick={() => {switchAddModal()}}>
-                                {t('modal.cancel')}
-                            </Button>
-                            {
-                                courseToAdd && courseToAdd !== '' &&
-                                <Button key="enabled-add" variant="secondary" onClick={() => {addCourse()}}>
-                                    {t('modal.add')}
-                                </Button>
-                            }
-                        </Modal.Footer>
-                    </Modal>
                 </Form>
             )}
             </Formik>
