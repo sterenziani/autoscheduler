@@ -34,7 +34,7 @@ function EditCoursePage(props) {
     const [badConnection, setBadConnection] = useState();
 
     const [course, setCourse] = useState(null);
-    const [requirements, setRequirements] = useState([]);
+    const [requirements, setRequirements] = useState();
     const [availableCourses, setAvailableCourses] = useState();
     const [courses, setCourses] = useState(null);
 
@@ -52,11 +52,11 @@ function EditCoursePage(props) {
             else{
                 if(user && !courses)
                     await Promise.all([loadCourses(user.id)]);
-                else if(user && !course && courses)
+                else if(user && !course && courses){
                     setCourse({"name": t("forms.placeholders.courseName"), "internalId": t("forms.placeholders.courseCode")})
+                    setRequirements([])
+                }
             }
-            if(user && course && courses && requirements)
-                setLoading(false)
         }
         execute();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,6 +64,8 @@ function EditCoursePage(props) {
 
     useEffect( () => {
         setAvailableCourses(getFilteredCourses(requirements))
+        if(user && course && courses && requirements)
+            setLoading(false)
     },[requirements])
 
     const loadUser = async () => {
