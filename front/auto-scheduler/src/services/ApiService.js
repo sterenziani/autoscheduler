@@ -194,6 +194,12 @@ const getTerm = (termId) =>
         setTimeout(() => resolve(term), RESOLVE_DELAY);
     });
 
+const getProgram = (programId) =>
+    new Promise((resolve, reject) => {
+        const term = SgaConstants.programs[9].find((p) => p.id == programId);
+        setTimeout(() => resolve(term), RESOLVE_DELAY);
+    });
+
 const getCourseClass = (classId) =>
     new Promise((resolve, reject) => {
         const courseClass = Object.values(SgaConstants.courseClasses).flat().filter((com) => com.id == classId);
@@ -204,8 +210,20 @@ const getCourseClass = (classId) =>
 
 const getRequiredCourses = (courseId) =>
     new Promise((resolve, reject) => {
-        const course = SgaConstants.courses[9];
-        setTimeout(() => resolve(course), RESOLVE_DELAY);
+        const courses = [SgaConstants.informaticaCourses[0], SgaConstants.informaticaCourses[5]];
+        setTimeout(() => resolve(courses), RESOLVE_DELAY);
+    });
+
+const getMandatoryCourses = (programId) =>
+    new Promise((resolve, reject) => {
+        const courses = [SgaConstants.informaticaCourses[0], SgaConstants.informaticaCourses[5]];
+        setTimeout(() => resolve(courses), RESOLVE_DELAY);
+    });
+
+const getOptionalCourses = (programId) =>
+    new Promise((resolve, reject) => {
+        const courses = [SgaConstants.informaticaCourses[6]];
+        setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
 
 const getCourseClassesForTerm = (courseId, termId) =>
@@ -373,7 +391,10 @@ const ApiService = {
     getFinishedCourses: getFinishedCourses,
     getCourse: getCourse,
     getTerm: getTerm,
+    getProgram: getProgram,
     getRequiredCourses: getRequiredCourses,
+    getMandatoryCourses: getMandatoryCourses,
+    getOptionalCourses: getOptionalCourses,
     getCourseClassesForTerm: getCourseClassesForTerm,
     addFinishedCourse: addFinishedCourse,
     deleteFinishedCourse: deleteFinishedCourse,

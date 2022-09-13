@@ -135,13 +135,21 @@
         "courseName":"Course name",
         "courseCode":"Course code/ID",
         "requirements":"Required courses",
+        "editProgram":"Edit Program",
+        "createProgram":"Create Program",
+        "programCode":"Program code/ID",
+        "programName":"Program name",
+        "mandatoryCourses":"Mandatory courses",
+        "optionalCourses":"Optional courses",
         "save":"Save",
         "placeholders":{
             "className":"Group X",
             "termName": "Term X",
             "termCode":"2022-S1",
             "courseName":"Example 101",
-            "courseCode":"01.01"
+            "courseCode":"01.01",
+            "programCode": "2B",
+            "programName": "AC Engineering"
         },
         "errors":{
             "courseClass":{
@@ -164,6 +172,14 @@
                 "minNameLength":"The course's code must be at least 3 characters long.",
                 "maxNameLength":"The course's name can't exceed 50 characters.",
                 "nameIsRequired":"The course must have a name."
+            },
+            "program":{
+                "minCodeLength":"The program must have a code you identify it with.",
+                "maxCodeLength":"The program's code can't exceed 25 characters.",
+                "codeIsRequired":"The program must have a code you identify it with.",
+                "minNameLength":"The program's code must be at least 3 characters long.",
+                "maxNameLength":"The program's name can't exceed 50 characters.",
+                "nameIsRequired":"The program must have a name."
             }
         }
     },

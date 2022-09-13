@@ -135,13 +135,21 @@
         "courseName":"Nombre de materia",
         "courseCode":"Código/ID de la materia",
         "requirements":"Correlativas",
+        "editProgram":"Editar Carrera",
+        "createProgram":"Crear Carrera",
+        "programCode":"Código/ID del plan",
+        "programName":"Nombre del plan",
+        "mandatoryCourses":"Materias obligatorias",
+        "optionalCourses":"Materias electivas",
         "save":"Guardar",
         "placeholders":{
             "className":"Grupo X",
             "termName": "Período X",
             "termCode":"2022-C1",
             "courseName":"Ejemplos I",
-            "courseCode":"01.01"
+            "courseCode":"01.01",
+            "programCode": "2B",
+            "programName": "Ingeniería en Aires"
         },
         "errors":{
             "courseClass":{
@@ -164,6 +172,14 @@
                 "minNameLength":"El nombre de la materia debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre de la materia no puede superar los 50 characters.",
                 "nameIsRequired":"La materia debe tener un nombre."
+            },
+            "program":{
+                "minCodeLength":"El plan de carrera debe tener un código con el cual la identifique.",
+                "maxCodeLength":"El código del plan de carrera no debe superar los 25 caracteres.",
+                "codeIsRequired":"El plan de carrera debe tener un código con el cual la identifique.",
+                "minNameLength":"El nombre del plan de carrera debe tener al menos 3 caracteres.",
+                "maxNameLength":"El nombre del plan de carrera no puede superar los 50 characters.",
+                "nameIsRequired":"El plan de carrera debe tener un nombre."
             }
         }
     },
