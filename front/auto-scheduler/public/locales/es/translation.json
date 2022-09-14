@@ -141,6 +141,13 @@
         "programName":"Nombre del plan",
         "mandatoryCourses":"Materias obligatorias",
         "optionalCourses":"Materias electivas",
+        "editBuilding": "Editar Sede",
+        "createBuilding": "Crear Sede",
+        "buildingCode": "Código/ID de sede",
+        "buildingName": "Nombre de la sede",
+        "timeToDestination": "Distancia a destinos",
+        "minutes":"mins.",
+        "onlyBuilding": "This is your only building.",
         "save":"Guardar",
         "placeholders":{
             "className":"Grupo X",
@@ -149,7 +156,9 @@
             "courseName":"Ejemplos I",
             "courseCode":"01.01",
             "programCode": "2B",
-            "programName": "Ingeniería en Aires"
+            "programName": "Ingeniería en Aires",
+            "buildingName": "Edificio Z",
+            "buildingCode": "EZ"
         },
         "errors":{
             "courseClass":{
@@ -180,6 +189,14 @@
                 "minNameLength":"El nombre del plan de carrera debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre del plan de carrera no puede superar los 50 characters.",
                 "nameIsRequired":"El plan de carrera debe tener un nombre."
+            },
+            "building":{
+                "minCodeLength":"La sede debe tener un código con el cual la identifique.",
+                "maxCodeLength":"El código de la sede no debe superar los 25 caracteres.",
+                "codeIsRequired":"La sede debe tener un código con el cual la identifique.",
+                "minNameLength":"El nombre de la sede debe tener al menos 3 caracteres.",
+                "maxNameLength":"El nombre de la sede no puede superar los 50 characters.",
+                "nameIsRequired":"La sede debe tener un nombre.""
             }
         }
     },

@@ -9,6 +9,7 @@ import EditCoursePage from './pages/EditCoursePage';
 import EditCourseClassPage from './pages/EditCourseClassPage';
 import EditTermPage from './pages/EditTermPage';
 import EditProgramPage from './pages/EditProgramPage';
+import EditBuildingPage from './pages/EditBuildingPage';
 import NoMatch from './components/NoMatch';
 import './resources/style.scss';
 
@@ -30,6 +31,8 @@ function App() {
                 <Route path="/programs/new" element={<EditProgramPage />} />
                 <Route path="/courses/new" element={<EditCoursePage />} />
                 <Route path="/courses/:id/edit" element={<EditCoursePage />} />
+                <Route path="/buildings/:id" element={<EditBuildingPage />} />
+                <Route path="/buildings/new" element={<EditBuildingPage />} />
                 <Route path="*" element={<NoMatch />} />
             </Routes>
         </Router>

@@ -8,7 +8,7 @@ const FormInputField = (props) => {
     return (
         <React.Fragment>
             <Form.Group className={'row mx-auto form-row ' + 'text-' + color}>
-                <div className="col-3 text-end my-auto">
+                <div className="col-3 text-break text-end my-auto">
                     <Form.Label className="col text-end my-auto">
                         <h5 className="my-0"><strong>{t(`${label}`)}</strong></h5>
                     </Form.Label>

@@ -196,8 +196,14 @@ const getTerm = (termId) =>
 
 const getProgram = (programId) =>
     new Promise((resolve, reject) => {
-        const term = SgaConstants.programs[9].find((p) => p.id == programId);
-        setTimeout(() => resolve(term), RESOLVE_DELAY);
+        const program = SgaConstants.programs[9].find((p) => p.id == programId);
+        setTimeout(() => resolve(program), RESOLVE_DELAY);
+    });
+
+const getBuilding = (buildingId) =>
+    new Promise((resolve, reject) => {
+        const building = SgaConstants.buildings[9].find((b) => b.id == buildingId);
+        setTimeout(() => resolve(building), RESOLVE_DELAY);
     });
 
 const getCourseClass = (classId) =>
@@ -375,6 +381,34 @@ const saveCourse = async (id, name, internalId, requirements) => {
     }
 }
 
+const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCourses) => {
+    try {
+        if(id){
+            return { status: OK };
+        }
+        else{
+            return { status: CREATED };
+        }
+    } catch (e) {
+        if (e.response) return { status: e.response.status };
+        else return { status: TIMEOUT };
+    }
+}
+
+const saveBuilding = async (id, name, internalId, distances) => {
+    try {
+        if(id){
+            return { status: OK };
+        }
+        else{
+            return { status: CREATED };
+        }
+    } catch (e) {
+        if (e.response) return { status: e.response.status };
+        else return { status: TIMEOUT };
+    }
+}
+
 const ApiService = {
     getGames: getGames,
     registerStudent: registerStudent,
@@ -392,6 +426,7 @@ const ApiService = {
     getCourse: getCourse,
     getTerm: getTerm,
     getProgram: getProgram,
+    getBuilding: getBuilding,
     getRequiredCourses: getRequiredCourses,
     getMandatoryCourses: getMandatoryCourses,
     getOptionalCourses: getOptionalCourses,
@@ -409,7 +444,9 @@ const ApiService = {
     unpublishTerm: unpublishTerm,
     saveCourseClass: saveCourseClass,
     saveTerm: saveTerm,
-    saveCourse: saveCourse
+    saveCourse: saveCourse,
+    saveProgram: saveProgram,
+    saveBuilding: saveBuilding,
 };
 
 export default ApiService;

@@ -661,9 +661,9 @@ var buildings = [
             internalId: 'SDT',
             name: 'Sede Distrito Tecnológico',
             distances: [
-                { building: { name: 'SDF' }, time: 30 },
-                { building: { name: 'SR' }, time: 10 },
-                { building: { name: 'V' }, time: 10 },
+                { building: { name: 'SDF', internalId: 'SDF'}, time: 30 },
+                { building: { name: 'SR', internalId: 'SR' }, time: 10 },
+                { building: { name: 'V', internalId: 'V' }, time: 10 },
             ],
         },
         {
@@ -671,9 +671,9 @@ var buildings = [
             internalId: 'SDF',
             name: 'Sede Distrito Financiero',
             distances: [
-                { building: { name: 'SDT' }, time: 30 },
-                { building: { name: 'SR' }, time: 35 },
-                { building: { name: 'V' }, time: 10 },
+                { building: { name: 'SDF', internalId: 'SDF'}, time: 30 },
+                { building: { name: 'SR', internalId: 'SR' }, time: 35 },
+                { building: { name: 'V', internalId: 'V' }, time: 10 },
             ],
         },
         {
@@ -681,9 +681,9 @@ var buildings = [
             internalId: 'SR',
             name: 'Sede Rectorado',
             distances: [
-                { building: { name: 'SDT' }, time: 10 },
-                { building: { name: 'SDF' }, time: 35 },
-                { building: { name: 'V' }, time: 10 },
+                { building: { name: 'SDF', internalId: 'SDF'}, time: 10 },
+                { building: { name: 'SR', internalId: 'SR' }, time: 35 },
+                { building: { name: 'V', internalId: 'V' }, time: 10 },
             ],
         },
         {
@@ -691,9 +691,9 @@ var buildings = [
             internalId: 'V',
             name: 'Virtual',
             distances: [
-                { building: { name: 'SDF' }, time: 30 },
-                { building: { name: 'SR' }, time: 10 },
-                { building: { name: 'SDT' }, time: 10 },
+                { building: { name: 'SDF', internalId: 'SDF'}, time: 30 },
+                { building: { name: 'SR', internalId: 'SR' }, time: 10 },
+                { building: { name: 'V', internalId: 'V' }, time: 10 },
             ],
         },
     ],

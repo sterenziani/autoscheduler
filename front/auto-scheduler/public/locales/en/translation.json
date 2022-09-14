@@ -141,6 +141,13 @@
         "programName":"Program name",
         "mandatoryCourses":"Mandatory courses",
         "optionalCourses":"Optional courses",
+        "editBuilding": "Edit Building",
+        "createBuilding": "Create Building",
+        "buildingCode": "Building Code/ID",
+        "buildingName": "Building name",
+        "timeToDestination": "Time to destination",
+        "minutes":"mins",
+        "onlyBuilding": "This is your only building.",
         "save":"Save",
         "placeholders":{
             "className":"Group X",
@@ -149,7 +156,9 @@
             "courseName":"Example 101",
             "courseCode":"01.01",
             "programCode": "2B",
-            "programName": "AC Engineering"
+            "programName": "AC Engineering",
+            "buildingName": "Building Z",
+            "buildingCode": "BZ"
         },
         "errors":{
             "courseClass":{
@@ -180,6 +189,14 @@
                 "minNameLength":"The program's code must be at least 3 characters long.",
                 "maxNameLength":"The program's name can't exceed 50 characters.",
                 "nameIsRequired":"The program must have a name."
+            },
+            "building":{
+                "minCodeLength":"The building must have a code you identify it with.",
+                "maxCodeLength":"The building's code can't exceed 25 characters.",
+                "codeIsRequired":"The building must have a code you identify it with.",
+                "minNameLength":"The building's code must be at least 3 characters long.",
+                "maxNameLength":"The building's name can't exceed 50 characters.",
+                "nameIsRequired":"The building must have a name."
             }
         }
     },

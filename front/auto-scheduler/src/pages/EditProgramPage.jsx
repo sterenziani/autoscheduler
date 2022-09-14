@@ -152,7 +152,7 @@ function EditProgramPage(props) {
         setSubmitting(true);
         if (values.programCode && values.programName)
         {
-            const resp = await ApiService.saveCourse(id, values.programCode, values.programName, mandatoryCourses, optionalCourses)
+            const resp = await ApiService.saveProgram(id, values.programCode, values.programName, mandatoryCourses, optionalCourses)
             if(resp.status == OK || resp.status == CREATED){
                 navigate("/?tab=programs")
             }
