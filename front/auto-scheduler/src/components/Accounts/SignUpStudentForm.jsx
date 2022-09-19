@@ -1,4 +1,6 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { Button, Form, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
@@ -29,87 +31,88 @@ const SignUpSchema = Yup.object().shape({
         .required('register.errors.repeatPassword.isRequired'),
 });
 
-class SignUpStudentForm extends Component {
-    state = {
-        bad_connection: false,
-        universities: [],
-        programs: [],
-        params: { school: undefined, program: undefined },
-        loading: true,
-        error: false,
-        programError: false,
-    };
+function SignUpStudentForm(props) {
+    const {t} = useTranslation();
 
-    onChangeSchools(e) {
-        const paramsCopy = Object.assign({}, this.state.params);
-        paramsCopy.school = e.target.value;
-        paramsCopy.program = undefined;
-        this.setState({ params: paramsCopy, loading: true });
-        this.loadPrograms(e.target.value);
+    const [badConnection, setBadConnection] = useState(false);
+    const [universities, setUniversities] = useState([]);
+    const [programs, setPrograms] = useState([]);
+    const [selectedSchool, setSelectedSchool] = useState()
+    const [selectedProgram, setSelectedProgram] = useState()
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(false)
+    const [status, setStatus] = useState(false)
+    const [programError, setProgramError] = useState(false)
+
+    useEffect( () => {
+        loadUniversities();
+    }, [])
+
+    const onChangeSchools = (e) => {
+        setSelectedSchool(e.target.value)
+        setSelectedProgram()
+        setLoading(true)
+        loadPrograms(e.target.value);
     }
 
-    onChangePrograms(e) {
-        const paramsCopy = Object.assign({}, this.state.params);
-        paramsCopy.program = e.target.value;
-        this.setState({ params: paramsCopy });
+    const onChangePrograms = (e) => {
+        setSelectedProgram(e.target.value)
     }
 
-    loadUniversities() {
+    const loadUniversities = () => {
         ApiService.getUniversities().then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
             if (findError) {
-                this.setState({ loading: false, error: true, status: findError });
+                setLoading(false)
+                setError(true)
+                setStatus(findError)
             } else {
                 ApiService.getPrograms(data[0].id).then((dataProg) => {
                     let findError = null;
                     if (dataProg && dataProg.status && dataProg.status !== OK && dataProg.status !== CREATED)
                         findError = dataProg.status;
-                    if (findError) this.setState({ loading: false, error: true, status: findError });
-                    else {
-                        const paramsCopy = Object.assign({}, this.state.params);
-                        paramsCopy.school = data[0].id;
-                        paramsCopy.program = dataProg && dataProg.length > 0 ? dataProg[0].id : undefined;
-                        this.setState({
-                            universities: data,
-                            programs: dataProg,
-                            params: paramsCopy,
-                            loading: false,
-                        });
+                    if (findError){
+                        setLoading(false)
+                        setError(true)
+                        setStatus(findError)
                     }
-                });
+                    else {
+                        setUniversities(data)
+                        setPrograms(dataProg)
+                        setSelectedSchool(data[0].id)
+                        setSelectedProgram(dataProg && dataProg.length > 0 ? dataProg[0].id : undefined)
+                        setLoading(false)
+                    }
+                })
             }
-        });
+        })
     }
 
-    loadPrograms(university) {
+    const loadPrograms = (university) => {
         ApiService.getPrograms(university).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
             if (findError) {
-                this.setState({ loading: false, error: true, status: findError });
+                setLoading(false)
+                setError(true)
+                setStatus(findError)
             } else {
-                const paramsCopy = Object.assign({}, this.state.params);
-                paramsCopy.program = data && data.length > 0 ? data[0].id : undefined;
-                this.setState({ programs: data, params: paramsCopy, loading: false, programError: false });
+                setPrograms(data)
+                setSelectedProgram(data && data.length > 0 ? data[0].id : undefined)
+                setLoading(false)
+                setProgramError(false)
             }
         });
     }
 
-    componentDidMount() {
-        this.loadUniversities();
-    }
-
-    register = async (values, setSubmitting, setFieldError) => {
+    const register = async (values, setSubmitting, setFieldError) => {
         const { status, conflicts } = await ApiService.registerStudent(
-            values.email,
-            values.password,
-            this.state.params.school,
-            this.state.params.program
+            values.email, values.password, selectedSchool, selectedProgram
         );
         switch (status) {
             case CREATED:
-                this.authenticate(values);
+                authenticate(values)
                 break;
             case CONFLICT:
                 setSubmitting(false);
@@ -118,13 +121,13 @@ class SignUpStudentForm extends Component {
                 });
                 break;
             default:
-                setSubmitting(false);
-                this.setState({ bad_connection: true });
+                setSubmitting(false)
+                setBadConnection(true)
                 break;
         }
-    };
+    }
 
-    authenticate = async (values) => {
+    const authenticate = async (values) => {
         const { status } = await ApiService.login(values.username, values.password);
         switch (status) {
             case OK:
@@ -132,144 +135,137 @@ class SignUpStudentForm extends Component {
                 break;
             default:
                 console.log('Log in failed');
-                this.props.activateRedirect('login');
+                props.activateRedirect('login');
                 break;
         }
-    };
-
-    onSubmit = (values, { setSubmitting, setFieldError }) => {
-        setSubmitting(true);
-        if (this.state.params.school && this.state.params.program) this.register(values, setSubmitting, setFieldError);
-        else {
-            this.setState({ programError: true });
-            setSubmitting(false);
-        }
-    };
-
-    render() {
-        return (
-            <Formik
-                initialValues={{ email: '', password: '', repeat_password: '' }}
-                validationSchema={SignUpSchema}
-                onSubmit={this.onSubmit}
-            >
-                {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-                    <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
-                        <FontAwesomeIcon size="3x" icon={faMortarBoard} />
-                        {this.state.bad_connection && (
-                            <p className="form-error">
-                                <Translation>{(t) => t('register.errors.badConnection')}</Translation>
-                            </p>
-                        )}
-
-                        <FormInputField
-                            label="register.email"
-                            name="email"
-                            placeholder="register.placeholders.emailStudent"
-                            value={values.email}
-                            error={errors.email}
-                            touched={touched.email}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
-
-                        <FormInputField
-                            type="password"
-                            label="register.password"
-                            name="password"
-                            placeholder="register.placeholders.password"
-                            value={values.password}
-                            error={errors.password}
-                            touched={touched.password}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
-
-                        <FormInputField
-                            type="password"
-                            label="register.repeatPassword"
-                            name="repeat_password"
-                            placeholder="register.placeholders.password"
-                            value={values.repeat_password}
-                            error={errors.repeat_password}
-                            touched={touched.repeat_password}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
-
-                        {this.state.loading ? (
-                            <div className="mx-auto py-3">
-                                <Spinner animation="border" />
-                            </div>
-                        ) : this.state.error ? (
-                            <h1>ERROR {this.state.error}</h1>
-                        ) : (
-                            <>
-                                <Form.Group controlId="school" className="row mx-auto form-row">
-                                    <div className="col-3 text-end my-auto text-break ">
-                                        <Form.Label className="my-0">
-                                            <h5 className="my-0">
-                                                <strong>
-                                                    <Translation>{(t) => t('register.school')}</Translation>
-                                                </strong>
-                                            </h5>
-                                        </Form.Label>
-                                    </div>
-                                    <div className="col-9 text-center">
-                                        <Form.Select
-                                            aria-label="School select"
-                                            value={this.state.params.school}
-                                            onChange={this.onChangeSchools.bind(this)}
-                                        >
-                                            {this.state.universities.map((u) => (
-                                                <option key={u.id} value={u.id}>
-                                                    {u.name}
-                                                </option>
-                                            ))}
-                                        </Form.Select>
-                                    </div>
-                                </Form.Group>
-                                <Form.Group controlId="program" className="row mx-auto form-row">
-                                    <div className="col-3 text-end my-auto text-break">
-                                        <Form.Label className="my-0">
-                                            <h5 className="my-0">
-                                                <strong>
-                                                    <Translation>{(t) => t('register.program')}</Translation>
-                                                </strong>
-                                            </h5>
-                                        </Form.Label>
-                                    </div>
-                                    <div className="col-9 text-center">
-                                        <Form.Select
-                                            aria-label="Program select"
-                                            value={this.state.params.program}
-                                            onChange={this.onChangePrograms.bind(this)}
-                                        >
-                                            {this.state.programs.map((p) => (
-                                                <option key={p.id} value={p.id}>
-                                                    {p.internalId + ' - ' + p.name}
-                                                </option>
-                                            ))}
-                                        </Form.Select>
-                                        {!this.state.params.program && (
-                                            <p key="program-error" className="form-error text-start my-0">
-                                                <Translation>
-                                                    {(t) => t('register.errors.school.programNotSelected')}
-                                                </Translation>
-                                            </p>
-                                        )}
-                                    </div>
-                                </Form.Group>
-                            </>
-                        )}
-                        <Button variant="secondary" type="submit" disabled={isSubmitting}>
-                            <Translation>{(t) => t('register.submit')}</Translation>
-                        </Button>
-                    </Form>
-                )}
-            </Formik>
-        );
     }
+
+    const onSubmit = (values, { setSubmitting, setFieldError }) => {
+        setSubmitting(true)
+        if (selectedSchool && selectedProgram)
+            register(values, setSubmitting, setFieldError);
+        else {
+            setProgramError(true)
+            setSubmitting(false)
+        }
+    }
+
+    return (
+        <Formik
+            initialValues={{ email: '', password: '', repeat_password: '' }}
+            validationSchema={SignUpSchema}
+            onSubmit={onSubmit}
+        >
+            {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+                <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
+                    <FontAwesomeIcon size="3x" icon={faMortarBoard} />
+                    {badConnection && (
+                        <p className="form-error">
+                            {t('register.errors.badConnection')}
+                        </p>
+                    )}
+
+                    <FormInputField
+                        label="register.email"
+                        name="email"
+                        placeholder="register.placeholders.emailStudent"
+                        value={values.email}
+                        error={errors.email}
+                        touched={touched.email}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
+
+                    <FormInputField
+                        type="password"
+                        label="register.password"
+                        name="password"
+                        placeholder="register.placeholders.password"
+                        value={values.password}
+                        error={errors.password}
+                        touched={touched.password}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
+
+                    <FormInputField
+                        type="password"
+                        label="register.repeatPassword"
+                        name="repeat_password"
+                        placeholder="register.placeholders.password"
+                        value={values.repeat_password}
+                        error={errors.repeat_password}
+                        touched={touched.repeat_password}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
+
+                    {loading ? (
+                        <div className="mx-auto py-3">
+                            <Spinner animation="border" />
+                        </div>
+                    ) : error ? (
+                        <h1>ERROR {error}</h1>
+                    ) : (
+                        <>
+                            <Form.Group controlId="school" className="row mx-auto form-row">
+                                <div className="col-3 text-end my-auto text-break ">
+                                    <Form.Label className="my-0">
+                                        <h5 className="my-0">
+                                            <strong> {t('register.school')}</strong>
+                                        </h5>
+                                    </Form.Label>
+                                </div>
+                                <div className="col-9 text-center">
+                                    <Form.Select
+                                        aria-label="School select"
+                                        value={selectedSchool}
+                                        onChange={onChangeSchools}
+                                    >
+                                        {universities.map((u) => (
+                                            <option key={u.id} value={u.id}>
+                                                {u.name}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </div>
+                            </Form.Group>
+                            <Form.Group controlId="program" className="row mx-auto form-row">
+                                <div className="col-3 text-end my-auto text-break">
+                                    <Form.Label className="my-0">
+                                        <h5 className="my-0">
+                                            <strong>{t('register.program')}</strong>
+                                        </h5>
+                                    </Form.Label>
+                                </div>
+                                <div className="col-9 text-center">
+                                    <Form.Select
+                                        aria-label="Program select"
+                                        value={selectedProgram}
+                                        onChange={onChangePrograms}
+                                    >
+                                        {programs.map((p) => (
+                                            <option key={p.id} value={p.id}>
+                                                {p.internalId + ' - ' + p.name}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    {!selectedProgram && (
+                                        <p key="program-error" className="form-error text-start my-0">
+                                            {t('register.errors.school.programNotSelected')}
+                                        </p>
+                                    )}
+                                </div>
+                            </Form.Group>
+                        </>
+                    )}
+                    <Button variant="secondary" type="submit" disabled={isSubmitting}>
+                        {t('register.submit')}
+                    </Button>
+                </Form>
+            )}
+        </Formik>
+    )
 }
 
 export default SignUpStudentForm;

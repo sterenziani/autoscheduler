@@ -1,7 +1,7 @@
 import { create } from 'axios';
 
 const api = create({
-    baseURL : `${process.env.PUBLIC_URL}/api/`,
+    baseURL : `http://localhost:8080/api/`,
     timeout : 10000
 })
 

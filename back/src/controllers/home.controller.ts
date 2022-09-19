@@ -2,12 +2,17 @@ import { RequestHandler } from 'express';
 import UserAuthService from '../services/auth.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
+import UserService from '../services/user.service';
+import { userToDto } from '../dtos/user.dto';
+import { IUser } from '../models/user.model';
 
 export class HomeController {
     private userAuthService: UserAuthService;
+    private userService: UserService;
 
     constructor() {
         this.userAuthService = UserAuthService.getInstance();
+        this.userService = UserService.getInstance();
     }
 
     public healthCheck: RequestHandler = async (req, res) => {
@@ -24,7 +29,8 @@ export class HomeController {
 
         try {
             const jwt: string = await this.userAuthService.login(email, password);
-            res.status(204).set('Authorization', jwt).send();
+            const user: IUser = await this.userService.getUserByEmail(email);
+            res.status(200).set('Authorization', jwt).send(userToDto(user));
         } catch (e) {
             next(e);
         }

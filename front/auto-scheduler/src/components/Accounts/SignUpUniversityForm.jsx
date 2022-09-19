@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { Button, Form } from 'react-bootstrap';
-import { Translation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildingColumns } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
@@ -35,33 +36,34 @@ const SignUpSchema = Yup.object().shape({
         .required('register.errors.email.isRequired'),
 });
 
-class SignUpUniversityForm extends Component {
-    state = {
-        bad_connection: false,
-        loading: true,
-        error: false,
-    };
+function SignUpUniversityForm(props) {
+    const {t} = useTranslation();
 
-    register = async (values, setSubmitting, setFieldError) => {
+    const [badConnection, setBadConnection] = useState(false);
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(false)
+    const [status, setStatus] = useState(false)
+
+    const register = async (values, setSubmitting, setFieldError) => {
         const { status, conflicts } = await ApiService.registerUniversity(values.email, values.password, values.name);
         switch (status) {
             case CREATED:
-                this.authenticate(values);
+                authenticate(values)
                 break;
             case CONFLICT:
-                setSubmitting(false);
+                setSubmitting(false)
                 conflicts.forEach((conflict) => {
                     setFieldError(conflict.field, conflict.i18Key);
                 });
                 break;
             default:
-                setSubmitting(false);
-                this.setState({ bad_connection: true });
+                setSubmitting(false)
+                setBadConnection(true)
                 break;
         }
     };
 
-    authenticate = async (values) => {
+    const authenticate = async (values) => {
         const { status } = await ApiService.login(values.username, values.password);
         switch (status) {
             case OK:
@@ -69,90 +71,86 @@ class SignUpUniversityForm extends Component {
                 break;
             default:
                 console.log('Log in failed');
-                this.props.activateRedirect('login');
+                props.activateRedirect('login');
                 break;
         }
     };
 
-    onSubmit = (values, { setSubmitting, setFieldError }) => {
+    const onSubmit = (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true);
-        this.register(values, setSubmitting, setFieldError);
+        register(values, setSubmitting, setFieldError);
     };
 
-    render() {
-        return (
-            <Formik
-                initialValues={{ email: '', password: '', repeat_password: '', name: '' }}
-                validationSchema={SignUpSchema}
-                onSubmit={this.onSubmit}
-            >
-                {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-                    <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
-                        <FontAwesomeIcon size="3x" icon={faBuildingColumns} />
-                        {this.state.bad_connection && (
-                            <p className="form-error">
-                                <Translation>{(t) => t('register.errors.badConnection')}</Translation>
-                            </p>
-                        )}
-                        <FormInputField
-                            type="text"
-                            label="register.name"
-                            name="name"
-                            placeholder="register.placeholders.name"
-                            value={values.name}
-                            error={errors.name}
-                            touched={touched.name}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
+    return (
+        <Formik
+            initialValues={{ email: '', password: '', repeat_password: '', name: '' }}
+            validationSchema={SignUpSchema}
+            onSubmit={onSubmit}
+        >
+            {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
+                <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
+                    <FontAwesomeIcon size="3x" icon={faBuildingColumns} />
+                    {badConnection && (
+                        <p className="form-error">{t('register.errors.badConnection')}</p>
+                    )}
+                    <FormInputField
+                        type="text"
+                        label="register.name"
+                        name="name"
+                        placeholder="register.placeholders.name"
+                        value={values.name}
+                        error={errors.name}
+                        touched={touched.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
 
-                        <FormInputField
-                            label="register.email"
-                            name="email"
-                            placeholder="register.placeholders.emailUniversity"
-                            value={values.email}
-                            error={errors.email}
-                            touched={touched.email}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
+                    <FormInputField
+                        label="register.email"
+                        name="email"
+                        placeholder="register.placeholders.emailUniversity"
+                        value={values.email}
+                        error={errors.email}
+                        touched={touched.email}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
 
-                        <FormInputField
-                            type="password"
-                            label="register.password"
-                            name="password"
-                            placeholder="register.placeholders.password"
-                            value={values.password}
-                            error={errors.password}
-                            touched={touched.password}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
+                    <FormInputField
+                        type="password"
+                        label="register.password"
+                        name="password"
+                        placeholder="register.placeholders.password"
+                        value={values.password}
+                        error={errors.password}
+                        touched={touched.password}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
 
-                        <FormInputField
-                            type="password"
-                            label="register.repeatPassword"
-                            name="repeat_password"
-                            placeholder="register.placeholders.password"
-                            value={values.repeat_password}
-                            error={errors.repeat_password}
-                            touched={touched.repeat_password}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
+                    <FormInputField
+                        type="password"
+                        label="register.repeatPassword"
+                        name="repeat_password"
+                        placeholder="register.placeholders.password"
+                        value={values.repeat_password}
+                        error={errors.repeat_password}
+                        touched={touched.repeat_password}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
 
-                        <p className="col-7 mx-auto">
-                            <Translation>{(t) => t('register.pleaseContact', { email: CONTACT_EMAIL })}</Translation>
-                        </p>
+                    <p className="col-7 mx-auto">
+                        {t('register.pleaseContact', { email: CONTACT_EMAIL })}
+                    </p>
 
-                        <Button variant="secondary" type="submit" disabled={isSubmitting}>
-                            <Translation>{(t) => t('register.submit')}</Translation>
-                        </Button>
-                    </Form>
-                )}
-            </Formik>
-        );
-    }
+                    <Button variant="secondary" type="submit" disabled={isSubmitting}>
+                        {t('register.submit')}
+                    </Button>
+                </Form>
+            )}
+        </Formik>
+    )
 }
 
 export default SignUpUniversityForm;

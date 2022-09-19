@@ -1,8 +1,6 @@
 import api from './api';
 import { observable, reaction } from 'mobx';
-import { OK, UNAUTHORIZED, TIMEOUT } from './ApiConstants';
-
-const endpoint = '/users';
+import { OK, BAD_REQUEST, UNAUTHORIZED, TIMEOUT } from './ApiConstants';
 
 const TokenStore = {
     setToken: token => localStorage.setItem('token', token),
@@ -55,18 +53,20 @@ const deleteToken = () => {
     TokenStore.removeToken();
 }
 
-const logInEndpoint = endpoint + '/login';
+const logInEndpoint = '/';
 
-const logIn = async (username, password) => {
+const logIn = async (email, password) => {
     try {
-        const response = await api.get(logInEndpoint, {
-            headers : {
-                authorization : 'Basic ' + btoa(username + ":" + password)
-            }
+        const credentials = {
+            'email': email,
+            'password': password
+        }
+        const response = await api.post(logInEndpoint, credentials, {
+            headers : {'Content-Type' : 'application/json'}
         })
-        if(response.status === UNAUTHORIZED)
-            return { status: UNAUTHORIZED }
-        token = response.headers.authorization;
+        if(response.status === BAD_REQUEST)
+            return { status: BAD_REQUEST }
+        token = response.headers.authorization
         userStore.user = response.data;
         TokenStore.setToken(token);
         UserStore.setUser(userStore.user);

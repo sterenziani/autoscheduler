@@ -142,7 +142,18 @@ const getActiveUser = () =>
             name: 'Instituto Tecnológico de Buenos Aires',
             verified: false,
         };
-        setTimeout(() => resolve(university), RESOLVE_DELAY);
+        const userStore = AuthService.getUserStore().user
+        const activeUser = {
+            id: userStore.id,
+            type: userStore.role,
+            email: userStore.email,
+            name: userStore.name,
+            university: userStore.university,
+            program: userStore.program,
+            verified: userStore.verified
+        }
+        console.log(activeUser)
+        setTimeout(() => resolve(student), RESOLVE_DELAY);
     });
 
 const getSchedules = (params) =>

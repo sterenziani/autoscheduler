@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Button, Form, Spinner, Row, Modal } from 'react-bootstrap';
+import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
