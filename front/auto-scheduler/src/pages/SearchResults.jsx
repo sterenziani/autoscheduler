@@ -2,15 +2,19 @@ import React, {useState, useEffect} from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from "react-router-dom";
 import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import { useLocation } from 'react-router-dom';
 import LinkButton from '../components/LinkButton';
+import NoAccess from '../components/NoAccess';
+import Roles from '../resources/RoleConstants';
 
 const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
 
 function SearchResults(props) {
     const {t} = useTranslation();
+    const navigate = useNavigate()
     const query = new URLSearchParams(useLocation().search);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -18,6 +22,7 @@ function SearchResults(props) {
     const [schedules, setSchedules] = useState([]);
     const [scheduleIndex, setScheduleIndex] = useState(0);
     const [tables, setTables] = useState();
+    const user = ApiService.getActiveUser()
 
     const getTimeTable = (schedule) => {
         var timeTable = {};
@@ -122,6 +127,8 @@ function SearchResults(props) {
     const params = readParams();
 
     useEffect( () => {
+        if(!user)
+            navigate("/login")
         ApiService.getSchedules(params).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED)
@@ -154,6 +161,8 @@ function SearchResults(props) {
         setScheduleIndex(scheduleIndex+1)
     }
 
+    if(user.type != Roles.STUDENT)
+        return <NoAccess/>
     if (loading === true) {
         return (
             <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

@@ -10,6 +10,8 @@ import FormInputField from '../components/FormInputField';
 import CourseListForm from '../components/Lists/CourseListForm';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
+import NoAccess from '../components/NoAccess';
+import Roles from '../resources/RoleConstants';
 
 function EditProgramPage(props) {
     const ProgramSchema = Yup.object().shape({
@@ -26,7 +28,7 @@ function EditProgramPage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams()
-    const [user, setUser] = useState(null);
+    const user = ApiService.getActiveUser();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -40,11 +42,13 @@ function EditProgramPage(props) {
     const [courses, setCourses] = useState(null);
     const [availableCourses, setAvailableCourses] = useState();
 
-    // ComponentDidMount
+    useEffect(() => {
+        if(!user)
+            navigate("/login")
+    }, [])
+
     useEffect( () => {
         async function execute() {
-            if(!user)
-                await Promise.all([loadUser()]);
             if(id){
                 if(user && !program && !courses)
                     await Promise.all([loadProgram(), loadCourses(user.id)]);
@@ -64,26 +68,11 @@ function EditProgramPage(props) {
         }
         execute();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[user, program, courses])
+    },[program, courses])
 
     useEffect( () => {
         setAvailableCourses(getFilteredCourses([...mandatoryCourses, ...optionalCourses]))
     },[mandatoryCourses, optionalCourses])
-
-    const loadUser = async () => {
-        ApiService.getActiveUser().then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else
-                setUser(data)
-        })
-    }
 
     const loadProgram = async () => {
         ApiService.getProgram(id).then((data) => {
@@ -208,6 +197,8 @@ function EditProgramPage(props) {
         setOptionalCourses(optionalsCopy)
     }
 
+    if(user.type != Roles.UNIVERSITY)
+        return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />

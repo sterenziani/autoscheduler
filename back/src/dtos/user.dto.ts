@@ -8,6 +8,7 @@ export const userToDto = (user: IUser): IUserDto => {
         url: userUrl,
         name: user.name,
         email: user.email,
+        role: user.role,
         approvedCoursesUrl: `${userUrl}/courses`,
     };
 };
@@ -21,5 +22,6 @@ interface IUserDto {
     url: string;
     name: string;
     email: string;
+    role: ROLES;
     approvedCoursesUrl: string;
 }

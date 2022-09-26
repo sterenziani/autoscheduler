@@ -16,7 +16,7 @@ import './resources/style.scss';
 function App() {
     return (
         <Router>
-            <Navbar user/>
+            <Navbar/>
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/register" element={<SignUpPage />} />

@@ -1,29 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Spinner } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
 import HomePageUniversity from '../components/HomePageUniversity';
 import HomePageStudent from '../components/HomePageStudent';
 import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import Roles from '../resources/RoleConstants';
 
 function HomePage(props)  {
-    const [user, setUser] = useState(null);
+    const navigate = useNavigate()
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
+    const user = ApiService.getActiveUser()
 
     useEffect( () => {
-        ApiService.getActiveUser().then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
-            else
-                setUser(data)
-            setLoading(false)
-        });
+        if(!user)
+            navigate("/login")
+        setLoading(false)
     }, [])
 
     if (loading === true)
@@ -39,8 +34,8 @@ function HomePage(props)  {
             <HelmetProvider>
                 <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
-            {user && user.type === 'student' && <HomePageStudent />}
-            {user && user.type === 'university' && (<HomePageUniversity user={user} />)}
+            {user && user.type === Roles.STUDENT && <HomePageStudent/>}
+            {user && user.type === Roles.UNIVERSITY && (<HomePageUniversity user={user}/>)}
         </React.Fragment>
     );
 }

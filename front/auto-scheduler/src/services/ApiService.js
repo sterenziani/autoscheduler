@@ -115,6 +115,10 @@ const login = async (username, password) => {
     return AuthService.logIn(username, password)
 };
 
+const logout = () => {
+    AuthService.logOut()
+};
+
 const requestPasswordChangeToken = async (username) => {
     try {
         // Hacer algo
@@ -125,25 +129,26 @@ const requestPasswordChangeToken = async (username) => {
     }
 };
 
-const getActiveUser = () =>
-    new Promise((resolve, reject) => {
-        const student = {
-            id: 1,
-            type: 'student',
-            email: 'student@itba.edu.ar',
-            name: '1C',
-            university: { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
-            program: { id: 1, name: 'S10 - Ingeniería Informática' },
-        };
-        const university = {
-            id: 9,
-            type: 'university',
-            email: 'rector@itba.edu.ar',
-            name: 'Instituto Tecnológico de Buenos Aires',
-            verified: false,
-        };
-        const userStore = AuthService.getUserStore().user
-        const activeUser = {
+const getActiveUser = () => {
+    const student = {
+        id: 1,
+        type: 'STUDENT',
+        email: 'student@itba.edu.ar',
+        name: '1C',
+        university: { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
+        program: { id: 1, name: 'S10 - Ingeniería Informática' }
+    };
+    const university = {
+        id: 9,
+        type: 'UNIVERSITY',
+        email: 'rector@itba.edu.ar',
+        name: 'Instituto Tecnológico de Buenos Aires',
+        verified: false
+    };
+    const userStore = AuthService.getUserStore().user
+    let activeUser = null
+    if(userStore){
+        activeUser = {
             id: userStore.id,
             type: userStore.role,
             email: userStore.email,
@@ -152,9 +157,9 @@ const getActiveUser = () =>
             program: userStore.program,
             verified: userStore.verified
         }
-        console.log(activeUser)
-        setTimeout(() => resolve(student), RESOLVE_DELAY);
-    });
+    }
+    return activeUser
+}
 
 const getSchedules = (params) =>
     new Promise((resolve, reject) => {
@@ -279,7 +284,8 @@ const getRemainingCoursesProgram = (user, programId) =>
         setTimeout(() => resolve(courses[programId - 1]), RESOLVE_DELAY);
     });
 
-const getFinishedCourses = (student) =>
+const getFinishedCourses = async(student) => {
+/*
     new Promise((resolve, reject) => {
         const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student).courses;
         const courses = SgaConstants.informaticaCourses.filter((c) => {
@@ -288,6 +294,18 @@ const getFinishedCourses = (student) =>
         });
         setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
+*/
+    try {
+        const endpoint = "student/"+student.id;
+        const response = await api.get(endpoint, { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+AuthService.getToken()}});
+        return response;
+    } catch(err) {
+        if(err.response)
+            return { status : err.response.status };
+        else
+            return { status : TIMEOUT }
+    }
+}
 
 const addFinishedCourse = (student, courseId) =>
     new Promise((resolve, reject) => {
@@ -425,6 +443,7 @@ const ApiService = {
     registerStudent: registerStudent,
     registerUniversity: registerUniversity,
     login: login,
+    logout: logout,
     requestPasswordChangeToken: requestPasswordChangeToken,
     getActiveUser: getActiveUser,
     getSchedules: getSchedules,

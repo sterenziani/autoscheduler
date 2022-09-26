@@ -205,5 +205,10 @@
     "minutes": "{{minutes}} mins",
     "edit": "Editar",
     "submit": "Buscar",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "accessDenied": "ACCESSO DENEGADO",
+    "noPermission": "No cuenta con permisos para ver esta página.",
+    "notFound": "NO ENCONTRADO",
+    "requestedDoesntExist": "El recurso solicitado no existe.",
+    "goHome": "Volver al inicio"
 }

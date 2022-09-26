@@ -1,14 +1,20 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from "react-router-dom";
+import ApiService from '../services/ApiService';
 import { Tabs, Tab } from 'react-bootstrap';
 import SignUpStudentForm from '../components/Accounts/SignUpStudentForm';
 import SignUpUniversityForm from '../components/Accounts/SignUpUniversityForm';
 import SignInForm from '../components/Accounts/SignInForm';
 
 function SignUpPage(props) {
-    const {t} = useTranslation();
+    const {t} = useTranslation()
+    const navigate = useNavigate()
+    const user = ApiService.getActiveUser()
 
+    if(user)
+        navigate("/")
     return (
         <React.Fragment>
             <HelmetProvider>

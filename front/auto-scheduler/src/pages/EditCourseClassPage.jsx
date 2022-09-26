@@ -9,6 +9,8 @@ import * as Yup from 'yup';
 import FormInputField from '../components/FormInputField';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
+import NoAccess from '../components/NoAccess';
+import Roles from '../resources/RoleConstants';
 
 function EditCourseClassPage(props) {
     const CourseClassSchema = Yup.object().shape({
@@ -21,7 +23,7 @@ function EditCourseClassPage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams()
-    const [user, setUser] = useState(null);
+    const user = ApiService.getActiveUser();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -38,11 +40,13 @@ function EditCourseClassPage(props) {
     const [programError, setProgramError] = useState();
     const [badConnection, setBadConnection] = useState();
 
-    // ComponentDidMount
+    useEffect(() => {
+        if(!user)
+            navigate("/login")
+    }, [])
+
     useEffect( () => {
         async function execute() {
-            if(!user && !courseClass)
-                await Promise.all([loadUser()]);
             if(id){
                 if(user && !courseClass)
                     await Promise.all([loadCourseClass()]);
@@ -69,23 +73,7 @@ function EditCourseClassPage(props) {
         }
         execute();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[user, courseClass, courses, terms, buildings])
-
-    const loadUser = async () => {
-        ApiService.getActiveUser().then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setUser(data)
-            }
-        })
-    }
+    },[courseClass, courses, terms, buildings])
 
     const loadCourseClass = async () => {
         ApiService.getCourseClass(id).then((data) => {
@@ -210,7 +198,6 @@ function EditCourseClassPage(props) {
             if(resp.status == OK || resp.status == CREATED)
                 navigate("/courses/"+selectedCourse);
             else{
-                console.log(resp.status)
                 setError(true)
                 setStatus(resp.status)
                 setSubmitting(false);
@@ -222,6 +209,8 @@ function EditCourseClassPage(props) {
         }
     };
 
+    if(user.type != Roles.UNIVERSITY)
+        return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />

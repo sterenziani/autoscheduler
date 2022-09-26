@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Translation } from 'react-i18next';
 import { Tabs, Tab, Spinner } from 'react-bootstrap';
@@ -7,14 +7,22 @@ import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import CourseRequirementsList from '../components/Lists/CourseRequirementsList';
 import CourseClassesTab from '../components/CourseClassesTab';
+import NoAccess from '../components/NoAccess';
+import Roles from '../resources/RoleConstants';
 
 function CoursePage(props) {
+    const navigate = useNavigate();
     const {id} = useParams()
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [user, setUser] = useState();
+    const user = ApiService.getActiveUser();
     const [course, setCourse] = useState();
+
+    useEffect(() => {
+        if(!user)
+            navigate("/login")
+    }, [])
 
     useEffect( () => {
         ApiService.getCourse(id).then((data) => {
@@ -27,24 +35,15 @@ function CoursePage(props) {
                 setStatus(findError)
             }
             else {
-                ApiService.getActiveUser().then((userData) => {
-                    let findError = null;
-                    if (userData && userData.status && userData.status !== OK && userData.status !== CREATED)
-                        findError = userData.status;
-                    if (findError){
-                        setError(true)
-                        setStatus(findError)
-                    }
-                    else{
-                        setUser(userData)
-                        setCourse(data)
-                    }
-                    setLoading(false)
-                });
+                setCourse(data)
+                setLoading(false)
             }
         });
     }, [id])
 
+
+    if(user.type != Roles.UNIVERSITY)
+        return <NoAccess/>
     if (loading === true)
         return (
             <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

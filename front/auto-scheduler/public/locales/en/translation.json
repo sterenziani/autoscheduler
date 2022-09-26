@@ -205,5 +205,10 @@
     "minutes": "{{minutes}} mins",
     "edit": "Edit",
     "submit": "Search",
-    "logout": "Log out"
+    "logout": "Log out",
+    "accessDenied": "ACCESS DENIED",
+    "noPermission": "You do not have permission to view this page.",
+    "notFound": "NOT FOUND",
+    "requestedDoesntExist": "The requested resource does not exist.",
+    "goHome": "Go home"
 }

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import Roles from '../../resources/RoleConstants';
 
 function CourseList(props){
     const {t} = useTranslation();
@@ -28,8 +29,8 @@ function CourseList(props){
     }
 
     const loadCourses = () => {
-        if (user.type === 'student') {
-            ApiService.getFinishedCourses(user.name).then((data) => {
+        if (user.type === Roles.STUDENT) {
+            ApiService.getFinishedCourses(user).then((data) => {
                 let findError = null;
                 if (data && data.status && data.status !== OK && data.status !== CREATED)
                     findError = data.status;
@@ -41,7 +42,7 @@ function CourseList(props){
                     setCourses(data)
                 setLoading(false)
             });
-        } else if (user.type === 'university') {
+        } else if (user.type === Roles.UNIVERSITY) {
             ApiService.getCourses(user.id).then((data) => {
                 let findError = null;
                 if (data && data.status && data.status !== OK && data.status !== CREATED)
@@ -59,9 +60,9 @@ function CourseList(props){
 
     const deleteCourse = () => {
         if (!courseToDelete) return;
-        if (user.type === 'student')
+        if (user.type === Roles.STUDENT)
             ApiService.deleteFinishedCourse(user, courseToDelete.id);
-        else if (user.type === 'university')
+        else if (user.type === Roles.UNIVERSITY)
             ApiService.deleteCourse(courseToDelete);
         closeDeleteModal()
         loadCourses();
@@ -93,7 +94,7 @@ function CourseList(props){
                               >
                                   <div className="my-auto">{entry.internalId}</div>
                                   <div className="my-auto w-min-50">
-                                      {user.type === 'university'
+                                      {user.type === Roles.UNIVERSITY
                                           ? [
                                                 <a
                                                     key={'link-' + entry.id}
@@ -106,7 +107,7 @@ function CourseList(props){
                                           : [<div key={'nada-' + entry.id}>{entry.name}</div>]}
                                   </div>
                                   <div className="d-flexmy-auto justify-content-center">
-                                      {user.type === 'university'
+                                      {user.type === Roles.UNIVERSITY
                                           ? [
                                                 <i
                                                     key={'pencil-' + index}

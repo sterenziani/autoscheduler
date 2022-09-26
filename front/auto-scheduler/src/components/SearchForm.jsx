@@ -2,16 +2,18 @@ import React, {useState, useEffect} from 'react';
 import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from "react-router-dom";
 import ApiService from '../services/ApiService';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 
 function SearchForm(props) {
     const {t} = useTranslation()
+    const navigate = useNavigate()
+    const user = ApiService.getActiveUser()
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [user, setUser] = useState();
     const [terms, setTerms] = useState();
     const [programs, setPrograms] = useState();
     const [params, setParams] = useState({
@@ -103,6 +105,12 @@ function SearchForm(props) {
         return path;
     }
 
+    useEffect( () => {
+        if(!user)
+            navigate("/register")
+        loadProgramsAndTerms(9) //user.university.id
+    }, [])
+
     const loadProgramsAndTerms = (university) => {
         ApiService.getPrograms(university).then((dataProg) => {
             let findError = null;
@@ -134,24 +142,6 @@ function SearchForm(props) {
             }
         });
     }
-
-    useEffect( () => {
-        ApiService.getActiveUser().then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-            findError = data.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-                setLoading(false)
-            }
-            else {
-                setUser(data)
-                loadProgramsAndTerms(data.university.id);
-            }
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
 
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>

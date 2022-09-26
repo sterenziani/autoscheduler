@@ -10,6 +10,8 @@ import FormInputField from '../components/FormInputField';
 import CourseListForm from '../components/Lists/CourseListForm';
 import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
+import NoAccess from '../components/NoAccess';
+import Roles from '../resources/RoleConstants';
 
 function EditCoursePage(props) {
     const CourseSchema = Yup.object().shape({
@@ -25,8 +27,8 @@ function EditCoursePage(props) {
 
     const navigate = useNavigate();
     const {t} = useTranslation();
-    const {id} = useParams()
-    const [user, setUser] = useState(null);
+    const {id} = useParams();
+    const user = ApiService.getActiveUser();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -38,11 +40,13 @@ function EditCoursePage(props) {
     const [availableCourses, setAvailableCourses] = useState();
     const [courses, setCourses] = useState(null);
 
-    // ComponentDidMount
+    useEffect(() => {
+        if(!user)
+            navigate("/login")
+    }, [])
+
     useEffect( () => {
         async function execute() {
-            if(!user && !course)
-                await Promise.all([loadUser()]);
             if(id){
                 if(user && !course && !courses)
                     await Promise.all([loadCourse(), loadCourses(user.id)]);
@@ -60,29 +64,13 @@ function EditCoursePage(props) {
         }
         execute();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[user, course, courses])
+    },[course, courses])
 
     useEffect( () => {
         setAvailableCourses(getFilteredCourses(requirements))
         if(user && course && courses && requirements)
             setLoading(false)
     },[requirements])
-
-    const loadUser = async () => {
-        ApiService.getActiveUser().then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setUser(data)
-            }
-        })
-    }
 
     const loadCourse = async () => {
         ApiService.getCourse(id).then((data) => {
@@ -185,6 +173,8 @@ function EditCoursePage(props) {
         setRequirements(requirementsCopy)
     }
 
+    if(user.type != Roles.UNIVERSITY)
+        return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
