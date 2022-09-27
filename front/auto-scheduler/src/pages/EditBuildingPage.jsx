@@ -7,8 +7,7 @@ import ApiService from '../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../components/FormInputField';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
+import { OK, CREATED } from '../services/ApiConstants';
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
 
@@ -31,16 +30,15 @@ function EditBuildingPage(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [programError, setProgramError] = useState();
-    const [badConnection, setBadConnection] = useState();
-
     const [building, setBuilding] = useState(null);
     const [buildings, setBuildings] = useState();
     const [distances, setDistances] = useState();
+    const [badConnection, setBadConnection] = useState();
 
     useEffect(() => {
         if(!user)
             navigate("/login")
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect( () => {
@@ -112,22 +110,21 @@ function EditBuildingPage(props) {
         if (values.buildingCode && values.buildingName)
         {
             const resp = await ApiService.saveBuilding(id, values.buildingCode, values.buildingName, Object.values(distances))
-            if(resp.status == OK || resp.status == CREATED){
+            if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=buildings")
             }
             else{
                 setError(true)
                 setStatus(resp.status)
-                setSubmitting(false);
+                setSubmitting(false)
             }
         }
         else {
-            setProgramError(true);
-            setSubmitting(false);
+            setSubmitting(false)
         }
     };
 
-    if(user.type != Roles.UNIVERSITY)
+    if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

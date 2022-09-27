@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Button, Form } from 'react-bootstrap';
-import { Translation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faKey } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT, CONFLICT, BAD_REQUEST } from '../../services/ApiConstants';
+import { OK, BAD_REQUEST } from '../../services/ApiConstants';
 import FormInputField from '../FormInputField';
 import SignInRecoverPasswordForm from './SignInRecoverPasswordForm';
 
@@ -24,8 +23,6 @@ function SignInForm(props) {
 
     const [correct, setCorrect] = useState(true);
     const [badConnection, setBadConnection] = useState(false);
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [failedExternalLogin, setFailedExternalLogin] = useState(props.loginFailed);
 
     const authenticate = async (values, setSubmitting) => {
         const { status } = await ApiService.login(values.email, values.password);
@@ -45,10 +42,6 @@ function SignInForm(props) {
     }
 
     const onSubmit = (values, { setSubmitting }) => {
-        if (failedExternalLogin) {
-            props.loginFailedProcessed()
-            setFailedExternalLogin(false)
-        }
         setSubmitting(true)
         authenticate(values, setSubmitting)
     };
@@ -68,9 +61,6 @@ function SignInForm(props) {
                         )}
                         {badConnection && (
                             <p className="form-error">{t('login.errors.badConnection')}</p>
-                        )}
-                        {failedExternalLogin && (
-                            <p className="form-error">{t('login.errors.externalLoginFailed')}</p>
                         )}
                         <FormInputField
                             label="register.email"

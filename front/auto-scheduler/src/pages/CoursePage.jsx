@@ -4,7 +4,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Translation } from 'react-i18next';
 import { Tabs, Tab, Spinner } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import { OK, CREATED } from '../services/ApiConstants';
 import CourseRequirementsList from '../components/Lists/CourseRequirementsList';
 import CourseClassesTab from '../components/CourseClassesTab';
 import NoAccess from '../components/NoAccess';
@@ -22,6 +22,7 @@ function CoursePage(props) {
     useEffect(() => {
         if(!user)
             navigate("/login")
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect( () => {
@@ -42,7 +43,7 @@ function CoursePage(props) {
     }, [id])
 
 
-    if(user.type != Roles.UNIVERSITY)
+    if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return (

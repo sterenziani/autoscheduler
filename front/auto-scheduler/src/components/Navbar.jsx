@@ -1,10 +1,7 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import { useNavigate } from "react-router-dom";
-import { reaction } from "mobx"
-import { Row, Navbar as BootstrapNavbar } from 'react-bootstrap';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import { Navbar as BootstrapNavbar } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
-import AuthService from '../services/AuthService';
 import { Link } from 'react-router-dom';
 import LinkButton from './LinkButton';
 import logo from '../resources/logo.svg';
@@ -13,7 +10,6 @@ import withUser from '../hoc/withUser';
 function Navbar(props){
     const user = props.user
     const navigate = useNavigate()
-    let redirecting = false
 
     const logOut = () => {
         ApiService.logout()

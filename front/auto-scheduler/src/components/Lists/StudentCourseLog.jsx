@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from "react-router-dom";
 import { Button, Modal, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../services/ApiConstants';
 import CourseList from './CourseList';
 
 function StudentCourseLog(props) {
     const {t} = useTranslation();
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -26,6 +24,7 @@ function StudentCourseLog(props) {
         }
         if(user)
             execute();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect( () => {

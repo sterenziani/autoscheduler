@@ -2,13 +2,12 @@ import React, {useState, useEffect} from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Button, Form, Spinner, Row } from 'react-bootstrap';
+import { Button, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../components/FormInputField';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
+import { OK, CREATED } from '../services/ApiConstants';
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
 
@@ -34,12 +33,13 @@ function EditTermPage(props) {
     const [term, setTerm] = useState(null);
 
     const [startDate, setStartDate] = useState();
-    const [programError, setProgramError] = useState();
+    const [missingDataError, setMissingDataError] = useState();
     const [badConnection, setBadConnection] = useState();
 
     useEffect(() => {
         if(!user)
             navigate("/login")
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect( () => {
@@ -88,7 +88,7 @@ function EditTermPage(props) {
         if (startDate && values.termName && values.internalId)
         {
             const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.internalId, startDate)
-            if(resp.status == OK || resp.status == CREATED)
+            if(resp.status === OK || resp.status === CREATED)
                 navigate("/?tab=terms");
             else{
                 setError(true)
@@ -97,12 +97,12 @@ function EditTermPage(props) {
             }
         }
         else {
-            setProgramError(true);
+            setMissingDataError(true);
             setSubmitting(false);
         }
     };
 
-    if(user.type != Roles.UNIVERSITY)
+    if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

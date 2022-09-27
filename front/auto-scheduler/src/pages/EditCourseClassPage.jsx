@@ -7,7 +7,7 @@ import ApiService from '../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../components/FormInputField';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import { OK, CREATED } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
@@ -37,12 +37,13 @@ function EditCourseClassPage(props) {
     const [className, setClassName] = useState();
     const [lectures, setLectures] = useState([]);
 
-    const [programError, setProgramError] = useState();
+    const [selectionError, setSelectionError] = useState();
     const [badConnection, setBadConnection] = useState();
 
     useEffect(() => {
         if(!user)
             navigate("/login")
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect( () => {
@@ -195,7 +196,7 @@ function EditCourseClassPage(props) {
         if (selectedCourse && selectedTerm && values.className)
         {
             const resp = await ApiService.saveCourseClass(id, selectedCourse, selectedTerm, values.className, lectures)
-            if(resp.status == OK || resp.status == CREATED)
+            if(resp.status === OK || resp.status === CREATED)
                 navigate("/courses/"+selectedCourse);
             else{
                 setError(true)
@@ -204,12 +205,12 @@ function EditCourseClassPage(props) {
             }
         }
         else {
-            setProgramError(true);
+            setSelectionError(true);
             setSubmitting(false);
         }
     };
 
-    if(user.type != Roles.UNIVERSITY)
+    if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

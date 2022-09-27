@@ -2,14 +2,13 @@ import React, {useState, useEffect} from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Button, Form, Spinner, Row } from 'react-bootstrap';
+import { Button, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../components/FormInputField';
 import CourseListForm from '../components/Lists/CourseListForm';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
+import { OK, CREATED } from '../services/ApiConstants';
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
 
@@ -32,7 +31,7 @@ function EditCoursePage(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [programError, setProgramError] = useState();
+    const [selectionError, setSelectionError] = useState();
     const [badConnection, setBadConnection] = useState();
 
     const [course, setCourse] = useState(null);
@@ -43,6 +42,7 @@ function EditCoursePage(props) {
     useEffect(() => {
         if(!user)
             navigate("/login")
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect( () => {
@@ -70,6 +70,7 @@ function EditCoursePage(props) {
         setAvailableCourses(getFilteredCourses(requirements))
         if(user && course && courses && requirements)
             setLoading(false)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[requirements])
 
     const loadCourse = async () => {
@@ -124,7 +125,7 @@ function EditCoursePage(props) {
         if (values.courseCode && values.courseName)
         {
             const resp = await ApiService.saveCourse(id, values.courseCode, values.courseName, requirements)
-            if(resp.status == OK || resp.status == CREATED){
+            if(resp.status === OK || resp.status === CREATED){
                 if(id)
                     navigate("/courses/"+id)
                 else
@@ -137,8 +138,8 @@ function EditCoursePage(props) {
             }
         }
         else {
-            setProgramError(true);
-            setSubmitting(false);
+            setSelectionError(true)
+            setSubmitting(false)
         }
     };
 
@@ -173,7 +174,7 @@ function EditCoursePage(props) {
         setRequirements(requirementsCopy)
     }
 
-    if(user.type != Roles.UNIVERSITY)
+    if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
-import  { Redirect, useHistory } from 'react-router-dom'
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../services/ApiConstants';
 
 function CourseClassesList(props) {
     const {t} = useTranslation();
@@ -12,12 +11,10 @@ function CourseClassesList(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [user, setUser] = useState(props.user);
 
     const [showDeleteModal,setShowDeleteModal] = useState(false);
-    const [course,setCourse] = useState(props.course);
-    const [term,setTerm] = useState(props.term);
-    const [courseClass,setCourseClass] = useState();
+    const course = props.course;
+    const term = props.term;
     const [termClasses,setTermClasses] = useState(null);
     const [courseClassToDelete,setCourseClassToDelete] = useState({});
 
@@ -26,6 +23,7 @@ function CourseClassesList(props) {
             await Promise.all([loadClasses()]);
         }
         execute();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const loadClasses = () => {

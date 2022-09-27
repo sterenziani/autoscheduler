@@ -5,20 +5,18 @@ import { useNavigate } from "react-router-dom";
 import HomePageUniversity from '../components/HomePageUniversity';
 import HomePageStudent from '../components/HomePageStudent';
 import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
 import Roles from '../resources/RoleConstants';
 
 function HomePage(props)  {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
     const user = ApiService.getActiveUser()
 
     useEffect( () => {
         if(!user)
             navigate("/login")
         setLoading(false)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     if (loading === true)
@@ -26,9 +24,7 @@ function HomePage(props)  {
             <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
                 <Spinner animation="border" variant="primary" />
             </div>
-        );
-    if (error)
-        return <h1>ERROR {error}</h1>;
+        )
     return (
         <React.Fragment>
             <HelmetProvider>

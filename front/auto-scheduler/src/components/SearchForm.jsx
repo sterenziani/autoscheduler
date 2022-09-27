@@ -4,7 +4,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import { OK, CREATED } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 
 function SearchForm(props) {
@@ -108,7 +108,8 @@ function SearchForm(props) {
     useEffect( () => {
         if(!user)
             navigate("/register")
-        loadProgramsAndTerms(9) //user.university.id
+        loadProgramsAndTerms(user.university.id)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const loadProgramsAndTerms = (university) => {

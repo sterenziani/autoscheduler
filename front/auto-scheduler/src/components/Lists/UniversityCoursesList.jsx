@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import CourseList from './CourseList';
 import { useNavigate } from "react-router-dom";
 
 function StudentCoursesList(props){
     const navigate = useNavigate()
-    const [user, setUser] = useState(props.user)
+    const user = props.user
 
     const redirectToCreate = () => {
         navigate('/courses/new');

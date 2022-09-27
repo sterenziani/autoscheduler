@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Spinner, Form } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import { OK, CREATED } from '../services/ApiConstants';
 import CourseClassesList from './Lists/CourseClassesList';
 
 function CourseClassesTab(props) {
@@ -32,6 +32,7 @@ function CourseClassesTab(props) {
     }, [])
 
     const onChangeTerms = (e) => {
+        // eslint-disable-next-line
         setSelectedTerm(terms.filter((t) => t.id == e.target.value)[0])
     }
 

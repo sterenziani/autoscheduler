@@ -1,4 +1,4 @@
-import { CREATED, CONFLICT, TIMEOUT, UNAUTHORIZED, NOT_FOUND, OK } from './ApiConstants';
+import { CREATED, CONFLICT, TIMEOUT, NOT_FOUND, OK } from './ApiConstants';
 import SgaConstants from '../resources/SgaConstants';
 import api from './api'
 import AuthService from './AuthService'
@@ -80,7 +80,7 @@ const getSchedules = async (params) => {
 const registerStudent = async (email, password, universityId, programId) => {
     try {
         const newUser = {
-            type: 'student',
+            type: 'STUDENT',
             email: email,
             password: password,
             university: universityId,
@@ -99,7 +99,7 @@ const registerStudent = async (email, password, universityId, programId) => {
 
 const registerUniversity = async (email, password, name) => {
     try {
-        const newUser = { type: 'university', email: email, password: password, name: name };
+        const newUser = { type: 'UNIVERSITY', email: email, password: password, name: name };
         //const registerEndpoint = endpoint + '/register';
         //const response = await api.post(registerEndpoint, newUser, { headers: {contentType : "application/json"} });
         return { status: CREATED }; //response.status }
@@ -206,24 +206,28 @@ const getCourse = (courseId) =>
 
 const getTerm = (termId) =>
     new Promise((resolve, reject) => {
+        // eslint-disable-next-line
         const term = SgaConstants.terms.find((t) => t.id == termId);
         setTimeout(() => resolve(term), RESOLVE_DELAY);
     });
 
 const getProgram = (programId) =>
     new Promise((resolve, reject) => {
+        // eslint-disable-next-line
         const program = SgaConstants.programs[9].find((p) => p.id == programId);
         setTimeout(() => resolve(program), RESOLVE_DELAY);
     });
 
 const getBuilding = (buildingId) =>
     new Promise((resolve, reject) => {
+        // eslint-disable-next-line
         const building = SgaConstants.buildings[9].find((b) => b.id == buildingId);
         setTimeout(() => resolve(building), RESOLVE_DELAY);
     });
 
 const getCourseClass = (classId) =>
     new Promise((resolve, reject) => {
+        // eslint-disable-next-line
         const courseClass = Object.values(SgaConstants.courseClasses).flat().filter((com) => com.id == classId);
         if(!courseClass)
             return { status: NOT_FOUND }
@@ -438,6 +442,30 @@ const saveBuilding = async (id, name, internalId, distances) => {
     }
 }
 
+const getToken = async(token) => {
+    // eslint-disable-next-line
+    if(token != "ABC")
+        return { status: NOT_FOUND }
+    new Promise((resolve, reject) => {
+        const resp = {user: {id: "primero", email:"tuvieja@tanga"}};
+        setTimeout(() => resolve(resp), RESOLVE_DELAY);
+    });
+}
+
+const changePassword = async (userId, token, newPassword) => {
+    try {
+        const endpoint = "users/"+userId+"/password";
+        const response = await api.put(endpoint, {'token': token, 'password': newPassword},
+                                                { headers: { 'Content-Type': 'application/json' , authorization: AuthService.getToken()}});
+        return response;
+    } catch(err) {
+      if(err.response)
+        return { status : err.response.status }
+      else
+        return { status : TIMEOUT }
+    }
+}
+
 const ApiService = {
     getGames: getGames,
     registerStudent: registerStudent,
@@ -477,6 +505,8 @@ const ApiService = {
     saveCourse: saveCourse,
     saveProgram: saveProgram,
     saveBuilding: saveBuilding,
+    getToken: getToken,
+    changePassword: changePassword
 };
 
 export default ApiService;

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Form, Modal } from 'react-bootstrap';
-import { Translation } from 'react-i18next';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, NOT_FOUND, TIMEOUT, CONFLICT, UNAUTHORIZED } from '../../services/ApiConstants';
+import { CREATED, NOT_FOUND } from '../../services/ApiConstants';
 import FormInputField from '../FormInputField';
 
 const EmailSchema = Yup.object().shape({

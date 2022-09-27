@@ -1,9 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Button, Form, Spinner, Row, Modal } from 'react-bootstrap';
-import FormInputField from '../FormInputField';
+import { Button, Form, Row, Modal } from 'react-bootstrap';
 
 function CourseListForm(props) {
     const {t} = useTranslation();
@@ -26,6 +23,7 @@ function CourseListForm(props) {
         addCourseToParent(courseToAdd)
         setCourseToAdd(undefined)
         switchAddModal()
+        // eslint-disable-next-line
         if(availableCourses[0] != courseToAdd)
             setCourseToAdd(availableCourses[0])
         else if(availableCourses.length>1)

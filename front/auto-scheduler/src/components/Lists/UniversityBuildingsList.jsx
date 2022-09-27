@@ -3,7 +3,7 @@ import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../services/ApiConstants';
 
 function UniversityBuildingsList(props) {
     const {t} = useTranslation();
@@ -12,12 +12,13 @@ function UniversityBuildingsList(props) {
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const [user, setUser] = useState(props.user);
+    const user = props.user;
     const [buildings, setBuildings] = useState(null);
     const [buildingToDelete, setBuildingToDelete] = useState();
 
     useEffect(() => {
         loadBuildings();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const loadBuildings = () => {

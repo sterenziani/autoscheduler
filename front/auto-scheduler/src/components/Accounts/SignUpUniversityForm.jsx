@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from "react-router-dom";
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from "react-router-dom";
 import { Button, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildingColumns } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT, CONFLICT } from '../../services/ApiConstants';
+import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
 import FormInputField from '../FormInputField';
 
 const CONTACT_EMAIL = 'juan@autoscheduler.com';
@@ -37,12 +36,9 @@ const SignUpSchema = Yup.object().shape({
 });
 
 function SignUpUniversityForm(props) {
-    const {t} = useTranslation();
-
-    const [badConnection, setBadConnection] = useState(false);
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(false)
-    const [status, setStatus] = useState(false)
+    const {t} = useTranslation()
+    const navigate = useNavigate()
+    const [badConnection, setBadConnection] = useState(false)
 
     const register = async (values, setSubmitting, setFieldError) => {
         const { status, conflicts } = await ApiService.registerUniversity(values.email, values.password, values.name);
@@ -67,12 +63,12 @@ function SignUpUniversityForm(props) {
         const { status } = await ApiService.login(values.username, values.password);
         switch (status) {
             case OK:
-                console.log('Redirect');
-                break;
+                navigate("/")
+                break
             default:
-                console.log('Log in failed');
-                props.activateRedirect('login');
-                break;
+                console.log('Log in failed')
+                navigate("/login")
+                break
         }
     };
 

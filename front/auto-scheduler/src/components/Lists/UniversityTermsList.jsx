@@ -3,7 +3,7 @@ import { Button, Modal, Spinner, Row } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../services/ApiConstants';
 
 function UniversityTermsList(props) {
     const {t} = useTranslation();
@@ -11,7 +11,7 @@ function UniversityTermsList(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [user, setUser] = useState(props.user);
+    const user = props.user;
     const [terms, setTerms] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [changingPublishStatus, setChangingPublishStatus] = useState([]);
@@ -22,6 +22,7 @@ function UniversityTermsList(props) {
             await Promise.all([loadTerms()]);
         }
         execute();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const loadTerms = () => {

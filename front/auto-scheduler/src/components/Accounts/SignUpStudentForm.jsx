@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from "react-router-dom";
 import { Button, Form, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
-import { Translation } from 'react-i18next';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT, CONFLICT } from '../../services/ApiConstants';
+import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
 import FormInputField from '../FormInputField';
 
 const SignUpSchema = Yup.object().shape({
@@ -32,7 +30,8 @@ const SignUpSchema = Yup.object().shape({
 });
 
 function SignUpStudentForm(props) {
-    const {t} = useTranslation();
+    const {t} = useTranslation()
+    const navigate = useNavigate()
 
     const [badConnection, setBadConnection] = useState(false);
     const [universities, setUniversities] = useState([]);
@@ -131,12 +130,12 @@ function SignUpStudentForm(props) {
         const { status } = await ApiService.login(values.username, values.password);
         switch (status) {
             case OK:
-                console.log('Redirect');
-                break;
+                navigate("/")
+                break
             default:
-                console.log('Log in failed');
-                props.activateRedirect('login');
-                break;
+                console.log('Log in failed')
+                navigate("/login")
+                break
         }
     }
 
@@ -162,6 +161,11 @@ function SignUpStudentForm(props) {
                     {badConnection && (
                         <p className="form-error">
                             {t('register.errors.badConnection')}
+                        </p>
+                    )}
+                    {programError && (
+                        <p className="form-error">
+                            {t('register.errors.selectSchoolAndProgram')}
                         </p>
                     )}
 

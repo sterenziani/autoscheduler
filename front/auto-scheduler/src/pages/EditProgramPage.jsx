@@ -8,8 +8,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../components/FormInputField';
 import CourseListForm from '../components/Lists/CourseListForm';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
+import { OK, CREATED } from '../services/ApiConstants';
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
 
@@ -32,7 +31,6 @@ function EditProgramPage(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [programError, setProgramError] = useState();
     const [badConnection, setBadConnection] = useState();
 
     const [program, setProgram] = useState(null);
@@ -45,6 +43,7 @@ function EditProgramPage(props) {
     useEffect(() => {
         if(!user)
             navigate("/login")
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect( () => {
@@ -72,6 +71,7 @@ function EditProgramPage(props) {
 
     useEffect( () => {
         setAvailableCourses(getFilteredCourses([...mandatoryCourses, ...optionalCourses]))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[mandatoryCourses, optionalCourses])
 
     const loadProgram = async () => {
@@ -142,7 +142,7 @@ function EditProgramPage(props) {
         if (values.programCode && values.programName)
         {
             const resp = await ApiService.saveProgram(id, values.programCode, values.programName, mandatoryCourses, optionalCourses)
-            if(resp.status == OK || resp.status == CREATED){
+            if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=programs")
             }
             else{
@@ -152,7 +152,6 @@ function EditProgramPage(props) {
             }
         }
         else {
-            setProgramError(true);
             setSubmitting(false);
         }
     };
@@ -197,7 +196,7 @@ function EditProgramPage(props) {
         setOptionalCourses(optionalsCopy)
     }
 
-    if(user.type != Roles.UNIVERSITY)
+    if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

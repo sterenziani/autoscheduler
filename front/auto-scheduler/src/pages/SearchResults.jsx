@@ -4,7 +4,7 @@ import { Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../services/ApiConstants';
+import { OK, CREATED } from '../services/ApiConstants';
 import { useLocation } from 'react-router-dom';
 import LinkButton from '../components/LinkButton';
 import NoAccess from '../components/NoAccess';
@@ -161,7 +161,7 @@ function SearchResults(props) {
         setScheduleIndex(scheduleIndex+1)
     }
 
-    if(user.type != Roles.STUDENT)
+    if(user.type !== Roles.STUDENT)
         return <NoAccess/>
     if (loading === true) {
         return (

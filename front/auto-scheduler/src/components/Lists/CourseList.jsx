@@ -3,7 +3,7 @@ import { Button, Modal, Spinner, Row } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, TIMEOUT } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../services/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 
 function CourseList(props){
@@ -12,7 +12,7 @@ function CourseList(props){
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [user, setUser] = useState(props.user);
+    const user = props.user;
     const [showDeleteModal,setShowDeleteModal] = useState(false);
     const [courses,setCourses] = useState(props.course);
     const [courseToDelete,setCourseToDelete] = useState();
@@ -22,6 +22,7 @@ function CourseList(props){
             await Promise.all([loadCourses()]);
         }
         execute();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const redirectToEdit = (id) => {

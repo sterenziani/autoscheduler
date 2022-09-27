@@ -1,6 +1,6 @@
 import api from './api';
 import { observable, reaction } from 'mobx';
-import { OK, BAD_REQUEST, UNAUTHORIZED, TIMEOUT } from './ApiConstants';
+import { OK, BAD_REQUEST, TIMEOUT } from './ApiConstants';
 
 const TokenStore = {
     setToken: token => localStorage.setItem('token', token),
@@ -14,7 +14,7 @@ const UserStore = {
     removeUser: () => localStorage.removeItem('user')
 }
 
-let userStore = observable({
+const userStore = observable({
     user: undefined,
     isLoggedIn: false
 });

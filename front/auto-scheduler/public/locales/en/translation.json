@@ -200,6 +200,12 @@
             }
         }
     },
+    "changePassword": {
+        "title": "Change password",
+        "forUser": "Enter the new password to use by {{email}}",
+        "notFound": "The requested token was not found, please make sure you've accessed the AutoScheduler password reset link provided by the latest email sent.",
+        "submit": "Reset password"
+    },
     "emptyList": "No items in this list.",
     "noRequiredCourses": "This course can be taken at any point.",
     "minutes": "{{minutes}} mins",

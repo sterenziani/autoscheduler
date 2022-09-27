@@ -1,7 +1,6 @@
 import React from 'react';
 import AuthService from '../services/AuthService';
 import { reaction } from 'mobx';
-import { useNavigate } from "react-router-dom";
 
 const withUser = (WrappedComponent, config) => {
     return (class extends React.Component {
