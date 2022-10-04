@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import Alert from 'react-bootstrap/Alert';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
@@ -171,7 +172,23 @@ function SearchResults(props) {
         );
     }
     if (error)
-        return <h1>ERROR {status}</h1>;
+        return <h1>ERROR {status}</h1>
+    if(schedules.length === 0)
+        return (
+            <React.Fragment>
+                <HelmetProvider>
+                    <Helmet><title>{t("results.results") +" - AutoScheduler"}</title></Helmet>
+                </HelmetProvider>
+                <div className="m-5 text-black">
+                    <div className="d-flex justify-content-center align-items-center">
+                        <Alert variant="primary" className="text-center">
+                            <p>{t("noSchedulesFound")}</p>
+                            <LinkButton variant="primary" textKey="goHome" href="/"/>
+                        </Alert>
+                    </div>
+                </div>
+            </React.Fragment>
+        )
     return (
         <React.Fragment>
             <HelmetProvider>

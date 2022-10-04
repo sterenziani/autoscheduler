@@ -32,12 +32,13 @@ function EditCoursePage(props) {
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [selectionError, setSelectionError] = useState();
-    const [badConnection, setBadConnection] = useState();
 
     const [course, setCourse] = useState(null);
     const [requirements, setRequirements] = useState();
     const [availableCourses, setAvailableCourses] = useState();
     const [courses, setCourses] = useState(null);
+    const [programs, setPrograms] = useState();
+    const [selectedProgram, setSelectedProgram] = useState();
 
     useEffect(() => {
         if(!user)
@@ -49,17 +50,13 @@ function EditCoursePage(props) {
         async function execute() {
             if(id){
                 if(user && !course && !courses)
-                    await Promise.all([loadCourse(), loadCourses(user.id)]);
-                else if(user && course && courses)
+                    await Promise.all([loadCourse(), loadCourses(user.id), loadPrograms(user.id)]);
+                else if(user && courses && programs && course)
                     await Promise.all([loadRequirements(course.id)]);
             }
-            else{
-                if(user && !courses)
-                    await Promise.all([loadCourses(user.id)]);
-                else if(user && !course && courses){
-                    setCourse({"name": t("forms.placeholders.courseName"), "internalId": t("forms.placeholders.courseCode")})
-                    setRequirements([])
-                }
+            else if(user && courses && programs && !course){
+                setCourse({"name": t("forms.placeholders.courseName"), "internalId": t("forms.placeholders.courseCode")})
+                setRequirements({})
             }
         }
         execute();
@@ -67,9 +64,11 @@ function EditCoursePage(props) {
     },[course, courses])
 
     useEffect( () => {
-        setAvailableCourses(getFilteredCourses(requirements))
-        if(user && course && courses && requirements)
+        if(requirements && selectedProgram)
+        {
+            setAvailableCourses(getFilteredCourses(requirements, selectedProgram.id))
             setLoading(false)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[requirements])
 
@@ -85,6 +84,22 @@ function EditCoursePage(props) {
             }
             else{
               setCourse(data)
+            }
+        });
+    }
+
+    const loadPrograms = async (universityId) => {
+        ApiService.getPrograms(universityId).then((data) => {
+            let findError = null;
+            if (data && data.status && data.status !== OK && data.status !== CREATED)
+                findError = data.status;
+            if (findError){
+                setError(true)
+                setStatus(findError)
+            }
+            else {
+                setPrograms(data)
+                setSelectedProgram(data[0])
             }
         });
     }
@@ -115,7 +130,7 @@ function EditCoursePage(props) {
                 setStatus(findError)
             }
             else{
-              setRequirements(data)
+                setRequirements(data)
             }
         });
     }
@@ -143,8 +158,11 @@ function EditCoursePage(props) {
         }
     };
 
-    const getFilteredCourses = (coursesToRemove) => {
+    const getFilteredCourses = (requiredCourses, programId) => {
         let availableCourses = []
+        let coursesToRemove = []
+        if(requiredCourses[programId])
+            coursesToRemove = [...coursesToRemove, ...requiredCourses[programId]]
         if(courses)
         {
             availableCourses = courses.filter(function(item) {
@@ -162,16 +180,24 @@ function EditCoursePage(props) {
 
     const onClickTrashCan = (e) => {
         const requirementsCopy = Object.assign([], requirements);
-        requirementsCopy.splice(requirements.indexOf(e), 1);
+        requirementsCopy[selectedProgram.id].splice(requirements[selectedProgram.id].indexOf(e), 1);
         setRequirements(requirementsCopy)
     }
 
     const addRequiredCourse = (courseToAdd) => {
         if (!courseToAdd)
             return;
-        const requirementsCopy = Object.assign([], requirements);
-        requirementsCopy.push(courseToAdd);
+        const requirementsCopy = Object.assign({}, requirements)
+        if(!requirementsCopy[selectedProgram.id])
+            requirementsCopy[selectedProgram.id] = []
+        requirementsCopy[selectedProgram.id].push(courseToAdd)
         setRequirements(requirementsCopy)
+    }
+
+    const onChangePrograms = (e) => {
+        // eslint-disable-next-line
+        setSelectedProgram(programs.filter((p) => p.id == e.target.value)[0])
+        setAvailableCourses(getFilteredCourses(requirements, e.target.value))
     }
 
     if(user.type !== Roles.UNIVERSITY)
@@ -204,15 +230,18 @@ function EditCoursePage(props) {
                         value={values.courseName} error={errors.courseName}
                         touched={touched.courseName} onChange={handleChange} onBlur={handleBlur}
                     />
-                    <Form.Group controlId="schedule" className="row mx-auto form-row">
+                    <Form.Group controlId="requirements" className="row mx-auto form-row">
                         <div className="col-3 text-end my-3 text-break">
                             <Form.Label className="my-0">
                                 <h5 className="my-0"><strong>{t('forms.requirements')}</strong></h5>
                             </Form.Label>
                         </div>
                         <div className="col-9 align-items-start align-items-center">
+                            <Form.Select className="w-75 m-auto" value={selectedProgram.id} onChange={onChangePrograms}>
+                                {programs.map((p) => (<option key={p.id} value={p.id}> {p.internalId + ' - ' + p.name}</option>))}
+                            </Form.Select>
                             <CourseListForm courses={courses}
-                                listedCourses={requirements} availableCourses={availableCourses}
+                                listedCourses={requirements[selectedProgram.id]} availableCourses={availableCourses}
                                 onClickTrashCan={onClickTrashCan} addCourse={addRequiredCourse}
                             />
                         </div>

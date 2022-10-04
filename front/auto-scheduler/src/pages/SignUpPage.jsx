@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
@@ -13,8 +13,11 @@ function SignUpPage(props) {
     const navigate = useNavigate()
     const user = ApiService.getActiveUser()
 
-    if(user)
-        navigate("/")
+    useEffect(() => {
+        if(user)
+            navigate("/")
+    }, [user])
+
     return (
         <React.Fragment>
             <HelmetProvider>

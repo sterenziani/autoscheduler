@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Translation } from 'react-i18next';
-import { Tabs, Tab, Spinner } from 'react-bootstrap';
+import { Tabs, Tab, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
 import { OK, CREATED } from '../services/ApiConstants';
 import CourseRequirementsList from '../components/Lists/CourseRequirementsList';
 import CourseClassesTab from '../components/CourseClassesTab';
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
+import LinkButton from '../components/LinkButton';
 
 function CoursePage(props) {
+    const {t} = useTranslation();
     const navigate = useNavigate();
     const {id} = useParams()
     const [loading, setLoading] = useState(true);
@@ -18,6 +20,8 @@ function CoursePage(props) {
     const [status, setStatus] = useState(null);
     const user = ApiService.getActiveUser();
     const [course, setCourse] = useState();
+    const [programs, setPrograms] = useState(null);
+    const [selectedProgram, setSelectedProgram] = useState(null);
 
     useEffect(() => {
         if(!user)
@@ -37,11 +41,40 @@ function CoursePage(props) {
             }
             else {
                 setCourse(data)
-                setLoading(false)
+                loadPrograms(data)
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
+    const loadPrograms = () => {
+        if(user){
+            ApiService.getPrograms(user.id).then((data) => {
+                let findError = null;
+                if (data && data.status && data.status !== OK && data.status !== CREATED)
+                    findError = data.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else {
+                    setPrograms(data)
+                    setSelectedProgram(data[0])
+                }
+            })
+        }
+    }
+
+    useEffect(() => {
+        if(programs && selectedProgram)
+            setLoading(false)
+    }, [programs, selectedProgram])
+
+    const onChangePrograms = (e) => {
+        // eslint-disable-next-line
+        setSelectedProgram(programs.filter((p) => p.id == e.target.value)[0])
+    }
 
     if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
@@ -50,7 +83,7 @@ function CoursePage(props) {
             <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
                 <Spinner animation="border" variant="primary" />
             </div>
-        );
+        )
     if (error)
         return <h1>ERROR {status}</h1>;
     return (
@@ -67,19 +100,18 @@ function CoursePage(props) {
                 </div>
                 <Tabs className="borderless-tabs" defaultActiveKey={'classes'} fill>
                     <Tab
-                        className="text-center"
-                        eventKey="required_courses"
-                        title={<Translation>{(t) => t('tabs.requiredCourses')}</Translation>}
+                        className="text-center" eventKey="required_courses"
+                        title={t('tabs.requiredCourses')}
                     >
-                        <div className="bg-primary rounded-bottom">
-                            <CourseRequirementsList course={course} />
+                        <div className="bg-primary rounded-bottom py-4">
+                            <Form.Select className="w-75 m-auto" value={selectedProgram.id} onChange={onChangePrograms}>
+                                {programs.map((p) => (<option key={p.id} value={p.id}> {p.internalId + ' - ' + p.name}</option>))}
+                            </Form.Select>
+                            <CourseRequirementsList course={course} program={selectedProgram} />
+                            <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit'} textKey="edit"/>
                         </div>
                     </Tab>
-                    <Tab
-                        className="text-center"
-                        eventKey="classes"
-                        title={<Translation>{(t) => t('tabs.courseClasses')}</Translation>}
-                    >
+                    <Tab className="text-center" eventKey="classes" title={t('tabs.courseClasses')}>
                         <div className="bg-primary rounded-bottom">
                             <CourseClassesTab user={user} course={course} />
                         </div>

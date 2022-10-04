@@ -158,15 +158,14 @@ const getActiveUser = () => {
             verified: userStore.verified
         }
     }
-    return activeUser
+    return student//activeUser
 }
 
 const getSchedules = (params) =>
     new Promise((resolve, reject) => {
-        let availableClasses = getAvailableClasses(params.userAsking); // Gets the classes the user is enabled to be in
+        let availableClasses = getAvailableClasses(params.userAsking, params.program); // Gets the classes the user is enabled to be in
         availableClasses = filterUnattendableClasses(availableClasses, params.unavailableTimeSlots); // Deletes classes that conflict with busy time
         calculateDurationOfEachClass(availableClasses); // Updates classes with time spent in each
-
         const schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays); // Returns sorted array
         setTimeout(() => resolve(schedules), RESOLVE_DELAY);
     });
@@ -236,7 +235,9 @@ const getCourseClass = (classId) =>
 
 const getRequiredCourses = (courseId) =>
     new Promise((resolve, reject) => {
-        const courses = [SgaConstants.informaticaCourses[0], SgaConstants.informaticaCourses[5]];
+        const courses = {
+            1: [SgaConstants.informaticaCourses[0], SgaConstants.informaticaCourses[5]]
+        }
         setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
 
@@ -517,12 +518,14 @@ export default ApiService;
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-const getAvailableClasses = (student) => {
-    const map = calculateImportanceOfEachCourse(SgaConstants.informaticaCourses);
+const getAvailableClasses = (student, programId) => {
+    const map = calculateImportanceOfEachCourse(SgaConstants.programCourses[programId], programId);
     const passedCourses = SgaConstants.finishedCourses.find((c) => c.student === student).courses;
-    const availableCourses = SgaConstants.informaticaCourses.filter((c) => {
-        if (passedCourses.includes(c.id)) return false;
-        if (c.requirements) return c.requirements.every((req) => passedCourses.includes(req));
+    const availableCourses = SgaConstants.programCourses[programId].filter((c) => {
+        if (passedCourses.includes(c.id))
+            return false;
+        if (c.requirements && c.requirements[programId])
+            return c.requirements[programId].every((req) => passedCourses.includes(req));
         return true;
     });
     const availableCourseCodes = [];
@@ -556,12 +559,13 @@ const areTimeSlotsCompatible = (slotsA, slotsB) => {
     return true;
 };
 
-const calculateImportanceOfEachCourse = (programCourses) => {
+const calculateImportanceOfEachCourse = (programCourses, programId) => {
     const map = {};
     programCourses.forEach((c) => {
-        if (c.requirements)
-            c.requirements.forEach((r) => {
-                if (!map[r]) map[r] = [];
+        if (c.requirements && c.requirements[programId])
+            c.requirements[programId].forEach((r) => {
+                if (!map[r])
+                    map[r] = [];
                 map[r].push(c);
             });
     });
@@ -604,7 +608,7 @@ const calculateDurationOfEachClass = (classes) => {
 const getBestSchedules = (availableClasses, desiredHours, prioritizeUnlocks, reduceDays) => {
     const courseCombinations = getCourseCombinations(availableClasses);
     const schedules = [];
-    courseCombinations.forEach((combo) => {
+    courseCombinations.forEach((combo, idx) => {
         let lectureHours = 0;
         let days = new Set();
         let unlockables = 0;

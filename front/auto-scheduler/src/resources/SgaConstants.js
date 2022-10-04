@@ -5,105 +5,117 @@ var informaticaCourses = [
         id: '31.08',
         internalId: '31.08',
         name: 'Sistemas de Representación',
+        requirements: {1:[]}
     },
     {
         id: '72.03',
         internalId: '72.03',
         name: 'Introducción a la Informática',
+        requirements: {1:[]}
     },
     {
         id: '94.24',
         internalId: '94.24',
         name: 'Metodología del Aprendizaje',
+        requirements: {1:[]}
     },
     {
         id: '93.26',
         internalId: '93.26',
         name: 'Análisis Matemático I',
+        requirements: {1:[]}
     },
     {
         id: '93.58',
         internalId: '93.58',
         name: 'Algebra',
+        requirements: {1:[]}
     },
     {
         id: '12.09',
         internalId: '12.09',
         name: 'Química',
+        requirements: {1:[]}
     },
     {
         id: '72.31',
         internalId: '72.31',
         name: 'Programación Imperativa',
-        requirements: ['93.58', '72.03'],
+        requirements: {1:['93.58', '72.03']},
     },
     {
         id: '93.59',
         internalId: '93.59',
         name: 'Matemática Discreta',
-        requirements: ['93.58'],
+        requirements: {1:['93.58']},
     },
     {
         id: '93.28',
         internalId: '93.28',
         name: 'Análisis Matemático II',
-        requirements: ['93.58', '93.26'],
+        requirements: {1:['93.58', '93.26']},
     },
     {
         id: '93.41',
         internalId: '93.41',
         name: 'Física I',
-        requirements: ['93.26'],
+        requirements: {1:['93.26']},
     },
     {
         id: '72.32',
         internalId: '72.32',
         name: 'Diseño y Procesamiento de Documentos XML',
-        requirements: ['72.31'],
+        requirements: {1:['72.31']},
     },
     {
         id: '72.33',
         internalId: '72.33',
         name: 'Programación Orientada a Objetos',
-        requirements: ['72.31'],
+        requirements: {1:['72.31']},
     },
     {
         id: '93.35',
         internalId: '93.35',
         name: 'Lógica Computacional',
-        requirements: ['93.58'],
+        requirements: {1:['93.58']},
     },
     {
         id: '93.42',
         internalId: '93.42',
         name: 'Física II',
-        requirements: ['93.28'],
+        requirements: {1:['93.28']},
     },
     {
         id: '72.08',
         internalId: '72.08',
         name: 'Arquitectura de Computadoras',
-        requirements: ['72.31'],
+        requirements: {1:['72.31']},
     },
     {
         id: '72.34',
         internalId: '72.34',
         name: 'Estructura de Datos y Algoritmos',
-        requirements: ['93.59', '72.33'],
+        requirements: {1:['93.59', '72.33']},
     },
     {
         id: '93.24',
         internalId: '93.24',
         name: 'Probabilidad y Estadística',
-        requirements: ['93.28'],
+        requirements: {1:['93.28']},
     },
     {
         id: '93.43',
         internalId: '93.43',
         name: 'Física III',
-        requirements: ['93.28', '93.41'],
+        requirements: {1:['93.28', '93.41']},
     },
 ];
+
+var programCourses = {
+    1: informaticaCourses,
+    2: [{ id: '93.99', internalId: '93.99', name: 'Algebra Lineal' }],
+    3: [{ id: '93.99', internalId: '93.99', name: 'Algebra Lineal' }]
+};
 
 var courseClasses2022A = [
     {
@@ -631,7 +643,7 @@ var courses = [
     [],
     [],
     [],
-    [...informaticaCourses, { id: '93.99', internalId: '93.99', name: 'Algebra Lineal' }],
+    [...informaticaCourses, { id: '93.99', internalId: '93.99', name: 'Algebra Lineal', requirements: {'I22':[], 'I13':[]}}],
     [],
     [],
     [],
@@ -712,6 +724,7 @@ var buildings = [
 
 const SgaConstants = {
     informaticaCourses: informaticaCourses,
+    programCourses: programCourses,
     courseClasses2022A: courseClasses2022A,
     courseClasses: courseClasses,
     finishedCourses: finishedCourses,
