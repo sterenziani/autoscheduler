@@ -268,17 +268,22 @@ const getPrograms = async (universityId, inputText) =>
     new Promise((resolve, reject) => {
         const programs = SgaConstants.programs[universityId];
         if(!inputText)
-            setTimeout(() => resolve([programs[2]]), RESOLVE_DELAY)
+            setTimeout(() => resolve(programs), RESOLVE_DELAY)
         else{
             const resp = programs.filter((p) => p.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
             setTimeout(() => resolve(resp), RESOLVE_DELAY)
         }
     });
 
-const getCourses = async (universityId) =>
+const getCourses = async (universityId, inputText) =>
     new Promise((resolve, reject) => {
         const courses = SgaConstants.courses;
-        setTimeout(() => resolve(courses[universityId]), RESOLVE_DELAY);
+        if(!inputText)
+            setTimeout(() => resolve(courses[universityId]), RESOLVE_DELAY);
+        else{
+            const resp = courses.filter((c) => c.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
+            setTimeout(() => resolve(resp), RESOLVE_DELAY)
+        }
     });
 
 const getTerms = async (universityId) =>
@@ -293,23 +298,28 @@ const getBuildings = (universityId) =>
         setTimeout(() => resolve(buildings[universityId]), RESOLVE_DELAY);
     });
 
-const getRemainingCoursesProgram = (user, programId) =>
+const getRemainingCoursesProgram = (user, programId, inputText) =>
     new Promise((resolve, reject) => {
-        const courses = SgaConstants.remainingCourses;
-        setTimeout(() => resolve(courses[programId - 1]), RESOLVE_DELAY);
+        const courses = SgaConstants.remainingCourses[programId-1]
+        if(!inputText)
+            setTimeout(() => resolve(courses), RESOLVE_DELAY);
+        else{
+            const resp = courses.filter((c) => c.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
+            setTimeout(() => resolve(resp), RESOLVE_DELAY)
+        }
     });
 
-const getFinishedCourses = async(student) => {
-/*
+const getFinishedCourses = (student) =>
     new Promise((resolve, reject) => {
-        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student).courses;
+        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
         const courses = SgaConstants.informaticaCourses.filter((c) => {
-            if (courseCodes.includes(c.id)) return true;
+            if (courseCodes.includes(c.id))
+                return true;
             return false;
         });
         setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
-*/
+/*{
     try {
         const endpoint = "student/"+student.id;
         const response = await api.get(endpoint, { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+AuthService.getToken()}});
@@ -321,6 +331,8 @@ const getFinishedCourses = async(student) => {
             return { status : TIMEOUT }
     }
 }
+    */
+
 
 const addFinishedCourse = (student, courseId) =>
     new Promise((resolve, reject) => {

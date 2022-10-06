@@ -208,7 +208,7 @@ function SignUpStudentForm(props) {
                                         </Form.Label>
                                     </div>
                                     <div className="col-9 text-center">
-                                        <AsyncSelect
+                                        <AsyncSelect key={selectedSchool}
                                             className="text-black text-start"
                                             placeholder={t('register.program')}
                                             cacheOptions

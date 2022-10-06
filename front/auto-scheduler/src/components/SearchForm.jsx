@@ -4,6 +4,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../services/ApiService';
+import AsyncSelect from 'react-select/async'
 import { OK, CREATED } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 
@@ -14,19 +15,13 @@ function SearchForm(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
+    const [programError, setProgramError] = useState();
     const [terms, setTerms] = useState();
-    const [programs, setPrograms] = useState();
     const [params, setParams] = useState({
-        program: undefined, term: undefined, hours: 24,
+        program: user.program.id, term: undefined, hours: 24,
         reduceDays: true, prioritizeUnlocks: true,
         unavailableTimeSlots: [JSON.parse(JSON.stringify(DEFAULT_DATE))]
     });
-
-    const onChangePrograms = (e) => {
-        const paramsCopy = Object.assign({}, params);
-        paramsCopy.program = e.target.value;
-        setParams(paramsCopy)
-    }
 
     const onChangeTerms = (e) => {
         const paramsCopy = Object.assign({}, params);
@@ -88,7 +83,7 @@ function SearchForm(props) {
 
     const getPath = (studentName) => {
         let path = 'results';
-        var prog = params.program ? params.program : programs[0];
+        var prog = params.program;
         var term = params.term ? params.term : terms[0];
         path += '?program=' + prog;
         path += '&term=' + term;
@@ -105,43 +100,60 @@ function SearchForm(props) {
         return path;
     }
 
+    const onButtonSubmit = (studentName) => {
+        if(params && !params.program)
+            setProgramError(true)
+        else
+            navigate(getPath(studentName))
+    }
+
     useEffect( () => {
         if(!user)
             navigate("/register")
-        loadProgramsAndTerms(user.university.id)
+        loadTerms(user.university.id)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const loadProgramsAndTerms = (university) => {
-        ApiService.getPrograms(university).then((dataProg) => {
+    const loadTerms = (university) => {
+        ApiService.getTerms(university).then((dataTerm) => {
             let findError = null;
-            if (dataProg && dataProg.status && dataProg.status !== OK && dataProg.status !== CREATED)
-                findError = dataProg.status;
+            if (dataTerm && dataTerm.status && dataTerm.status !== OK && dataTerm.status !== CREATED)
+                findError = dataTerm.status;
             if (findError) {
                 setError(true)
                 setStatus(findError)
-                setLoading(false)
-            } else {
-                ApiService.getTerms(university).then((dataTerm) => {
-                    let findError = null;
-                    if (dataTerm && dataTerm.status && dataTerm.status !== OK && dataTerm.status !== CREATED)
-                        findError = dataTerm.status;
-                    if (findError) {
-                        setError(true)
-                        setStatus(findError)
-                    }
-                    else {
-                        const paramsCopy = Object.assign({}, params);
-                        paramsCopy.program = dataProg[0].id;
-                        paramsCopy.term = dataTerm[0].id;
-                        setPrograms(dataProg)
-                        setTerms(dataTerm)
-                        setParams(paramsCopy)
-                    }
-                    setLoading(false)
-                });
             }
+            else {
+                const paramsCopy = Object.assign({}, params);
+                paramsCopy.term = dataTerm[0].id;
+                setTerms(dataTerm)
+                setParams(paramsCopy)
+            }
+            setLoading(false)
         });
+    }
+
+    const loadProgramOptions = (inputValue, callback) => {
+        setTimeout(() => {
+            ApiService.getPrograms(user.university.id, inputValue).then((data) => {
+                let findError = null;
+                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (findError) {
+                    setError(true)
+                    setStatus(findError)
+                    callback([])
+                } else {
+                    callback(data)
+                }
+            })
+        })
+    }
+
+    const onChangePrograms = (programId) => {
+        const paramsCopy = Object.assign({}, params);
+        paramsCopy.program = programId;
+        setParams(paramsCopy)
+        setProgramError(false)
     }
 
     if (loading === true)
@@ -162,13 +174,19 @@ function SearchForm(props) {
                         </Form.Label>
                     </div>
                     <div className="col-8 text-center">
-                        <Form.Select value={params.program} onChange={onChangePrograms}>
-                            {programs.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {p.internalId + ' - ' + p.name}
-                                </option>
-                            ))}
-                        </Form.Select>
+                        <AsyncSelect
+                            className="text-black text-start"
+                            placeholder={t('search.program')}
+                            cacheOptions
+                            defaultOptions
+                            defaultInputValue={user.program.name}
+                            defaultValue={user.program.id}
+                            getOptionLabel={e => e.internalId+' - '+e.name}
+                            getOptionValue={e => e.id}
+                            loadOptions={loadProgramOptions}
+                            onChange={opt => onChangePrograms(opt.id)}
+                        />
+                        { programError && <p key="program-error" className="form-error text-start my-0">{t('search.programError')}</p>}
                     </div>
                 </Form.Group>
 
@@ -312,24 +330,16 @@ function SearchForm(props) {
                 </Form.Group>
                 <div className="row">
                     <div className="col text-center">
-                        <LinkContainer to={getPath('Newcomer')}>
-                            <Button className="btn btn-secondary mt-3">Newcomer</Button>
-                        </LinkContainer>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>Newcomer</Button>
                     </div>
                     <div className="col text-center">
-                        <LinkContainer to={getPath('Algebra')}>
-                            <Button className="btn btn-secondary mt-3">Algebra + Intro Inf</Button>
-                        </LinkContainer>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>Algebra + Intro Inf</Button>
                     </div>
                     <div className="col text-center">
-                        <LinkContainer to={getPath('1C')}>
-                            <Button className="btn btn-secondary mt-3">1° Semester Done</Button>
-                        </LinkContainer>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>1° Semester Done</Button>
                     </div>
                     <div className="col text-center">
-                        <LinkContainer to={getPath('2C')}>
-                            <Button className="btn btn-secondary mt-3">2° Semester Done</Button>
-                        </LinkContainer>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>2° Semester Done</Button>
                     </div>
                 </div>
             </Form>

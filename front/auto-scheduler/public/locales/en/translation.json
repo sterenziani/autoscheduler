@@ -79,7 +79,7 @@
         "areYouSureClass": "Are you sure you want to delete class {{class}} for course '{{code}} - {{name}}' in term {{term}}?",
         "areYouSureBuilding": "Are you sure you want to delete the building '{{code}} - {{name}}'?",
         "areYouSureTerm": "Are you sure you want to delete the term '{{code}} - {{name}}'?",
-        "noRemainingCoursesProgram": "This plan has no remaining courses available.",
+        "noRemainingCoursesProgram": "This program has no remaining courses available.",
         "noRemainingCourses": "No remaining courses available.",
         "cancel": "Cancel",
         "delete": "Delete",
@@ -93,7 +93,8 @@
         "hoursPerWeek": "Weekly hours",
         "prioritizeUnlocks": "Prioritize unlockables",
         "reduceDays": "Reduce days",
-        "unavailableSlots": "Timeslots to avoid"
+        "unavailableSlots": "Timeslots to avoid",
+        "programError":"Please select a program."
     },
     "days": {
         "M": "Monday",
@@ -218,5 +219,7 @@
     "requestedDoesntExist": "The requested resource does not exist.",
     "noSchedulesFound": "Could not find any recommended schedules for your search.",
     "noDefinedRequirements": "No requirements defined. It is possible this course does not belong to the selected program.",
+    "selectNoOptions": "Please type in a character to search for options.",
+    "selectNoResults": "No results found for the given query.",
     "goHome": "Go home"
 }

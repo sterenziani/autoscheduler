@@ -93,7 +93,8 @@
         "hoursPerWeek": "Horas semanales",
         "prioritizeUnlocks": "Priorizar correlativas",
         "reduceDays": "Reducir días",
-        "unavailableSlots": "Horarios a evitar"
+        "unavailableSlots": "Horarios a evitar",
+        "programError":"Por favor seleccione un programa."
     },
     "days": {
         "M": "Lunes",
@@ -218,5 +219,7 @@
     "requestedDoesntExist": "El recurso solicitado no existe.",
     "noSchedulesFound:" "No hubo planes encontrados para su búsqueda.",
     "noDefinedRequirements": "No hay correlativas definidas. Es posible que esta materia no sea parte del plan seleccionado.",
+    "selectNoOptions": "Ingrese un caracter para buscar.",
+    "selectNoResults": "No results found for the given query.",
     "goHome": "Volver al inicio"
 }
