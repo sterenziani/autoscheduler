@@ -170,9 +170,9 @@ const getSchedules = (params) =>
         setTimeout(() => resolve(schedules), RESOLVE_DELAY);
     });
 
-const getUniversities = () =>
+const getUniversities = async (inputText) =>
     new Promise((resolve, reject) => {
-        const programs = [
+        const schools = [
             { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
             { id: 1, name: 'Academia para Astronautas' },
             { id: 2, name: 'Bachiller para Bochincheros' },
@@ -193,8 +193,13 @@ const getUniversities = () =>
             { id: 18, name: 'Rectorado para Rectores' },
             { id: 19, name: 'Universidad Siglo 21' },
             { id: 20, name: 'UTN' },
-        ];
-        setTimeout(() => resolve(programs), RESOLVE_DELAY);
+        ]
+        if(!inputText)
+            setTimeout(() => resolve([schools[1], schools[2], schools[3]]), RESOLVE_DELAY)
+        else{
+            const resp = schools.filter((s) => s.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
+            setTimeout(() => resolve(resp), RESOLVE_DELAY)
+        }
     });
 
 const getCourse = (courseId) =>
@@ -259,10 +264,15 @@ const getCourseClassesForTerm = (courseId, termId) =>
         setTimeout(() => resolve(availableClasses), RESOLVE_DELAY);
     });
 
-const getPrograms = (universityId) =>
+const getPrograms = async (universityId, inputText) =>
     new Promise((resolve, reject) => {
-        const programs = SgaConstants.programs;
-        setTimeout(() => resolve(programs[universityId]), RESOLVE_DELAY);
+        const programs = SgaConstants.programs[universityId];
+        if(!inputText)
+            setTimeout(() => resolve([programs[2]]), RESOLVE_DELAY)
+        else{
+            const resp = programs.filter((p) => p.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
+            setTimeout(() => resolve(resp), RESOLVE_DELAY)
+        }
     });
 
 const getCourses = async (universityId) =>

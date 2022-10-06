@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
-import { Button, Form, Spinner } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
 import FormInputField from '../FormInputField';
-import Select from 'react-select'
+import AsyncSelect from 'react-select/async'
 
 const SignUpSchema = Yup.object().shape({
     email: Yup.string()
@@ -35,61 +35,19 @@ function SignUpStudentForm(props) {
     const navigate = useNavigate()
 
     const [badConnection, setBadConnection] = useState(false);
-    const [universities, setUniversities] = useState([]);
-    const [programs, setPrograms] = useState([]);
     const [selectedSchool, setSelectedSchool] = useState()
     const [selectedProgram, setSelectedProgram] = useState()
-    const [loading, setLoading] = useState(false)
     const [error, setError] = useState(false)
     const [status, setStatus] = useState(false)
     const [programError, setProgramError] = useState(false)
-    const [disablePrograms, setDisablePrograms] = useState(false)
-
-    useEffect( () => {
-        loadUniversities();
-    }, [])
 
     const onChangeSchools = (schoolId) => {
         setSelectedSchool(schoolId)
         setSelectedProgram()
-        setDisablePrograms(true)
-        loadPrograms(schoolId)
     }
 
     const onChangePrograms = (programId) => {
         setSelectedProgram(programId)
-    }
-
-    const loadUniversities = () => {
-        ApiService.getUniversities().then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
-            if (findError) {
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            } else {
-                setUniversities(data)
-                setLoading(false)
-            }
-        })
-    }
-
-    const loadPrograms = (university) => {
-        ApiService.getPrograms(university).then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
-            if (findError) {
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            } else {
-                setPrograms(data)
-                setLoading(false)
-                setDisablePrograms(false)
-                setProgramError(false)
-            }
-        });
     }
 
     const register = async (values, setSubmitting, setFieldError) => {
@@ -136,6 +94,38 @@ function SignUpStudentForm(props) {
         }
     }
 
+    const loadSchoolOptions = (inputValue, callback) => {
+        setTimeout(() => {
+            ApiService.getUniversities(inputValue).then((data) => {
+                let findError = null;
+                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (findError) {
+                    setError(true)
+                    setStatus(findError)
+                    callback([])
+                } else {
+                    callback(data)
+                }
+            })
+        })
+    }
+
+    const loadProgramOptions = (inputValue, callback) => {
+        setTimeout(() => {
+            ApiService.getPrograms(selectedSchool, inputValue).then((data) => {
+                let findError = null;
+                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (findError) {
+                    setError(true)
+                    setStatus(findError)
+                    callback([])
+                } else {
+                    callback(data)
+                }
+            })
+        })
+    }
+
     return (
         <Formik
             initialValues={{ email: '', password: '', repeat_password: '' }}
@@ -145,11 +135,7 @@ function SignUpStudentForm(props) {
             {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
                     <FontAwesomeIcon size="3x" icon={faMortarBoard} />
-                    {badConnection && (
-                        <p className="form-error">
-                            {t('register.errors.badConnection')}
-                        </p>
-                    )}
+                    {badConnection && <p className="form-error">{t('register.errors.badConnection')}</p>}
 
                     <FormInputField
                         label="register.email"
@@ -186,9 +172,7 @@ function SignUpStudentForm(props) {
                         onBlur={handleBlur}
                     />
 
-                    {loading ? (
-                        <div className="mx-auto py-3"><Spinner animation="border"/></div>
-                    ) : error ? (
+                    {error ? (
                         <h1>ERROR {error}</h1>
                     ) : (
                         <>
@@ -201,16 +185,20 @@ function SignUpStudentForm(props) {
                                     </Form.Label>
                                 </div>
                                 <div className="col-9 text-center">
-                                    <Select
+                                    <AsyncSelect
                                         className="text-black text-start"
                                         placeholder={t('register.school')}
-                                        options={universities.map((u) => ({value: u.id, label: u.name}))}
-                                        onChange={opt => onChangeSchools(opt.value)}
+                                        cacheOptions
+                                        defaultOptions
+                                        getOptionLabel={e => e.name}
+                                        getOptionValue={e => e.id}
+                                        loadOptions={loadSchoolOptions}
+                                        onChange={opt => onChangeSchools(opt.id)}
                                     />
                                 </div>
                             </Form.Group>
                             {
-                                !disablePrograms && selectedSchool && (
+                                selectedSchool && (
                                 <Form.Group controlId="program" className="row mx-auto form-row">
                                     <div className="col-3 text-end my-auto text-break">
                                         <Form.Label className="my-0">
@@ -220,11 +208,15 @@ function SignUpStudentForm(props) {
                                         </Form.Label>
                                     </div>
                                     <div className="col-9 text-center">
-                                        <Select
+                                        <AsyncSelect
                                             className="text-black text-start"
                                             placeholder={t('register.program')}
-                                            options={programs.map((p) => ({value: p.id, label: p.internalId+' - '+p.name}))}
-                                            onChange={opt => onChangePrograms(opt.value)}
+                                            cacheOptions
+                                            defaultOptions
+                                            getOptionLabel={e => e.internalId+' - '+e.name}
+                                            getOptionValue={e => e.id}
+                                            loadOptions={loadProgramOptions}
+                                            onChange={opt => onChangePrograms(opt.id)}
                                         />
                                         {!selectedProgram && programError && (
                                             <p key="program-error" className="form-error text-start my-0">
