@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
 import FormInputField from '../FormInputField';
+import Select from 'react-select'
 
 const SignUpSchema = Yup.object().shape({
     email: Yup.string()
@@ -42,20 +43,21 @@ function SignUpStudentForm(props) {
     const [error, setError] = useState(false)
     const [status, setStatus] = useState(false)
     const [programError, setProgramError] = useState(false)
+    const [disablePrograms, setDisablePrograms] = useState(false)
 
     useEffect( () => {
         loadUniversities();
     }, [])
 
-    const onChangeSchools = (e) => {
-        setSelectedSchool(e.target.value)
+    const onChangeSchools = (schoolId) => {
+        setSelectedSchool(schoolId)
         setSelectedProgram()
-        setLoading(true)
-        loadPrograms(e.target.value);
+        setDisablePrograms(true)
+        loadPrograms(schoolId)
     }
 
-    const onChangePrograms = (e) => {
-        setSelectedProgram(e.target.value)
+    const onChangePrograms = (programId) => {
+        setSelectedProgram(programId)
     }
 
     const loadUniversities = () => {
@@ -67,23 +69,8 @@ function SignUpStudentForm(props) {
                 setError(true)
                 setStatus(findError)
             } else {
-                ApiService.getPrograms(data[0].id).then((dataProg) => {
-                    let findError = null;
-                    if (dataProg && dataProg.status && dataProg.status !== OK && dataProg.status !== CREATED)
-                        findError = dataProg.status;
-                    if (findError){
-                        setLoading(false)
-                        setError(true)
-                        setStatus(findError)
-                    }
-                    else {
-                        setUniversities(data)
-                        setPrograms(dataProg)
-                        setSelectedSchool(data[0].id)
-                        setSelectedProgram(dataProg && dataProg.length > 0 ? dataProg[0].id : undefined)
-                        setLoading(false)
-                    }
-                })
+                setUniversities(data)
+                setLoading(false)
             }
         })
     }
@@ -98,8 +85,8 @@ function SignUpStudentForm(props) {
                 setStatus(findError)
             } else {
                 setPrograms(data)
-                setSelectedProgram(data && data.length > 0 ? data[0].id : undefined)
                 setLoading(false)
+                setDisablePrograms(false)
                 setProgramError(false)
             }
         });
@@ -163,11 +150,6 @@ function SignUpStudentForm(props) {
                             {t('register.errors.badConnection')}
                         </p>
                     )}
-                    {programError && (
-                        <p className="form-error">
-                            {t('register.errors.selectSchoolAndProgram')}
-                        </p>
-                    )}
 
                     <FormInputField
                         label="register.email"
@@ -205,9 +187,7 @@ function SignUpStudentForm(props) {
                     />
 
                     {loading ? (
-                        <div className="mx-auto py-3">
-                            <Spinner animation="border" />
-                        </div>
+                        <div className="mx-auto py-3"><Spinner animation="border"/></div>
                     ) : error ? (
                         <h1>ERROR {error}</h1>
                     ) : (
@@ -221,46 +201,39 @@ function SignUpStudentForm(props) {
                                     </Form.Label>
                                 </div>
                                 <div className="col-9 text-center">
-                                    <Form.Select
-                                        aria-label="School select"
-                                        value={selectedSchool}
-                                        onChange={onChangeSchools}
-                                    >
-                                        {universities.map((u) => (
-                                            <option key={u.id} value={u.id}>
-                                                {u.name}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
+                                    <Select
+                                        className="text-black text-start"
+                                        placeholder={t('register.school')}
+                                        options={universities.map((u) => ({value: u.id, label: u.name}))}
+                                        onChange={opt => onChangeSchools(opt.value)}
+                                    />
                                 </div>
                             </Form.Group>
-                            <Form.Group controlId="program" className="row mx-auto form-row">
-                                <div className="col-3 text-end my-auto text-break">
-                                    <Form.Label className="my-0">
-                                        <h5 className="my-0">
-                                            <strong>{t('register.program')}</strong>
-                                        </h5>
-                                    </Form.Label>
-                                </div>
-                                <div className="col-9 text-center">
-                                    <Form.Select
-                                        aria-label="Program select"
-                                        value={selectedProgram}
-                                        onChange={onChangePrograms}
-                                    >
-                                        {programs.map((p) => (
-                                            <option key={p.id} value={p.id}>
-                                                {p.internalId + ' - ' + p.name}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                    {!selectedProgram && (
-                                        <p key="program-error" className="form-error text-start my-0">
-                                            {t('register.errors.school.programNotSelected')}
-                                        </p>
-                                    )}
-                                </div>
-                            </Form.Group>
+                            {
+                                !disablePrograms && selectedSchool && (
+                                <Form.Group controlId="program" className="row mx-auto form-row">
+                                    <div className="col-3 text-end my-auto text-break">
+                                        <Form.Label className="my-0">
+                                            <h5 className="my-0">
+                                                <strong>{t('register.program')}</strong>
+                                            </h5>
+                                        </Form.Label>
+                                    </div>
+                                    <div className="col-9 text-center">
+                                        <Select
+                                            className="text-black text-start"
+                                            placeholder={t('register.program')}
+                                            options={programs.map((p) => ({value: p.id, label: p.internalId+' - '+p.name}))}
+                                            onChange={opt => onChangePrograms(opt.value)}
+                                        />
+                                        {!selectedProgram && programError && (
+                                            <p key="program-error" className="form-error text-start my-0">
+                                                {t('register.errors.school.programNotSelected')}
+                                            </p>
+                                        )}
+                                    </div>
+                                </Form.Group>
+                            )}
                         </>
                     )}
                     <Button variant="secondary" type="submit" disabled={isSubmitting}>
