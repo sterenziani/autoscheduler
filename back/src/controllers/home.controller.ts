@@ -5,6 +5,7 @@ import { ERRORS } from '../constants/error.constants';
 import UserService from '../services/user.service';
 import { userToDto } from '../dtos/user.dto';
 import { IUser } from '../models/user.model';
+import {HTTP_STATUS} from "../constants/http.constants";
 
 export class HomeController {
     private userAuthService: UserAuthService;
@@ -16,7 +17,7 @@ export class HomeController {
     }
 
     public healthCheck: RequestHandler = async (req, res) => {
-        res.status(204).send();
+        res.status(HTTP_STATUS.NO_CONTENT).send();
     };
 
     public login: RequestHandler = async (req, res, next) => {
@@ -30,7 +31,7 @@ export class HomeController {
         try {
             const jwt: string = await this.userAuthService.login(email, password);
             const user: IUser = await this.userService.getUserByEmail(email);
-            res.status(200).set('Authorization', jwt).send(userToDto(user));
+            res.status(HTTP_STATUS.OK).set('Authorization', jwt).send(userToDto(user));
         } catch (e) {
             next(e);
         }

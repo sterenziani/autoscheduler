@@ -5,8 +5,9 @@ import GenericException from '../exceptions/generic.exception';
 import UserService from '../services/user.service';
 import { IUser } from '../models/user.model';
 import CourseService from '../services/course.service';
-import { modelArrayToDtoArray } from '../helpers/collection.helper';
 import { courseToDto } from '../dtos/course.dto';
+import {HTTP_STATUS} from "../constants/http.constants";
+import {modelArrayToDtoArray} from "../helpers/collection.helper";
 
 export class StudentController {
     private courseService: CourseService;
@@ -29,7 +30,7 @@ export class StudentController {
 
         try {
             const user: IUser = await this.userService.getUser(userId);
-            res.status(200).send(userToDto(user));
+            res.status(HTTP_STATUS.OK).send(userToDto(user));
         } catch (e) {
             next(e);
         }
@@ -43,7 +44,7 @@ export class StudentController {
 
         try {
             const approvedCourses = await this.courseService.getStudentCompletedCourses(userId);
-            res.status(200).send(modelArrayToDtoArray(courseToDto, approvedCourses));
+            res.status(HTTP_STATUS.OK).send(modelArrayToDtoArray(courseToDto, approvedCourses));
         } catch (e) {
             next(e);
         }
