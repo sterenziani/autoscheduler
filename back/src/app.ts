@@ -28,8 +28,8 @@ class App {
     }
 
     private setRoutes() {
-        this.app.use('/api/', new HomeRoutes().router);
-        this.app.use('/api/student', new StudentRoutes().router);
+        this.app.use('/', new HomeRoutes().router);
+        this.app.use('/student', new StudentRoutes().router);
     }
 }
 
