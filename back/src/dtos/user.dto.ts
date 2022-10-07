@@ -14,7 +14,7 @@ export const userToDto = (user: IUser): IUserDto => {
 };
 
 export const getUserUrl = (userId: string, role: ROLES): string => {
-    return `/api/${role.toLowerCase()}/${userId}`;
+    return `/${role.toLowerCase()}/${userId}`;
 };
 
 interface IUserDto {
