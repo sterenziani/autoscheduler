@@ -281,7 +281,7 @@ const getCourses = async (universityId, inputText) =>
         if(!inputText)
             setTimeout(() => resolve(courses[universityId]), RESOLVE_DELAY);
         else{
-            const resp = courses.filter((c) => c.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
+            const resp = courses[universityId].filter((c) => c.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
             setTimeout(() => resolve(resp), RESOLVE_DELAY)
         }
     });

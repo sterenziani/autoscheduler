@@ -38,7 +38,6 @@ function EditProgramPage(props) {
     const [optionalCourses, setOptionalCourses] = useState([]);
 
     const [courses, setCourses] = useState(null);
-    const [availableCourses, setAvailableCourses] = useState();
 
     useEffect(() => {
         if(!user)
@@ -61,18 +60,12 @@ function EditProgramPage(props) {
                     setProgram({"name": t("forms.placeholders.programName"), "internalId": t("forms.placeholders.programCode")})
             }
             if(user && program && courses && mandatoryCourses && optionalCourses){
-                setAvailableCourses(getFilteredCourses([...mandatoryCourses, ...optionalCourses]))
                 setLoading(false)
             }
         }
         execute();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[program, courses])
-
-    useEffect( () => {
-        setAvailableCourses(getFilteredCourses([...mandatoryCourses, ...optionalCourses]))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[mandatoryCourses, optionalCourses])
 
     const loadProgram = async () => {
         ApiService.getProgram(id).then((data) => {
@@ -156,18 +149,6 @@ function EditProgramPage(props) {
         }
     };
 
-    const getFilteredCourses = (coursesToRemove) => {
-        let availableCourses = []
-        if(courses)
-        {
-            availableCourses = courses.filter(function(item) {
-                const match = coursesToRemove.find((c) => c.id === item.id);
-                return !match;
-            })
-        }
-        return availableCourses
-    }
-
     const onClickReqTrashCan = (e) => {
         const mandatoriesCopy = Object.assign([], mandatoryCourses);
         mandatoriesCopy.splice(mandatoryCourses.indexOf(e), 1);
@@ -236,7 +217,7 @@ function EditProgramPage(props) {
                             </div>
                             <div className="align-items-start align-items-center">
                                 <CourseListForm courses={courses}
-                                    listedCourses={mandatoryCourses} availableCourses={availableCourses}
+                                    listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
                                     onClickTrashCan={onClickReqTrashCan} addCourse={addRequiredCourse}
                                 />
                             </div>
@@ -251,7 +232,7 @@ function EditProgramPage(props) {
                             </div>
                             <div className="align-items-start align-items-center">
                                 <CourseListForm courses={courses}
-                                    listedCourses={optionalCourses} availableCourses={availableCourses}
+                                    listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
                                     onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
                                 />
                             </div>

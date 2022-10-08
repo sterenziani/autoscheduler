@@ -1,22 +1,25 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Form, Row, Modal } from 'react-bootstrap';
+import { Button, Row, Modal } from 'react-bootstrap';
+import AsyncSelect from 'react-select/async'
+import ApiService from '../../services/ApiService';
+import { OK, CREATED } from '../../services/ApiConstants';
 
 function CourseListForm(props) {
     const {t} = useTranslation();
+    const user = ApiService.getActiveUser();
     const listedCourses = props.listedCourses
-    const availableCourses = props.availableCourses
+    const unavailableCourses = props.unavailableCourses
     const onClickTrashCan = props.onClickTrashCan
     const addCourseToParent = props.addCourse
     const [showAddModal, setShowAddModal] = useState(false);
     const [courseToAdd, setCourseToAdd] = useState();
-
-    useEffect( () => {
-        setCourseToAdd(availableCourses[0])
-    },[availableCourses])
+    const [error, setError] = useState(false);
+    const [status, setStatus] = useState(null);
 
     const switchAddModal = () => {
         setShowAddModal(!showAddModal)
+        setCourseToAdd(undefined)
     }
 
     const addCourse = () => {
@@ -24,15 +27,30 @@ function CourseListForm(props) {
         setCourseToAdd(undefined)
         switchAddModal()
         // eslint-disable-next-line
-        if(availableCourses[0] != courseToAdd)
-            setCourseToAdd(availableCourses[0])
-        else if(availableCourses.length>1)
-            setCourseToAdd(availableCourses[1])
     }
 
-    const onChangeCourseToAdd = (e) => {
-        const course = props.courses.find((c) => c.id === e.target.value);
-        if(course) setCourseToAdd(course)
+    const onChangeCourseToAdd = (courseId) => {
+        const course = props.courses.find((c) => c.id === courseId);
+        if(course)
+            setCourseToAdd(course)
+    }
+
+    const loadRemainingCoursesOptions = (inputValue, callback) => {
+        setTimeout(() => {
+            ApiService.getCourses(user.id, inputValue).then((data) => {
+                let findError = null;
+                if (data && data.status && data.status !== OK && data.status !== CREATED)
+                    findError = data.status;
+                if (findError) {
+                    setError(true)
+                    setStatus(findError)
+                    callback([])
+                } else {
+                    const availableCourses = data.filter((item) => !unavailableCourses.find((c) => c.id === item.id))
+                    callback(availableCourses)
+                }
+            })
+        })
     }
 
     return(
@@ -69,23 +87,23 @@ function CourseListForm(props) {
                 <Modal.Title>{t('modal.addCourse')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {availableCourses && availableCourses.length > 0
-                    ? [
-                        <Form.Select
-                            key="course-select" value={courseToAdd? courseToAdd.id:undefined}
-                            onChange={onChangeCourseToAdd} className="m-2">
-                            {availableCourses.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                    {c.internalId + ' - ' + c.name}
-                                </option>
-                            ))}
-                        </Form.Select>
-                      ]
-                    : [
-                          <div className="text-center" key="no-courses-message">
-                              {t('modal.noRemainingCourses')}
-                          </div>,
-                      ]}
+                {
+                    <AsyncSelect key="course-select"
+                        className="text-black m-2"
+                        placeholder={t('forms.course')}
+                        cacheOptions
+                        defaultOptions
+                        noOptionsMessage={(inputValue) => {
+                            if(inputValue.inputValue.length > 0)
+                                return t('selectNoResults')
+                            return t('modal.noRemainingCourses')
+                        }}
+                        getOptionLabel={e => e.internalId+' - '+e.name}
+                        getOptionValue={e => e.id}
+                        loadOptions={loadRemainingCoursesOptions}
+                        onChange={opt => onChangeCourseToAdd(opt.id)}
+                    />
+                }
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="grey" onClick={() => {switchAddModal()}}>
