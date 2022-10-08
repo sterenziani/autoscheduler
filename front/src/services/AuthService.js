@@ -67,9 +67,9 @@ const logIn = async (email, password) => {
         if(response.status === BAD_REQUEST)
             return { status: BAD_REQUEST }
         token = response.headers.authorization
-        userStore.user = response.data;
         TokenStore.setToken(token);
-        UserStore.setUser(userStore.user);
+        const userData = await api.get('student/primero', { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+AuthService.getToken()}})
+        UserStore.setUser(userData.data)
         return { status: OK }
     }
     catch(e) {
@@ -87,9 +87,7 @@ const logInWithStore = async () => {
         return { status : OK }
     try {
         const response = await api.get(logInEndpoint, {
-            headers : {
-                authorization : savedToken
-            }
+            headers : { authorization : savedToken }
         })
         token = response.headers.authorization;
         userStore.user = response.data;

@@ -1,7 +1,7 @@
 import { create } from 'axios';
 
 const api = create({
-    baseURL : `http://localhost:8080/api/`,
+    baseURL : `http://localhost:8080/`,
     timeout : 10000
 })
 
