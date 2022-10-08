@@ -29,10 +29,8 @@ function CourseListForm(props) {
         // eslint-disable-next-line
     }
 
-    const onChangeCourseToAdd = (courseId) => {
-        const course = props.courses.find((c) => c.id === courseId);
-        if(course)
-            setCourseToAdd(course)
+    const onChangeCourseToAdd = (course) => {
+        setCourseToAdd(course)
     }
 
     const loadRemainingCoursesOptions = (inputValue, callback) => {
@@ -77,7 +75,7 @@ function CourseListForm(props) {
                             </div>
                         </Row>
                     ))
-            ]:[<div key="empty-list">{t('emptyList')}</div>]
+            ]:[<div className="mt-3" key="empty-list">{t('emptyList')}</div>]
         }
         <div className="mx-auto align-items-center plus-button-container clickable">
             <i className="bi bi-plus-circle-fill btn btn-lg color-primary" onClick={switchAddModal}></i>
@@ -101,7 +99,7 @@ function CourseListForm(props) {
                         getOptionLabel={e => e.internalId+' - '+e.name}
                         getOptionValue={e => e.id}
                         loadOptions={loadRemainingCoursesOptions}
-                        onChange={opt => onChangeCourseToAdd(opt.id)}
+                        onChange={opt => onChangeCourseToAdd(opt)}
                     />
                 }
             </Modal.Body>

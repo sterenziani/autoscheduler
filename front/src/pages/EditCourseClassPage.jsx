@@ -11,6 +11,7 @@ import { OK, CREATED } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
+import AsyncSelect from 'react-select/async'
 
 function EditCourseClassPage(props) {
     const CourseClassSchema = Yup.object().shape({
@@ -28,7 +29,6 @@ function EditCourseClassPage(props) {
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [courseClass, setCourseClass] = useState(null);
-    const [courses, setCourses] = useState();
     const [terms, setTerms] = useState();
     const [buildings, setBuildings] = useState();
 
@@ -52,18 +52,17 @@ function EditCourseClassPage(props) {
                 if(user && !courseClass)
                     await Promise.all([loadCourseClass()]);
                 if(user && courseClass){
-                    if(!courses && !terms && !buildings)
-                        await Promise.all([loadCourses(user.id), loadTerms(user.id)], loadBuildings(user.id));
-                    else if (courses && terms && buildings)
+                    if(!terms && !buildings)
+                        await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
+                    else if (terms && buildings)
                         setLoading(false)
                 }
             }
             else{
                 if(user){
-                    if(!courses && !terms && !buildings)
-                        await Promise.all([loadCourses(user.id), loadTerms(user.id)], loadBuildings(user.id));
-                    else if (courses && terms && buildings){
-                        setSelectedCourse(courses[0].id)
+                    if(!terms && !buildings)
+                        await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
+                    else if (terms && buildings){
                         setSelectedTerm(terms[0].id)
                         setClassName("X")
                         setLectures([DEFAULT_DATE])
@@ -74,7 +73,7 @@ function EditCourseClassPage(props) {
         }
         execute();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[courseClass, courses, terms, buildings])
+    },[courseClass, terms, buildings])
 
     const loadCourseClass = async () => {
         ApiService.getCourseClass(id).then((data) => {
@@ -92,22 +91,6 @@ function EditCourseClassPage(props) {
               setSelectedTerm(data.term)
               setClassName(data.courseClass)
               setLectures(data.lectures)
-            }
-        });
-    }
-
-    const loadCourses = async (universityId) => {
-        ApiService.getCourses(universityId).then((data) => {
-            let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-              setCourses(data)
             }
         });
     }
@@ -142,8 +125,8 @@ function EditCourseClassPage(props) {
         });
     }
 
-    const onChangeCourse = (e) => {
-        setSelectedCourse(e.target.value)
+    const onChangeCourse = (course) => {
+        setSelectedCourse(course)
     }
 
     const onChangeTerm = (e) => {
@@ -197,7 +180,7 @@ function EditCourseClassPage(props) {
         {
             const resp = await ApiService.saveCourseClass(id, selectedCourse, selectedTerm, values.className, lectures)
             if(resp.status === OK || resp.status === CREATED)
-                navigate("/courses/"+selectedCourse);
+                navigate("/courses/"+selectedCourse.id);
             else{
                 setError(true)
                 setStatus(resp.status)
@@ -209,6 +192,22 @@ function EditCourseClassPage(props) {
             setSubmitting(false);
         }
     };
+
+    const loadCourseOptions = (inputValue, callback) => {
+        setTimeout(() => {
+            ApiService.getCourses(user.id, inputValue).then((data) => {
+                let findError = null;
+                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (findError) {
+                    setError(true)
+                    setStatus(findError)
+                    callback([])
+                } else {
+                    callback(data)
+                }
+            })
+        })
+    }
 
     if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
@@ -234,13 +233,20 @@ function EditCourseClassPage(props) {
                                 <h5 className="my-0"><strong>{t('forms.course')}</strong></h5>
                             </Form.Label>
                         </div>
-                        <div className="col-9 text-center">
+                        <div className="col-9 text-start">
                         {
-                            <Form.Select value={selectedCourse} onChange={onChangeCourse}>
-                                {courses && courses.map((c) => (
-                                    <option key={c.id} value={c.id}> {c.internalId + ' - ' + c.name}</option>
-                                ))}
-                            </Form.Select>
+                            <AsyncSelect
+                                className="text-black"
+                                placeholder={selectedCourse.internalId+' - '+selectedCourse.name}
+                                cacheOptions
+                                defaultOptions
+                                defaultValue={selectedCourse.id}
+                                defaultInputValue={selectedCourse.internalId+' - '+selectedCourse.name}
+                                getOptionLabel={e => e.internalId+' - '+e.name}
+                                getOptionValue={e => e.id}
+                                loadOptions={loadCourseOptions}
+                                onChange={opt => onChangeCourse(opt)}
+                            />
                         }
                         </div>
                     </Form.Group>
@@ -267,15 +273,15 @@ function EditCourseClassPage(props) {
                         touched={touched.className} onChange={handleChange} onBlur={handleBlur}
                     />
                     <Form.Group controlId="schedule" className="row mx-auto form-row">
-                        <div className="col-3 text-end my-3 text-break">
-                            <Form.Label className="my-0">
-                                <h5 className="my-0"><strong>{t('forms.lectures')}</strong></h5>
+                        <div className="col-3 text-end text-break my-4">
+                            <Form.Label className="">
+                                <h5 className=""><strong>{t('forms.lectures')}</strong></h5>
                             </Form.Label>
                         </div>
                         <div className="col-9 align-items-start align-items-center">
                             {lectures.map((entry, index) => (
-                                <Row key={'timerow-' + index} xs={1} md={6} className="list-row pb-2 pt-3 justify-content-center">
-                                    <Form.Select id={'day-' + index} className="w-auto mx-1" value={lectures[index].day} onChange={onChangeDay}>
+                                <Row key={'timerow-' + index} xs={1} md={6} className="list-row pb-2 pt-3 ms-1 justify-content-center">
+                                    <Form.Select id={'day-' + index} className="w-auto mx-auto" value={lectures[index].day} onChange={onChangeDay}>
                                         {DAYS.map((p) => (<option key={p} value={p}>{t('days.' + p)}</option>))}
                                     </Form.Select>
                                     <input
@@ -289,10 +295,10 @@ function EditCourseClassPage(props) {
                                         value={lectures[index].endTime}
                                         onChange={onChangeEndTime}
                                     />
-                                    <Form.Select id={'building-' + index} className="w-auto mx-1" value={lectures[index].building} onChange={onChangeBuilding}>
+                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].building} onChange={onChangeBuilding}>
                                         {buildings.map((b) => (<option key={b.id} value={b.id}>{b.internalId}</option>))}
                                     </Form.Select>
-                                    <i className="bi bi-trash-fill btn color-primary w-auto my-auto mx-2"
+                                    <i className="bi bi-trash-fill btn color-primary w-auto my-auto"
                                         id={'trash-' + index} onClick={onClickTrashCan}
                                     ></i>
                                 </Row>

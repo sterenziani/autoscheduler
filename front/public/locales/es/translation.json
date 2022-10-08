@@ -149,6 +149,7 @@
         "timeToDestination": "Distancia a destinos",
         "minutes":"mins.",
         "onlyBuilding": "This is your only building.",
+        "selectProgram": "Seleccione un programa para ver sus correlativas para este curso.",
         "save":"Guardar",
         "placeholders":{
             "className":"Grupo X",

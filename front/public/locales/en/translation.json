@@ -149,6 +149,7 @@
         "timeToDestination": "Time to destination",
         "minutes":"mins",
         "onlyBuilding": "This is your only building.",
+        "selectProgram": "Please select a program to view its requirements for this course.",
         "save":"Save",
         "placeholders":{
             "className":"Group X",

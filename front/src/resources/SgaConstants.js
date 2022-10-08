@@ -120,77 +120,77 @@ var programCourses = {
 var courseClasses2022A = [
     {
         id: 1,
-        course: '12.09',
+        course: {id: '12.09',internalId: '12.09',name: 'Química',requirements: {1:[]}},
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[5], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '72.03',
+        course: { id: '72.03', internalId: '72.03', name: 'Introducción a la Informática', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[1], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '94.24',
+        course: { id: '94.24', internalId: '94.24', name: 'Metodología del Aprendizaje', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'A',
         lectures: [{ day: DAYS[1], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '94.24',
+        course: { id: '94.24', internalId: '94.24', name: 'Metodología del Aprendizaje', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'B',
         lectures: [{ day: DAYS[3], startTime: '11:00', endTime: '14:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '94.24',
+        course: { id: '94.24', internalId: '94.24', name: 'Metodología del Aprendizaje', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[1], startTime: '14:00', endTime: '17:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '31.08',
+        course: { id: '31.08', internalId: '31.08', name: 'Sistemas de Representación', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'A',
         lectures: [{ day: DAYS[2], startTime: '11:00', endTime: '14:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '31.08',
+        course: { id: '31.08', internalId: '31.08', name: 'Sistemas de Representación', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'B',
         lectures: [{ day: DAYS[2], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '31.08',
+        course: { id: '31.08', internalId: '31.08', name: 'Sistemas de Representación', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[3], startTime: '14:00', endTime: '17:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '31.08',
+        course: { id: '31.08', internalId: '31.08', name: 'Sistemas de Representación', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'K',
         lectures: [{ day: DAYS[4], startTime: '14:00', endTime: '17:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '72.32',
+        course: { id: '72.32', internalId: '72.32', name: 'Diseño y Procesamiento de Documentos XML', requirements: {1:['72.31']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[3], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '72.33',
+        course: { id: '72.33', internalId: '72.33', name: 'Programación Orientada a Objetos', requirements: {1:['72.31']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -200,7 +200,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.26',
+        course: { id: '93.26', internalId: '93.26', name: 'Análisis Matemático I', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -210,7 +210,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.58',
+        course: { id: '93.58', internalId: '93.58', name: 'Algebra', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -221,7 +221,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '72.31',
+        course: { id: '72.31', internalId: '72.31', name: 'Programación Imperativa', requirements: {1:['93.58', '72.03']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -233,7 +233,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.28',
+        course: { id: '93.28', internalId: '93.28', name: 'Análisis Matemático II', requirements: {1:['93.58', '93.26']} },
         term: '2022-1Q',
         courseClass: 'S1',
         lectures: [
@@ -244,7 +244,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.28',
+        course: { id: '93.28', internalId: '93.28', name: 'Análisis Matemático II', requirements: {1:['93.58', '93.26']} },
         term: '2022-1Q',
         courseClass: 'S2',
         lectures: [
@@ -255,7 +255,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.41',
+        course: { id: '93.41', internalId: '93.41', name: 'Física I', requirements: {1:['93.26']} },
         term: '2022-1Q',
         courseClass: 'A',
         lectures: [
@@ -266,7 +266,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.41',
+        course: { id: '93.41', internalId: '93.41', name: 'Física I', requirements: {1:['93.26']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -277,7 +277,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.59',
+        course: { id: '93.59', internalId: '93.59', name: 'Matemática Discreta', requirements: {1:['93.58']}},
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -287,7 +287,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.35',
+        course: { id: '93.35', internalId: '93.35', name: 'Lógica Computacional', requirements: {1:['93.58']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -298,7 +298,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.35',
+        course: { id: '93.35', internalId: '93.35', name: 'Lógica Computacional', requirements: {1:['93.58']} },
         term: '2022-1Q',
         courseClass: 'S1',
         lectures: [
@@ -309,7 +309,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.42',
+        course: { id: '93.42', internalId: '93.42', name: 'Física II', requirements: {1:['93.28']} },
         term: '2022-1Q',
         courseClass: 'A',
         lectures: [
@@ -319,7 +319,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.42',
+        course: { id: '93.42', internalId: '93.42', name: 'Física II', requirements: {1:['93.28']} },
         term: '2022-1Q',
         courseClass: 'B',
         lectures: [
@@ -329,7 +329,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.42',
+        course: { id: '93.42', internalId: '93.42', name: 'Física II', requirements: {1:['93.28']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -339,7 +339,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '72.08',
+        course: { id: '72.08', internalId: '72.08', name: 'Arquitectura de Computadoras', requirements: {1:['72.31']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -349,7 +349,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '72.34',
+        course: { id: '72.34', internalId: '72.34', name: 'Estructura de Datos y Algoritmos', requirements: {1:['93.59', '72.33']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -359,7 +359,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.24',
+        course: { id: '93.24', internalId: '93.24', name: 'Probabilidad y Estadística', requirements: {1:['93.28']} },
         term: '2022-1Q',
         courseClass: 'SKE',
         lectures: [
@@ -370,7 +370,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.43',
+        course: { id: '93.43', internalId: '93.43', name: 'Física III', requirements: {1:['93.28', '93.41']} },
         term: '2022-1Q',
         courseClass: 'A',
         lectures: [
@@ -380,7 +380,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.43',
+        course: { id: '93.43', internalId: '93.43', name: 'Física III', requirements: {1:['93.28', '93.41']} },
         term: '2022-1Q',
         courseClass: 'D',
         lectures: [
@@ -391,7 +391,7 @@ var courseClasses2022A = [
     },
     {
         id: 1,
-        course: '93.43',
+        course: { id: '93.43', internalId: '93.43', name: 'Física III', requirements: {1:['93.28', '93.41']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -404,42 +404,47 @@ var courseClasses2022A = [
 var courseClasses2021B = [
     {
         id: 1,
-        course: '12.09',
+        course: { id: '12.09', internalId: '12.09', name: 'Química', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[5], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '72.03',
+        course: {
+            id: '72.03',
+            internalId: '72.03',
+            name: 'Introducción a la Informática',
+            requirements: {1:[]}
+        },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[1], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '94.24',
+        course: { id: '94.24', internalId: '94.24', name: 'Metodología del Aprendizaje', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[1], startTime: '14:00', endTime: '17:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '31.08',
+        course: { id: '31.08', internalId: '31.08', name: 'Sistemas de Representación', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[3], startTime: '14:00', endTime: '17:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '72.32',
+        course: { id: '72.32', internalId: '72.32', name: 'Diseño y Procesamiento de Documentos XML', requirements: {1:['72.31']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [{ day: DAYS[3], startTime: '08:00', endTime: '11:00', building: 'Madero' }],
     },
     {
         id: 1,
-        course: '72.33',
+        course: { id: '72.33', internalId: '72.33', name: 'Programación Orientada a Objetos', requirements: {1:['72.31']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -449,7 +454,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.26',
+        course: { id: '93.26', internalId: '93.26', name: 'Análisis Matemático I', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -459,7 +464,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.58',
+        course: { id: '93.58', internalId: '93.58', name: 'Algebra', requirements: {1:[]} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -470,7 +475,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '72.31',
+        course: { id: '72.31', internalId: '72.31', name: 'Programación Imperativa', requirements: {1:['93.58', '72.03']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -482,7 +487,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.28',
+        course: { id: '93.28', internalId: '93.28', name: 'Análisis Matemático II', requirements: {1:['93.58', '93.26']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -493,7 +498,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.41',
+        course: { id: '93.41', internalId: '93.41', name: 'Física I', requirements: {1:['93.26']} },
         term: '2022-1Q',
         courseClass: 'A',
         lectures: [
@@ -504,7 +509,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.59',
+        course: { id: '93.59', internalId: '93.59', name: 'Matemática Discreta', requirements: {1:['93.58']}},
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -514,7 +519,8 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.35',
+        course: {
+      id: '93.35', internalId: '93.35', name: 'Lógica Computacional', requirements: {1:['93.58']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -525,7 +531,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.42',
+        course: { id: '93.42', internalId: '93.42', name: 'Física II', requirements: {1:['93.28']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -535,7 +541,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '72.08',
+        course: { id: '72.08', internalId: '72.08', name: 'Arquitectura de Computadoras', requirements: {1:['72.31']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -545,7 +551,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '72.34',
+        course: { id: '72.34', internalId: '72.34', name: 'Estructura de Datos y Algoritmos', requirements: {1:['93.59', '72.33']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [
@@ -555,7 +561,7 @@ var courseClasses2021B = [
     },
     {
         id: 1,
-        course: '93.24',
+        course: { id: '93.24', internalId: '93.24', name: 'Probabilidad y Estadística', requirements: {1:['93.28']} },
         term: '2022-1Q',
         courseClass: 'SKE',
         lectures: [
@@ -566,7 +572,7 @@ var courseClasses2021B = [
     },
     {
         id: 2,
-        course: '93.43',
+        course: { id: '93.43', internalId: '93.43', name: 'Física III', requirements: {1:['93.28', '93.41']} },
         term: '2022-1Q',
         courseClass: 'S',
         lectures: [

@@ -260,7 +260,7 @@ const getOptionalCourses = (programId) =>
 
 const getCourseClassesForTerm = (courseId, termId) =>
     new Promise((resolve, reject) => {
-        const availableClasses = SgaConstants.courseClasses[termId].filter((com) => com.course === courseId);
+        const availableClasses = SgaConstants.courseClasses[termId].filter((com) => com.course.id === courseId);
         setTimeout(() => resolve(availableClasses), RESOLVE_DELAY);
     });
 
