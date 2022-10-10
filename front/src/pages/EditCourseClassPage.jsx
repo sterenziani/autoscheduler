@@ -235,17 +235,21 @@ function EditCourseClassPage(props) {
                         </div>
                         <div className="col-9 text-start">
                         {
+                            selectedCourse &&
                             <AsyncSelect
-                                className="text-black"
+                                className="text-black" cacheOptions defaultOptions
                                 placeholder={selectedCourse.internalId+' - '+selectedCourse.name}
-                                cacheOptions
-                                defaultOptions
-                                defaultValue={selectedCourse.id}
-                                defaultInputValue={selectedCourse.internalId+' - '+selectedCourse.name}
-                                getOptionLabel={e => e.internalId+' - '+e.name}
-                                getOptionValue={e => e.id}
-                                loadOptions={loadCourseOptions}
-                                onChange={opt => onChangeCourse(opt)}
+                                defaultValue={selectedCourse.id} defaultInputValue={selectedCourse.internalId+' - '+selectedCourse.name}
+                                getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
+                                loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
+                            />
+                        }
+                        {
+                            !selectedCourse &&
+                            <AsyncSelect
+                                className="text-black" cacheOptions defaultOptions
+                                getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
+                                loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
                             />
                         }
                         </div>
