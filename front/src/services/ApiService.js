@@ -158,7 +158,7 @@ const getActiveUser = () => {
             verified: userStore.verified
         }
     }
-    return student
+    return university
 }
 
 const getSchedules = (params) =>

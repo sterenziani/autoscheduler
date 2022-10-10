@@ -10,6 +10,7 @@ import CourseClassesTab from '../components/CourseClassesTab';
 import NoAccess from '../components/NoAccess';
 import Roles from '../resources/RoleConstants';
 import LinkButton from '../components/LinkButton';
+import AsyncSelect from 'react-select/async'
 
 function CoursePage(props) {
     const {t} = useTranslation();
@@ -20,7 +21,6 @@ function CoursePage(props) {
     const [status, setStatus] = useState(null);
     const user = ApiService.getActiveUser();
     const [course, setCourse] = useState();
-    const [programs, setPrograms] = useState(null);
     const [selectedProgram, setSelectedProgram] = useState(null);
 
     useEffect(() => {
@@ -41,39 +41,30 @@ function CoursePage(props) {
             }
             else {
                 setCourse(data)
-                loadPrograms(data)
+                setLoading(false)
             }
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
-    const loadPrograms = () => {
-        if(user){
-            ApiService.getPrograms(user.id).then((data) => {
+    const loadProgramOptions = (inputValue, callback) => {
+        setTimeout(() => {
+            ApiService.getPrograms(user.id, inputValue).then((data) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED)
-                    findError = data.status;
-                if (findError){
-                    setLoading(false)
+                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (findError) {
                     setError(true)
                     setStatus(findError)
-                }
-                else {
-                    setPrograms(data)
-                    setSelectedProgram(data[0])
+                    callback([])
+                } else {
+                    callback(data)
                 }
             })
-        }
+        })
     }
 
-    useEffect(() => {
-        if(programs && selectedProgram)
-            setLoading(false)
-    }, [programs, selectedProgram])
-
-    const onChangePrograms = (e) => {
-        // eslint-disable-next-line
-        setSelectedProgram(programs.filter((p) => p.id == e.target.value)[0])
+    const onChangePrograms = (program) => {
+        setSelectedProgram(program)
     }
 
     if(user.type !== Roles.UNIVERSITY)
@@ -104,10 +95,19 @@ function CoursePage(props) {
                         title={t('tabs.requiredCourses')}
                     >
                         <div className="bg-primary rounded-bottom py-4">
-                            <Form.Select className="w-75 m-auto" value={selectedProgram.id} onChange={onChangePrograms}>
-                                {programs.map((p) => (<option key={p.id} value={p.id}> {p.internalId + ' - ' + p.name}</option>))}
-                            </Form.Select>
-                            <CourseRequirementsList course={course} program={selectedProgram} />
+                            <AsyncSelect
+                                className="text-black text-start w-75 m-auto"
+                                placeholder={t('register.program')}
+                                cacheOptions
+                                defaultOptions
+                                getOptionLabel={e => e.internalId+' - '+e.name}
+                                getOptionValue={e => e.id}
+                                loadOptions={loadProgramOptions}
+                                onChange={opt => onChangePrograms(opt)}
+                            />
+                            {
+                                selectedProgram && <CourseRequirementsList course={course} program={selectedProgram}/>
+                            }
                             <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit'} textKey="edit"/>
                         </div>
                     </Tab>
