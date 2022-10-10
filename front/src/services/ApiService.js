@@ -292,10 +292,17 @@ const getTerms = async (universityId) =>
         setTimeout(() => resolve(terms), RESOLVE_DELAY);
     });
 
-const getBuildings = (universityId) =>
+const getBuildings = (universityId, page) =>
     new Promise((resolve, reject) => {
-        const buildings = SgaConstants.buildings;
-        setTimeout(() => resolve(buildings[universityId]), RESOLVE_DELAY);
+        const buildings = SgaConstants.buildings[universityId];
+        if(!page)
+            setTimeout(() => resolve(buildings), RESOLVE_DELAY);
+        else{
+            if(page==1)
+                setTimeout(() => resolve([buildings[0], buildings[1]]), RESOLVE_DELAY);
+            else if(page==2)
+                setTimeout(() => resolve([buildings[2], buildings[3]]), RESOLVE_DELAY);
+        }
     });
 
 const getRemainingCoursesProgram = (user, programId, inputText) =>

@@ -15,14 +15,19 @@ function UniversityBuildingsList(props) {
     const user = props.user;
     const [buildings, setBuildings] = useState(null);
     const [buildingToDelete, setBuildingToDelete] = useState();
+    const [prevPage, setPrevPage] = useState();
+    const [page, setPage] = useState(1);
+    const [nextPage, setNextPage] = useState();
 
     useEffect(() => {
-        loadBuildings();
+        loadBuildings(1);
+        setNextPage(true)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const loadBuildings = () => {
-        ApiService.getBuildings(user.id).then((data) => {
+    const loadBuildings = (page) => {
+        setLoading(true)
+        ApiService.getBuildings(user.id, page).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED)
                 findError = data.status;
@@ -30,8 +35,9 @@ function UniversityBuildingsList(props) {
                 setError(true)
                 setStatus(findError)
             }
-            else
+            else{
                 setBuildings(data)
+            }
             setLoading(false)
         });
     }
@@ -59,6 +65,20 @@ function UniversityBuildingsList(props) {
     const openDeleteModal = (e) => {
         setShowDeleteModal(true)
         setBuildingToDelete(e)
+    }
+
+    const movePagePrev = () => {
+        loadBuildings(page-1)
+        setPage(page-1)
+        setPrevPage()
+        setNextPage(true)
+    }
+
+    const movePageNext = () => {
+        loadBuildings(page+1)
+        setPage(page+1)
+        setPrevPage(true)
+        setNextPage()
     }
 
     if (loading === true)
@@ -112,6 +132,29 @@ function UniversityBuildingsList(props) {
                           <div key="empty-list">{t('emptyList')}</div>,
                       ]}
             </div>
+            <Row>
+                <Col className="text-end">
+                {
+                    prevPage? [
+                        <i className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big color-white"
+                        onClick={movePagePrev} key="prev-page-e"></i>
+                    ] : [
+                        <i className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big disabled color-disabled" key="prev-page-d"></i>
+                    ]
+                }
+                </Col>
+                <h6 className="col my-auto">Page {page}</h6>
+                <Col className="text-start">
+                {
+                    nextPage? [
+                        <i className="col text-start bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big color-white"
+                        onClick={movePageNext} key="next-page-e"></i>
+                    ] : [
+                        <i className="col text-start bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big disabled color-disabled" key="next-page-d"></i>
+                    ]
+                }
+                </Col>
+            </Row>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"
