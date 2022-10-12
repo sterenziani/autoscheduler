@@ -83,7 +83,7 @@ function SignInForm(props) {
                             onChange={handleChange}
                             onBlur={handleBlur}
                         />
-                        <Button variant="secondary" type="submit" disabled={isSubmitting}>
+                        <Button variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting}>
                             {t('login.submit')}
                         </Button>
                     </Form>
