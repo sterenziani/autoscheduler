@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Form } from 'react-bootstrap';
 
 const FormInputField = (props) => {
-    const { t } = useTranslation();
+    const { t } = jest ? {t:s=>s} : useTranslation();
     const { type, label, placeholder, name, color, error, touched, ...other } = props;
     return (
         <React.Fragment>

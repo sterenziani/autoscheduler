@@ -7,7 +7,7 @@ import { OK, CREATED } from '../../services/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 
 function CourseList(props){
-    const {t} = useTranslation();
+    const { t } = jest ? {t:s=>s} : useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);

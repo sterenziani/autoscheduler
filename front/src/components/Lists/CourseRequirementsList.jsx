@@ -5,7 +5,7 @@ import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 
 function CourseRequirementsList(props) {
-    const {t} = useTranslation();
+    const { t } = jest ? {t:s=>s} : useTranslation();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);

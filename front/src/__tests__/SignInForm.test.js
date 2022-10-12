@@ -4,6 +4,19 @@ import '@testing-library/jest-dom'
 import userEvent from '@testing-library/user-event';
 import { Link, BrowserRouter as Router } from 'react-router-dom';
 import SignInForm from '../components/Accounts/SignInForm';
+import * as api from '../services/ApiService'
+
+jest.mock("../services/ApiService", () => {
+  return {
+    login: jest.fn()
+  };
+});
+
+beforeEach(() => {
+    api.login.mockResolvedValue({
+        status: 200
+    })
+})
 
 test('Empty fields give double error', async () => {
     render(<Router><SignInForm/></Router>)
@@ -14,8 +27,8 @@ test('Empty fields give double error', async () => {
     await act(async() => {
         userEvent.click(submitButton)
     })
-    let emailError = screen.getByText('register.errors.email.isRequired')
-    let passError = screen.getByText('register.errors.password.isRequired')
+    const emailError = screen.getByText('register.errors.email.isRequired')
+    const passError = screen.getByText('register.errors.password.isRequired')
     expect(emailError).toBeInTheDocument()
     expect(passError).toBeInTheDocument()
     expect(submitButton).toBeEnabled()

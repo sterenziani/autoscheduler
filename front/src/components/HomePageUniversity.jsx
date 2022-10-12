@@ -11,7 +11,7 @@ import UniversityTermsList from './Lists/UniversityTermsList';
 const CONTACT_EMAIL = 'juan@autoscheduler.com';
 
 function HomePageUniversity(props) {
-    const {t} = useTranslation()
+    const { t } = jest ? {t:s=>s} : useTranslation()
     const query = new URLSearchParams(useLocation().search).get('tab')
     const startingTab = query? query:"programs"
     return (

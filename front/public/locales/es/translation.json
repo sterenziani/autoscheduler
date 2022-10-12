@@ -14,6 +14,7 @@
             "emailUniversity": "rector@university.edu",
             "email": "example@university.com",
             "password": "",
+            "repeatPassword": ""
             "name": "AutoScheduler University"
         },
         "errors": {

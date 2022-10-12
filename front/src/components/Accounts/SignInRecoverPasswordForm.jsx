@@ -15,7 +15,7 @@ const EmailSchema = Yup.object().shape({
 });
 
 function SignInRecoverPasswordForm(props) {
-    const {t} = useTranslation();
+    const { t } = jest ? {t:s=>s} : useTranslation();
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [finished, setFinished] = useState(false);
     const [badConnection, setBadConnection] = useState(false);

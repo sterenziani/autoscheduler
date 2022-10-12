@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHand } from '@fortawesome/free-solid-svg-icons';
 
 function NoAccess(props){
-    const {t} = useTranslation()
+    const { t } = jest ? {t:s=>s} : useTranslation()
 
     return <div className="m-5">
         <Alert variant="danger" className="text-center">

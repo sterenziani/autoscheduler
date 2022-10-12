@@ -31,7 +31,7 @@ const SignUpSchema = Yup.object().shape({
 });
 
 function SignUpStudentForm(props) {
-    const {t} = useTranslation()
+    const { t } = jest ? {t:s=>s} : useTranslation()
     const navigate = useNavigate()
 
     const [badConnection, setBadConnection] = useState(false);
@@ -164,7 +164,7 @@ function SignUpStudentForm(props) {
                         type="password"
                         label="register.repeatPassword"
                         name="repeat_password"
-                        placeholder="register.placeholders.password"
+                        placeholder="register.placeholders.repeatPassword"
                         value={values.repeat_password}
                         error={errors.repeat_password}
                         touched={touched.repeat_password}
@@ -176,7 +176,7 @@ function SignUpStudentForm(props) {
                         <h1>ERROR {error}</h1>
                     ) : (
                         <>
-                            <Form.Group controlId="school" className="row mx-auto form-row">
+                            <Form.Group controlId="school" className="mb-0 row mx-auto form-row">
                                 <div className="col-3 text-end my-auto text-break ">
                                     <Form.Label className="my-0">
                                         <h5 className="my-0">
@@ -186,6 +186,7 @@ function SignUpStudentForm(props) {
                                 </div>
                                 <div className="col-9 text-center">
                                     <AsyncSelect
+                                        aria-label="school-select"
                                         className="text-black text-start"
                                         placeholder={t('register.school')}
                                         cacheOptions
@@ -199,7 +200,7 @@ function SignUpStudentForm(props) {
                             </Form.Group>
                             {
                                 selectedSchool && (
-                                <Form.Group controlId="program" className="row mx-auto form-row">
+                                <Form.Group controlId="program" className="mb-0 row mx-auto form-row">
                                     <div className="col-3 text-end my-auto text-break">
                                         <Form.Label className="my-0">
                                             <h5 className="my-0">
@@ -209,6 +210,7 @@ function SignUpStudentForm(props) {
                                     </div>
                                     <div className="col-9 text-center">
                                         <AsyncSelect key={selectedSchool}
+                                            aria-label="program-select"
                                             className="text-black text-start"
                                             placeholder={t('register.program')}
                                             cacheOptions
@@ -218,17 +220,22 @@ function SignUpStudentForm(props) {
                                             loadOptions={loadProgramOptions}
                                             onChange={opt => onChangePrograms(opt.id)}
                                         />
-                                        {!selectedProgram && programError && (
-                                            <p key="program-error" className="form-error text-start my-0">
-                                                {t('register.errors.school.programNotSelected')}
-                                            </p>
-                                        )}
                                     </div>
                                 </Form.Group>
                             )}
+                            {!selectedProgram && programError && (
+                                <div className="my-0 row mx-auto form-row">
+                                    <div className="col-3 text-center"></div>
+                                    <div className="col-9 text-center">
+                                        <p key="program-error" className="form-error text-start my-0">
+                                            {t('register.errors.school.programNotSelected')}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </>
                     )}
-                    <Button variant="secondary" type="submit" disabled={isSubmitting}>
+                    <Button className="mt-4 mb-2" variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting}>
                         {t('register.submit')}
                     </Button>
                 </Form>
