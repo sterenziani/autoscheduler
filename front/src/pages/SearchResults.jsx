@@ -83,7 +83,7 @@ function SearchResults(props) {
                                             >
                                                 <div>
                                                     <div className="col">
-                                                        <b> {c.courseClass.course} - {c.courseClass.courseName} </b>
+                                                        <b> {c.courseClass.course.id} - {c.courseClass.course.name} </b>
                                                         <i>&nbsp;({c.courseClass.courseClass})</i>
                                                     </div>
                                                     <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} </div>
@@ -250,7 +250,7 @@ function SearchResults(props) {
                         {schedules[scheduleIndex].courseClasses.map((c, cidx) => {
                             return (
                                 <li key={'ci-' + cidx} className="list-item col border border-primary py-2">
-                                    {c.course} - {c.courseName} ({c.courseClass})
+                                    {c.course.id} - {c.course.name} ({c.courseClass})
                                     <ul>
                                         {c.lectures.map((l, lidx) => {
                                             return (

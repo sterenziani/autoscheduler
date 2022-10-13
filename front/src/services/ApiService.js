@@ -559,10 +559,9 @@ const getAvailableClasses = (student, programId) => {
     });
     const availableCourseCodes = [];
     availableCourses.forEach((c) => availableCourseCodes.push(c.id));
-    const availableClasses = SgaConstants.courseClasses2022A.filter((com) => availableCourseCodes.includes(com.course));
+    const availableClasses = SgaConstants.courseClasses2022A.filter((com) => availableCourseCodes.includes(com.course.id));
     availableClasses.forEach((c) => {
-        c.unlockables = map[c.course] ? map[c.course] : 0; // Adds importance of that course to the class
-        c.courseName = SgaConstants.informaticaCourses.find((s) => s.id === c.course).name;
+        c.unlockables = map[c.course.id] ? map[c.course.id] : 0; // Adds importance of that course to the class
     });
     return availableClasses;
 };
