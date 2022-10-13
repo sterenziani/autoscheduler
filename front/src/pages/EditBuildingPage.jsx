@@ -52,7 +52,9 @@ function EditBuildingPage(props) {
                     await Promise.all([loadBuildings(user.id)]);
                 else if(user && !building && buildings){
                     setBuilding({"name": t("forms.placeholders.buildingName"), "internalId": t("forms.placeholders.buildingCode")})
-                    setDistances({})
+                    const emptyDist = {}
+                    buildings.forEach((b) => emptyDist[b.internalId] = {building: b, distance:0});
+                    setDistances(emptyDist)
                 }
             }
             if(user && building && buildings)
@@ -75,9 +77,7 @@ function EditBuildingPage(props) {
             else{
                 setBuilding(data)
                 const dist = {}
-                data.distances.forEach((d) => {
-                    dist[d.building.internalId] = d
-                })
+                data.distances.forEach((d) => dist[d.building.internalId] = d)
                 setDistances(dist)
             }
         });
@@ -166,7 +166,7 @@ function EditBuildingPage(props) {
                                 Object.values(distances).map((entry, index) => (
                                     <Row key={"time-input-"+index}>
                                     <Col className="my-auto text-end text-break" xs={3} md={2}>
-                                        <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.name}</h6></Form.Label>
+                                        <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.internalId}</h6></Form.Label>
                                     </Col>
                                     <Col className="pe-0" xs={6} md={8}>
                                         <Form.Control type="number" value={entry.time} onChange={(e) => onChangeTime(e, entry)}/>
