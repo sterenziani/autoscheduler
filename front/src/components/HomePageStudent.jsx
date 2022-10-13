@@ -6,7 +6,7 @@ import SearchForm from '../components/SearchForm';
 import StudentCourseLog from '../components/Lists/StudentCourseLog';
 
 function HomePageStudent(props) {
-    const { t } = jest ? {t:s=>s} : useTranslation()
+    const { t } = useTranslation()
     return (
         <React.Fragment>
             <HelmetProvider>

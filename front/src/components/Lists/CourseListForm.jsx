@@ -6,7 +6,7 @@ import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 
 function CourseListForm(props) {
-    const { t } = jest ? {t:s=>s} : useTranslation();
+    const { t } = useTranslation();
     const user = ApiService.getActiveUser();
     const listedCourses = props.listedCourses
     const unavailableCourses = props.unavailableCourses

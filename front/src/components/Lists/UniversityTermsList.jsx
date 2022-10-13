@@ -6,7 +6,7 @@ import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 
 function UniversityTermsList(props) {
-    const { t } = jest ? {t:s=>s} : useTranslation();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);

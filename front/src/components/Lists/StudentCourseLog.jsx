@@ -7,7 +7,7 @@ import CourseList from './CourseList';
 import AsyncSelect from 'react-select/async'
 
 function StudentCourseLog(props) {
-    const { t } = jest ? {t:s=>s} : useTranslation();
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);

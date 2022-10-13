@@ -6,6 +6,10 @@ import { Link, BrowserRouter as Router } from 'react-router-dom';
 import SignInForm from '../components/Accounts/SignInForm';
 import * as api from '../services/ApiService'
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({t: key => key})
+}));
+
 jest.mock("../services/ApiService", () => {
   return {
     login: jest.fn()

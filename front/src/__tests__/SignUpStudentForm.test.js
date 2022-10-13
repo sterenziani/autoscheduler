@@ -8,6 +8,10 @@ import { Link, BrowserRouter as Router } from 'react-router-dom';
 import SignUpStudentForm from '../components/Accounts/SignUpStudentForm';
 import * as api from '../services/ApiService'
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({t: key => key})
+}));
+
 jest.mock("../services/ApiService", () => {
   return {
     getUniversities: jest.fn(),

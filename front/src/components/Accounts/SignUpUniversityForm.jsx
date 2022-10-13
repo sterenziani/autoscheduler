@@ -36,7 +36,7 @@ const SignUpSchema = Yup.object().shape({
 });
 
 function SignUpUniversityForm(props) {
-    const { t } = jest ? {t:s=>s} : useTranslation()
+    const { t } = useTranslation()
     const navigate = useNavigate()
     const [badConnection, setBadConnection] = useState(false)
 

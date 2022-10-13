@@ -19,7 +19,7 @@ const SignInSchema = Yup.object().shape({
 
 function SignInForm(props) {
     const navigate = useNavigate();
-    const { t } = jest ? {t:s=>s} : useTranslation()
+    const { t } = useTranslation()
 
     const [correct, setCorrect] = useState(true);
     const [badConnection, setBadConnection] = useState(false);

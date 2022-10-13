@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 
 function NoMatch(props){
-    const { t } = jest ? {t:s=>s} : useTranslation()
+    const { t } = useTranslation()
 
     return <div className="m-5">
         <Alert variant="danger" className="text-center">

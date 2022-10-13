@@ -4,7 +4,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { useTranslation } from 'react-i18next';
 
 const LinkButton = (props) => {
-    const { t } = jest ? {t:s=>s} : useTranslation()
+    const { t } = useTranslation()
     const { href, text, textKey, ...other } = props;
 
     return href ? (

@@ -8,7 +8,7 @@ import { OK, CREATED } from '../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
 
 function SearchForm(props) {
-    const { t } = jest ? {t:s=>s} : useTranslation()
+    const { t } = useTranslation()
     const navigate = useNavigate()
     const user = ApiService.getActiveUser()
     const [loading, setLoading] = useState(true);
