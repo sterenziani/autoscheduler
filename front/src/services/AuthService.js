@@ -68,7 +68,7 @@ const logIn = async (email, password) => {
             return { status: BAD_REQUEST }
         token = response.headers.authorization
         TokenStore.setToken(token);
-        const userData = await api.get('student/primero', { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+AuthService.getToken()}})
+        const userData = await api.get('student/'+parseUserFromJwt(token).id, { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+token}})
         UserStore.setUser(userData.data)
         return { status: OK }
     }
@@ -79,6 +79,15 @@ const logIn = async (email, password) => {
             return { status: TIMEOUT }
     }
 }
+
+const parseUserFromJwt = (token) => {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+};
 
 const logInWithStore = async () => {
     const savedToken = TokenStore.getToken()

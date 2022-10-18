@@ -12,7 +12,7 @@ function CourseList(props){
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const user = props.user;
+    const user = ApiService.getActiveUser();
     const [showDeleteModal,setShowDeleteModal] = useState(false);
     const [courses,setCourses] = useState(props.course);
     const [courseToDelete,setCourseToDelete] = useState();
@@ -85,7 +85,7 @@ function CourseList(props){
         return <h1>ERROR {status}</h1>;
     return (
         <React.Fragment>
-            <div className="pt-4">
+            <div data-testid="content" className="pt-4">
                 {courses && courses.length > 0
                     ? [
                           courses.map((entry, index) => (

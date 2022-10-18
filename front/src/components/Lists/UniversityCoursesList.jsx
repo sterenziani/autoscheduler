@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 function StudentCoursesList(props){
     const navigate = useNavigate()
-    const user = props.user
 
     const redirectToCreate = () => {
         navigate('/courses/new');
@@ -12,7 +11,7 @@ function StudentCoursesList(props){
 
     return (
         <React.Fragment>
-            {user ? [<CourseList key="course-list" user={user} />] : []}
+            <CourseList key="course-list"/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

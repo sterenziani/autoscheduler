@@ -79,13 +79,13 @@ function StudentCourseLog(props) {
         return <h1>ERROR {status}</h1>;
     return (
         <React.Fragment>
-            {user && <CourseList key={'list'} user={user}/>}
+            {user && <CourseList key={'list'}/>}
             {
                 <div key="div-prog">
                     <div className="mx-auto align-items-center plus-button-container clickable">
                         <i
                             className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"
-                            onClick={() => switchAddModal()}
+                            onClick={() => switchAddModal()} data-testid="plus-button"
                         ></i>
                     </div>
                     <Modal show={showAddModal} onHide={() => switchAddModal()} className="color-warning text-black">

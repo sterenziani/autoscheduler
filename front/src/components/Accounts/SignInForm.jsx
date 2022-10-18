@@ -43,6 +43,8 @@ function SignInForm(props) {
 
     const onSubmit = (values, { setSubmitting }) => {
         setSubmitting(true)
+        setCorrect(true)
+        setBadConnection(false)
         authenticate(values, setSubmitting)
     };
 
