@@ -94,6 +94,7 @@ function StudentCourseLog(props) {
                         </Modal.Header>
                         <Modal.Body>
                             <AsyncSelect
+                                aria-label="program-select"
                                 className="text-black m-2"
                                 placeholder={t('search.program')}
                                 defaultOptions
@@ -105,6 +106,7 @@ function StudentCourseLog(props) {
                                 onChange={opt => onChangePrograms(opt.id)}
                             />
                             <AsyncSelect key={selectedProgram}
+                                aria-label="course-select"
                                 className="text-black m-2"
                                 placeholder={t('forms.course')}
                                 cacheOptions
@@ -136,7 +138,7 @@ function StudentCourseLog(props) {
                             </Button>
                         ]}
                         </Modal.Footer>
-                        </Modal>
+                    </Modal>
                 </div>
             }
         </React.Fragment>

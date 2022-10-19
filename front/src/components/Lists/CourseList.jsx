@@ -121,6 +121,7 @@ function CourseList(props){
                                       <i
                                           className="bi bi-trash-fill btn btn-lg text-white"
                                           id={'trash-' + index}
+                                          data-testid={'trash-' + index}
                                           onClick={() => openDeleteModal(entry)}
                                       ></i>
                                   </div>
