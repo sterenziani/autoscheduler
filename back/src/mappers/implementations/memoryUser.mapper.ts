@@ -53,7 +53,7 @@ class MemoryUserMapper implements IUserMapper {
             id: 'tercero',
             name: 'estudiante3',
             email: 'estudiante3@itba.edu.ar',
-            password: "$2b$10$8oi..kfRPXtdNPnVtQ3hfOTpmLxozAIcjjNKfj8gj3B4BuzAlLrVy", // 'estudiante3'
+            password: '$2b$10$8oi..kfRPXtdNPnVtQ3hfOTpmLxozAIcjjNKfj8gj3B4BuzAlLrVy', // 'estudiante3'
             role: ROLES.STUDENT,
         };
 

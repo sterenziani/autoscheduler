@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import UserAuthService from '../services/auth.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import {HTTP_STATUS} from "../constants/http.constants";
+import { HTTP_STATUS } from '../constants/http.constants';
 
 export class HomeController {
     private userAuthService: UserAuthService;

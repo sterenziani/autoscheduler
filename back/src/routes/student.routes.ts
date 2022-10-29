@@ -22,8 +22,8 @@ export class StudentRoutes {
 
         this.router.use(cors());
 
-        this.router.get('/', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getActiveUser);
-        this.router.get('/:userId', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getUser);
+        this.router.get('/', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getActiveStudent);
+        this.router.get('/:userId', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getStudent);
         this.router.get(
             '/:userId/courses',
             userAuthMiddleware,

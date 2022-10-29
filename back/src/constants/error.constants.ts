@@ -18,6 +18,8 @@ export const ERRORS = {
     NOT_FOUND: {
         GENERAL: { status: 404, code: 'NOT_FOUND', message: 'Not Found' },
         USER: { status: 404, code: 'USER_NOT_FOUND', message: 'User not found' },
+        STUDENT: { status: 404, code: 'STUDENT_NOT_FOUND', message: 'Student not found' },
+        UNIVERSITY: { status: 404, code: 'UNIVERSITY_NOT_FOUND', message: 'University not found' },
     },
     CONFLICT: {
         GENERAL: { status: 409, code: 'CONFLICT', message: 'Conflict' },

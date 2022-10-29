@@ -1,9 +1,10 @@
 import express, { Application } from 'express';
 import * as dotenv from 'dotenv';
+import cors from 'cors';
+import ErrorHandlerMiddleware from './middlewares/errorHandler.middleware';
 import { HomeRoutes } from './routes/home.routes';
 import { StudentRoutes } from './routes/student.routes';
-import ErrorHandlerMiddleware from './middlewares/errorHandler.middleware';
-import cors from 'cors';
+import { UniversityRoutes } from './routes/university.routes';
 
 class App {
     public app: Application;
@@ -20,7 +21,7 @@ class App {
         dotenv.config();
         this.app.use(express.json({ limit: '25mb' }));
         this.app.use(express.urlencoded({ limit: '25mb', extended: true }));
-        this.app.use(cors({exposedHeaders: '*'}));
+        this.app.use(cors({ exposedHeaders: '*' }));
     }
 
     private initializeErrorHandling() {
@@ -30,6 +31,7 @@ class App {
     private setRoutes() {
         this.app.use('/', new HomeRoutes().router);
         this.app.use('/student', new StudentRoutes().router);
+        this.app.use('/university', new UniversityRoutes().router);
     }
 }
 

@@ -1,28 +1,34 @@
 import { RequestHandler } from 'express';
-import { getUserUrl, userToDto } from '../dtos/user.dto';
+import * as UserDto from '../dtos/user.dto';
+import * as StudentDto from '../dtos/student.dto';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import UserService from '../services/user.service';
 import { IUser } from '../models/user.model';
 import CourseService from '../services/course.service';
 import { courseToDto } from '../dtos/course.dto';
-import {HTTP_STATUS} from "../constants/http.constants";
-import {modelArrayToDtoArray} from "../helpers/collection.helper";
+import { HTTP_STATUS } from '../constants/http.constants';
+import { modelArrayToDtoArray } from '../helpers/collection.helper';
+import { IStudent } from '../models/student.model';
+import StudentService from '../services/student.service';
+import { ROLES } from '../constants/general.constants';
 
 export class StudentController {
     private courseService: CourseService;
     private userService: UserService;
+    private studentService: StudentService;
 
     constructor() {
         this.courseService = CourseService.getInstance();
         this.userService = UserService.getInstance();
+        this.studentService = StudentService.getInstance();
     }
 
-    public getActiveUser: RequestHandler = async (req, res) => {
-        res.redirect(getUserUrl(req.user.id, req.user.role));
+    public getActiveStudent: RequestHandler = async (req, res) => {
+        res.redirect(UserDto.getUrl(req.user.id, ROLES.STUDENT));
     };
 
-    public getUser: RequestHandler = async (req, res, next) => {
+    public getStudent: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
         const userInfo = req.user;
 
@@ -30,7 +36,8 @@ export class StudentController {
 
         try {
             const user: IUser = await this.userService.getUser(userId);
-            res.status(HTTP_STATUS.OK).send(userToDto(user));
+            const student: IStudent = await this.studentService.getStudent(userId);
+            res.status(HTTP_STATUS.OK).send(StudentDto.toDto(user, student));
         } catch (e) {
             next(e);
         }
