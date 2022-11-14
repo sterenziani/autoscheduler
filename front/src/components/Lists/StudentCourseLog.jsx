@@ -100,8 +100,7 @@ function StudentCourseLog(props) {
                                 defaultOptions
                                 getOptionLabel={e => e.internalId+' - '+e.name}
                                 getOptionValue={e => e.id}
-                                defaultInputValue={user.program.name}
-                                defaultValue={user.program.id}
+                                defaultValue = {{value:user.program.id, internalId: user.program.internalId, name: user.program.name}}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}
                             />

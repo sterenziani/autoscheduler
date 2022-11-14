@@ -62,7 +62,7 @@ function CourseListForm(props) {
                         >
                             <div className="my-auto">{entry.internalId}</div>
                             <div className="my-auto w-min-50">
-                                <a key={'link-' + entry.id} href={'/programs/' + entry.id}>
+                                <a key={'link-' + entry.id} href={'/courses/' + entry.id}>
                                     {entry.name}
                                 </a>
                             </div>

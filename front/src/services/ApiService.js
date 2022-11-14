@@ -136,7 +136,7 @@ const getActiveUser = () => {
         email: 'student@itba.edu.ar',
         name: '1C',
         university: { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
-        program: { id: 1, name: 'S10 - Ingeniería Informática' }
+        program: { id: 1, internalId: "S10", name: 'Ingeniería Informática' }
     };
     const university = {
         id: 9,

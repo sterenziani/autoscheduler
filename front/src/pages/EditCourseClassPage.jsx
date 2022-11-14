@@ -216,7 +216,7 @@ function EditCourseClassPage(props) {
             <Spinner animation="border" variant="primary" />
         </div>
     if (error)
-        return <h1>ERROR {status}</h1>;
+        return <h1>ERROR {status}</h1>
     return (
         <React.Fragment>
             <HelmetProvider>
@@ -238,8 +238,7 @@ function EditCourseClassPage(props) {
                             selectedCourse &&
                             <AsyncSelect
                                 className="text-black" cacheOptions defaultOptions
-                                placeholder={selectedCourse.internalId+' - '+selectedCourse.name}
-                                defaultValue={selectedCourse.id} defaultInputValue={selectedCourse.internalId+' - '+selectedCourse.name}
+                                defaultValue = {{value:selectedCourse.id, internalId: selectedCourse.internalId, name: selectedCourse.name}}
                                 getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
                                 loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
                             />
@@ -248,6 +247,7 @@ function EditCourseClassPage(props) {
                             !selectedCourse &&
                             <AsyncSelect
                                 className="text-black" cacheOptions defaultOptions
+                                placeholder={t("forms.course")}
                                 getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
                                 loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
                             />

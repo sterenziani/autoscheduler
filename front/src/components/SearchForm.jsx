@@ -178,8 +178,7 @@ function SearchForm(props) {
                             placeholder={t('search.program')}
                             cacheOptions
                             defaultOptions
-                            defaultInputValue={user.program.name}
-                            defaultValue={user.program.id}
+                            defaultValue = {{value:user.program.id, internalId: user.program.internalId, name: user.program.name}}
                             getOptionLabel={e => e.internalId+' - '+e.name}
                             getOptionValue={e => e.id}
                             loadOptions={loadProgramOptions}
@@ -329,13 +328,13 @@ function SearchForm(props) {
                 </Form.Group>
                 <div className="row">
                     <div className="col text-center">
-                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>Newcomer</Button>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('Newcomer')}>Newcomer</Button>
                     </div>
                     <div className="col text-center">
-                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>Algebra + Intro Inf</Button>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('Algebra')}>Algebra + Intro Inf</Button>
                     </div>
                     <div className="col text-center">
-                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>1° Semester Done</Button>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('1C')}>1° Semester Done</Button>
                     </div>
                     <div className="col text-center">
                         <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>2° Semester Done</Button>
