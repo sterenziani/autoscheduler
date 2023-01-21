@@ -372,9 +372,9 @@ const getFinishedCourses = (studentId, page) =>
             setTimeout(() => resolve(courses), RESOLVE_DELAY);
         else{
             if(page==1)
-                setTimeout(() => resolve([courses[0], courses[1], courses[2], courses[3], courses[4]]), RESOLVE_DELAY);
+                setTimeout(() => resolve(courses.slice(0, 5)), RESOLVE_DELAY);
             else if(page==2)
-                setTimeout(() => resolve([courses[5], courses[6], courses[7]]), RESOLVE_DELAY);
+                setTimeout(() => resolve(courses.slice(5, 10)), RESOLVE_DELAY);
             else
                 setTimeout(() => resolve([]), RESOLVE_DELAY);
         }
@@ -394,16 +394,16 @@ const getFinishedCourses = (studentId, page) =>
     */
 
 
-const addFinishedCourse = (student, courseId) =>
+const addFinishedCourse = (studentId, courseId) =>
     new Promise((resolve, reject) => {
-        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
-        courseCodes.push(courseId);
+        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student == studentId).courses;
+        courseCodes.unshift(courseId);
         setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
     });
 
-const deleteFinishedCourse = (student, courseId) =>
+const deleteFinishedCourse = (studentId, courseId) =>
     new Promise((resolve, reject) => {
-        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
+        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student == studentId).courses;
         courseCodes.splice(courseCodes.indexOf(courseId), 1);
         setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
     });

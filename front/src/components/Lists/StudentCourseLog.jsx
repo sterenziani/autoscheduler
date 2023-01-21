@@ -91,9 +91,10 @@ function StudentCourseLog(props) {
         if (!courseToAdd)
             return;
         setLoading(true)
-        ApiService.addFinishedCourse(user, courseToAdd).then((data) => {
+        ApiService.addFinishedCourse(user.id, courseToAdd).then((data) => {
             switchAddModal()
             setCourseToAdd()
+            loadCourses(page)
             setLoading(false)
         });
     }

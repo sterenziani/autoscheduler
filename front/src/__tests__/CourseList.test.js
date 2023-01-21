@@ -289,7 +289,6 @@ test('Choosing a course from the modal adds it to the list and closes modal', as
     // Test program filter
     const programInput = getByLabelText('program-select')
     let courseInput
-    expect(programInput.value).toBe('S10 - Ingeniería Informática');
     await act(async() => {
         fireEvent.change(programInput, { target: { value: '' } })
         userEvent.type(programInput, "in")

@@ -26,7 +26,7 @@ function CourseList(props){
     const deleteCourse = () => {
         if (!courseToDelete) return;
         if (user.type === Roles.STUDENT)
-            ApiService.deleteFinishedCourse(user, courseToDelete.id);
+            ApiService.deleteFinishedCourse(user.id, courseToDelete.id);
         else if (user.type === Roles.UNIVERSITY)
             ApiService.deleteCourse(courseToDelete);
         closeDeleteModal()
