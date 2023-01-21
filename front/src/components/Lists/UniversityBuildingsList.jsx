@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
+import Pagination from '../Pagination'
 import { OK, CREATED } from '../../services/ApiConstants';
 
 function UniversityBuildingsList(props) {
@@ -15,15 +17,38 @@ function UniversityBuildingsList(props) {
     const user = props.user;
     const [buildings, setBuildings] = useState(null);
     const [buildingToDelete, setBuildingToDelete] = useState();
-    const [prevPage, setPrevPage] = useState();
+    const [prevPage, setPrevPage] = useState(false);
     const [page, setPage] = useState(1);
-    const [nextPage, setNextPage] = useState();
+    const [nextPage, setNextPage] = useState(false);
+    const search = useLocation().search
+
+    const readPageInSearchParams = () => {
+        const params = new URLSearchParams(search)
+        const requestedTab = params.get('tab')
+        let requestedPage = params.get('page')
+        if(!requestedTab || requestedTab != "buildings")
+            return null
+        if(!requestedPage)
+            requestedPage = 1
+        return requestedPage
+    }
 
     useEffect(() => {
-        loadBuildings(1);
-        setNextPage(true)
+        let requestedPage = readPageInSearchParams()
+        if(!requestedPage)
+            requestedPage = 1
+        if(!buildings || requestedPage != page){
+            setPage(requestedPage)
+            loadBuildings(requestedPage)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [useLocation().search])
+
+    const changePage = (newPage) => {
+        setPage(newPage)
+        loadBuildings(newPage)
+        navigate("?tab=buildings&page="+newPage)
+    }
 
     const loadBuildings = (page) => {
         setLoading(true)
@@ -37,6 +62,8 @@ function UniversityBuildingsList(props) {
             }
             else{
                 setBuildings(data)
+                setPrevPage(page == 2)
+                setNextPage(page < 2)
             }
             setLoading(false)
         });
@@ -65,20 +92,6 @@ function UniversityBuildingsList(props) {
     const openDeleteModal = (e) => {
         setShowDeleteModal(true)
         setBuildingToDelete(e)
-    }
-
-    const movePagePrev = () => {
-        loadBuildings(page-1)
-        setPage(page-1)
-        setPrevPage()
-        setNextPage(true)
-    }
-
-    const movePageNext = () => {
-        loadBuildings(page+1)
-        setPage(page+1)
-        setPrevPage(true)
-        setNextPage()
     }
 
     if (loading === true)
@@ -132,29 +145,7 @@ function UniversityBuildingsList(props) {
                           <div key="empty-list">{t('emptyList')}</div>,
                       ]}
             </div>
-            <Row>
-                <Col className="text-end">
-                {
-                    prevPage? [
-                        <i className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big color-white"
-                        onClick={movePagePrev} key="prev-page-e"></i>
-                    ] : [
-                        <i className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big disabled color-disabled" key="prev-page-d"></i>
-                    ]
-                }
-                </Col>
-                <h6 className="col my-auto">Page {page}</h6>
-                <Col className="text-start">
-                {
-                    nextPage? [
-                        <i className="col text-start bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big color-white"
-                        onClick={movePageNext} key="next-page-e"></i>
-                    ] : [
-                        <i className="col text-start bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big disabled color-disabled" key="next-page-d"></i>
-                    ]
-                }
-                </Col>
-            </Row>
+            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

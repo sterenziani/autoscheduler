@@ -9,54 +9,18 @@ import Roles from '../../resources/RoleConstants';
 function CourseList(props){
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const user = ApiService.getActiveUser();
     const [showDeleteModal,setShowDeleteModal] = useState(false);
-    const [courses,setCourses] = useState(props.course);
     const [courseToDelete,setCourseToDelete] = useState();
 
-    useEffect( () => {
-        async function execute() {
-            await Promise.all([loadCourses()]);
-        }
-        execute();
+    useEffect(() => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [props.courses])
 
     const redirectToEdit = (id) => {
         navigate("/courses/"+id+"/edit")
-    }
-
-    const loadCourses = () => {
-        if (user.type === Roles.STUDENT) {
-            ApiService.getFinishedCourses(user).then((data) => {
-                let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED)
-                    findError = data.status;
-                if (findError){
-                    setError(true)
-                    setStatus(findError)
-                }
-                else
-                    setCourses(data)
-                setLoading(false)
-            });
-        } else if (user.type === Roles.UNIVERSITY) {
-            ApiService.getCourses(user.id).then((data) => {
-                let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED)
-                    findError = data.status;
-                if (findError){
-                    setError(true)
-                    setStatus(findError)
-                }
-                else
-                    setCourses(data)
-                setLoading(false)
-            });
-        }
     }
 
     const deleteCourse = () => {
@@ -66,7 +30,7 @@ function CourseList(props){
         else if (user.type === Roles.UNIVERSITY)
             ApiService.deleteCourse(courseToDelete);
         closeDeleteModal()
-        loadCourses();
+        props.reloadCourses()
     }
 
     const closeDeleteModal = () => {
@@ -79,16 +43,12 @@ function CourseList(props){
         setCourseToDelete(e)
     }
 
-    if (loading === true)
-        return <div className="mx-auto py-3"><Spinner animation="border"/></div>
-    if (error)
-        return <h1>ERROR {status}</h1>;
     return (
         <React.Fragment>
             <div data-testid="content" className="pt-4">
-                {courses && courses.length > 0
+                {props.courses && props.courses.length > 0
                     ? [
-                          courses.map((entry, index) => (
+                          props.courses.map((entry, index) => (
                               <Row
                                   key={'row-' + index} xs={1} md={4}
                                   className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"

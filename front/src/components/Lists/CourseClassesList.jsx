@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
+import Pagination from '../Pagination'
 
 function CourseClassesList(props) {
     const { t } = useTranslation();
@@ -18,17 +20,35 @@ function CourseClassesList(props) {
     const [termClasses,setTermClasses] = useState(null);
     const [courseClassToDelete,setCourseClassToDelete] = useState({});
 
-    useEffect( () => {
-        async function execute() {
-            await Promise.all([loadClasses()]);
-        }
-        execute();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    const [prevPage, setPrevPage] = useState(false);
+    const [page, setPage] = useState(1);
+    const [nextPage, setNextPage] = useState(false);
+    const search = useLocation().search
 
-    const loadClasses = () => {
+        const readPageInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            return params.get('page')
+        }
+
+        useEffect(() => {
+            let requestedPage = readPageInSearchParams()
+            if(!requestedPage)
+                requestedPage = 1
+            if(!termClasses || requestedPage != page){
+                setPage(requestedPage)
+                loadClasses(requestedPage)
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [useLocation().search])
+
+        const changePage = (newPage) => {
+            setPage(newPage)
+            loadClasses(newPage)
+        }
+
+    const loadClasses = (page) => {
         setLoading(true)
-        ApiService.getCourseClassesForTerm(course.id, term.id).then((data) => {
+        ApiService.getCourseClassesForTerm(course.id, term.id, page).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED)
                 findError = data.status;
@@ -36,8 +56,11 @@ function CourseClassesList(props) {
                 setError(true)
                 setStatus(findError)
             }
-            else
+            else{
                 setTermClasses(data)
+                setPrevPage(page == 2)
+                setNextPage(page < 2)
+            }
             setLoading(false)
         });
     }
@@ -128,6 +151,7 @@ function CourseClassesList(props) {
                           </div>,
                       ]}
             </div>
+            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

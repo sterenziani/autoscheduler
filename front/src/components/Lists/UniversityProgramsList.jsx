@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, Spinner, Row } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
+import Pagination from '../Pagination'
 import { OK, CREATED } from '../../services/ApiConstants';
 
 function UniversityProgramsList(props){
@@ -15,14 +17,42 @@ function UniversityProgramsList(props){
     const user = props.user;
     const [programs, setPrograms] = useState(null);
     const [programToDelete, setProgramToDelete] = useState();
+    const [prevPage, setPrevPage] = useState(false);
+    const [page, setPage] = useState(1);
+    const [nextPage, setNextPage] = useState(false);
+    const search = useLocation().search
 
-    useEffect( () => {
-        loadPrograms();
+    const readPageInSearchParams = () => {
+        const params = new URLSearchParams(search)
+        const requestedTab = params.get('tab')
+        let requestedPage = params.get('page')
+        if(!requestedTab || requestedTab != "programs")
+            return null
+        if(!requestedPage)
+            requestedPage = 1
+        return requestedPage
+    }
+
+    useEffect(() => {
+        let requestedPage = readPageInSearchParams()
+        if(!requestedPage)
+            requestedPage = 1
+        if(!programs || requestedPage != page){
+            setPage(requestedPage)
+            loadPrograms(requestedPage)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [useLocation().search])
 
-    const loadPrograms = () => {
-        ApiService.getPrograms(user.id).then((data) => {
+    const changePage = (newPage) => {
+        setPage(newPage)
+        loadPrograms(newPage)
+        navigate("?tab=programs&page="+newPage)
+    }
+
+    const loadPrograms = (page) => {
+        setLoading(true)
+        ApiService.getProgramsPage(user.id, page).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED)
                 findError = data.status;
@@ -30,8 +60,11 @@ function UniversityProgramsList(props){
                 setError(true)
                 setStatus(findError)
             }
-            else
+            else{
                 setPrograms(data)
+                setPrevPage(page == 2)
+                setNextPage(page < 2)
+            }
             setLoading(false)
         });
     }
@@ -99,6 +132,7 @@ function UniversityProgramsList(props){
                           <div key="empty-list">{t('emptyList')}</div>,
                       ]}
             </div>
+            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

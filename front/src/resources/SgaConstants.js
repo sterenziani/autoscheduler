@@ -601,6 +601,11 @@ var finishedCourses = [
         student: '2C',
         courses: ['93.58', '93.26', '72.03', '31.08', '94.24', '72.31', '93.59', '93.28', '93.41'],
     },
+
+    {
+        student: '1',
+        courses: ['93.58', '93.26', '72.03', '31.08', '94.24', '72.31', '93.59', '93.28', '93.41'],
+    },
 ];
 
 var remainingCourses = [informaticaCourses, [{ id: '93.99', internalId: '93.99', name: 'Algebra Lineal' }], []];

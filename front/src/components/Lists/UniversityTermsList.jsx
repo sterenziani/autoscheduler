@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, Spinner, Row } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
+import Pagination from '../Pagination'
 import { OK, CREATED } from '../../services/ApiConstants';
 
 function UniversityTermsList(props) {
@@ -16,17 +18,42 @@ function UniversityTermsList(props) {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [changingPublishStatus, setChangingPublishStatus] = useState([]);
     const [termToDelete, setTermToDelete] = useState();
+    const [prevPage, setPrevPage] = useState(false);
+    const [page, setPage] = useState(1);
+    const [nextPage, setNextPage] = useState(false);
+    const search = useLocation().search
+
+    const readPageInSearchParams = () => {
+        const params = new URLSearchParams(search)
+        const requestedTab = params.get('tab')
+        let requestedPage = params.get('page')
+        if(!requestedTab || requestedTab != "terms")
+            return null
+        if(!requestedPage)
+            requestedPage = 1
+        return requestedPage
+    }
 
     useEffect(() => {
-        async function execute() {
-            await Promise.all([loadTerms()]);
+        let requestedPage = readPageInSearchParams()
+        if(!requestedPage)
+            requestedPage = 1
+        if(!terms || requestedPage != page){
+            setPage(requestedPage)
+            loadTerms(requestedPage)
         }
-        execute();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [useLocation().search])
 
-    const loadTerms = () => {
-        ApiService.getTerms(user.id).then((data) => {
+    const changePage = (newPage) => {
+        setPage(newPage)
+        loadTerms(newPage)
+        navigate("?tab=terms&page="+newPage)
+    }
+
+    const loadTerms = (page) => {
+        setLoading(true)
+        ApiService.getTerms(user.id, page).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED)
                 findError = data.status;
@@ -36,6 +63,8 @@ function UniversityTermsList(props) {
             }
             else{
                 setTerms(data)
+                setPrevPage(page == 2)
+                setNextPage(page < 2)
                 setChangingPublishStatus(new Array(data.length).fill(false))
             }
             setLoading(false)
@@ -83,7 +112,6 @@ function UniversityTermsList(props) {
         setShowDeleteModal(true)
         setTermToDelete(e)
     }
-
 
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
@@ -149,6 +177,7 @@ function UniversityTermsList(props) {
                           <div key="empty-list">{t('emptyList')}</div>,
                       ]}
             </div>
+            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

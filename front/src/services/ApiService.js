@@ -263,10 +263,15 @@ const getOptionalCourses = (programId) =>
         setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
 
-const getCourseClassesForTerm = (courseId, termId) =>
+const getCourseClassesForTerm = (courseId, termId, page) =>
     new Promise((resolve, reject) => {
         const availableClasses = SgaConstants.courseClasses[termId].filter((com) => com.course.id === courseId);
-        setTimeout(() => resolve(availableClasses), RESOLVE_DELAY);
+        if(availableClasses.length >= 2 && page==1)
+            setTimeout(() => resolve([availableClasses[0], availableClasses[1]]), RESOLVE_DELAY);
+        else if(availableClasses.length >= 3 && page==2)
+            setTimeout(() => resolve([availableClasses[2]]), RESOLVE_DELAY);
+        else
+            setTimeout(() => resolve(availableClasses), RESOLVE_DELAY);
     });
 
 const getPrograms = async (universityId, inputText) =>
@@ -280,6 +285,17 @@ const getPrograms = async (universityId, inputText) =>
         }
     });
 
+const getProgramsPage = async (universityId, page) =>
+    new Promise((resolve, reject) => {
+        const programs = SgaConstants.programs[universityId];
+        if(page==1)
+            setTimeout(() => resolve([programs[0], programs[1]]), RESOLVE_DELAY);
+        else if(page==2)
+            setTimeout(() => resolve([programs[2]]), RESOLVE_DELAY);
+        else
+            setTimeout(() => resolve([]), RESOLVE_DELAY);
+    });
+
 const getCourses = async (universityId, inputText) =>
     new Promise((resolve, reject) => {
         const courses = SgaConstants.courses;
@@ -291,10 +307,31 @@ const getCourses = async (universityId, inputText) =>
         }
     });
 
-const getTerms = async (universityId) =>
+const getCoursesPage = async (universityId, page) =>
+    new Promise((resolve, reject) => {
+        const courses = SgaConstants.courses;
+        let full = courses[universityId]
+        if(page==1)
+            setTimeout(() => resolve([full[0], full[1], full[2], full[3], full[4]]), RESOLVE_DELAY);
+        else if(page==2)
+            setTimeout(() => resolve([full[5], full[6], full[7], full[8], full[9]]), RESOLVE_DELAY);
+        else
+            setTimeout(() => resolve([]), RESOLVE_DELAY);
+    });
+
+const getTerms = async (universityId, page) =>
     new Promise((resolve, reject) => {
         const terms = SgaConstants.terms;
-        setTimeout(() => resolve(terms), RESOLVE_DELAY);
+        if(!page)
+            setTimeout(() => resolve(terms), RESOLVE_DELAY);
+        else{
+            if(page==1)
+                setTimeout(() => resolve([terms[0], terms[1]]), RESOLVE_DELAY);
+            else if(page==2)
+                setTimeout(() => resolve([terms[2]]), RESOLVE_DELAY);
+            else
+                setTimeout(() => resolve([]), RESOLVE_DELAY);
+        }
     });
 
 const getBuildings = (universityId, page) =>
@@ -307,6 +344,8 @@ const getBuildings = (universityId, page) =>
                 setTimeout(() => resolve([buildings[0], buildings[1]]), RESOLVE_DELAY);
             else if(page==2)
                 setTimeout(() => resolve([buildings[2], buildings[3]]), RESOLVE_DELAY);
+            else
+                setTimeout(() => resolve([]), RESOLVE_DELAY);
         }
     });
 
@@ -321,15 +360,24 @@ const getRemainingCoursesProgram = (user, programId, inputText) =>
         }
     });
 
-const getFinishedCourses = (student) =>
+const getFinishedCourses = (studentId, page) =>
     new Promise((resolve, reject) => {
-        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student === student.name).courses;
+        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student == studentId).courses;
         const courses = SgaConstants.informaticaCourses.filter((c) => {
             if (courseCodes.includes(c.id))
                 return true;
             return false;
         });
-        setTimeout(() => resolve(courses), RESOLVE_DELAY);
+        if(!page)
+            setTimeout(() => resolve(courses), RESOLVE_DELAY);
+        else{
+            if(page==1)
+                setTimeout(() => resolve([courses[0], courses[1], courses[2], courses[3], courses[4]]), RESOLVE_DELAY);
+            else if(page==2)
+                setTimeout(() => resolve([courses[5], courses[6], courses[7]]), RESOLVE_DELAY);
+            else
+                setTimeout(() => resolve([]), RESOLVE_DELAY);
+        }
     });
 /*{
     try {
@@ -512,6 +560,7 @@ const ApiService = {
     getSchedules: getSchedules,
     getUniversities: getUniversities,
     getPrograms: getPrograms,
+    getProgramsPage: getProgramsPage,
     getTerms: getTerms,
     getBuildings: getBuildings,
     getRemainingCoursesProgram: getRemainingCoursesProgram,
@@ -528,6 +577,7 @@ const ApiService = {
     deleteFinishedCourse: deleteFinishedCourse,
     deleteProgram: deleteProgram,
     getCourses: getCourses,
+    getCoursesPage: getCoursesPage,
     getCourseClass: getCourseClass,
     deleteCourse: deleteCourse,
     deleteBuilding: deleteBuilding,
