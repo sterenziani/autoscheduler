@@ -48,7 +48,7 @@ function HomePageUniversity(props) {
                 </Alert>
             )}
             <div className="container my-5">
-                <Tabs className="borderless-tabs" defaultActiveKey={startingTab} fill>
+                <Tabs className="borderless-tabs" aria-label="home-tabs" defaultActiveKey={startingTab} fill>
                     <Tab
                         className="text-center" eventKey="buildings"
                         title={t('tabs.buildings')} id="buildings-tab"

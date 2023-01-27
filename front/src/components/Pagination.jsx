@@ -31,7 +31,7 @@ const FormInputField = (props) => {
                     ]
                 }
                 </Col>
-                <h6 className="col my-auto">Page {page}</h6>
+                <h6 className="col my-auto page-number">Page {page}</h6>
                 <Col className="text-start">
                 {
                     nextPage? [
