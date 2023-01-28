@@ -151,7 +151,7 @@ beforeEach(() => {
         ]
     const courses = {1: informaticaCourses, 2: industrialCourses, 3: industrialCourses}
 
-    api.getActiveUser.mockImplementation(() => student)
+    api.getActiveUser.mockImplementation(() => university)
     api.getTerms.mockImplementation((universityId, page) => {
         const terms = [
             { id: 6, internalId: '2021-2Q', name: '2° Cuatrimestre 2021', startDate: '2021-08-01', published: true },
