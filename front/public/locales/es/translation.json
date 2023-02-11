@@ -18,7 +18,7 @@
             "name": "AutoScheduler University"
         },
         "errors": {
-            "badConnection": "Error al conectarse. Revise su conexión a internet.",
+            "badConnection": "Could not connect to AutoScheduler service.",
             "email": {
                 "maxLength": "Su email no puede contener más de 100 caracteres.",
                 "invalidEmail": "Ingrese una dirección de email válida.",
@@ -95,7 +95,7 @@
         "prioritizeUnlocks": "Priorizar correlativas",
         "reduceDays": "Reducir días",
         "unavailableSlots": "Horarios a evitar",
-        "programError":"Por favor seleccione un programa."
+        "programError":"Por favor seleccione una carrera."
     },
     "days": {
         "M": "Lunes",
@@ -150,7 +150,7 @@
         "timeToDestination": "Distancia a destinos",
         "minutes":"mins.",
         "onlyBuilding": "This is your only building.",
-        "selectProgram": "Seleccione un programa para ver sus correlativas para este curso.",
+        "selectProgram": "Seleccione una carrera para ver sus correlativas para este curso.",
         "save":"Guardar",
         "placeholders":{
             "className":"Grupo X",
