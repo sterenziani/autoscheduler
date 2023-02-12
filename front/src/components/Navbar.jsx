@@ -5,7 +5,7 @@ import ApiService from '../services/ApiService';
 import { Link } from 'react-router-dom';
 import LinkButton from './LinkButton';
 import logo from '../resources/logo.svg';
-import withUser from '../hoc/withUser';
+import withUser from './withUser';
 
 function Navbar(props){
     const user = props.user
