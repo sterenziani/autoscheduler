@@ -17,7 +17,7 @@ function Navbar(props){
     }
 
     return (
-        <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight">
+        <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight flex-wrap">
             <div className="ms-5 my-2 col">
                 <BootstrapNavbar.Brand as={Link} to="/">
                     <b className="text-light">Auto</b>
