@@ -743,7 +743,7 @@ const isValidSchedule = (courseClasses) => {
     for (const [i1, c1] of courseClasses.entries()) {
         for (const [i2, c2] of courseClasses.entries()) {
             // Same course, different class
-            if (c1.course === c2.course && i1 !== i2) return false;
+            if (c1.course.id === c2.course.id && i1 !== i2) return false;
             // Lectures overlap
             if (c1 !== c2 && !areTimeSlotsCompatible(c1.lectures, c2.lectures)) return false;
         }
