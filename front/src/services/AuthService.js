@@ -14,6 +14,12 @@ const UserStore = {
     removeUser: () => localStorage.removeItem('user')
 }
 
+const ExpStore = {
+    setExp: exp => localStorage.setItem('exp', JSON.stringify(exp)),
+    getExp: () => JSON.parse(localStorage.getItem('exp')),
+    removeExp: () => localStorage.removeItem('exp')
+}
+
 const userStore = observable({
     user: undefined,
     isLoggedIn: false
@@ -35,6 +41,10 @@ const getUserStore = () => {
     return userStore;
 }
 
+const getExp = () => {
+    return ExpStore.getExp();
+}
+
 const deleteUserInStore = () => {
     if(userStore.user)
         userStore.user = undefined;
@@ -52,6 +62,9 @@ const deleteToken = () => {
         token = undefined;
     TokenStore.removeToken();
 }
+const deleteExp = () => {
+    ExpStore.removeExp();
+}
 
 const logInEndpoint = '/';
 
@@ -67,7 +80,12 @@ const logIn = async (email, password) => {
         if(response.status === BAD_REQUEST)
             return { status: BAD_REQUEST }
         token = response.headers.authorization
-        TokenStore.setToken(token);
+        TokenStore.setToken(token)
+
+        let expirationDate = new Date(0)
+        expirationDate.setUTCSeconds(parseUserFromJwt(token).exp);
+        ExpStore.setExp(expirationDate)
+
         const userData = await api.get('student/'+parseUserFromJwt(token).id, { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+token}})
         UserStore.setUser(userData.data)
         return { status: OK }
@@ -89,6 +107,7 @@ const parseUserFromJwt = (token) => {
     return JSON.parse(jsonPayload);
 };
 
+// Calls the login endpoint with its current token in header instead of user:pass as body
 const logInWithStore = async () => {
     const savedToken = TokenStore.getToken()
     const savedUser  = UserStore.getUser()
@@ -98,9 +117,16 @@ const logInWithStore = async () => {
         const response = await api.get(logInEndpoint, {
             headers : { authorization : savedToken }
         })
-        token = response.headers.authorization;
-        userStore.user = response.data;
-        TokenStore.setToken(token);
+        if(response.status === BAD_REQUEST)
+            return { status: BAD_REQUEST }
+        token = response.headers.authorization
+        userStore.user = response.data
+        TokenStore.setToken(token)
+
+        let expirationDate = new Date(0)
+        expirationDate.setUTCSeconds(parseUserFromJwt(token).exp)
+        ExpStore.setExp(expirationDate)
+
         UserStore.setUser(userStore.user);
         return { status: OK }
     }
@@ -117,7 +143,19 @@ const logInWithStore = async () => {
 const logOut = async () => {
     deleteUserInStore();
     deleteToken();
+    deleteExp();
     return { status: OK }
+}
+
+const logOutIfExpiredJwt = async (email, password) => {
+    let exp = getExp()
+    if(!exp)
+        return
+    let now = new Date().toISOString()
+    let nowEpoch = new Date(now).getTime()
+    let expEpoch = new Date(exp).getTime()
+    if (exp && expEpoch < nowEpoch)
+        logOut()
 }
 
 const AuthService   = {
@@ -125,7 +163,9 @@ const AuthService   = {
     logInWithStore : logInWithStore,
     logOut         : logOut,
     getUserStore   : getUserStore,
-    getToken       : getToken
+    getToken       : getToken,
+    getExp         : getExp,
+    logOutIfExpiredJwt: logOutIfExpiredJwt
 }
 
 export default AuthService;

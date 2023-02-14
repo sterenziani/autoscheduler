@@ -1,7 +1,9 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Navbar as BootstrapNavbar } from 'react-bootstrap';
 import ApiService from '../services/ApiService';
+import AuthService from '../services/AuthService';
 import { Link } from 'react-router-dom';
 import LinkButton from './LinkButton';
 import logo from '../resources/logo.svg';
@@ -10,11 +12,16 @@ import withUser from './withUser';
 function Navbar(props){
     const user = props.user
     const navigate = useNavigate()
+    const location = useLocation()
 
     const logOut = () => {
         ApiService.logout()
         navigate("/login")
     }
+
+    useEffect(() => {
+        AuthService.logOutIfExpiredJwt()
+    }, [location]);
 
     return (
         <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight flex-wrap">
