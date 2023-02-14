@@ -95,7 +95,8 @@
         "prioritizeUnlocks": "Prioritize unlockables",
         "reduceDays": "Reduce days",
         "unavailableSlots": "Timeslots to avoid",
-        "programError":"Please select a program."
+        "programError":"Please select a program.",
+        "invalidParams":"Received invalid params."
     },
     "days": {
         "M": "Monday",

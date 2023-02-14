@@ -14,7 +14,7 @@
             "emailUniversity": "rector@university.edu",
             "email": "example@university.com",
             "password": "",
-            "repeatPassword": ""
+            "repeatPassword": "",
             "name": "AutoScheduler University"
         },
         "errors": {
@@ -95,7 +95,8 @@
         "prioritizeUnlocks": "Priorizar correlativas",
         "reduceDays": "Reducir días",
         "unavailableSlots": "Horarios a evitar",
-        "programError":"Por favor seleccione una carrera."
+        "programError":"Por favor seleccione una carrera.",
+        "invalidParams":"Se recibieron parámetros inválidos."
     },
     "days": {
         "M": "Lunes",

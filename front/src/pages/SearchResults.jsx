@@ -9,6 +9,7 @@ import { OK, CREATED } from '../services/ApiConstants';
 import { useLocation } from 'react-router-dom';
 import LinkButton from '../components/LinkButton';
 import NoAccess from '../components/NoAccess';
+import ErrorMessage from '../components/ErrorMessage';
 import Roles from '../resources/RoleConstants';
 
 const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
@@ -122,6 +123,8 @@ function SearchResults(props) {
             unavailableTimeSlots: query.getAll('unavailable'),
             userAsking: query.get('userAsking'),
         };
+        if(!params.program || !params.term || !params.hours || !params.userAsking)
+            return null
         return params;
     }
 
@@ -130,6 +133,10 @@ function SearchResults(props) {
     useEffect( () => {
         if(!user)
             navigate("/login")
+        if(params == null){
+            setLoading(false)
+            return
+        }
         ApiService.getSchedules(params).then((data) => {
             let findError = null;
             if (data && data.status && data.status !== OK && data.status !== CREATED)
@@ -162,7 +169,7 @@ function SearchResults(props) {
         setScheduleIndex(scheduleIndex+1)
     }
 
-    if(user.type !== Roles.STUDENT)
+    if(!user || user.type !== Roles.STUDENT)
         return <NoAccess/>
     if (loading === true) {
         return (
@@ -172,7 +179,9 @@ function SearchResults(props) {
         );
     }
     if (error)
-        return <h1>ERROR {status}</h1>
+        return <ErrorMessage status={status}/>
+    if (params == null)
+        return <ErrorMessage message={"search.invalidParams"}/>
     if(schedules.length === 0)
         return (
             <React.Fragment>
