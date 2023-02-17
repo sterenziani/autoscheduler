@@ -8,7 +8,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
-import FormInputField from '../FormInputField';
+import FormInputField from '../Common/FormInputField';
 
 const CONTACT_EMAIL = 'juan@autoscheduler.com';
 

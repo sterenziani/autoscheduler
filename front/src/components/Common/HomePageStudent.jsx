@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import SearchForm from '../components/SearchForm';
-import StudentCourseLog from '../components/Lists/StudentCourseLog';
+import SearchForm from './SearchForm';
+import StudentCourseLog from '../Lists/StudentCourseLog';
 import { useLocation } from 'react-router-dom';
 
 function HomePageStudent(props) {

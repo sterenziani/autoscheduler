@@ -3,10 +3,10 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import UniversityProgramsList from './Lists/UniversityProgramsList';
-import UniversityCoursesList from './Lists/UniversityCoursesList';
-import UniversityBuildingsList from './Lists/UniversityBuildingsList';
-import UniversityTermsList from './Lists/UniversityTermsList';
+import UniversityProgramsList from '../Lists/UniversityProgramsList';
+import UniversityCoursesList from '../Lists/UniversityCoursesList';
+import UniversityBuildingsList from '../Lists/UniversityBuildingsList';
+import UniversityTermsList from '../Lists/UniversityTermsList';
 
 const CONTACT_EMAIL = 'juan@autoscheduler.com';
 

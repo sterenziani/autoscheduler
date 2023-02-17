@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 
 import ApiService from '../../services/ApiService';
 import { OK, BAD_REQUEST } from '../../services/ApiConstants';
-import FormInputField from '../FormInputField';
+import FormInputField from '../Common/FormInputField';
 import SignInRecoverPasswordForm from './SignInRecoverPasswordForm';
 
 const SignInSchema = Yup.object().shape({

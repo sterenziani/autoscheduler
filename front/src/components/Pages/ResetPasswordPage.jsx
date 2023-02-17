@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from "react-router-dom";
-import ApiService from '../services/ApiService';
+import ApiService from '../../services/ApiService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRecycle } from '@fortawesome/free-solid-svg-icons';
-import FormInputField from '../components/FormInputField';
-import { OK, CREATED, CONFLICT } from '../services/ApiConstants';
+import FormInputField from '../Common/FormInputField';
+import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -31,13 +31,14 @@ function ResetPasswordPage(props) {
     const navigate = useNavigate()
     const {token} = useParams()
     const [resetToken, setResetToken] = useState(false)
-    const [invallidToken, setInvalidToken] = useState(false)
+    const [invalidToken, setInvalidToken] = useState(false)
 
     const [badConnection, setBadConnection] = useState(false)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if(!token){
+            console.log("Invalid")
             setInvalidToken(true)
             setLoading(false)
         }
@@ -95,7 +96,7 @@ function ResetPasswordPage(props) {
             </div>
         );
     }
-    if(invallidToken)
+    if(invalidToken)
         return(<React.Fragment>
             <HelmetProvider>
                 <Helmet><title>{t('changePassword.title')}</title></Helmet>

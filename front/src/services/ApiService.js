@@ -525,15 +525,11 @@ const saveBuilding = async (id, name, internalId, distances) => {
     }
 }
 
-const getToken = async(token) => {
-    // eslint-disable-next-line
-    if(token != "ABC")
-        return { status: NOT_FOUND }
+const getToken = async (token) =>
     new Promise((resolve, reject) => {
         const resp = {user: {id: "primero", email:"tuvieja@tanga"}};
         setTimeout(() => resolve(resp), RESOLVE_DELAY);
     });
-}
 
 const changePassword = async (userId, token, newPassword) => {
     try {

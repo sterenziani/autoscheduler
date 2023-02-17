@@ -1,17 +1,19 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import { Spinner } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import SearchResults from './pages/SearchResults';
-import HomePage from './pages/HomePage';
-import SignUpPage from './pages/SignUpPage';
-import CoursePage from './pages/CoursePage';
-import EditCoursePage from './pages/EditCoursePage';
-import EditCourseClassPage from './pages/EditCourseClassPage';
-import EditTermPage from './pages/EditTermPage';
-import EditProgramPage from './pages/EditProgramPage';
-import EditBuildingPage from './pages/EditBuildingPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import NoMatch from './components/NoMatch';
+import Navbar from './components/Common/Navbar';
+import SearchResults from './components/Pages/SearchResults';
+import HomePage from './components/Pages/HomePage';
+import SignUpPage from './components/Pages/SignUpPage';
+import CoursePage from './components/Pages/CoursePage';
+import EditCoursePage from './components/Pages/EditCoursePage';
+import EditCourseClassPage from './components/Pages/EditCourseClassPage';
+import EditTermPage from './components/Pages/EditTermPage';
+import EditProgramPage from './components/Pages/EditProgramPage';
+import EditBuildingPage from './components/Pages/EditBuildingPage';
+import ResetPasswordPage from './components/Pages/ResetPasswordPage';
+import NoMatch from './components/Common/NoMatch';
+import AuthService from './services/AuthService';
 import './resources/style.scss';
 
 function App() {

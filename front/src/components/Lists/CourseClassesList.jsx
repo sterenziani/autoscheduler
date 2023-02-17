@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
-import Pagination from '../Pagination'
+import Pagination from '../Common/Pagination'
 
 function CourseClassesList(props) {
     const { t } = useTranslation();

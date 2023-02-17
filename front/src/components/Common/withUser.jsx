@@ -1,5 +1,5 @@
 import React from 'react';
-import AuthService from '../services/AuthService';
+import AuthService from '../../services/AuthService';
 import { reaction } from 'mobx';
 
 const withUser = (WrappedComponent, config) => {

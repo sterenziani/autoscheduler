@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 import { OK, CREATED } from '../../services/ApiConstants';
 import ApiService from '../../services/ApiService';
-import Pagination from '../Pagination'
+import Pagination from '../Common/Pagination'
 
 function StudentCoursesList(props){
     const navigate = useNavigate()

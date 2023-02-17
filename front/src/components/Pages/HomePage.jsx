@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Spinner } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
-import HomePageUniversity from '../components/HomePageUniversity';
-import HomePageStudent from '../components/HomePageStudent';
-import ApiService from '../services/ApiService';
-import Roles from '../resources/RoleConstants';
+import HomePageUniversity from '../Common/HomePageUniversity';
+import HomePageStudent from '../Common/HomePageStudent';
+import ApiService from '../../services/ApiService';
+import Roles from '../../resources/RoleConstants';
 
 function HomePage(props)  {
     const navigate = useNavigate()

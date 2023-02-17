@@ -3,14 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner, Row } from 'react-bootstrap';
-import ApiService from '../services/ApiService';
+import ApiService from '../../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import FormInputField from '../components/FormInputField';
-import { OK, CREATED } from '../services/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../services/SystemConstants";
-import NoAccess from '../components/NoAccess';
-import Roles from '../resources/RoleConstants';
+import FormInputField from '../Common/FormInputField';
+import { OK, CREATED } from '../../services/ApiConstants';
+import { DAYS, DEFAULT_DATE } from "../../services/SystemConstants";
+import NoAccess from '../Common/NoAccess';
+import Roles from '../../resources/RoleConstants';
 import AsyncSelect from 'react-select/async'
 
 function EditCourseClassPage(props) {

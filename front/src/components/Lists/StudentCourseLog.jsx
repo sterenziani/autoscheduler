@@ -7,7 +7,7 @@ import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 import CourseList from './CourseList';
 import AsyncSelect from 'react-select/async'
-import Pagination from '../Pagination'
+import Pagination from '../Common/Pagination'
 
 function StudentCourseLog(props) {
     const { t } = useTranslation();

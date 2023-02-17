@@ -3,13 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Form, Spinner } from 'react-bootstrap';
-import ApiService from '../services/ApiService';
-import { OK, CREATED } from '../services/ApiConstants';
-import CourseRequirementsList from '../components/Lists/CourseRequirementsList';
-import CourseClassesTab from '../components/CourseClassesTab';
-import NoAccess from '../components/NoAccess';
-import Roles from '../resources/RoleConstants';
-import LinkButton from '../components/LinkButton';
+import ApiService from '../../services/ApiService';
+import { OK, CREATED } from '../../services/ApiConstants';
+import CourseRequirementsList from '../Lists/CourseRequirementsList';
+import CourseClassesTab from '../Common/CourseClassesTab';
+import NoAccess from '../Common/NoAccess';
+import Roles from '../../resources/RoleConstants';
+import LinkButton from '../Common/LinkButton';
 import AsyncSelect from 'react-select/async'
 
 function CoursePage(props) {

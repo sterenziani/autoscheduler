@@ -5,7 +5,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
 import { CREATED, NOT_FOUND } from '../../services/ApiConstants';
-import FormInputField from '../FormInputField';
+import FormInputField from '../Common/FormInputField';
 
 const EmailSchema = Yup.object().shape({
     email: Yup.string()
