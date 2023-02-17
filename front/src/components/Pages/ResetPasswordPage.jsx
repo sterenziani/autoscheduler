@@ -8,6 +8,8 @@ import { faRecycle } from '@fortawesome/free-solid-svg-icons';
 import FormInputField from '../Common/FormInputField';
 import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
 import { Form, Button, Spinner } from 'react-bootstrap';
+import Roles from '../../resources/RoleConstants';
+import NoAccess from '../Common/NoAccess';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
@@ -29,6 +31,7 @@ const ChangePasswordSchema = Yup.object().shape({
 function ResetPasswordPage(props) {
     const {t} = useTranslation()
     const navigate = useNavigate()
+    const user = ApiService.getActiveUser()
     const {token} = useParams()
     const [resetToken, setResetToken] = useState(false)
     const [invalidToken, setInvalidToken] = useState(false)
@@ -37,6 +40,8 @@ function ResetPasswordPage(props) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        if(!user)
+            navigate("/login")
         if(!token){
             console.log("Invalid")
             setInvalidToken(true)
@@ -96,6 +101,10 @@ function ResetPasswordPage(props) {
             </div>
         );
     }
+    if(!user)
+        return <React.Fragment/>
+    if(user.type !== Roles.UNIVERSITY)
+        return <NoAccess/>
     if(invalidToken)
         return(<React.Fragment>
             <HelmetProvider>

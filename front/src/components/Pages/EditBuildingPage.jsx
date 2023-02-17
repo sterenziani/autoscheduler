@@ -124,6 +124,8 @@ function EditBuildingPage(props) {
         }
     };
 
+    if(!user)
+        return <React.Fragment/>
     if(user.type !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)

@@ -169,7 +169,9 @@ function SearchResults(props) {
         setScheduleIndex(scheduleIndex+1)
     }
 
-    if(!user || user.type !== Roles.STUDENT)
+    if(!user)
+        return <React.Fragment/>
+    if(user.type !== Roles.STUDENT)
         return <NoAccess/>
     if (loading === true) {
         return (
