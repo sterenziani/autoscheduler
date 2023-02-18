@@ -134,7 +134,7 @@ function StudentCourseLog(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <h1>ERROR {status}</h1>;
+        return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
             {user &&

@@ -33,7 +33,7 @@ function CourseRequirementsList(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <h1>ERROR {status}</h1>
+        return <ErrorMessage status={status}/>
     if(!props.program || !props.program.id || !courses[props.program.id])
         return <div className="mt-3">{t('noDefinedRequirements')}</div>
     if(!courses || !courses[props.program.id] || courses[props.program.id].length <= 0)

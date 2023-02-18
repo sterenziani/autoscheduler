@@ -186,7 +186,7 @@ function EditProgramPage(props) {
             <Spinner animation="border" variant="primary" />
         </div>
     if (error)
-        return <h1>ERROR {status}</h1>;
+        return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
             <HelmetProvider>
