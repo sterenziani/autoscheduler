@@ -40,18 +40,15 @@ function ResetPasswordPage(props) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        if(!user)
-            navigate("/login")
         if(!token){
-            console.log("Invalid")
             setInvalidToken(true)
             setLoading(false)
         }
-        ApiService.getToken(token).then((resp) => {
-            if(resp.status !== OK)
+        ApiService.getToken(token).then((data) => {
+            if (data && data.status && data.status !== OK)
                 setInvalidToken(true)
             else
-                setResetToken(resp.data)
+                setResetToken(data)
             setLoading(false)
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,20 +74,21 @@ function ResetPasswordPage(props) {
     }
 
     const authenticate = async (values) => {
-        const { status } = await ApiService.login(resetToken.user.username, values.password);
+        const { status } = await ApiService.login(values.email, values.password);
         switch (status) {
             case OK:
                 navigate("/")
-                break
+                break;
             default:
                 console.log('Log in failed')
                 navigate("/login")
-                break
+                break;
         }
     }
 
     const onSubmit = (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true)
+        values.email = resetToken.user.email
         changePassword(values, setSubmitting, setFieldError)
     };
 
@@ -101,10 +99,6 @@ function ResetPasswordPage(props) {
             </div>
         );
     }
-    if(!user)
-        return <React.Fragment/>
-    if(user.type !== Roles.UNIVERSITY)
-        return <NoAccess/>
     if(invalidToken)
         return(<React.Fragment>
             <HelmetProvider>
@@ -157,7 +151,7 @@ function ResetPasswordPage(props) {
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                             />
-                            <Button variant="secondary" type="submit" disabled={isSubmitting}>
+                            <Button variant="secondary" type="submit" disabled={errors.password || errors['repeat_password'] || isSubmitting}>
                                 {t('changePassword.submit')}
                             </Button>
                         </Form>

@@ -527,7 +527,7 @@ const saveBuilding = async (id, name, internalId, distances) => {
 
 const getToken = async (token) =>
     new Promise((resolve, reject) => {
-        const resp = {user: {id: "primero", email:"tuvieja@tanga"}};
+        const resp = {status: OK, user: {id: "primero", email:"estudiante1@itba.edu.ar"}};
         setTimeout(() => resolve(resp), RESOLVE_DELAY);
     });
 
