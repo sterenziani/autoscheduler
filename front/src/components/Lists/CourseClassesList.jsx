@@ -6,6 +6,7 @@ import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 import Pagination from '../Common/Pagination'
+import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseClassesList(props) {
     const { t } = useTranslation();

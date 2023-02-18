@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import { OK, CREATED } from '../../services/ApiConstants';
+import ErrorMessage from '../Common/ErrorMessage';
 
 function UniversityBuildingsList(props) {
     const { t } = useTranslation();

@@ -10,6 +10,7 @@ import FormInputField from '../Common/FormInputField';
 import { OK, CREATED } from '../../services/ApiConstants';
 import NoAccess from '../Common/NoAccess';
 import Roles from '../../resources/RoleConstants';
+import ErrorMessage from '../Common/ErrorMessage';
 
 function EditBuildingPage(props) {
     const BuildingSchema = Yup.object().shape({

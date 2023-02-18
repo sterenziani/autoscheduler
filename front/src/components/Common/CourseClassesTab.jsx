@@ -3,6 +3,7 @@ import { Spinner, Form } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 import CourseClassesList from '../Lists/CourseClassesList';
+import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseClassesTab(props) {
     const [loading, setLoading] = useState(true);

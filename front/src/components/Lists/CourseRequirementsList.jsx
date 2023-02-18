@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Spinner, Row } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
+import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseRequirementsList(props) {
     const { t } = useTranslation();

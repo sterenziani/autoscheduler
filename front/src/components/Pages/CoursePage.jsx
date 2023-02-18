@@ -10,6 +10,7 @@ import CourseClassesTab from '../Common/CourseClassesTab';
 import NoAccess from '../Common/NoAccess';
 import Roles from '../../resources/RoleConstants';
 import LinkButton from '../Common/LinkButton';
+import ErrorMessage from '../Common/ErrorMessage';
 import AsyncSelect from 'react-select/async'
 
 function CoursePage(props) {

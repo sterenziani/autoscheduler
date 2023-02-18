@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { OK, CREATED } from '../../services/ApiConstants';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
+import ErrorMessage from '../Common/ErrorMessage';
 
 function StudentCoursesList(props){
     const navigate = useNavigate()
