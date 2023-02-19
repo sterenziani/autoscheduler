@@ -147,7 +147,7 @@ const logOut = async () => {
     return { status: OK }
 }
 
-const logOutIfExpiredJwt = async (email, password) => {
+const logOutIfExpiredJwt = async () => {
     let exp = getExp()
     if(!exp)
         return
