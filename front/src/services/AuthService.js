@@ -1,5 +1,4 @@
 import api from './api';
-import { observable, reaction } from 'mobx';
 import { OK, BAD_REQUEST, TIMEOUT } from './ApiConstants';
 
 const TokenStore = {
@@ -20,25 +19,8 @@ const ExpStore = {
     removeExp: () => localStorage.removeItem('exp')
 }
 
-const userStore = observable({
-    user: undefined,
-    isLoggedIn: false
-});
-
-reaction(
-    () => userStore.user,
-    () => {
-        if(!userStore.user)
-            userStore.isLoggedIn = false
-        else
-            userStore.isLoggedIn = true
-    }
-)
-
 const getUserStore = () => {
-    if(!userStore.user)
-        userStore.user = UserStore.getUser();
-    return userStore;
+    return UserStore.getUser();
 }
 
 const getExp = () => {
@@ -46,8 +28,6 @@ const getExp = () => {
 }
 
 const deleteUserInStore = () => {
-    if(userStore.user)
-        userStore.user = undefined;
     UserStore.removeUser()
 }
 
@@ -120,14 +100,13 @@ const logInWithStore = async () => {
         if(response.status === BAD_REQUEST)
             return { status: BAD_REQUEST }
         token = response.headers.authorization
-        userStore.user = response.data
         TokenStore.setToken(token)
+        UserStore.setUser(response.data)
 
         let expirationDate = new Date(0)
         expirationDate.setUTCSeconds(parseUserFromJwt(token).exp)
         ExpStore.setExp(expirationDate)
 
-        UserStore.setUser(userStore.user);
         return { status: OK }
     }
     catch(e) {
@@ -150,12 +129,15 @@ const logOut = async () => {
 const logOutIfExpiredJwt = async () => {
     let exp = getExp()
     if(!exp)
-        return
+        return false
     let now = new Date().toISOString()
     let nowEpoch = new Date(now).getTime()
     let expEpoch = new Date(exp).getTime()
-    if (exp && expEpoch < nowEpoch)
+    if (exp && expEpoch < nowEpoch){
         logOut()
+        return true
+    }
+    return false
 }
 
 const AuthService   = {

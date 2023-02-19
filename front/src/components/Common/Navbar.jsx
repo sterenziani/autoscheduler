@@ -7,10 +7,9 @@ import AuthService from '../../services/AuthService';
 import { Link } from 'react-router-dom';
 import LinkButton from './LinkButton';
 import logo from '../../resources/logo.svg';
-import withUser from './withUser';
 
 function Navbar(props){
-    const user = props.user
+    let user = AuthService.getUserStore()
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -20,7 +19,11 @@ function Navbar(props){
     }
 
     useEffect(() => {
-        AuthService.logOutIfExpiredJwt()
+        AuthService.logOutIfExpiredJwt().then((expired) => {
+            if(expired)
+                navigate("/login")
+        })
+        user = AuthService.getUserStore()
     }, [location]);
 
     return (
@@ -43,4 +46,4 @@ function Navbar(props){
     );
 }
 
-export default withUser(Navbar);
+export default Navbar;

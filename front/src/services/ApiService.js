@@ -145,7 +145,7 @@ const getActiveUser = () => {
         name: 'Instituto Tecnológico de Buenos Aires',
         verified: false
     };
-    const userStore = AuthService.getUserStore().user
+    const userStore = AuthService.getUserStore()
     let activeUser = null
     if(userStore){
         activeUser = {
