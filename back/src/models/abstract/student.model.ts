@@ -12,7 +12,7 @@ export default abstract class Student extends User {
     name: string;           // Name of the student
 
     // Abstract class constructor
-    protected constructor(id: string, email: string, password: string, internalId: string, name: string) {
+    constructor(id: string, email: string, password: string, internalId: string, name: string) {
         super(id, email, password, ROLE.STUDENT);
         this.internalId = internalId;
         this.name = name; 

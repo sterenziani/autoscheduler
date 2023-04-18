@@ -2,7 +2,7 @@ import { ERRORS } from "../../../constants/error.constants";
 import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
 import GenericException from "../../../exceptions/generic.exception";
 import TimeRange from "../../../helpers/classes/timeRange.class";
-import { getChildsFromParent, getParentFromChild } from "../../../helpers/persistence/memoryPersistence.helper";
+import { addChildToParent, getChildsFromParent, getParentFromChild } from "../../../helpers/persistence/memoryPersistence.helper";
 import CourseClass from "../../abstract/courseClass.model";
 import Schedule from "../../abstract/schedule.model";
 import Student from "../../abstract/student.model";
@@ -24,13 +24,7 @@ export default class MemorySchedule extends Schedule {
     }
 
     public async addCourseClass(courseClassId: string): Promise<void> {
-        const map = MEMORY_DATABASE.courseClassesOfSchedule;
-        // We first check if we need to initialize array
-        if (!map.get(this.id))
-            map.set(this.id, new Set());
-        
-        // Now we update the map
-        map.get(this.id)!.add(courseClassId);
+        addChildToParent(MEMORY_DATABASE.courseClassesOfSchedule, this.id, courseClassId);
     }
 
     public async getCourseClasses(): Promise<CourseClass[]> {

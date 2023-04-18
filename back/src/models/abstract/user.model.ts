@@ -9,7 +9,7 @@ export default abstract class User {
     role: ROLE
 
     // Abstract class constructor
-    protected constructor(id: string, email: string, password: string, role: ROLE) {
+    constructor(id: string, email: string, password: string, role: ROLE) {
         this.id = id;
         this.email = email;
         this.password = password;

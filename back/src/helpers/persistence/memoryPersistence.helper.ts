@@ -74,3 +74,12 @@ export const getParentFromChild = <T>(relationshipMap: Map<string, Set<string>>,
 
     return entity;
 }
+
+// Adds a child to a parent, initializing set if neccesary
+export const addChildToParent = (relationshipMap: Map<string, Set<string>>, parentId: string, childId: string): void => {
+    // If this is the first time we have to initialize the array
+    if (!relationshipMap.get(parentId))
+        relationshipMap.set(parentId, new Set());
+    // Now we can safely add to the array
+    relationshipMap.get(parentId)!.add(childId);
+}

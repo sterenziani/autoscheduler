@@ -8,7 +8,7 @@ export default abstract class Schedule {
     id: string;             // Id of the schedule in our databases
 
     // Abstract class constructor
-    protected constructor(id: string) {
+    constructor(id: string) {
         this.id = id;
     }
 

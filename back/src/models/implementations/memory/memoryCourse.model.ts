@@ -1,7 +1,7 @@
 import { ERRORS } from "../../../constants/error.constants";
 import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
 import GenericException from "../../../exceptions/generic.exception";
-import { getChildsFromParent, getChildsFromParents, getParentFromChild } from "../../../helpers/persistence/memoryPersistence.helper";
+import { addChildToParent, getChildsFromParent, getChildsFromParents, getParentFromChild } from "../../../helpers/persistence/memoryPersistence.helper";
 import Course from "../../abstract/course.model";
 import CourseClass from "../../abstract/courseClass.model";
 import University from "../../abstract/university.model";
@@ -10,13 +10,7 @@ export default class MemoryCourse extends Course {
 
     /////////////////// Abstract Methods Implementation ///////////////////
     public async setRequiredCourse(courseId: string): Promise<void> {
-        const map = MEMORY_DATABASE.requiredCoursesOfCourse;
-        // If this is the first time we have to initialize the array
-        if (!map.get(this.id))
-            map.set(this.id, new Set());
-        
-        // Now we can safely add to the array
-        map.get(this.id)!.add(courseId);
+        addChildToParent(MEMORY_DATABASE.requiredCoursesOfCourse, this.id, courseId);
     }
 
     public async getRequiredCourses(): Promise<Course[]> {

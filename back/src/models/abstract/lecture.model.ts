@@ -8,7 +8,7 @@ export default abstract class Lecture {
     time: TimeRange;    // The time range of the lecture
 
     // Abstract class constructor
-    protected constructor(id: string, time: TimeRange) {
+    constructor(id: string, time: TimeRange) {
         this.id = id;
         this.time = time;
     }

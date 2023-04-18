@@ -10,7 +10,7 @@ export default abstract class Term {
     startDate: Date;        // Start date of the term
 
     // Abstract class constructor
-    protected constructor(id: string, internalId: string, name: string, published: boolean, startDate: Date) {
+    constructor(id: string, internalId: string, name: string, published: boolean, startDate: Date) {
         this.id = id;
         this.internalId = internalId;
         this.name = name;

@@ -25,6 +25,8 @@ export const ERRORS = {
         BUILDING: { status: 404, code: 'BUILDING_NOT_FOUND', message: 'Building not found' },
         COURSE_CLASS: { status: 404, code: 'COURSE_CLASS_NOT_FOUND', message: 'Course class not found' },
         PROGRAM: { status: 404, code: 'PROGRAM_NOT_FOUND', message: 'Program not found' },
+        LECTURE: { status: 404, code: 'LECTURE_NOT_FOUND', message: 'Lecture not found' },
+        SCHEDULE: { status: 404, code: 'SCHEDULE_NOT_FOUND', message: 'Schedule not found' },
     },
     CONFLICT: {
         GENERAL: { status: 409, code: 'CONFLICT', message: 'Conflict' },

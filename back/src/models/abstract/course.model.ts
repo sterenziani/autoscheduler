@@ -8,7 +8,7 @@ export default abstract class Course {
     name: string;           // Name of the course as given by the university on creation
 
     // Abstract class constructor
-    protected constructor(id: string, internalId: string, name: string) {
+    constructor(id: string, internalId: string, name: string) {
         this.id = id;
         this.internalId = internalId;
         this.name = name;

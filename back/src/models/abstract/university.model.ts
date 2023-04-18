@@ -13,7 +13,7 @@ export default abstract class University extends User {
     verified: boolean;
 
     // Abstract class constructor
-    protected constructor(id: string, email: string, password: string, name: string, verified: boolean) {
+    constructor(id: string, email: string, password: string, name: string, verified: boolean) {
         super(id, email, password, ROLE.UNIVERSITY);
         this.name = name;
         this.verified = verified;

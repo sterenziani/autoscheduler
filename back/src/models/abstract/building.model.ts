@@ -7,7 +7,7 @@ export default abstract class Building {
     name: string;           // Name of the building
 
     // Abstract class constructor
-    protected constructor(id: string, internalId: string, name: string) {
+    constructor(id: string, internalId: string, name: string) {
         this.id = id;
         this.internalId = internalId;
         this.name = name;
