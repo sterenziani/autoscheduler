@@ -4,12 +4,12 @@ import * as UniversityDto from '../dtos/university.dto';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import UserService from '../services/user.service';
-import { User } from '../models/user.interface';
 import CourseService from '../services/course.service';
 import { HTTP_STATUS } from '../constants/http.constants';
-import { University } from '../models/university.interface';
 import UniversityService from '../services/university.service';
 import { ROLE } from '../constants/general.constants';
+import University from '../models/abstract/university.model';
+import User from '../models/abstract/user.model';
 
 export class UniversityController {
     private courseService: CourseService;

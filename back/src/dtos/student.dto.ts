@@ -1,6 +1,6 @@
-import { User } from '../models/user.interface';
+import Student from '../models/abstract/student.model';
+import User from '../models/abstract/user.model';
 import * as UserDto from './user.dto';
-import { Student } from '../models/student.interface';
 
 export const toDto = (user: User, student: Student): IStudentDto => {
     const userDto: UserDto.IUserDto = UserDto.toDto(user);

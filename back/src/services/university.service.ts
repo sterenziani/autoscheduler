@@ -1,15 +1,15 @@
-import IUniversityMapper from '../mappers/interfaces/university.mapper';
-import { University } from '../models/university.interface';
-import { ERRORS } from '../constants/error.constants';
-import GenericException from '../exceptions/generic.exception';
-import UniversityMapperFactory from '../mappers/factories/universityMapper.factory';
+import PersistenceFactory from "../factories/persistence.factory";
+import University from "../models/abstract/university.model";
+import PersistenceService from "./persistence/persistence.service";
 
-class UniversityService {
+
+export default class UniversityService {
     private static instance: UniversityService;
-    private universityMapper: IUniversityMapper;
+    
+    private persistenceService: PersistenceService;
 
     constructor() {
-        this.universityMapper = UniversityMapperFactory.get();
+        this.persistenceService = PersistenceFactory.get();
     }
 
     static getInstance = (): UniversityService => {
@@ -22,10 +22,6 @@ class UniversityService {
     // public methods
 
     async getUniversity(id: string): Promise<University> {
-        const university: University | null = await this.universityMapper.getUniversityById(id);
-        if (!university) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
-
-        return university;
+        return await this.persistenceService.getUniversity(id);
     }
 }
-export default UniversityService;

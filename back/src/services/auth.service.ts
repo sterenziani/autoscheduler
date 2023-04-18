@@ -1,13 +1,13 @@
 import { DEFAULT_AUTH_TOKEN_EXPIRE_TIME } from '../constants/auth.constants';
 import { IUserInfo } from '../interfaces/auth.interface';
-import { User } from '../models/user.interface';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import { jwtSign, jwtVerify, validatePassword } from '../helpers/auth.helper';
 import httpException from '../exceptions/http.exception';
 import UserService from './user.service';
+import User from '../models/abstract/user.model';
 
-class UserAuthService {
+export default class UserAuthService {
     private static instance: UserAuthService;
     private userService: UserService;
     private readonly jwtKey: string;
@@ -60,5 +60,3 @@ class UserAuthService {
         return jwtVerify(this.jwtPublicKey, token);
     }
 }
-
-export default UserAuthService;

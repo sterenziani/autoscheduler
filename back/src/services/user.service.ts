@@ -1,15 +1,14 @@
-import IUserMapper from '../mappers/interfaces/user.mapper';
-import { User } from '../models/user.interface';
-import { ERRORS } from '../constants/error.constants';
-import GenericException from '../exceptions/generic.exception';
-import UserMapperFactory from '../mappers/factories/userMapper.factory';
+import PersistenceService from './persistence/persistence.service';
+import PersistenceFactory from '../factories/persistence.factory';
+import User from '../models/abstract/user.model';
 
-class UserService {
+export default class UserService {
     private static instance: UserService;
-    private userMapper: IUserMapper;
+    
+    private persistenceService: PersistenceService;
 
     constructor() {
-        this.userMapper = UserMapperFactory.get();
+        this.persistenceService = PersistenceFactory.get();
     }
 
     static getInstance = (): UserService => {
@@ -20,19 +19,11 @@ class UserService {
     };
 
     // public methods
-
     async getUser(id: string): Promise<User> {
-        const user: User | null = await this.userMapper.getUserById(id);
-        if (!user) throw new GenericException(ERRORS.NOT_FOUND.USER);
-
-        return user;
+        return await this.persistenceService.getUser(id);
     }
 
     async getUserByEmail(email: string): Promise<User> {
-        const user: User | null = await this.userMapper.getUserByEmail(email);
-        if (!user) throw new GenericException(ERRORS.NOT_FOUND.USER);
-
-        return user;
+        throw new Error('Not implemented');
     }
 }
-export default UserService;

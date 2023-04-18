@@ -1,13 +1,14 @@
-import ICourseMapper from '../mappers/interfaces/course.mapper';
-import CourseMapperFactory from '../mappers/factories/courseMapper.factory';
-import { Course } from '../models/course.interface';
+import PersistenceService from './persistence/persistence.service';
+import PersistenceFactory from '../factories/persistence.factory';
+import Course from '../models/abstract/course.model';
 
-class CourseService {
+export default class CourseService {
     private static instance: CourseService;
-    private courseMapper: ICourseMapper;
+    
+    private persistenceService: PersistenceService;
 
     constructor() {
-        this.courseMapper = CourseMapperFactory.get();
+        this.persistenceService = PersistenceFactory.get();
     }
 
     static getInstance = (): CourseService => {
@@ -19,8 +20,9 @@ class CourseService {
 
     // public methods
 
+    // TODO: whoever is querying this can just query for a student and then use the getcompletedCourses() outside of this service, that is how it should be used
     async getStudentCompletedCourses(studentId: string): Promise<Course[]> {
-        return this.courseMapper.getStudentCompletedCourses(studentId);
+        const student = await this.persistenceService.getStudent(studentId);
+        return await student.getCompletedCourses();
     }
 }
-export default CourseService;

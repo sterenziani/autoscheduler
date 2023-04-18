@@ -1,5 +1,5 @@
-import { User } from '../models/user.interface';
-import { University } from '../models/university.interface';
+import University from '../models/abstract/university.model';
+import User from '../models/abstract/user.model';
 import * as UserDto from './user.dto';
 
 export const toDto = (user: User, university: University): IUniversityDto => {

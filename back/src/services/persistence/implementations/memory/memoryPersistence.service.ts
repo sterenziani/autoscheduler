@@ -27,7 +27,15 @@ import MemorySchedule from "../../../../models/implementations/memory/memorySche
 import GenericException from "../../../../exceptions/generic.exception";
 import { ERRORS } from "../../../../constants/error.constants";
 
-export default class MemoryPersistence extends PersistenceService {
+export default class MemoryPersistenceService extends PersistenceService {
+    private static instance: MemoryPersistenceService;
+
+    static getInstance = () => {
+        if (!MemoryPersistenceService.instance) {
+            MemoryPersistenceService.instance = new MemoryPersistenceService();
+        }
+        return MemoryPersistenceService.instance;
+    }
 
     /////////////////// Basic constructors ///////////////////
     // These methods creates a new entity in the database with the given info

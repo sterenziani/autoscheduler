@@ -1,4 +1,4 @@
-import { Course } from '../models/course.interface';
+import Course from "../models/abstract/course.model";
 
 export const courseToDto = (course: Course): ICourseDto => {
     const courseUrl = getCourseUrl(course.id);
@@ -8,7 +8,7 @@ export const courseToDto = (course: Course): ICourseDto => {
         url: courseUrl,
         name: course.name,
         code: course.internalId,
-        universityId: course.universityId,
+        //universityId: course.universityId, TODO: for this we can of need this method to be async and do await course.getUniversity() or pass university as parameter of the courseToDto function
         universityUrl,
     };
 };
@@ -22,6 +22,6 @@ interface ICourseDto {
     url: string;
     name: string;
     code: string;
-    universityId: string;
+    //universityId: string;
     universityUrl: string;
 }
