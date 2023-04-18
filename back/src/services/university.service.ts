@@ -1,5 +1,5 @@
 import IUniversityMapper from '../mappers/interfaces/university.mapper';
-import { IUniversity } from '../models/university.model';
+import { University } from '../models/university.interface';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import UniversityMapperFactory from '../mappers/factories/universityMapper.factory';
@@ -21,8 +21,8 @@ class UniversityService {
 
     // public methods
 
-    async getUniversity(id: string): Promise<IUniversity> {
-        const university: IUniversity | null = await this.universityMapper.getUniversityById(id);
+    async getUniversity(id: string): Promise<University> {
+        const university: University | null = await this.universityMapper.getUniversityById(id);
         if (!university) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
 
         return university;

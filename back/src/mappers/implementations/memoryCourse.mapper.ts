@@ -1,10 +1,10 @@
 import ICourseMapper from '../interfaces/course.mapper';
-import { ICourse } from '../../models/course.model';
+import { Course } from '../../models/course.interface';
 
 class MemoryCourseMapper implements ICourseMapper {
     private static instance: ICourseMapper;
     // mock stuff
-    private courses: ICourse[];
+    private courses: Course[];
     private studentCompletedCourses: { [studentId: string]: string[] };
     private courseRequiredCourses: { [courseId: string]: { [programId: string]: string[] } };
 
@@ -24,14 +24,14 @@ class MemoryCourseMapper implements ICourseMapper {
         return MemoryCourseMapper.instance;
     };
 
-    async getStudentCompletedCourses(studentId: string): Promise<ICourse[]> {
+    async getStudentCompletedCourses(studentId: string): Promise<Course[]> {
         const coursesIds = this.studentCompletedCourses[studentId] ?? [];
         return coursesIds.map((cId) => {
             return this.courses.find((c) => c.id === cId)!;
         });
     }
 
-    async getRequiredCourses(courseId: string, programId: string): Promise<ICourse[]> {
+    async getRequiredCourses(courseId: string, programId: string): Promise<Course[]> {
         const coursesIds = (this.courseRequiredCourses[courseId] ?? {})[programId] ?? [];
         return coursesIds.map((cId) => {
             return this.courses.find((c) => c.id === cId)!;
@@ -44,34 +44,34 @@ class MemoryCourseMapper implements ICourseMapper {
     private _populate() {
         // TODO: improve
         // courses
-        const firstCourse: ICourse = {
+        const firstCourse: Course = {
             id: 'materia1',
             name: 'algebra',
-            code: '00-01',
+            internalId: '00-01',
             universityId: 'universidadItba',
         };
-        const secondCourse: ICourse = {
+        const secondCourse: Course = {
             id: 'materia2',
             name: 'Formación General 1',
-            code: '00-02',
+            internalId: '00-02',
             universityId: 'universidadItba',
         };
-        const thirdCourse: ICourse = {
+        const thirdCourse: Course = {
             id: 'materia3',
             name: 'Programación Imperativa',
-            code: '01-03',
+            internalId: '01-03',
             universityId: 'universidadItba',
         };
-        const fourthCourse: ICourse = {
+        const fourthCourse: Course = {
             id: 'materia4',
             name: 'Estructura de Datos y Algoritmos',
-            code: '01-04',
+            internalId: '01-04',
             universityId: 'universidadItba',
         };
-        const fifthCourse: ICourse = {
+        const fifthCourse: Course = {
             id: 'materia5',
             name: 'Algoritmos y Estructura de Datos',
-            code: '01-04',
+            internalId: '01-04',
             universityId: 'universidadUba',
         };
         this.courses.push(firstCourse, secondCourse, thirdCourse, fourthCourse, fifthCourse);
@@ -82,11 +82,11 @@ class MemoryCourseMapper implements ICourseMapper {
         this.studentCompletedCourses['tercero'] = [fourthCourse.id];
 
         // required courses
-        this.courseRequiredCourses[thirdCourse.code] = {
+        this.courseRequiredCourses[thirdCourse.internalId] = {
             itbaInformatica: ['00-01'],
             itbaLicenciaturaSistemas: ['00-01'],
         };
-        this.courseRequiredCourses[fourthCourse.code] = {
+        this.courseRequiredCourses[fourthCourse.internalId] = {
             itbaInformatica: ['00-03'],
         };
     }

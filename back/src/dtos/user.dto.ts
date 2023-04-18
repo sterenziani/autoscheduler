@@ -1,7 +1,7 @@
-import { IUser } from '../models/user.model';
-import { ROLES } from '../constants/general.constants';
+import { User } from '../models/user.interface';
+import { ROLE } from '../constants/general.constants';
 
-export const toDto = (user: IUser): IUserDto => {
+export const toDto = (user: User): IUserDto => {
     const url = getUrl(user.id, user.role);
     return {
         id: user.id,
@@ -12,7 +12,7 @@ export const toDto = (user: IUser): IUserDto => {
     };
 };
 
-export const getUrl = (userId: string, role: ROLES): string => {
+export const getUrl = (userId: string, role: ROLE): string => {
     return `/${role.toLowerCase()}/${userId}`;
 };
 
@@ -21,5 +21,5 @@ export interface IUserDto {
     url: string;
     name: string;
     email: string;
-    role: ROLES;
+    role: ROLE;
 }

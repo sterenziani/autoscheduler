@@ -1,9 +1,9 @@
 import IStudentMapper from '../interfaces/student.mapper';
-import { IStudent } from '../../models/student.model';
+import { Student } from '../../models/student.interface';
 
 class MemoryStudentMapper implements IStudentMapper {
     private static instance: IStudentMapper;
-    private students: IStudent[];
+    private students: Student[];
 
     constructor() {
         this.students = [];
@@ -19,9 +19,9 @@ class MemoryStudentMapper implements IStudentMapper {
         return MemoryStudentMapper.instance;
     };
 
-    async getStudentById(userId: string): Promise<IStudent | null> {
+    async getStudentById(userId: string): Promise<Student | null> {
         const maybeStudent = this.students.find((s) => s.id === userId);
-        return maybeStudent ? (maybeStudent as IStudent) : null;
+        return maybeStudent ? (maybeStudent as Student) : null;
     }
 
     // PRIVATE FUNCTIONS
@@ -29,17 +29,17 @@ class MemoryStudentMapper implements IStudentMapper {
     // populate with dummy data
     private _populate() {
         // TODO: improve
-        const firstStudent: IStudent = {
+        const firstStudent: Student = {
             id: 'primero',
             universityId: 'universidadItba',
             programId: 'itbaInformatica',
         };
-        const secondStudent: IStudent = {
+        const secondStudent: Student = {
             id: 'segundo',
             universityId: 'universidadItba',
             programId: 'itbaInformatica',
         };
-        const thirdStudent: IStudent = {
+        const thirdStudent: Student = {
             id: 'tercero',
             universityId: 'universidadUba',
             programId: 'ubaInformatica',

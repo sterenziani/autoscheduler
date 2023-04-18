@@ -1,4 +1,4 @@
-import { PERSISTENCE } from '../../constants/persistence.contants';
+import { PERSISTENCE } from '../../constants/persistence/persistence.contants';
 
 abstract class GenericMapperFactory {
     protected static readonly mappers: { [p: string]: any };

@@ -1,6 +1,6 @@
 import { DEFAULT_AUTH_TOKEN_EXPIRE_TIME } from '../constants/auth.constants';
 import { IUserInfo } from '../interfaces/auth.interface';
-import { IUser } from '../models/user.model';
+import { User } from '../models/user.interface';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import { jwtSign, jwtVerify, validatePassword } from '../helpers/auth.helper';
@@ -32,7 +32,7 @@ class UserAuthService {
 
     async login(email: string, password: string): Promise<string> {
         // existence check
-        let user: IUser | null = null;
+        let user: User | null = null;
         try {
             user = await this.userService.getUserByEmail(email);
         } catch (e) {

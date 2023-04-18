@@ -1,7 +1,7 @@
-import { IUniversity } from '../../models/university.model';
+import { University } from '../../models/university.interface';
 
 interface IUniversityMapper {
-    getUniversityById(userId: string): Promise<IUniversity | null>;
+    getUniversityById(userId: string): Promise<University | null>;
 }
 
 export default IUniversityMapper;

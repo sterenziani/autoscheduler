@@ -1,9 +1,9 @@
 import IUniversityMapper from '../interfaces/university.mapper';
-import { IUniversity } from '../../models/university.model';
+import { University } from '../../models/university.interface';
 
 class MemoryUniversityMapper implements IUniversityMapper {
     private static instance: IUniversityMapper;
-    private universities: IUniversity[];
+    private universities: University[];
 
     constructor() {
         this.universities = [];
@@ -19,9 +19,9 @@ class MemoryUniversityMapper implements IUniversityMapper {
         return MemoryUniversityMapper.instance;
     };
 
-    async getUniversityById(userId: string): Promise<IUniversity | null> {
+    async getUniversityById(userId: string): Promise<University | null> {
         const maybeUniversity = this.universities.find((s) => s.id === userId);
-        return maybeUniversity ? (maybeUniversity as IUniversity) : null;
+        return maybeUniversity ? (maybeUniversity as University) : null;
     }
 
     // PRIVATE FUNCTIONS
@@ -29,17 +29,17 @@ class MemoryUniversityMapper implements IUniversityMapper {
     // populate with dummy data
     private _populate() {
         // TODO: improve
-        const firstUniversity: IUniversity = {
+        const firstUniversity: University = {
             id: 'universidadItba',
             name: 'Instituto Tecnológico de Buenos Aires',
             verified: true,
         };
-        const secondUniversity: IUniversity = {
+        const secondUniversity: University = {
             id: 'universidadUba',
             name: 'Universidad de Buenos Aires',
             verified: true,
         };
-        const thirdUniversity: IUniversity = {
+        const thirdUniversity: University = {
             id: 'universidadFake',
             name: 'Universidad de Mentira aún no verificada',
             verified: false,

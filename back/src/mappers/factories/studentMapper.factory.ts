@@ -1,4 +1,4 @@
-import { PERSISTENCE } from '../../constants/persistence.contants';
+import { PERSISTENCE } from '../../constants/persistence/persistence.contants';
 import GenericMapperFactory from './genericMapper.factory';
 import MemoryStudentMapper from '../implementations/memoryStudent.mapper';
 

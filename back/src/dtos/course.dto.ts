@@ -1,13 +1,13 @@
-import { ICourse } from '../models/course.model';
+import { Course } from '../models/course.interface';
 
-export const courseToDto = (course: ICourse): ICourseDto => {
+export const courseToDto = (course: Course): ICourseDto => {
     const courseUrl = getCourseUrl(course.id);
     const universityUrl = 'TODO';
     return {
         id: course.id,
         url: courseUrl,
         name: course.name,
-        code: course.code,
+        code: course.internalId,
         universityId: course.universityId,
         universityUrl,
     };

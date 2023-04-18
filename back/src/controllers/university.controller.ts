@@ -4,12 +4,12 @@ import * as UniversityDto from '../dtos/university.dto';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import UserService from '../services/user.service';
-import { IUser } from '../models/user.model';
+import { User } from '../models/user.interface';
 import CourseService from '../services/course.service';
 import { HTTP_STATUS } from '../constants/http.constants';
-import { IUniversity } from '../models/university.model';
+import { University } from '../models/university.interface';
 import UniversityService from '../services/university.service';
-import { ROLES } from '../constants/general.constants';
+import { ROLE } from '../constants/general.constants';
 
 export class UniversityController {
     private courseService: CourseService;
@@ -23,7 +23,7 @@ export class UniversityController {
     }
 
     public getActiveUniversity: RequestHandler = async (req, res) => {
-        res.redirect(UserDto.getUrl(req.user.id, ROLES.UNIVERSITY));
+        res.redirect(UserDto.getUrl(req.user.id, ROLE.UNIVERSITY));
     };
 
     public getUniversity: RequestHandler = async (req, res, next) => {
@@ -33,8 +33,8 @@ export class UniversityController {
         if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
         try {
-            const user: IUser = await this.userService.getUser(userId);
-            const university: IUniversity = await this.universityService.getUniversity(userId);
+            const user: User = await this.userService.getUser(userId);
+            const university: University = await this.universityService.getUniversity(userId);
             res.status(HTTP_STATUS.OK).send(UniversityDto.toDto(user, university));
         } catch (e) {
             next(e);

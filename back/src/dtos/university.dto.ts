@@ -1,8 +1,8 @@
-import { IUser } from '../models/user.model';
-import { IUniversity } from '../models/university.model';
+import { User } from '../models/user.interface';
+import { University } from '../models/university.interface';
 import * as UserDto from './user.dto';
 
-export const toDto = (user: IUser, university: IUniversity): IUniversityDto => {
+export const toDto = (user: User, university: University): IUniversityDto => {
     const userDto: UserDto.IUserDto = UserDto.toDto(user);
     return {
         ...userDto,

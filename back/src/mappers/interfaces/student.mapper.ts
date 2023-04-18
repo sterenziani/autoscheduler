@@ -1,7 +1,7 @@
-import { IStudent } from '../../models/student.model';
+import { Student } from '../../models/student.interface';
 
 interface IStudentMapper {
-    getStudentById(userId: string): Promise<IStudent | null>;
+    getStudentById(userId: string): Promise<Student | null>;
 }
 
 export default IStudentMapper;

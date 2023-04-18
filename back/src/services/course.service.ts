@@ -1,6 +1,6 @@
 import ICourseMapper from '../mappers/interfaces/course.mapper';
 import CourseMapperFactory from '../mappers/factories/courseMapper.factory';
-import { ICourse } from '../models/course.model';
+import { Course } from '../models/course.interface';
 
 class CourseService {
     private static instance: CourseService;
@@ -19,7 +19,7 @@ class CourseService {
 
     // public methods
 
-    async getStudentCompletedCourses(studentId: string): Promise<ICourse[]> {
+    async getStudentCompletedCourses(studentId: string): Promise<Course[]> {
         return this.courseMapper.getStudentCompletedCourses(studentId);
     }
 }

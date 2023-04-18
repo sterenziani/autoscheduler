@@ -1,9 +1,9 @@
-import { ICourse } from '../../models/course.model';
+import { Course } from '../../models/course.interface';
 
 interface ICourseMapper {
-    getStudentCompletedCourses(userId: string): Promise<ICourse[]>;
+    getStudentCompletedCourses(userId: string): Promise<Course[]>;
 
-    getRequiredCourses(courseId: string, programId: string): Promise<ICourse[]>;
+    getRequiredCourses(courseId: string, programId: string): Promise<Course[]>;
 }
 
 export default ICourseMapper;
