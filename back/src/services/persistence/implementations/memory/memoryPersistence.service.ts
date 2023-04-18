@@ -1,23 +1,29 @@
-import { ROLE } from "../../constants/general.constants";
-import TimeRange from "../../helpers/classes/timeRange.class";
-import Building from "../../models/abstract/building.model";
-import Course from "../../models/abstract/course.model";
-import CourseClass from "../../models/abstract/courseClass.model";
-import Lecture from "../../models/abstract/lecture.model";
-import Program from "../../models/abstract/program.model";
-import Schedule from "../../models/abstract/schedule.model";
-import Student from "../../models/abstract/student.model";
-import Term from "../../models/abstract/term.model";
-import University from "../../models/abstract/university.model";
-import User from "../../models/abstract/user.model";
-import PersistenceService from "./persistence.service";
+import { ROLE } from "../../../../constants/general.constants";
+import TimeRange from "../../../../helpers/classes/timeRange.class";
+import Building from "../../../../models/abstract/building.model";
+import Course from "../../../../models/abstract/course.model";
+import CourseClass from "../../../../models/abstract/courseClass.model";
+import Lecture from "../../../../models/abstract/lecture.model";
+import Program from "../../../../models/abstract/program.model";
+import Schedule from "../../../../models/abstract/schedule.model";
+import Student from "../../../../models/abstract/student.model";
+import Term from "../../../../models/abstract/term.model";
+import University from "../../../../models/abstract/university.model";
+import User from "../../../../models/abstract/user.model";
+import MemoryUser from "../../../../models/implementations/memory/memoryUser.model";
+import PersistenceService from "../../persistence.service";
 
 export default class MemoryPersistence extends PersistenceService {
+
+    private users: Map<string, MemoryUser> = new Map();
+    private universities: Map<string, MemoryUniversity> = new Map();
+    private programs: Map<string, MemoryProgram> = new Map();
+    private buildings: Map<string, MemoryBuilding> = new Map();
 
     /////////////////// Basic constructors ///////////////////
     // These methods creates a new entity in the database with the given info
     public createUser(email: string, password: string, role: ROLE): Promise<User> {
-        throw new Error("Method not implemented.");
+        return
     }
     public createUniversity(userId: string, name: string, verified: boolean): Promise<University> {
         throw new Error("Method not implemented.");

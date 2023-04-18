@@ -25,7 +25,7 @@ export default abstract class PersistenceService {
     public abstract createCourseClass(courseId: string, termId: string, name: string): Promise<CourseClass>;
     public abstract createLecture(courseClassId: string, buildingId: string, time: TimeRange): Promise<Lecture>;
     public abstract createStudent(userId: string, universityId: string, programId: string, internalId: string, name: string): Promise<Student>;
-    public abstract createSchedule(studentId: string, termId: string, courseClassIds: string[]): Promise<Schedule>;
+    public abstract createSchedule(studentId: string, termId: string): Promise<Schedule>;
     
     /////////////////// Basic getters ///////////////////
     // These methods just retrieve the entity by the database id

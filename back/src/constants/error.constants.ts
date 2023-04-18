@@ -20,11 +20,17 @@ export const ERRORS = {
         USER: { status: 404, code: 'USER_NOT_FOUND', message: 'User not found' },
         STUDENT: { status: 404, code: 'STUDENT_NOT_FOUND', message: 'Student not found' },
         UNIVERSITY: { status: 404, code: 'UNIVERSITY_NOT_FOUND', message: 'University not found' },
+        TERM: { status: 404, code: 'TERM_NOT_FOUND', message: 'Term not found' },
+        COURSE: { status: 404, code: 'COURSE_NOT_FOUND', message: 'Course not found' },
+        BUILDING: { status: 404, code: 'BUILDING_NOT_FOUND', message: 'Building not found' },
+        COURSE_CLASS: { status: 404, code: 'COURSE_CLASS_NOT_FOUND', message: 'Course class not found' },
+        PROGRAM: { status: 404, code: 'PROGRAM_NOT_FOUND', message: 'Program not found' },
     },
     CONFLICT: {
         GENERAL: { status: 409, code: 'CONFLICT', message: 'Conflict' },
     },
     INTERNAL_SERVER_ERROR: {
         GENERAL: { status: 500, code: 'INTERNAL_SERVER_ERROR', message: 'Internal Server Error' },
+        CORRUPTED_DATABASE: {status: 500, code: 'CORRUPTED_DATABASE', message: 'Database data is corrupted, it needs manual cleaning.'}
     },
 };

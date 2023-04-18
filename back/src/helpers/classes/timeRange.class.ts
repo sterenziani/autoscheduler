@@ -1,4 +1,4 @@
-import { DAY } from "../../constants/general.constants";
+import { DAY } from "../../constants/time.constants";
 import Time from "./time.class";
 
 export default class TimeRange {

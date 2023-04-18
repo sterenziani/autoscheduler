@@ -1,4 +1,6 @@
+import { ERRORS } from "../../../constants/error.constants";
 import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
+import GenericException from "../../../exceptions/generic.exception";
 import { getChildsFromParent, getChildsFromParents, getParentFromChild } from "../../../helpers/persistence/memoryPersistence.helper";
 import Course from "../../abstract/course.model";
 import CourseClass from "../../abstract/courseClass.model";
@@ -8,12 +10,13 @@ export default class MemoryCourse extends Course {
 
     /////////////////// Abstract Methods Implementation ///////////////////
     public async setRequiredCourse(courseId: string): Promise<void> {
+        const map = MEMORY_DATABASE.requiredCoursesOfCourse;
         // If this is the first time we have to initialize the array
-        if (!MEMORY_DATABASE.requiredCoursesOfCourse.get(this.id))
-            MEMORY_DATABASE.requiredCoursesOfCourse.set(this.id, []);
+        if (!map.get(this.id))
+            map.set(this.id, new Set());
         
         // Now we can safely add to the array
-        MEMORY_DATABASE.requiredCoursesOfCourse.get(this.id)!.push(courseId);
+        map.get(this.id)!.add(courseId);
     }
 
     public async getRequiredCourses(): Promise<Course[]> {
@@ -27,8 +30,7 @@ export default class MemoryCourse extends Course {
 
     public async getUniversity(): Promise<University> {
         const maybeUniversity = getParentFromChild<University>(MEMORY_DATABASE.coursesOfUniversity, MEMORY_DATABASE.universities, this.id);
-        if (!maybeUniversity) throw new Error('Building is not associated with any university. Data is probably corrupted');
+        if (!maybeUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
         return maybeUniversity;
     }
-
 }
