@@ -1,14 +1,15 @@
-import PersistenceService from './persistence/persistence.service';
-import PersistenceFactory from '../factories/persistence.factory';
 import Student from '../models/abstract/student.model';
+import Course from '../models/abstract/course.model';
+import StudentDao from '../persistence/abstract/student.dao';
+import StudentDaoFactory from '../factories/studentDao.factory';
 
 export default class StudentService {
     private static instance: StudentService;
     
-    private persistenceService: PersistenceService;
+    private dao: StudentDao;
 
     constructor() {
-        this.persistenceService = PersistenceFactory.get();
+        this.dao = StudentDaoFactory.get();
     }
 
     static getInstance = (): StudentService => {
@@ -21,6 +22,11 @@ export default class StudentService {
     // public methods
 
     async getStudent(id: string): Promise<Student> {
-        return await this.persistenceService.getStudent(id);
+        return await this.dao.getById(id);
+    }
+
+    async getStudentCompletedCourses(studentId: string): Promise<Course[]> {
+        const student = await this.dao.getById(studentId);
+        return await student.getCompletedCourses();
     }
 }

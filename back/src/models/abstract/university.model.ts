@@ -12,9 +12,9 @@ export default abstract class University extends User {
     name: string;
     verified: boolean;
 
-    // Abstract class constructor
-    constructor(id: string, email: string, password: string, name: string, verified: boolean) {
-        super(id, email, password, ROLE.UNIVERSITY);
+    // Abstract class constructor. University and Student require an existing user, so they are the only ones that have required id in constructor
+    constructor(userId: string, email: string, password: string, name: string, verified: boolean) {
+        super(userId, email, password, ROLE.UNIVERSITY);
         this.name = name;
         this.verified = verified;
     }

@@ -1,15 +1,15 @@
 import TimeRange from "../../helpers/classes/timeRange.class";
 import CourseClass from "./courseClass.model";
+import GenericModel from "./generic.model";
 import Student from "./student.model";
 import Term from "./term.model";
 
-export default abstract class Schedule {
+export default abstract class Schedule extends GenericModel {
     // Properties
-    id: string;             // Id of the schedule in our databases
 
     // Abstract class constructor
-    constructor(id: string) {
-        this.id = id;
+    constructor(id: string, ) {
+        super(id)
     }
 
     // Methods

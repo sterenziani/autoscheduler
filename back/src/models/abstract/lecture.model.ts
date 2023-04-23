@@ -1,15 +1,15 @@
 import TimeRange from "../../helpers/classes/timeRange.class";
 import Building from "./building.model";
 import CourseClass from "./courseClass.model";
+import GenericModel from "./generic.model";
 
-export default abstract class Lecture {
+export default abstract class Lecture extends GenericModel {
     // Properties
-    id: string;         // Id of the lecture in our databases
     time: TimeRange;    // The time range of the lecture
 
     // Abstract class constructor
     constructor(id: string, time: TimeRange) {
-        this.id = id;
+        super(id);
         this.time = time;
     }
 

@@ -1,15 +1,15 @@
 import Course from "./course.model";
+import GenericModel from "./generic.model";
 import Lecture from "./lecture.model";
 import Term from "./term.model";
 
-export default abstract class CourseClass {
+export default abstract class CourseClass extends GenericModel {
     // Properties
-    id: string;
     name: string;
 
     // Abstract class constructor
     constructor(id: string, name: string) {
-        this.id = id;
+        super(id);
         this.name = name;
     }
 

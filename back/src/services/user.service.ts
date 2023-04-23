@@ -1,14 +1,14 @@
-import PersistenceService from './persistence/persistence.service';
-import PersistenceFactory from '../factories/persistence.factory';
 import User from '../models/abstract/user.model';
+import UserDao from '../persistence/abstract/user.dao';
+import UserDaoFactory from '../factories/userDao.factory';
 
 export default class UserService {
     private static instance: UserService;
     
-    private persistenceService: PersistenceService;
+    private dao: UserDao;
 
     constructor() {
-        this.persistenceService = PersistenceFactory.get();
+        this.dao = UserDaoFactory.get();
     }
 
     static getInstance = (): UserService => {
@@ -20,10 +20,10 @@ export default class UserService {
 
     // public methods
     async getUser(id: string): Promise<User> {
-        return await this.persistenceService.getUser(id);
+        return await this.dao.getById(id);
     }
 
     async getUserByEmail(email: string): Promise<User> {
-        throw new Error('Not implemented');
+        return await this.dao.getByEmail(email);
     }
 }

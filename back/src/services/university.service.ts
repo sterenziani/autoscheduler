@@ -1,15 +1,15 @@
-import PersistenceFactory from "../factories/persistence.factory";
+import UniversityDaoFactory from "../factories/universityDao.factory";
 import University from "../models/abstract/university.model";
-import PersistenceService from "./persistence/persistence.service";
+import UniversityDao from "../persistence/abstract/university.dao";
 
 
 export default class UniversityService {
     private static instance: UniversityService;
     
-    private persistenceService: PersistenceService;
+    private dao: UniversityDao;
 
     constructor() {
-        this.persistenceService = PersistenceFactory.get();
+        this.dao = UniversityDaoFactory.get();
     }
 
     static getInstance = (): UniversityService => {
@@ -22,6 +22,6 @@ export default class UniversityService {
     // public methods
 
     async getUniversity(id: string): Promise<University> {
-        return await this.persistenceService.getUniversity(id);
+        return await this.dao.getById(id);
     }
 }

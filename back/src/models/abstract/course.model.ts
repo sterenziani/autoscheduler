@@ -1,15 +1,15 @@
 import CourseClass from "./courseClass.model";
+import GenericModel from "./generic.model";
 import University from "./university.model";
 
-export default abstract class Course {
+export default abstract class Course extends GenericModel {
     // Properties
-    id: string;             // Id of the course in our databases
     internalId: string;     // Internal id of the course as given by the university on creation
     name: string;           // Name of the course as given by the university on creation
 
     // Abstract class constructor
     constructor(id: string, internalId: string, name: string) {
-        this.id = id;
+        super(id);
         this.internalId = internalId;
         this.name = name;
     }

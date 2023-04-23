@@ -1,16 +1,16 @@
 import { ROLE } from "../../constants/general.constants";
 import { validatePassword } from "../../helpers/auth.helper";
+import GenericModel from "./generic.model";
 
-export default abstract class User {
+export default abstract class User extends GenericModel {
     // Properties
-    id: string;         // The id of the user in our databases
     email: string;      // Email the user uses to log in
     password: string;   // Hashed password with bcrypt to match when logging in
     role: ROLE
 
     // Abstract class constructor
     constructor(id: string, email: string, password: string, role: ROLE) {
-        this.id = id;
+        super(id);
         this.email = email;
         this.password = password;
         this.role = role;

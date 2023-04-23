@@ -1,14 +1,13 @@
-import PersistenceService from './persistence/persistence.service';
-import PersistenceFactory from '../factories/persistence.factory';
-import Course from '../models/abstract/course.model';
+import CourseDaoFactory from '../factories/courseDao.factory';
+import CourseDao from '../persistence/abstract/course.dao';
 
 export default class CourseService {
     private static instance: CourseService;
     
-    private persistenceService: PersistenceService;
+    private dao: CourseDao;
 
     constructor() {
-        this.persistenceService = PersistenceFactory.get();
+        this.dao = CourseDaoFactory.get();
     }
 
     static getInstance = (): CourseService => {
@@ -19,10 +18,4 @@ export default class CourseService {
     };
 
     // public methods
-
-    // TODO: whoever is querying this can just query for a student and then use the getcompletedCourses() outside of this service, that is how it should be used
-    async getStudentCompletedCourses(studentId: string): Promise<Course[]> {
-        const student = await this.persistenceService.getStudent(studentId);
-        return await student.getCompletedCourses();
-    }
 }

@@ -11,9 +11,9 @@ export default abstract class Student extends User {
     internalId: string;      // The internal student id the university assigns to their students
     name: string;           // Name of the student
 
-    // Abstract class constructor
-    constructor(id: string, email: string, password: string, internalId: string, name: string) {
-        super(id, email, password, ROLE.STUDENT);
+    // Abstract class constructor. University and Student require an existing user, so they are the only ones that have required id in constructor
+    constructor(userId: string, email: string, password: string, internalId: string, name: string) {
+        super(userId, email, password, ROLE.STUDENT);
         this.internalId = internalId;
         this.name = name; 
     }
