@@ -1,10 +1,10 @@
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import { addChildToParent } from "../../../helpers/persistence/memoryPersistence.helper";
-import CourseClass from "../../../models/abstract/courseClass.model";
-import MemoryCourseClass from "../../../models/implementations/memory/memoryCourseClass.model";
-import CourseClassDao from "../../abstract/courseClass.dao";
-import {v4 as uuidv4} from "uuid";
-import MemoryTermDao from "./memoryTerm.dao";
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import { addChildToParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import CourseClass from '../../../models/abstract/courseClass.model';
+import MemoryCourseClass from '../../../models/implementations/memory/memoryCourseClass.model';
+import CourseClassDao from '../../abstract/courseClass.dao';
+import { v4 as uuidv4 } from 'uuid';
+import MemoryTermDao from './memoryTerm.dao';
 
 export default class MemoryCourseClassDao extends CourseClassDao {
     private static instance: CourseClassDao;
@@ -14,7 +14,7 @@ export default class MemoryCourseClassDao extends CourseClassDao {
             MemoryCourseClassDao.instance = new MemoryCourseClassDao();
         }
         return MemoryCourseClassDao.instance;
-    }
+    };
 
     // Abstract Methods Implementations
     public async create(courseId: string, termId: string, name: string): Promise<CourseClass> {
@@ -39,7 +39,7 @@ export default class MemoryCourseClassDao extends CourseClassDao {
 
         if (!(courseClass instanceof MemoryCourseClass))
             courseClass = new MemoryCourseClass(courseClass.id, courseClass.name);
-        
+
         MEMORY_DATABASE.courseClasses.set(courseClass.id, courseClass);
     }
 }

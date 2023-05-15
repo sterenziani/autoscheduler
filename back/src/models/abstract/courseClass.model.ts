@@ -1,7 +1,7 @@
-import Course from "./course.model";
-import GenericModel from "./generic.model";
-import Lecture from "./lecture.model";
-import Term from "./term.model";
+import Course from './course.model';
+import GenericModel from './generic.model';
+import Lecture from './lecture.model';
+import Term from './term.model';
 
 export default abstract class CourseClass extends GenericModel {
     // Properties

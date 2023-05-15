@@ -1,7 +1,7 @@
-import { PERSISTENCE } from "../constants/persistence/persistence.contants";
-import CourseClassDao from "../persistence/abstract/courseClass.dao";
-import MemoryCourseClassDao from "../persistence/implementations/memory/memoryCourseClass.dao";
-import GenericDaoFactory from "./genericDao.factory";
+import { PERSISTENCE } from '../constants/persistence/persistence.contants';
+import CourseClassDao from '../persistence/abstract/courseClass.dao';
+import MemoryCourseClassDao from '../persistence/implementations/memory/memoryCourseClass.dao';
+import GenericDaoFactory from './genericDao.factory';
 
 export default class CourseClassDaoFactory extends GenericDaoFactory {
     // Static Getters

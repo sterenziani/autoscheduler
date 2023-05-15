@@ -3,7 +3,7 @@ import CourseDao from '../persistence/abstract/course.dao';
 
 export default class CourseService {
     private static instance: CourseService;
-    
+
     private dao: CourseDao;
 
     constructor() {

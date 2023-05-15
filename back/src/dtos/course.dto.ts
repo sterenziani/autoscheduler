@@ -1,4 +1,4 @@
-import Course from "../models/abstract/course.model";
+import Course from '../models/abstract/course.model';
 
 export const courseToDto = (course: Course): ICourseDto => {
     const courseUrl = getCourseUrl(course.id);

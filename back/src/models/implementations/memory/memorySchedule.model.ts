@@ -1,18 +1,25 @@
-import { ERRORS } from "../../../constants/error.constants";
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import GenericException from "../../../exceptions/generic.exception";
-import TimeRange from "../../../helpers/classes/timeRange.class";
-import { addChildToParent, getChildsFromParent, getParentFromChild } from "../../../helpers/persistence/memoryPersistence.helper";
-import CourseClass from "../../abstract/courseClass.model";
-import Schedule from "../../abstract/schedule.model";
-import Student from "../../abstract/student.model";
-import Term from "../../abstract/term.model";
+import { ERRORS } from '../../../constants/error.constants';
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import GenericException from '../../../exceptions/generic.exception';
+import TimeRange from '../../../helpers/classes/timeRange.class';
+import {
+    addChildToParent,
+    getChildsFromParent,
+    getParentFromChild,
+} from '../../../helpers/persistence/memoryPersistence.helper';
+import CourseClass from '../../abstract/courseClass.model';
+import Schedule from '../../abstract/schedule.model';
+import Student from '../../abstract/student.model';
+import Term from '../../abstract/term.model';
 
 export default class MemorySchedule extends Schedule {
-
     /////////////////// Abstract Methods Implementation ///////////////////
     public async getStudent(): Promise<Student> {
-        const maybeStudent = getParentFromChild<Student>(MEMORY_DATABASE.schedulesOfStudent, MEMORY_DATABASE.students, this.id);
+        const maybeStudent = getParentFromChild<Student>(
+            MEMORY_DATABASE.schedulesOfStudent,
+            MEMORY_DATABASE.students,
+            this.id,
+        );
         if (!maybeStudent) throw new GenericException(ERRORS.NOT_FOUND.STUDENT);
         return maybeStudent;
     }
@@ -28,10 +35,19 @@ export default class MemorySchedule extends Schedule {
     }
 
     public async getCourseClasses(): Promise<CourseClass[]> {
-        return getChildsFromParent<CourseClass>(MEMORY_DATABASE.courseClassesOfSchedule, MEMORY_DATABASE.courseClasses, this.id);
+        return getChildsFromParent<CourseClass>(
+            MEMORY_DATABASE.courseClassesOfSchedule,
+            MEMORY_DATABASE.courseClasses,
+            this.id,
+        );
     }
 
-    public async getScore(credits: number, availableTimes: TimeRange[], reduceDays: boolean, prioritizeCourseRequirements: boolean): Promise<number> {
-        throw new Error("Method not implemented.");
+    public async getScore(
+        credits: number,
+        availableTimes: TimeRange[],
+        reduceDays: boolean,
+        prioritizeCourseRequirements: boolean,
+    ): Promise<number> {
+        throw new Error('Method not implemented.');
     }
 }

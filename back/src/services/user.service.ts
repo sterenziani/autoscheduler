@@ -4,7 +4,7 @@ import UserDaoFactory from '../factories/userDao.factory';
 
 export default class UserService {
     private static instance: UserService;
-    
+
     private dao: UserDao;
 
     constructor() {

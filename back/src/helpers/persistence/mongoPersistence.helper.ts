@@ -1,10 +1,10 @@
-import mongoose, {Model, ClientSession, FilterQuery, UpdateQuery, AnyKeys, Document} from "mongoose";
-import GenericException from "../../exceptions/generic.exception";
-import { ERRORS } from "../../constants/error.constants";
+import mongoose, { Model, ClientSession, FilterQuery, UpdateQuery, AnyKeys, Document } from 'mongoose';
+import GenericException from '../../exceptions/generic.exception';
+import { ERRORS } from '../../constants/error.constants';
 
 export const validateObjectId = (maybeId: string): void => {
     if (!mongoose.Types.ObjectId.isValid(maybeId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_OBJECT_ID);
-}
+};
 
 export const startTransaction = async (): Promise<ClientSession> => {
     const session = await mongoose.startSession();
@@ -32,17 +32,23 @@ export const abortTransaction = async (session: ClientSession | null): Promise<v
 
 const executeQuery = async (docQuery: any, lean = false, session: ClientSession | null = null) => {
     let query = session ? docQuery.session(session) : docQuery;
-    return lean ? await query.lean({virtuals: true}).exec() : await query.exec();
-}
+    return lean ? await query.lean({ virtuals: true }).exec() : await query.exec();
+};
 
-const executePaginatedQuery = async (docQuery: any, page: number, limit: number, lean: boolean, sort: boolean, session: ClientSession | null = null) => {
-    let query = docQuery.limit(limit).skip((page - 1) * limit)
+const executePaginatedQuery = async (
+    docQuery: any,
+    page: number,
+    limit: number,
+    lean: boolean,
+    sort: boolean,
+    session: ClientSession | null = null,
+) => {
+    let query = docQuery.limit(limit).skip((page - 1) * limit);
 
-    if (sort)
-        query = query.sort('-creationTime');
+    if (sort) query = query.sort('-creationTime');
 
     return await executeQuery(query, lean, session);
-}
+};
 
 export const countDocumentsByQuery = async <T extends Document>(
     model: Model<T>,
@@ -52,11 +58,10 @@ export const countDocumentsByQuery = async <T extends Document>(
 ): Promise<number> => {
     let docQuery = model.countDocuments(query);
 
-    if (limit)
-        docQuery = docQuery.limit(limit);
+    if (limit) docQuery = docQuery.limit(limit);
 
     return await executeQuery(docQuery, false, session);
-}
+};
 
 export const getDocument = async <T extends Document>(
     model: Model<T>,
@@ -65,7 +70,7 @@ export const getDocument = async <T extends Document>(
     session: ClientSession | null = null,
 ): Promise<T | null> => {
     return await executeQuery(model.findById(docId), lean, session);
-}
+};
 
 export const getDocumentByQuery = async <T extends Document>(
     model: Model<T>,
@@ -74,7 +79,7 @@ export const getDocumentByQuery = async <T extends Document>(
     session: ClientSession | null = null,
 ): Promise<T | null> => {
     return await executeQuery(model.findOne(query), lean, session);
-}
+};
 
 export const getDocumentsByQuery = async <T extends Document>(
     model: Model<T>,
@@ -83,7 +88,7 @@ export const getDocumentsByQuery = async <T extends Document>(
     session: ClientSession | null = null,
 ): Promise<T[]> => {
     return await executeQuery(model.find(query), lean, session);
-}
+};
 
 export const getSortedDocumentByQuery = async <T extends Document>(
     model: Model<T>,
@@ -94,7 +99,7 @@ export const getSortedDocumentByQuery = async <T extends Document>(
     session: ClientSession | null = null,
 ): Promise<T | null> => {
     return await executeQuery(model.findOne(query).sort((descending ? '-' : '') + sortBy), lean, session);
-}
+};
 
 export const getSortedDocumentsByQuery = async <T extends Document>(
     model: Model<T>,
@@ -105,7 +110,7 @@ export const getSortedDocumentsByQuery = async <T extends Document>(
     session: ClientSession | null = null,
 ): Promise<T[]> => {
     return await executeQuery(model.find(query).sort((descending ? '-' : '') + sortBy), lean, session);
-}
+};
 
 export const getPaginatedDocumentsByQuery = async <T extends Document>(
     model: Model<T>,
@@ -117,7 +122,7 @@ export const getPaginatedDocumentsByQuery = async <T extends Document>(
     session: ClientSession | null = null,
 ): Promise<T[]> => {
     return await executePaginatedQuery(model.find(query), page, limit, lean, sort, session);
-}
+};
 
 export const updateDocument = async <T extends Document>(
     model: Model<T>,
@@ -126,8 +131,8 @@ export const updateDocument = async <T extends Document>(
     returnNew = true,
     session: ClientSession | null = null,
 ): Promise<T | null> => {
-    return await executeQuery(model.findOneAndUpdate(query, update, {new: returnNew}), true, session);
-}
+    return await executeQuery(model.findOneAndUpdate(query, update, { new: returnNew }), true, session);
+};
 
 export const updateDocuments = async <T extends Document>(
     model: Model<T>,
@@ -136,29 +141,29 @@ export const updateDocuments = async <T extends Document>(
     session: ClientSession | null = null,
 ): Promise<void> => {
     await executeQuery(model.updateMany(query, update), false, session);
-}
+};
 
 export const deleteDocuments = async <T extends Document>(
     model: Model<T>,
     query: FilterQuery<T>,
-    session: ClientSession | null = null
+    session: ClientSession | null = null,
 ): Promise<void> => {
     await executeQuery(model.deleteMany(query), false, session);
-}
+};
 
 export const createDocument = async <T extends Document>(
     model: Model<T>,
     doc: AnyKeys<T> | T,
-    session: ClientSession | null = null
+    session: ClientSession | null = null,
 ): Promise<T> => {
     const res = await createDocuments<T>(model, [doc], session);
     return res[0];
-}
+};
 
 export const createDocuments = async <T extends Document>(
     model: Model<T>,
     docs: (AnyKeys<T> | T)[],
-    session: ClientSession | null = null
+    session: ClientSession | null = null,
 ): Promise<T[]> => {
-    return await model.create(docs, {session});
-}
+    return await model.create(docs, { session });
+};

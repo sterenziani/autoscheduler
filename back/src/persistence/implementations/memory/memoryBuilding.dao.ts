@@ -1,10 +1,10 @@
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import { addChildToParent } from "../../../helpers/persistence/memoryPersistence.helper";
-import Building from "../../../models/abstract/building.model";
-import MemoryBuilding from "../../../models/implementations/memory/memoryBuilding.model";
-import BuildingDao from "../../abstract/building.dao";
-import {v4 as uuidv4} from "uuid";
-import MemoryUniversityDao from "./memoryUniversity.dao";
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import { addChildToParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import Building from '../../../models/abstract/building.model';
+import MemoryBuilding from '../../../models/implementations/memory/memoryBuilding.model';
+import BuildingDao from '../../abstract/building.dao';
+import { v4 as uuidv4 } from 'uuid';
+import MemoryUniversityDao from './memoryUniversity.dao';
 
 export default class MemoryBuildingDao extends BuildingDao {
     private static instance: BuildingDao;
@@ -14,7 +14,7 @@ export default class MemoryBuildingDao extends BuildingDao {
             MemoryBuildingDao.instance = new MemoryBuildingDao();
         }
         return MemoryBuildingDao.instance;
-    }
+    };
 
     // Abstract Methods Implementations
     public async create(universityId: string, internalId: string, name: string): Promise<Building> {

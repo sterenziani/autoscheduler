@@ -1,6 +1,6 @@
-import { ERRORS } from "../../constants/error.constants";
-import GenericException from "../../exceptions/generic.exception";
-import { IErrorData } from "../../interfaces/error.interface";
+import { ERRORS } from '../../constants/error.constants';
+import GenericException from '../../exceptions/generic.exception';
+import { IErrorData } from '../../interfaces/error.interface';
 
 export default abstract class GenericDao<T> {
     // Properties

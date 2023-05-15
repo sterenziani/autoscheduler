@@ -1,15 +1,15 @@
-import { ERRORS } from "../../constants/error.constants";
-import { ROLE } from "../../constants/general.constants";
-import GenericException from "../../exceptions/generic.exception";
-import User from "../../models/abstract/user.model";
-import GenericDao from "./generic.dao";
+import { ERRORS } from '../../constants/error.constants';
+import { ROLE } from '../../constants/general.constants';
+import GenericException from '../../exceptions/generic.exception';
+import User from '../../models/abstract/user.model';
+import GenericDao from './generic.dao';
 
 export default abstract class UserDao extends GenericDao<User> {
     // Constructor
     constructor() {
         super(ERRORS.NOT_FOUND.USER);
     }
-    
+
     // Abstract Methods
     public abstract create(email: string, password: string, role: ROLE): Promise<User>;
     public abstract findByEmail(email: string): Promise<User | undefined>;

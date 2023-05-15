@@ -1,8 +1,8 @@
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import University from "../../../models/abstract/university.model";
-import MemoryUniversity from "../../../models/implementations/memory/memoryUniversity.model";
-import UniversityDao from "../../abstract/university.dao";
-import MemoryUserDao from "./memoryUser.dao";
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import University from '../../../models/abstract/university.model';
+import MemoryUniversity from '../../../models/implementations/memory/memoryUniversity.model';
+import UniversityDao from '../../abstract/university.dao';
+import MemoryUserDao from './memoryUser.dao';
 
 export default class MemoryUniversityDao extends UniversityDao {
     private static instance: UniversityDao;
@@ -12,7 +12,7 @@ export default class MemoryUniversityDao extends UniversityDao {
             MemoryUniversityDao.instance = new MemoryUniversityDao();
         }
         return MemoryUniversityDao.instance;
-    }
+    };
 
     // Abstract Methods Implementations
     public async create(userId: string, name: string, verified: boolean): Promise<University> {
@@ -31,8 +31,14 @@ export default class MemoryUniversityDao extends UniversityDao {
         await this.getById(university.id);
 
         if (!(university instanceof MemoryUniversity))
-            university = new MemoryUniversity(university.id, university.email, university.password, university.name, university.verified);
-        
+            university = new MemoryUniversity(
+                university.id,
+                university.email,
+                university.password,
+                university.name,
+                university.verified,
+            );
+
         MEMORY_DATABASE.universities.set(university.id, university);
     }
 }

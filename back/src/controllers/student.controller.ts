@@ -14,12 +14,10 @@ import Student from '../models/abstract/student.model';
 import User from '../models/abstract/user.model';
 
 export class StudentController {
-    private courseService: CourseService;
     private userService: UserService;
     private studentService: StudentService;
 
     constructor() {
-        this.courseService = CourseService.getInstance();
         this.userService = UserService.getInstance();
         this.studentService = StudentService.getInstance();
     }
@@ -50,7 +48,7 @@ export class StudentController {
         if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
         try {
-            const approvedCourses = await this.courseService.getStudentCompletedCourses(userId);
+            const approvedCourses = await this.studentService.getStudentCompletedCourses(userId);
             res.status(HTTP_STATUS.OK).send(modelArrayToDtoArray(courseToDto, approvedCourses));
         } catch (e) {
             next(e);

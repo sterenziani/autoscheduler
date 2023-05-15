@@ -1,11 +1,11 @@
-import { ERRORS } from "../../../constants/error.constants";
-import { ROLE } from "../../../constants/general.constants";
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import GenericException from "../../../exceptions/generic.exception";
-import User from "../../../models/abstract/user.model";
-import MemoryUser from "../../../models/implementations/memory/memoryUser.model";
-import UserDao from "../../abstract/user.dao";
-import { v4 as uuidv4} from "uuid";
+import { ERRORS } from '../../../constants/error.constants';
+import { ROLE } from '../../../constants/general.constants';
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import GenericException from '../../../exceptions/generic.exception';
+import User from '../../../models/abstract/user.model';
+import MemoryUser from '../../../models/implementations/memory/memoryUser.model';
+import UserDao from '../../abstract/user.dao';
+import { v4 as uuidv4 } from 'uuid';
 
 export default class MemoryUserDao extends UserDao {
     private static instance: UserDao;
@@ -15,7 +15,7 @@ export default class MemoryUserDao extends UserDao {
             MemoryUserDao.instance = new MemoryUserDao();
         }
         return MemoryUserDao.instance;
-    }
+    };
 
     // Abstract Methods Implementations
     public async create(email: string, password: string, role: ROLE): Promise<User> {
@@ -31,9 +31,8 @@ export default class MemoryUserDao extends UserDao {
     public async set(user: User): Promise<void> {
         await this.getById(user.id);
 
-        if (!(user instanceof MemoryUser))
-            user = new MemoryUser(user.id, user.email, user.password, user.role);
-        
+        if (!(user instanceof MemoryUser)) user = new MemoryUser(user.id, user.email, user.password, user.role);
+
         MEMORY_DATABASE.users.set(user.id, user);
     }
 

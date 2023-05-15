@@ -1,10 +1,10 @@
-import { ROLE } from "../../constants/general.constants";
-import Building from "./building.model";
-import Course from "./course.model";
-import Program from "./program.model";
-import Student from "./student.model";
-import Term from "./term.model";
-import User from "./user.model";
+import { ROLE } from '../../constants/general.constants';
+import Building from './building.model';
+import Course from './course.model';
+import Program from './program.model';
+import Student from './student.model';
+import Term from './term.model';
+import User from './user.model';
 
 // University extends User and so it has all the properties of an User as well
 export default abstract class University extends User {

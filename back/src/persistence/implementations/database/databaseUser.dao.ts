@@ -1,9 +1,14 @@
-import { ROLE } from "../../../constants/general.constants";
-import GenericException from "../../../exceptions/generic.exception";
-import { createDocument, getDocument, getDocumentByQuery, updateDocument } from "../../../helpers/persistence/mongoPersistence.helper";
-import User from "../../../models/abstract/user.model";
-import DatabaseUser, { UserDocument, UserModel } from "../../../models/implementations/database/databaseUser.model";
-import UserDao from "../../abstract/user.dao";
+import { ROLE } from '../../../constants/general.constants';
+import GenericException from '../../../exceptions/generic.exception';
+import {
+    createDocument,
+    getDocument,
+    getDocumentByQuery,
+    updateDocument,
+} from '../../../helpers/persistence/mongoPersistence.helper';
+import User from '../../../models/abstract/user.model';
+import DatabaseUser, { UserDocument, UserModel } from '../../../models/implementations/database/databaseUser.model';
+import UserDao from '../../abstract/user.dao';
 
 // TODO: see if transactions matter
 export default class DatabaseUserDao extends UserDao {
@@ -14,11 +19,11 @@ export default class DatabaseUserDao extends UserDao {
             DatabaseUserDao.instance = new DatabaseUserDao();
         }
         return DatabaseUserDao.instance;
-    }
+    };
 
     // Abstract Methods Implementations
     public async create(email: string, password: string, role: ROLE): Promise<User> {
-        const newUser = await createDocument<UserDocument>(UserModel, {email, password, role});
+        const newUser = await createDocument<UserDocument>(UserModel, { email, password, role });
         return this.documentToModel(newUser);
     }
 
@@ -28,17 +33,26 @@ export default class DatabaseUserDao extends UserDao {
     }
 
     public async set(user: User): Promise<void> {
-        const maybeUpdatedUser = await updateDocument<UserDocument>(UserModel, {_id: user.id }, {email: user.email, password: user.password, role: user.role});
+        const maybeUpdatedUser = await updateDocument<UserDocument>(
+            UserModel,
+            { _id: user.id },
+            { email: user.email, password: user.password, role: user.role },
+        );
         if (!maybeUpdatedUser) throw new GenericException(this.notFoundError);
     }
 
     public async findByEmail(email: string): Promise<User | undefined> {
-        const maybeUser = await getDocumentByQuery<UserDocument>(UserModel, {email: email}, true);
+        const maybeUser = await getDocumentByQuery<UserDocument>(UserModel, { email: email }, true);
         return maybeUser ? this.documentToModel(maybeUser) : undefined;
     }
 
     // Private helper methods
     private documentToModel(userDocument: UserDocument): DatabaseUser {
-        return new DatabaseUser(userDocument.id as string, userDocument.email, userDocument.password, userDocument.role);
+        return new DatabaseUser(
+            userDocument.id as string,
+            userDocument.email,
+            userDocument.password,
+            userDocument.role,
+        );
     }
 }

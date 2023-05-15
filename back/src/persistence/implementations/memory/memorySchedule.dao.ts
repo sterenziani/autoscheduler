@@ -1,11 +1,11 @@
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import { addChildToParent } from "../../../helpers/persistence/memoryPersistence.helper";
-import Schedule from "../../../models/abstract/schedule.model";
-import MemorySchedule from "../../../models/implementations/memory/memorySchedule.model";
-import ScheduleDao from "../../abstract/schedule.dao";
-import MemoryStudentDao from "./memoryStudent.dao";
-import MemoryTermDao from "./memoryTerm.dao";
-import {v4 as uuidv4} from "uuid";
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import { addChildToParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import Schedule from '../../../models/abstract/schedule.model';
+import MemorySchedule from '../../../models/implementations/memory/memorySchedule.model';
+import ScheduleDao from '../../abstract/schedule.dao';
+import MemoryStudentDao from './memoryStudent.dao';
+import MemoryTermDao from './memoryTerm.dao';
+import { v4 as uuidv4 } from 'uuid';
 
 export default class MemoryScheduleDao extends ScheduleDao {
     private static instance: ScheduleDao;
@@ -15,7 +15,7 @@ export default class MemoryScheduleDao extends ScheduleDao {
             MemoryScheduleDao.instance = new MemoryScheduleDao();
         }
         return MemoryScheduleDao.instance;
-    }
+    };
 
     // Abstract Methods Implementations
     public async create(studentId: string, termId: string): Promise<Schedule> {
@@ -38,9 +38,8 @@ export default class MemoryScheduleDao extends ScheduleDao {
     public async set(schedule: Schedule): Promise<void> {
         await this.getById(schedule.id);
 
-        if (!(schedule instanceof MemorySchedule))
-            schedule = new MemorySchedule(schedule.id);
-        
+        if (!(schedule instanceof MemorySchedule)) schedule = new MemorySchedule(schedule.id);
+
         MEMORY_DATABASE.schedules.set(schedule.id, schedule);
     }
 }

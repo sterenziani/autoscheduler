@@ -1,14 +1,13 @@
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import { getChildsFromParent } from "../../../helpers/persistence/memoryPersistence.helper";
-import Building from "../../abstract/building.model";
-import Course from "../../abstract/course.model";
-import Program from "../../abstract/program.model";
-import Student from "../../abstract/student.model";
-import Term from "../../abstract/term.model";
-import University from "../../abstract/university.model"
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import { getChildsFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import Building from '../../abstract/building.model';
+import Course from '../../abstract/course.model';
+import Program from '../../abstract/program.model';
+import Student from '../../abstract/student.model';
+import Term from '../../abstract/term.model';
+import University from '../../abstract/university.model';
 
 export default class MemoryUniversity extends University {
-
     /////////////////// Abstract Methods Implementation ///////////////////
     public async getPrograms(): Promise<Program[]> {
         return getChildsFromParent<Program>(MEMORY_DATABASE.programsOfUniversity, MEMORY_DATABASE.programs, this.id);

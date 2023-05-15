@@ -1,5 +1,5 @@
-import { DAY } from "../../constants/time.constants";
-import Time from "./time.class";
+import { DAY } from '../../constants/time.constants';
+import Time from './time.class';
 
 export default class TimeRange {
     // Properties

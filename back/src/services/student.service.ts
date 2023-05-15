@@ -5,7 +5,7 @@ import StudentDaoFactory from '../factories/studentDao.factory';
 
 export default class StudentService {
     private static instance: StudentService;
-    
+
     private dao: StudentDao;
 
     constructor() {

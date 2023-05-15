@@ -1,7 +1,7 @@
 export default class Time {
     // Properties
-    hour: number;       // Allowed values are 0 to 23
-    minute: number;     // Allowed values are 0 to 59
+    hour: number; // Allowed values are 0 to 23
+    minute: number; // Allowed values are 0 to 59
 
     // Constructor
     constructor(hour: number, minute: number) {
@@ -22,12 +22,11 @@ export default class Time {
      * Returns positive number if this is greater than other
      * Returns negative number if this is lesser than other
      * Returns 0 if this is equal to other
-     * @param other 
+     * @param other
      */
     compareTo(other: Time): number {
         let diff = this.hour - other.hour;
-        if (diff == 0)
-            diff = this.minute - other.minute;
+        if (diff == 0) diff = this.minute - other.minute;
         return diff;
     }
 }

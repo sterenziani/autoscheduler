@@ -1,24 +1,36 @@
-import { ERRORS } from "../../../constants/error.constants";
-import { MEMORY_DATABASE } from "../../../constants/persistence/memoryPersistence.constants";
-import GenericException from "../../../exceptions/generic.exception";
-import { addChildToParent, getChildsFromParent, getChildsFromParents, getParentFromChild } from "../../../helpers/persistence/memoryPersistence.helper";
-import Course from "../../abstract/course.model";
-import Program from "../../abstract/program.model";
-import Schedule from "../../abstract/schedule.model";
-import Student from "../../abstract/student.model";
-import University from "../../abstract/university.model";
+import { ERRORS } from '../../../constants/error.constants';
+import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import GenericException from '../../../exceptions/generic.exception';
+import {
+    addChildToParent,
+    getChildsFromParent,
+    getChildsFromParents,
+    getParentFromChild,
+} from '../../../helpers/persistence/memoryPersistence.helper';
+import Course from '../../abstract/course.model';
+import Program from '../../abstract/program.model';
+import Schedule from '../../abstract/schedule.model';
+import Student from '../../abstract/student.model';
+import University from '../../abstract/university.model';
 
 export default class MemoryStudent extends Student {
-
     /////////////////// Abstract Methods Implementation ///////////////////
     public async getUniversity(): Promise<University> {
-        const maybeUniversity = getParentFromChild<University>(MEMORY_DATABASE.studentsOfUniversity, MEMORY_DATABASE.universities, this.id);
+        const maybeUniversity = getParentFromChild<University>(
+            MEMORY_DATABASE.studentsOfUniversity,
+            MEMORY_DATABASE.universities,
+            this.id,
+        );
         if (!maybeUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
         return maybeUniversity;
     }
 
     public async getProgram(): Promise<Program> {
-        const maybeProgram = getParentFromChild<Program>(MEMORY_DATABASE.studentsOfProgram, MEMORY_DATABASE.programs, this.id);
+        const maybeProgram = getParentFromChild<Program>(
+            MEMORY_DATABASE.studentsOfProgram,
+            MEMORY_DATABASE.programs,
+            this.id,
+        );
         if (!maybeProgram) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
         return maybeProgram;
     }
@@ -36,6 +48,12 @@ export default class MemoryStudent extends Student {
     }
 
     public async getSchedules(termId: string): Promise<Schedule[]> {
-        return getChildsFromParents<Schedule>(MEMORY_DATABASE.schedulesOfStudent, MEMORY_DATABASE.schedulesOfTerm, MEMORY_DATABASE.schedules, this.id, termId);
+        return getChildsFromParents<Schedule>(
+            MEMORY_DATABASE.schedulesOfStudent,
+            MEMORY_DATABASE.schedulesOfTerm,
+            MEMORY_DATABASE.schedules,
+            this.id,
+            termId,
+        );
     }
 }

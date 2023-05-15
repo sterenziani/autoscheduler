@@ -1,24 +1,27 @@
-import { ERRORS } from "../../constants/error.constants";
-import GenericException from "../../exceptions/generic.exception";
+import { ERRORS } from '../../constants/error.constants';
+import GenericException from '../../exceptions/generic.exception';
 
 // Given a Map<string, Set<string>> returns the string that has the given value in the Set<string>
 // This is not an efficient method, but we are doing this so we dont have to have reverse maps
 export const findKeyThatHoldsValueInArray = (map: Map<string, Set<string>>, value: string): string | undefined => {
     for (let [k, v] of map) {
-        if (v.has(value))
-            return k;
+        if (v.has(value)) return k;
     }
 
     return undefined;
-}
+};
 
-export const getChildsFromParent = <T>(relationshipMap: Map<string, Set<string>>, childEntityMap: Map<string, T>, parentId: string): T[] => {
+export const getChildsFromParent = <T>(
+    relationshipMap: Map<string, Set<string>>,
+    childEntityMap: Map<string, T>,
+    parentId: string,
+): T[] => {
     // We start response
     let res: T[] = [];
 
     // We get the ids from the relationshipMap
     const entityIds: Set<string> | undefined = relationshipMap.get(parentId);
-    
+
     // If there are entities, we loop over the ids and get the entities from the entityMap
     if (entityIds) {
         for (const entityId of entityIds) {
@@ -28,12 +31,18 @@ export const getChildsFromParent = <T>(relationshipMap: Map<string, Set<string>>
             res.push(entity);
         }
     }
-    
+
     return res;
-}
+};
 
 // This is similar to getChildsFromParent, except in this case we have 2 parents, so we want the children of both parents and not just one (aka the intersection of the sets)
-export const getChildsFromParents = <T>(fatherRelationshipMap: Map<string, Set<string>>, motherRelationshipMap: Map<string, Set<string>>, childEntityMap: Map<string, T>, fatherId: string, motherId: string): T[] => {
+export const getChildsFromParents = <T>(
+    fatherRelationshipMap: Map<string, Set<string>>,
+    motherRelationshipMap: Map<string, Set<string>>,
+    childEntityMap: Map<string, T>,
+    fatherId: string,
+    motherId: string,
+): T[] => {
     // We start the response
     let res: T[] = [];
 
@@ -46,7 +55,7 @@ export const getChildsFromParents = <T>(fatherRelationshipMap: Map<string, Set<s
     if (!motherEntityIds) return res;
 
     // We get the intersection
-    const entityIds: Set<string> = new Set([...fatherEntityIds].filter(v => motherEntityIds.has(v)));
+    const entityIds: Set<string> = new Set([...fatherEntityIds].filter((v) => motherEntityIds.has(v)));
 
     // Now we loop over the ids and get the entities from the entityMap
     for (const entityId of entityIds) {
@@ -57,10 +66,14 @@ export const getChildsFromParents = <T>(fatherRelationshipMap: Map<string, Set<s
     }
 
     return res;
-}
+};
 
 // TODO: think if undefined makes sense, i think it does for Courses and Programs, but idk
-export const getParentFromChild = <T>(relationshipMap: Map<string, Set<string>>, parentEntityMap: Map<string, T>, childId: string): T | undefined => {
+export const getParentFromChild = <T>(
+    relationshipMap: Map<string, Set<string>>,
+    parentEntityMap: Map<string, T>,
+    childId: string,
+): T | undefined => {
     // We get the id of the parent from the relationshipMap
     const parentId = findKeyThatHoldsValueInArray(relationshipMap, childId);
 
@@ -73,13 +86,16 @@ export const getParentFromChild = <T>(relationshipMap: Map<string, Set<string>>,
     if (!entity) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.CORRUPTED_DATABASE);
 
     return entity;
-}
+};
 
 // Adds a child to a parent, initializing set if neccesary
-export const addChildToParent = (relationshipMap: Map<string, Set<string>>, parentId: string, childId: string): void => {
+export const addChildToParent = (
+    relationshipMap: Map<string, Set<string>>,
+    parentId: string,
+    childId: string,
+): void => {
     // If this is the first time we have to initialize the array
-    if (!relationshipMap.get(parentId))
-        relationshipMap.set(parentId, new Set());
+    if (!relationshipMap.get(parentId)) relationshipMap.set(parentId, new Set());
     // Now we can safely add to the array
     relationshipMap.get(parentId)!.add(childId);
-}
+};

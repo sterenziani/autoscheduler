@@ -1,11 +1,10 @@
-import UniversityDaoFactory from "../factories/universityDao.factory";
-import University from "../models/abstract/university.model";
-import UniversityDao from "../persistence/abstract/university.dao";
-
+import UniversityDaoFactory from '../factories/universityDao.factory';
+import University from '../models/abstract/university.model';
+import UniversityDao from '../persistence/abstract/university.dao';
 
 export default class UniversityService {
     private static instance: UniversityService;
-    
+
     private dao: UniversityDao;
 
     constructor() {
