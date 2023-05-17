@@ -49,7 +49,7 @@ interface IMemoryDatabase {
     distanceBetweenBuildings: Map<string, Map<string, number>>; // buildingId -> Map<buildingId, distance>
 
     // Required courses of course relationship
-    requiredCoursesOfCourse: Map<string, Set<string>>; // courseId -> Set<courseId>
+    requiredCoursesOfCourse: Map<string, Map<string, Set<string>>>; // courseId -> programId -> Set<courseId>
 }
 
 export const MEMORY_DATABASE: IMemoryDatabase = {

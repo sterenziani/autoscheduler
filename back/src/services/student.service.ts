@@ -8,16 +8,20 @@ export default class StudentService {
 
     private dao: StudentDao;
 
-    constructor() {
-        this.dao = StudentDaoFactory.get();
-    }
-
     static getInstance = (): StudentService => {
         if (!StudentService.instance) {
             StudentService.instance = new StudentService();
         }
         return StudentService.instance;
     };
+
+    constructor() {
+        this.dao = StudentDaoFactory.get();
+    }
+
+    init() {
+        // init services if required
+    }
 
     // public methods
 

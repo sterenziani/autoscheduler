@@ -1,15 +1,17 @@
 import Course from '../models/abstract/course.model';
+import University from '../models/abstract/university.model';
+import { getUserUrl } from './user.dto';
+import { ROLE } from '../constants/general.constants';
 
-export const courseToDto = (course: Course): ICourseDto => {
-    const courseUrl = getCourseUrl(course.id);
-    const universityUrl = 'TODO';
+export const courseToDto = (course: Course, university: University): ICourseDto => {
     return {
         id: course.id,
-        url: courseUrl,
+        url: getCourseUrl(course.id),
         name: course.name,
         code: course.internalId,
-        //universityId: course.universityId, TODO: for this we can of need this method to be async and do await course.getUniversity() or pass university as parameter of the courseToDto function
-        universityUrl,
+        requirements: getCourseRequirementsUrl(course.id),
+        universityId: university.id,
+        universityUrl: getUserUrl(university.id, ROLE.UNIVERSITY),
     };
 };
 
@@ -17,11 +19,16 @@ export const getCourseUrl = (courseId: string): string => {
     return `/course/${courseId}`;
 };
 
+export const getCourseRequirementsUrl = (courseId: string): string => {
+    return `${getCourseUrl(courseId)}/requirements`;
+};
+
 interface ICourseDto {
     id: string;
     url: string;
     name: string;
     code: string;
-    //universityId: string;
+    requirements: string;
+    universityId: string;
     universityUrl: string;
 }

@@ -25,7 +25,7 @@ export class StudentRoutes {
         this.router.get('/', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getActiveStudent);
         this.router.get('/:userId', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getStudent);
         this.router.get(
-            '/:userId/courses',
+            '/:userId/completed-courses',
             userAuthMiddleware,
             studentsOnlyMiddleware,
             this.controller.getStudentApprovedCourses,

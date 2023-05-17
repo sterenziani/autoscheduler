@@ -14,6 +14,16 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_OBJECT_ID',
             message: 'Given value does not match a valid mongo ObjectId.',
         },
+        INVALID_PARAMS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_PARAMS',
+            message: 'Provided params has invalid values.',
+        },
+        INVALID_PAGING_PARAMS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_PAGING_PARAMS',
+            message: 'Page-size must be positive integer & page must be integer.',
+        },
     },
     UNAUTHORIZED: {
         GENERAL: { status: HTTP_STATUS.UNAUTHORIZED, code: 'UNAUTHORIZED', message: 'Unauthorized.' },

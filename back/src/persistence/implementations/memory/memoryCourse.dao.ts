@@ -1,10 +1,13 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import { addChildToParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import { addChildToParent, paginateCollection } from '../../../helpers/persistence/memoryPersistence.helper';
 import Course from '../../../models/abstract/course.model';
 import MemoryCourse from '../../../models/implementations/memory/memoryCourse.model';
 import CourseDao from '../../abstract/course.dao';
 import MemoryUniversityDao from './memoryUniversity.dao';
 import { v4 as uuidv4 } from 'uuid';
+import GenericException from '../../../exceptions/generic.exception';
+import { ERRORS } from '../../../constants/error.constants';
+import { PaginatedCollection } from '../../../interfaces/paging.interface';
 
 export default class MemoryCourseDao extends CourseDao {
     private static instance: CourseDao;
@@ -38,5 +41,37 @@ export default class MemoryCourseDao extends CourseDao {
         if (!(course instanceof MemoryCourse)) course = new MemoryCourse(course.id, course.internalId, course.name);
 
         MEMORY_DATABASE.courses.set(course.id, course);
+    }
+
+    public async getByText(
+        universityId: string,
+        text?: string,
+        limit?: number,
+        offset = 0,
+    ): Promise<PaginatedCollection<Course>> {
+        // limit must be either undefined or positive integer
+        if (limit && (!Number.isInteger(limit) || limit <= 0))
+            throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PAGING_PARAMS);
+        // offset must be either undefined or integer
+        if (offset && !Number.isInteger(offset)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PAGING_PARAMS);
+
+        text = text ? text.toLowerCase() : text;
+        let courses = [];
+        for (const course of MEMORY_DATABASE.courses.values()) {
+            const university = await course.getUniversity();
+            if (university.id != universityId) continue;
+            if (!text || course.name.toLowerCase().includes(text) || course.internalId.toLowerCase().includes(text)) {
+                courses.push(course);
+            }
+        }
+
+        // sorting by internalId
+        const compareCourses = (c1: Course, c2: Course) => {
+            if (c1.internalId < c2.internalId) return -1;
+            if (c1.internalId > c2.internalId) return 1;
+            return 0;
+        };
+
+        return paginateCollection(courses, compareCourses, limit, offset);
     }
 }

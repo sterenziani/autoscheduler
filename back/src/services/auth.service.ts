@@ -9,7 +9,7 @@ import User from '../models/abstract/user.model';
 
 export default class UserAuthService {
     private static instance: UserAuthService;
-    private userService: UserService;
+    private userService!: UserService;
     private readonly jwtKey: string;
     private readonly jwtPublicKey: string;
     private readonly expireTime: string;
@@ -22,10 +22,13 @@ export default class UserAuthService {
     };
 
     private constructor() {
-        this.userService = UserService.getInstance();
         this.jwtKey = process.env.AUTH_TOKEN_KEY!;
         this.jwtPublicKey = process.env.AUTH_TOKEN_PUB_KEY!;
         this.expireTime = process.env.AUTH_TOKEN_EXPIRE_TIME ?? DEFAULT_AUTH_TOKEN_EXPIRE_TIME;
+    }
+
+    init() {
+        this.userService = UserService.getInstance();
     }
 
     // PUBLIC METHODS

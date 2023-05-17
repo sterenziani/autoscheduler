@@ -2,8 +2,8 @@ import { ERRORS } from '../../../constants/error.constants';
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
 import GenericException from '../../../exceptions/generic.exception';
 import {
-    addChildToParent,
-    getChildsFromParent,
+    addGrandchildToParent,
+    getGrandchildsFromParent,
     getChildsFromParents,
     getParentFromChild,
 } from '../../../helpers/persistence/memoryPersistence.helper';
@@ -13,12 +13,17 @@ import University from '../../abstract/university.model';
 
 export default class MemoryCourse extends Course {
     /////////////////// Abstract Methods Implementation ///////////////////
-    public async setRequiredCourse(courseId: string): Promise<void> {
-        addChildToParent(MEMORY_DATABASE.requiredCoursesOfCourse, this.id, courseId);
+    public async setRequiredCourse(programId: string, courseId: string): Promise<void> {
+        addGrandchildToParent(MEMORY_DATABASE.requiredCoursesOfCourse, this.id, programId, courseId);
     }
 
-    public async getRequiredCourses(): Promise<Course[]> {
-        return getChildsFromParent<Course>(MEMORY_DATABASE.requiredCoursesOfCourse, MEMORY_DATABASE.courses, this.id);
+    public async getRequiredCourses(programId: string): Promise<Course[]> {
+        return getGrandchildsFromParent<Course>(
+            MEMORY_DATABASE.requiredCoursesOfCourse,
+            MEMORY_DATABASE.courses,
+            this.id,
+            programId,
+        );
     }
 
     // I know this is inefficient but i don't see the point of making it better when memory database is just for testing

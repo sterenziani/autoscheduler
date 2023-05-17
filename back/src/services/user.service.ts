@@ -7,16 +7,20 @@ export default class UserService {
 
     private dao: UserDao;
 
-    constructor() {
-        this.dao = UserDaoFactory.get();
-    }
-
     static getInstance = (): UserService => {
         if (!UserService.instance) {
             UserService.instance = new UserService();
         }
         return UserService.instance;
     };
+
+    constructor() {
+        this.dao = UserDaoFactory.get();
+    }
+
+    init() {
+        // init services if required
+    }
 
     // public methods
     async getUser(id: string): Promise<User> {

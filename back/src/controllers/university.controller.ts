@@ -23,7 +23,7 @@ export class UniversityController {
     }
 
     public getActiveUniversity: RequestHandler = async (req, res) => {
-        res.redirect(UserDto.getUrl(req.user.id, ROLE.UNIVERSITY));
+        res.redirect(UserDto.getUserUrl(req.user.id, ROLE.UNIVERSITY));
     };
 
     public getUniversity: RequestHandler = async (req, res, next) => {
@@ -35,7 +35,7 @@ export class UniversityController {
         try {
             const user: User = await this.userService.getUser(userId);
             const university: University = await this.universityService.getUniversity(userId);
-            res.status(HTTP_STATUS.OK).send(UniversityDto.toDto(user, university));
+            res.status(HTTP_STATUS.OK).send(UniversityDto.universityToDto(user, university));
         } catch (e) {
             next(e);
         }

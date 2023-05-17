@@ -1,14 +1,18 @@
 import CourseDaoFactory from '../factories/courseDao.factory';
 import CourseDao from '../persistence/abstract/course.dao';
+import Course from '../models/abstract/course.model';
+import ProgramService from './program.service';
+import UniversityService from './university.service';
+import GenericException from '../exceptions/generic.exception';
+import { ERRORS } from '../constants/error.constants';
+import { PaginatedCollection } from '../interfaces/paging.interface';
 
 export default class CourseService {
     private static instance: CourseService;
+    private programService!: ProgramService;
+    private universityService!: UniversityService;
 
     private dao: CourseDao;
-
-    constructor() {
-        this.dao = CourseDaoFactory.get();
-    }
 
     static getInstance = (): CourseService => {
         if (!CourseService.instance) {
@@ -17,5 +21,52 @@ export default class CourseService {
         return CourseService.instance;
     };
 
+    constructor() {
+        this.dao = CourseDaoFactory.get();
+    }
+
+    init() {
+        this.programService = ProgramService.getInstance();
+        this.universityService = UniversityService.getInstance();
+    }
+
     // public methods
+
+    async getCourse(id: string): Promise<Course> {
+        return await this.dao.getById(id);
+    }
+
+    async createCourse(
+        universityId: string,
+        name: string,
+        internalId: string,
+        requiredCourses: { [programId: string]: string[] },
+    ): Promise<Course> {
+        // validate existence of university & programId
+        await this.universityService.getUniversity(universityId);
+        await Promise.all(
+            Object.keys(requiredCourses).map(async (pId) => {
+                const program = await this.programService.getProgram(pId);
+                const university = await program.getUniversity();
+                if (university.id != universityId) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
+            }),
+        );
+
+        const course: Course = await this.dao.create(name, internalId, universityId);
+        for (const programId of Object.keys(requiredCourses)) {
+            for (const courseId of requiredCourses[programId]) {
+                await course.setRequiredCourse(programId, courseId);
+            }
+        }
+        return course;
+    }
+
+    async getCoursesByText(
+        universityId: string,
+        text: string,
+        limit?: number,
+        offset?: number,
+    ): Promise<PaginatedCollection<Course>> {
+        return await this.dao.getByText(universityId, text, limit, offset);
+    }
 }
