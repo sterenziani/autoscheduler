@@ -48,11 +48,11 @@ class App {
     }
 
     private setRoutes() {
-        this.app.use('/', new HomeRoutes().router);
-        this.app.use('/course', new CourseRoutes().router);
-        this.app.use('/program', new ProgramRoutes().router);
-        this.app.use('/student', new StudentRoutes().router);
-        this.app.use('/university', new UniversityRoutes().router);
+        this.app.use('/api/', new HomeRoutes().router);
+        this.app.use('/api/course', new CourseRoutes().router);
+        this.app.use('/api/program', new ProgramRoutes().router);
+        this.app.use('/api/student', new StudentRoutes().router);
+        this.app.use('/api/university', new UniversityRoutes().router);
     }
 }
 
