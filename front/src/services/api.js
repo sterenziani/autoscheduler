@@ -1,7 +1,7 @@
-import { create } from 'axios';
+import axios from 'axios';
 import AuthService from './AuthService'
 
-const api = create({
+const api = axios.create({
     baseURL : process.env.REACT_APP_API_URL,
     timeout : 10000
 })
