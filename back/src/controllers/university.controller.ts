@@ -9,7 +9,7 @@ import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
 import { ROLE } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
-import User from '../models/abstract/user.model';
+import { getUserUrl } from '../dtos/user.dto';
 
 export class UniversityController {
     private courseService: CourseService;
@@ -28,14 +28,23 @@ export class UniversityController {
 
     public getUniversity: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
-        const userInfo = req.user;
-
-        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
         try {
-            const user: User = await this.userService.getUser(userId);
             const university: University = await this.universityService.getUniversity(userId);
-            res.status(HTTP_STATUS.OK).send(UniversityDto.universityToDto(user, university));
+            res.status(HTTP_STATUS.OK).send(UniversityDto.universityToDto(university));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public createUniversity: RequestHandler = async (req, res, next) => {
+        const email = req.body.email as string;
+        const password = req.body.password as string;
+        const name = req.body.name as string;
+
+        try {
+            const university: University = await this.universityService.createUniversity(email, password, name);
+            res.status(HTTP_STATUS.CREATED).location(getUserUrl(university.id, ROLE.UNIVERSITY)).send();
         } catch (e) {
             next(e);
         }

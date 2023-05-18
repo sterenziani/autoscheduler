@@ -23,6 +23,7 @@ export class UniversityRoutes {
         this.router.use(cors());
 
         this.router.get('/', userAuthMiddleware, universitiesOnlyMiddleware, this.controller.getActiveUniversity);
-        this.router.get('/:userId', userAuthMiddleware, universitiesOnlyMiddleware, this.controller.getUniversity);
+        this.router.post('/', this.controller.createUniversity);
+        this.router.get('/:userId', this.controller.getUniversity);
     }
 }

@@ -1,9 +1,8 @@
 import Student from '../models/abstract/student.model';
-import User from '../models/abstract/user.model';
 import * as UserDto from './user.dto';
 
-export const studentToDto = (user: User, student: Student): IStudentDto => {
-    const userDto: UserDto.IUserDto = UserDto.userToDto(user);
+export const studentToDto = (student: Student): IStudentDto => {
+    const userDto: UserDto.IUserDto = UserDto.userToDto(student);
     return {
         ...userDto,
         approvedCoursesUrl: `${userDto.url}/completed-courses`,

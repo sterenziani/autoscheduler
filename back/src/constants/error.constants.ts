@@ -14,6 +14,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_OBJECT_ID',
             message: 'Given value does not match a valid mongo ObjectId.',
         },
+        INVALID_PASSWORD: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_PASSWORD',
+            message: 'Provided password is invalid.',
+        },
         INVALID_PARAMS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_PARAMS',
@@ -23,6 +28,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_PAGING_PARAMS',
             message: 'Page-size must be positive integer & page must be integer.',
+        },
+        USER_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'USER_ALREADY_EXISTS',
+            message: 'An user with provided params already exists.',
         },
     },
     UNAUTHORIZED: {

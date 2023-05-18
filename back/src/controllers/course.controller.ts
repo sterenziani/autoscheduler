@@ -32,7 +32,7 @@ export class CourseController {
 
         try {
             const course: Course = await this.courseService.createCourse(userInfo.id, name, internalId, requirements);
-            res.status(HTTP_STATUS.CREATED).location(CourseDto.getCourseUrl(course.id));
+            res.status(HTTP_STATUS.CREATED).location(CourseDto.getCourseUrl(course.id)).send();
         } catch (e) {
             next(e);
         }

@@ -1,12 +1,11 @@
 import University from '../models/abstract/university.model';
-import User from '../models/abstract/user.model';
 import * as UserDto from './user.dto';
 import { ROLE } from '../constants/general.constants';
 import { getUserUrl } from './user.dto';
 import { queryParamsStringBuilder } from '../helpers/url.helper';
 
-export const universityToDto = (user: User, university: University): IUniversityDto => {
-    const userDto: UserDto.IUserDto = UserDto.userToDto(user);
+export const universityToDto = (university: University): IUniversityDto => {
+    const userDto: UserDto.IUserDto = UserDto.userToDto(university);
     return {
         ...userDto,
         name: university.name,
