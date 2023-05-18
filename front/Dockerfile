@@ -3,15 +3,13 @@ FROM node:hydrogen-alpine3.17
 # Label creator of Dockerfile
 LABEL maintainer="crojas@itba.edu.ar"
 
-# Create a user, group and workdir to avoid using root
-RUN groupadd -g 999 node \
-    && useradd -r -u 999 -g node node \
-    && mkdir -p /usr/app \
+# Node image has user and group node already so we don't have to create it. We just create working dir and change owner
+RUN mkdir -p /usr/app \
     && chown -R node:node /usr/app
 
 # Move to folder and change user
 WORKDIR /usr/app
-USER 999
+USER node
 
 # Copy package*.json and install dependencies from lock (To better use docker cache)
 COPY --chown=node:node package*.json ./

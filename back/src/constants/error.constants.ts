@@ -78,6 +78,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
     },
     INTERNAL_SERVER_ERROR: {
         GENERAL: { status: HTTP_STATUS.SERVER_ERROR, code: 'INTERNAL_SERVER_ERROR', message: 'Internal Server Error.' },
+        DATABASE_CONNECTION: { status: HTTP_STATUS.SERVER_ERROR, code: 'DATABASE_CONNECTION', message: 'Failed to connect to database'},
         CORRUPTED_DATABASE: {
             status: HTTP_STATUS.SERVER_ERROR,
             code: 'CORRUPTED_DATABASE',

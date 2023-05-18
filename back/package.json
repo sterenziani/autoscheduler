@@ -45,6 +45,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.1.1",
     "mongoose-lean-virtuals": "^0.9.1",
+    "neo4j-driver": "^5.8.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
