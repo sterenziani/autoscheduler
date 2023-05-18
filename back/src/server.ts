@@ -4,8 +4,8 @@ import app from './app';
 const server = http.createServer(app);
 
 const start = async () => {
-    server.listen(process.env.PORT, () =>
-        console.log(`[Initialization] server up and running in port ${process.env.PORT}`),
+    server.listen(3000, () =>
+        console.log(`[Initialization] server up and running in port 3000`),
     );
 };
 
