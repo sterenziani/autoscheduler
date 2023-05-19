@@ -23,7 +23,7 @@ const SignUpSchema = Yup.object().shape({
     repeat_password: Yup.string()
         .when('password', (password, schema) => {
             return schema.test({
-                test: (repeat_password) => !!password && repeat_password === password,
+                test: (repeat_password) => !!password && repeat_password == password,
                 message: 'register.errors.repeatPassword.passwordsMismatch',
             });
         })

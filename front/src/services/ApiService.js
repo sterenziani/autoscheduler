@@ -4,29 +4,6 @@ import api from './api'
 import AuthService from './AuthService'
 const RESOLVE_DELAY = 250;
 
-/*
-const getUsers = () =>
-  new Promise((resolve, reject) => {
-    if (!users) {
-      return setTimeout(() => reject(new Error('Users not found')), 2); // wait for RESOLVE_DELAYms
-    }
-    setTimeout(() => resolve(Object.values(users)), RESOLVE_DELAY);
-  });
-
-const getUser = (id) =>
-  new Promise((resolve, reject) => {
-    const user = users[id];
-
-    if (!user) {
-      return setTimeout(
-        () => reject(new Error('User not found')),
-        RESOLVE_DELAY
-      );
-    }
-    setTimeout(() => resolve(users[id]), RESOLVE_DELAY);
-  });
-  */
-
 // En package.json se cambia "proxy" por la dirección y puerto donde esté corriendo la API
 const getGames = async () => {
     try {
@@ -76,39 +53,12 @@ const getSchedules = async (params) => {
 }
 */
 
-// TEMPORARY FIX FOR PROTOTYPE
 const registerStudent = async (email, password, universityId, programId) => {
-    try {
-        const newUser = {
-            type: 'STUDENT',
-            email: email,
-            password: password,
-            university: universityId,
-            program: programId,
-        };
-        //const registerEndpoint = endpoint + '/register';
-        //const response = await api.post(registerEndpoint, newUser, { headers: {contentType : "application/json"} });
-        return { status: CREATED }; //response.status }
-    } catch (e) {
-        if (e.response) {
-            if (e.response.status === CONFLICT) return { status: CONFLICT, conflicts: e.response.data };
-            return { status: e.response.status };
-        } else return { status: TIMEOUT };
-    }
+    return AuthService.signUpStudent(email, password, universityId, programId)
 };
 
 const registerUniversity = async (email, password, name) => {
-    try {
-        const newUser = { type: 'UNIVERSITY', email: email, password: password, name: name };
-        //const registerEndpoint = endpoint + '/register';
-        //const response = await api.post(registerEndpoint, newUser, { headers: {contentType : "application/json"} });
-        return { status: CREATED }; //response.status }
-    } catch (e) {
-        if (e.response) {
-            if (e.response.status === CONFLICT) return { status: CONFLICT, conflicts: e.response.data };
-            return { status: e.response.status };
-        } else return { status: TIMEOUT };
-    }
+    return AuthService.signUpUniversity(email, password, name)
 };
 
 const login = async (username, password) => {

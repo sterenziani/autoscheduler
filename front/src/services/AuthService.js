@@ -1,5 +1,5 @@
 import api from './api';
-import { OK, BAD_REQUEST, TIMEOUT } from './ApiConstants';
+import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, CREATED } from './ApiConstants';
 
 const TokenStore = {
     setToken: token => localStorage.setItem('token', token),
@@ -47,6 +47,7 @@ const deleteExp = () => {
 }
 
 const logInEndpoint = '/';
+const signUpUniversityEndpoint = '/university';
 
 const logIn = async (email, password) => {
     try {
@@ -60,6 +61,8 @@ const logIn = async (email, password) => {
         if(response.status === BAD_REQUEST)
             return { status: BAD_REQUEST }
         token = response.headers.authorization
+        if (!token)
+            return { status: NOT_FOUND }
         TokenStore.setToken(token)
 
         let expirationDate = new Date(0)
@@ -69,6 +72,53 @@ const logIn = async (email, password) => {
         const userData = await api.get('student/'+parseUserFromJwt(token).id, { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+token}})
         UserStore.setUser(userData.data)
         return { status: OK }
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const signUpStudent = async (email, password, universityId, programId) => {
+    try {
+        const payload = {
+            'email': email,
+            'password': password,
+            "universityId": universityId,
+            "programId": programId,
+            "internalId": "58717",
+            "name": "Crostian Jasmin"
+        }
+        const response = await api.post(signUpUniversityEndpoint, payload, {
+            headers : {'Content-Type' : 'application/json'}
+        })
+        if(response.status === BAD_REQUEST)
+            return { status: BAD_REQUEST }
+        return { status: CREATED }
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const signUpUniversity = async (email, password, name) => {
+    try {
+        const payload = {
+            'email': email,
+            'password': password,
+            'name': name,
+        }
+        const response = await api.post(signUpUniversityEndpoint, payload, {
+            headers : {'Content-Type' : 'application/json'}
+        })
+        if(response.status === BAD_REQUEST)
+            return { status: BAD_REQUEST }
+        return { status: CREATED }
     }
     catch(e) {
         if (e.response)
@@ -143,6 +193,8 @@ const logOutIfExpiredJwt = async () => {
 const AuthService   = {
     logIn          : logIn,
     logInWithStore : logInWithStore,
+    signUpStudent  : signUpStudent,
+    signUpUniversity: signUpUniversity,
     logOut         : logOut,
     getUserStore   : getUserStore,
     getToken       : getToken,
