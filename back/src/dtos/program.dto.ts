@@ -18,7 +18,7 @@ export const programToDto = (program: Program, university: University): IProgram
 };
 
 export const getProgramUrl = (programId: string): string => {
-    return `/program/${programId}`;
+    return `api/program/${programId}`;
 };
 
 export const getProgramMandatoryCoursesUrl = (programId: string, page?: number, pageSize?: number): string => {

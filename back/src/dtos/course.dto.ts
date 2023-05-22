@@ -16,7 +16,7 @@ export const courseToDto = (course: Course, university: University): ICourseDto 
 };
 
 export const getCourseUrl = (courseId: string): string => {
-    return `/course/${courseId}`;
+    return `api/course/${courseId}`;
 };
 
 export const getCourseRequirementsUrl = (courseId: string): string => {
