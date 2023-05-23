@@ -21,6 +21,8 @@ services:
 
   front:
     build: ./front
+    env_file:
+      - ./front/.env
     ports:
       - '8080:3000'
     networks:
