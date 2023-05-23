@@ -5,13 +5,16 @@ import { ERRORS } from '../../constants/error.constants';
 export const initializeMongoConnection = async (): Promise<void> => {
     // Mongo connection
     mongoose.Promise = global.Promise;
-    await mongoose.connect(`mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}`, {
-        dbName: process.env.MONGO_DB,
-        connectTimeoutMS: 10000,
-        socketTimeoutMS: 45000
-    });
+    await mongoose.connect(
+        `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}`,
+        {
+            dbName: process.env.MONGO_DB,
+            connectTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+        },
+    );
     return;
-}
+};
 
 export const validateObjectId = (maybeId: string): void => {
     if (!mongoose.Types.ObjectId.isValid(maybeId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_OBJECT_ID);

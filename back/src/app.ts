@@ -13,8 +13,8 @@ import ProgramService from './services/program.service';
 import StudentService from './services/student.service';
 import UniversityService from './services/university.service';
 import UserService from './services/user.service';
-import {initializeMongoConnection} from "./helpers/persistence/mongoPersistence.helper";
-import {initializeGraphConnection} from "./helpers/persistence/graphPersistence.helper";
+import { initializeMongoConnection } from './helpers/persistence/mongoPersistence.helper';
+import { initializeGraphConnection } from './helpers/persistence/graphPersistence.helper';
 
 class App {
     public app: Application;
@@ -41,11 +41,11 @@ class App {
         // Mongo connection
         initializeMongoConnection()
             .then(() => console.log(`[Initialization] Connected to MongoDB`))
-            .catch(err => console.log(JSON.stringify(err)));
+            .catch((err) => console.log(JSON.stringify(err)));
         // Neo4j connection
         initializeGraphConnection()
             .then(() => console.log(`[Initialization] Connected to Graph Database`))
-            .catch(err => console.log(JSON.stringify(err)));
+            .catch((err) => console.log(JSON.stringify(err)));
     }
 
     // avoids cyclic dependencies on constructor methods

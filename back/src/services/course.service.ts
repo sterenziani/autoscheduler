@@ -52,6 +52,7 @@ export default class CourseService {
             }),
         );
 
+        // TODO add session logic for transactional operations
         const course: Course = await this.dao.create(name, internalId, universityId);
         for (const programId of Object.keys(requiredCourses)) {
             for (const courseId of requiredCourses[programId]) {
