@@ -29,6 +29,16 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_PAGING_PARAMS',
             message: 'Page-size must be positive integer & page must be integer.',
         },
+        COURSE_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_EXISTS',
+            message: 'A course with provided internalId already exists.',
+        },
+        PROGRAM_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'PROGRAM_ALREADY_EXISTS',
+            message: 'A program with provided internalId already exists.',
+        },
         USER_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'USER_ALREADY_EXISTS',

@@ -33,6 +33,19 @@ export default class MemoryProgramDao extends ProgramDao {
         return MEMORY_DATABASE.programs.get(id);
     }
 
+    public async findByInternalId(universityId: string, internalId: string): Promise<Program | undefined> {
+        // find programs with matching internalId
+        const programsWithMatchingInternalId: Program[] = Array.from(MEMORY_DATABASE.programs.values()).filter(
+            (p) => p.internalId == internalId,
+        );
+        // find university with matching obtained id
+        for (const program of programsWithMatchingInternalId) {
+            const university = await program.getUniversity();
+            if (university.id == universityId) return program;
+        }
+        return undefined;
+    }
+
     public async set(program: Program): Promise<void> {
         await this.getById(program.id);
 

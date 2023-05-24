@@ -51,6 +51,9 @@ export default class CourseService {
                 if (university.id != universityId) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
             }),
         );
+        // check if a course with internalId already exists
+        if (await this.dao.findByInternalId(universityId, internalId))
+            throw new GenericException(ERRORS.BAD_REQUEST.COURSE_ALREADY_EXISTS);
 
         // TODO add session logic for transactional operations
         const course: Course = await this.dao.create(name, internalId, universityId);

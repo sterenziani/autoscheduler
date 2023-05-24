@@ -35,6 +35,19 @@ export default class MemoryCourseDao extends CourseDao {
         return MEMORY_DATABASE.courses.get(id);
     }
 
+    public async findByInternalId(universityId: string, internalId: string): Promise<Course | undefined> {
+        // find courses with matching internalId
+        const coursesWithMatchingInternalId: Course[] = Array.from(MEMORY_DATABASE.courses.values()).filter(
+            (c) => c.internalId == internalId,
+        );
+        // find university with matching obtained id
+        for (const course of coursesWithMatchingInternalId) {
+            const university = await course.getUniversity();
+            if (university.id == universityId) return course;
+        }
+        return undefined;
+    }
+
     public async set(course: Course): Promise<void> {
         await this.getById(course.id);
 

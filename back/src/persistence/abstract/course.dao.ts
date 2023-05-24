@@ -11,6 +11,7 @@ export default abstract class CourseDao extends GenericDao<Course> {
 
     // Abstract Methods
     public abstract create(universityId: string, internalId: string, name: string): Promise<Course>;
+    public abstract findByInternalId(universityId: string, internalId: string): Promise<Course | undefined>;
     public abstract getByText(
         universityId: string,
         text: string,

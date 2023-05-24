@@ -29,7 +29,7 @@ export class ProgramController {
         const name = req.body.name as string;
         const internalId = req.body.internalId as string;
         const mandatoryCourses = req.body.mandatoryCourses as string[] | undefined;
-        const optionalCourses = req.body.mandatoryCourses as string[] | undefined;
+        const optionalCourses = req.body.optionalCourses as string[] | undefined;
 
         try {
             const program: Program = await this.programService.createProgram(
@@ -39,7 +39,7 @@ export class ProgramController {
                 mandatoryCourses,
                 optionalCourses,
             );
-            res.status(HTTP_STATUS.CREATED).location(ProgramDto.getProgramUrl(program.id));
+            res.status(HTTP_STATUS.CREATED).location(ProgramDto.getProgramUrl(program.id)).send();
         } catch (e) {
             next(e);
         }
