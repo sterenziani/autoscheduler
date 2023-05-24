@@ -171,7 +171,7 @@ function SearchResults(props) {
 
     if(!user)
         return <React.Fragment/>
-    if(user.type !== Roles.STUDENT)
+    if(user.role !== Roles.STUDENT)
         return <NoAccess/>
     if (loading === true) {
         return (

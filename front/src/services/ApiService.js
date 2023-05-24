@@ -80,9 +80,11 @@ const requestPasswordChangeToken = async (username) => {
 };
 
 const getActiveUser = () => {
+    return AuthService.getUserStore()
+    /*
     const student = {
         id: 1,
-        type: 'STUDENT',
+        role: 'STUDENT',
         email: 'student@itba.edu.ar',
         name: '1C',
         university: { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
@@ -90,30 +92,12 @@ const getActiveUser = () => {
     };
     const university = {
         id: 9,
-        type: 'UNIVERSITY',
+        role: 'UNIVERSITY',
         email: 'rector@itba.edu.ar',
         name: 'Instituto Tecnológico de Buenos Aires',
         verified: false
     };
-    const userStore = AuthService.getUserStore()
-    let activeUser = null
-    if(userStore){
-        activeUser = {
-            id: userStore.id,
-            type: userStore.role,
-            email: userStore.email,
-            name: userStore.name,
-            university: userStore.university,
-            program: userStore.program,
-            verified: userStore.verified
-        }
-    }
-    else
-        return null
-    // return activeUser
-    if(userStore.id === "segundo")
-        return university
-    return student
+    */
 }
 
 const getSchedules = (params) =>
@@ -125,6 +109,21 @@ const getSchedules = (params) =>
         setTimeout(() => resolve(schedules), RESOLVE_DELAY);
     });
 
+const getUniversities = async (inputText) => {
+    try {
+        const endpoint = "/university?inputText="+inputText
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+/*
 const getUniversities = async (inputText) =>
     new Promise((resolve, reject) => {
         const schools = [
@@ -156,6 +155,7 @@ const getUniversities = async (inputText) =>
             setTimeout(() => resolve(resp), RESOLVE_DELAY)
         }
     });
+*/
 
 const getCourse = (courseId) =>
     new Promise((resolve, reject) => {
@@ -237,7 +237,7 @@ const getPrograms = async (universityId, inputText) =>
 
 const getProgramsPage = async (universityId, page) =>
     new Promise((resolve, reject) => {
-        const programs = SgaConstants.programs[universityId];
+        const programs = SgaConstants.programs[9];
         if(page==1)
             setTimeout(() => resolve([programs[0], programs[1]]), RESOLVE_DELAY);
         else if(page==2)
@@ -250,7 +250,7 @@ const getCourses = async (universityId, inputText) =>
     new Promise((resolve, reject) => {
         const courses = SgaConstants.courses;
         if(!inputText)
-            setTimeout(() => resolve(courses[universityId]), RESOLVE_DELAY);
+            setTimeout(() => resolve(courses[9]), RESOLVE_DELAY);
         else{
             const resp = courses[universityId].filter((c) => c.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
             setTimeout(() => resolve(resp), RESOLVE_DELAY)
@@ -260,7 +260,7 @@ const getCourses = async (universityId, inputText) =>
 const getCoursesPage = async (universityId, page) =>
     new Promise((resolve, reject) => {
         const courses = SgaConstants.courses;
-        let full = courses[universityId]
+        let full = courses[9]
         if(page==1)
             setTimeout(() => resolve([full[0], full[1], full[2], full[3], full[4]]), RESOLVE_DELAY);
         else if(page==2)
@@ -286,7 +286,7 @@ const getTerms = async (universityId, page) =>
 
 const getBuildings = (universityId, page) =>
     new Promise((resolve, reject) => {
-        const buildings = SgaConstants.buildings[universityId];
+        const buildings = SgaConstants.buildings[9];
         if(!page)
             setTimeout(() => resolve(buildings), RESOLVE_DELAY);
         else{
@@ -449,15 +449,38 @@ const saveCourse = async (id, name, internalId, requirements) => {
 
 const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCourses) => {
     try {
+        const payload = {
+            'id': id,
+            'name': name,
+            'internalId': internalId,
+            "mandatoryCourses": mandatoryCourses,
+            "optionalCourses": optionalCourses,
+        }
         if(id){
             return { status: OK };
         }
         else{
-            return { status: CREATED };
+            return createProgram(payload)
         }
     } catch (e) {
         if (e.response) return { status: e.response.status };
         else return { status: TIMEOUT };
+    }
+}
+
+const createProgram = async (payload) => {
+    try {
+        const response = await api.post("/program", payload, AuthService.getRequestHeaders())
+        const id = response.headers.location.split('/')[1]
+        return { status: CREATED, id: id }
+    }
+    catch(e) {
+        if (e.response){
+            console.log(e.response)
+            return { status: e.response.status, data: e.response.data}
+        }
+        else
+            return { status: TIMEOUT }
     }
 }
 

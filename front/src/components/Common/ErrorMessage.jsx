@@ -5,19 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 
-function NoAccess(props){
+function ErrorMessage(props){
     const { t } = useTranslation()
-    const message = props.message
-    const status = props.status
 
     return <div className="m-5">
-        <Alert variant="primary" className="text-center">
-            { !status && <FontAwesomeIcon className="mb-3" size="3x" icon={faCircleExclamation}/> }
-            { status && <Alert.Heading>{status}</Alert.Heading> }
-            <Alert.Heading>{status}</Alert.Heading>
-            <p>{t(message)}</p>
+        <Alert variant="danger" className="text-center">
+            <FontAwesomeIcon className="mb-3" size="3x" icon={faCircleExclamation}/>
+            <Alert.Heading>ERROR {props.status}</Alert.Heading>
+            <p>{t(props.message)}</p>
+            <LinkButton variant="primary" textKey="goHome" href="/"/>
         </Alert>
     </div>
 }
 
-export default NoAccess;
+export default ErrorMessage;
