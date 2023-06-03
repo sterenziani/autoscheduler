@@ -15,16 +15,39 @@ export const universityToDto = (university: University): IUniversityDto => {
 
 export const getUniversityCoursesUrl = (
     universityId: string,
-    text?: string,
+    filter?: string,
     page?: number,
-    pageSize?: number,
+    perPage?: number,
 ): string => {
     const params = {
-        filter: text,
+        filter,
         page: page ? page.toString() : undefined,
-        pageSize: pageSize ? pageSize.toString() : undefined,
+        per_page: perPage ? perPage.toString() : undefined,
     };
-    return `${getUserUrl(universityId, ROLE.UNIVERSITY)}/courses${queryParamsStringBuilder(params)}`;
+    return queryParamsStringBuilder(`${getUserUrl(universityId, ROLE.UNIVERSITY)}/courses`, params);
+};
+
+export const getUniversityProgramsUrl = (
+    universityId: string,
+    filter?: string,
+    page?: number,
+    perPage?: number,
+): string => {
+    const params = {
+        filter,
+        page: page ? page.toString() : undefined,
+        per_page: perPage ? perPage.toString() : undefined,
+    };
+    return queryParamsStringBuilder(`${getUserUrl(universityId, ROLE.UNIVERSITY)}/programs`, params);
+};
+
+export const getUniversitiesUrl = (filter?: string, page?: number, perPage?: number): string => {
+    const params = {
+        filter,
+        page: page ? page.toString() : undefined,
+        per_page: perPage ? perPage.toString() : undefined,
+    };
+    return queryParamsStringBuilder('universities', params);
 };
 
 type IUniversityDto = UserDto.IUserDto & {

@@ -18,7 +18,7 @@ export class CourseController {
         try {
             const course: Course = await this.courseService.getCourse(courseId);
             const university: University = await course.getUniversity();
-            res.status(HTTP_STATUS.OK).send(CourseDto.courseToDto(course, university));
+            res.status(HTTP_STATUS.OK).send(CourseDto.courseToDto(course, university.id));
         } catch (e) {
             next(e);
         }

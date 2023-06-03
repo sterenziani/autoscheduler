@@ -1,6 +1,7 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { PaginatedCollection, PagingInfo } from '../../interfaces/paging.interface';
+import { DEFAULT_PAGE_SIZE } from '../../constants/paging.constants';
 
 // Given a Map<string, Set<string>> returns the string that has the given value in the Set<string>
 // This is not an efficient method, but we are doing this so we dont have to have reverse maps
@@ -144,24 +145,23 @@ export const paginateCollection = <T>(
     collection: T[],
     compareTo: (a: T, b: T) => number,
     limit?: number,
-    offset = 0,
+    offset?: number,
 ): PaginatedCollection<T> => {
     // building pagingInfo
-    const lastPage = limit ? Math.ceil(collection.length / limit) : 0;
-    offset = lastPage > 0 ? (offset + lastPage + 1) % (lastPage + 1) : 0;
+    limit = limit || DEFAULT_PAGE_SIZE;
+    const lastPage = Math.floor(collection.length / limit);
+    offset = offset ? (lastPage > 0 ? (offset + lastPage + 1) % (lastPage + 1) : 0) : 0;
     const pagingInfo: PagingInfo = {
         first: 0,
         last: lastPage,
     };
-    if (offset - 1 < pagingInfo.first) pagingInfo.prev = offset - 1;
+    if (offset - 1 > pagingInfo.first) pagingInfo.prev = offset - 1;
     if (offset + 1 < pagingInfo.last) pagingInfo.next = offset + 1;
 
     if (collection.length <= 0) return { collection, pagingInfo };
     let newCollection = collection.sort(compareTo);
-    if (limit) {
-        const firstIndex = (offset * limit + newCollection.length) % newCollection.length;
-        const lastIndex = firstIndex + limit;
-        newCollection = newCollection.slice(firstIndex, lastIndex);
-    }
+    const firstIndex = (offset * limit + newCollection.length) % newCollection.length;
+    const lastIndex = firstIndex + limit;
+    newCollection = newCollection.slice(firstIndex, lastIndex);
     return { collection: newCollection, pagingInfo };
 };

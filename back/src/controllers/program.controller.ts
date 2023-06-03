@@ -18,7 +18,7 @@ export class ProgramController {
         try {
             const program: Program = await this.programService.getProgram(programId);
             const university: University = await program.getUniversity();
-            res.status(HTTP_STATUS.OK).send(ProgramDto.programToDto(program, university));
+            res.status(HTTP_STATUS.OK).send(ProgramDto.programToDto(program, university.id));
         } catch (e) {
             next(e);
         }

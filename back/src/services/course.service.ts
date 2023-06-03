@@ -67,7 +67,7 @@ export default class CourseService {
 
     async getCoursesByText(
         universityId: string,
-        text: string,
+        text?: string,
         limit?: number,
         offset?: number,
     ): Promise<PaginatedCollection<Course>> {

@@ -14,7 +14,7 @@ export default abstract class CourseDao extends GenericDao<Course> {
     public abstract findByInternalId(universityId: string, internalId: string): Promise<Course | undefined>;
     public abstract getByText(
         universityId: string,
-        text: string,
+        text?: string,
         limit?: number,
         offset?: number,
     ): Promise<PaginatedCollection<Course>>;

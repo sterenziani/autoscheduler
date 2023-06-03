@@ -44,6 +44,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'USER_ALREADY_EXISTS',
             message: 'An user with provided params already exists.',
         },
+        UNIVERSITY_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'UNIVERSITY_ALREADY_EXISTS',
+            message: 'An university with provided params already exists.',
+        },
     },
     UNAUTHORIZED: {
         GENERAL: { status: HTTP_STATUS.UNAUTHORIZED, code: 'UNAUTHORIZED', message: 'Unauthorized.' },

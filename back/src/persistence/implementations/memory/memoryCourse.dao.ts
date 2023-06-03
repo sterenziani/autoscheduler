@@ -60,16 +60,10 @@ export default class MemoryCourseDao extends CourseDao {
         universityId: string,
         text?: string,
         limit?: number,
-        offset = 0,
+        offset?: number,
     ): Promise<PaginatedCollection<Course>> {
-        // limit must be either undefined or positive integer
-        if (limit && (!Number.isInteger(limit) || limit <= 0))
-            throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PAGING_PARAMS);
-        // offset must be either undefined or integer
-        if (offset && !Number.isInteger(offset)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PAGING_PARAMS);
-
         text = text ? text.toLowerCase() : text;
-        let courses = [];
+        const courses: Course[] = [];
         for (const course of MEMORY_DATABASE.courses.values()) {
             const university = await course.getUniversity();
             if (university.id != universityId) continue;

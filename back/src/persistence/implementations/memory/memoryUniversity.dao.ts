@@ -3,6 +3,8 @@ import University from '../../../models/abstract/university.model';
 import MemoryUniversity from '../../../models/implementations/memory/memoryUniversity.model';
 import UniversityDao from '../../abstract/university.dao';
 import MemoryUserDao from './memoryUser.dao';
+import { PaginatedCollection } from '../../../interfaces/paging.interface';
+import { paginateCollection } from '../../../helpers/persistence/memoryPersistence.helper';
 
 export default class MemoryUniversityDao extends UniversityDao {
     private static instance: UniversityDao;
@@ -40,5 +42,30 @@ export default class MemoryUniversityDao extends UniversityDao {
             );
 
         MEMORY_DATABASE.universities.set(university.id, university);
+    }
+
+    public async findByName(name: string): Promise<University | undefined> {
+        for (const maybeUniversity of MEMORY_DATABASE.universities.values()) {
+            if (maybeUniversity.name === name) return maybeUniversity;
+        }
+        return undefined;
+    }
+
+    public async findByText(text?: string, limit?: number, offset?: number): Promise<PaginatedCollection<University>> {
+        text = text ? text.toLowerCase() : text;
+        const universities: University[] = [];
+
+        for (const maybeUniversity of MEMORY_DATABASE.universities.values()) {
+            if (!text || maybeUniversity.name.toLowerCase().includes(text)) universities.push(maybeUniversity);
+        }
+
+        // sorting by name
+        const compareUniversities = (u1: University, u2: University) => {
+            if (u1.name < u2.name) return -1;
+            if (u1.name > u2.name) return 1;
+            return 0;
+        };
+
+        return paginateCollection(universities, compareUniversities, limit, offset);
     }
 }

@@ -5,6 +5,7 @@ import CourseService from './course.service';
 import UniversityService from './university.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
+import { PaginatedCollection } from '../interfaces/paging.interface';
 
 export default class ProgramService {
     private static instance: ProgramService;
@@ -66,5 +67,14 @@ export default class ProgramService {
         ]);
 
         return program;
+    }
+
+    async getProgramsByText(
+        universityId: string,
+        text?: string,
+        limit?: number,
+        offset?: number,
+    ): Promise<PaginatedCollection<Program>> {
+        return await this.dao.findByText(universityId, text, limit, offset);
     }
 }

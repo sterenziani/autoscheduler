@@ -1,17 +1,16 @@
 import Course from '../models/abstract/course.model';
-import University from '../models/abstract/university.model';
 import { getUserUrl } from './user.dto';
 import { ROLE } from '../constants/general.constants';
 
-export const courseToDto = (course: Course, university: University): ICourseDto => {
+export const courseToDto = (course: Course, universityId: string): ICourseDto => {
     return {
         id: course.id,
         url: getCourseUrl(course.id),
         name: course.name,
         code: course.internalId,
         requirements: getCourseRequirementsUrl(course.id),
-        universityId: university.id,
-        universityUrl: getUserUrl(university.id, ROLE.UNIVERSITY),
+        universityId: universityId,
+        universityUrl: getUserUrl(universityId, ROLE.UNIVERSITY),
     };
 };
 

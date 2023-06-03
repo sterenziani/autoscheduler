@@ -7,6 +7,7 @@ import { CourseRoutes } from './routes/course.routes';
 import { ProgramRoutes } from './routes/program.routes';
 import { StudentRoutes } from './routes/student.routes';
 import { UniversityRoutes } from './routes/university.routes';
+import { UniversitiesRoutes } from './routes/universities.routes';
 import UserAuthService from './services/auth.service';
 import CourseService from './services/course.service';
 import ProgramService from './services/program.service';
@@ -68,6 +69,7 @@ class App {
         this.app.use('/api/program', new ProgramRoutes().router);
         this.app.use('/api/student', new StudentRoutes().router);
         this.app.use('/api/university', new UniversityRoutes().router);
+        this.app.use('/api/universities', new UniversitiesRoutes().router);
     }
 }
 

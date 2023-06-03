@@ -55,7 +55,7 @@ export class StudentController {
                 }),
             );
             res.status(HTTP_STATUS.OK).send(
-                coursesWithUniversity.map((cwu) => courseToDto(cwu.course, cwu.university)),
+                coursesWithUniversity.map((cwu) => courseToDto(cwu.course, cwu.university.id)),
             );
         } catch (e) {
             next(e);
