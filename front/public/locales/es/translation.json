@@ -18,14 +18,21 @@
             "name": "AutoScheduler University"
         },
         "errors": {
-            "badConnection": "No pudimos conectarnos al servicio de AutoScheduler.",
+            "codes": {
+                "401": "Ocurrió un error de permisos al enviar solicitud a AutoScheduler.",
+                "TIMEOUT": "No pudimos conectarnos al servicio de AutoScheduler",
+                "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
+                "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas."
+            },
+            "gettingUniversitiesData": "Ocurrió un error al buscar datos de universidades.",
             "email": {
                 "maxLength": "Su email no puede contener más de 100 caracteres.",
                 "invalidEmail": "Ingrese una dirección de email válida.",
                 "isRequired": "Este campo es obligatorio."
             },
             "password": {
-                "requiredLength": "Su contraseña debe contener al menos 6 caracteres.",
+                "requiredLength": "Su contraseña debe contener al menos 8 caracteres.",
+                "requiredCharacters": "Su contraseña debe contener números, minúsculas y mayúsculas.",
                 "maxLength": "Su contraseña no debe exceder los 100 caracteres.",
                 "isRequired": "Este campo es obligatorio."
             },

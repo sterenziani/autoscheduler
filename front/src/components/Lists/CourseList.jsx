@@ -25,9 +25,9 @@ function CourseList(props){
 
     const deleteCourse = () => {
         if (!courseToDelete) return;
-        if (user.type === Roles.STUDENT)
+        if (user.role === Roles.STUDENT)
             ApiService.deleteFinishedCourse(user.id, courseToDelete.id);
-        else if (user.type === Roles.UNIVERSITY)
+        else if (user.role === Roles.UNIVERSITY)
             ApiService.deleteCourse(courseToDelete);
         closeDeleteModal()
         props.reloadCourses()
@@ -55,7 +55,7 @@ function CourseList(props){
                               >
                                   <div className="my-auto">{entry.internalId}</div>
                                   <div className="my-auto w-min-50">
-                                      {user.type === Roles.UNIVERSITY
+                                      {user.role === Roles.UNIVERSITY
                                           ? [
                                                 <a
                                                     key={'link-' + entry.id}
@@ -68,7 +68,7 @@ function CourseList(props){
                                           : [<div key={'nada-' + entry.id}>{entry.name}</div>]}
                                   </div>
                                   <div className="d-flexmy-auto justify-content-center">
-                                      {user.type === Roles.UNIVERSITY
+                                      {user.role === Roles.UNIVERSITY
                                           ? [
                                                 <i
                                                     key={'pencil-' + index}

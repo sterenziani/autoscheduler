@@ -167,7 +167,7 @@ function EditCoursePage(props) {
 
     if(!user)
         return <React.Fragment/>
-    if(user.type !== Roles.UNIVERSITY)
+    if(user.role !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

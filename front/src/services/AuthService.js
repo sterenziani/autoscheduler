@@ -1,6 +1,10 @@
 import api from './api';
 import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, CREATED } from './ApiConstants';
 
+const logInEndpoint = '/';
+const signUpUniversityEndpoint = '/university';
+const signUpStudentEndpoint = '/student';
+
 const TokenStore = {
     setToken: token => localStorage.setItem('token', token),
     getToken: () => localStorage.getItem('token'),
@@ -31,6 +35,15 @@ const deleteUserInStore = () => {
     UserStore.removeUser()
 }
 
+const getRequestHeaders = () => {
+    const headerToken = getToken()
+    if(!headerToken)
+        return { headers : {'Content-Type': 'application/json'} }
+    return {
+        headers : { 'Content-Type': 'application/json', authorization: "Bearer "+getToken()}
+    }
+}
+
 let token;
 const getToken = () => {
     if(!token)
@@ -46,20 +59,16 @@ const deleteExp = () => {
     ExpStore.removeExp();
 }
 
-const logInEndpoint = '/';
-const signUpUniversityEndpoint = '/university';
-
 const logIn = async (email, password) => {
     try {
         const credentials = {
             'email': email,
             'password': password
         }
-        const response = await api.post(logInEndpoint, credentials, {
-            headers : {'Content-Type' : 'application/json'}
-        })
-        if(response.status === BAD_REQUEST)
-            return { status: BAD_REQUEST }
+        const response = await api.post(logInEndpoint, credentials, getRequestHeaders())
+        if(response.status === BAD_REQUEST) {
+            return { status: BAD_REQUEST, code: response.body.code }
+        }
         token = response.headers.authorization
         if (!token)
             return { status: NOT_FOUND }
@@ -69,13 +78,15 @@ const logIn = async (email, password) => {
         expirationDate.setUTCSeconds(parseUserFromJwt(token).exp);
         ExpStore.setExp(expirationDate)
 
-        const userData = await api.get('student/'+parseUserFromJwt(token).id, { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+token}})
+        const tokenUserData = parseUserFromJwt(token)
+        const endpoint = tokenUserData.role.toLowerCase() +'/'+ tokenUserData.id
+        const userData = await api.get(endpoint, getRequestHeaders())
         UserStore.setUser(userData.data)
         return { status: OK }
     }
     catch(e) {
         if (e.response)
-            return { status: e.response.status }
+            return { status: e.response.status, data: e.response.data}
         else
             return { status: TIMEOUT }
     }
@@ -86,21 +97,17 @@ const signUpStudent = async (email, password, universityId, programId) => {
         const payload = {
             'email': email,
             'password': password,
-            "universityId": universityId,
-            "programId": programId,
-            "internalId": "58717",
-            "name": "Crostian Jasmin"
+            "universityId": "185f8a24-3aff-426d-8071-38cd2b93bd74", //universityId,
+            "programId": "a66b5719-efa5-48d5-bab3-89371dc024e8", //programId,
+            "internalId": "XXXX",
+            "name": "Default"
         }
-        const response = await api.post(signUpUniversityEndpoint, payload, {
-            headers : {'Content-Type' : 'application/json'}
-        })
-        if(response.status === BAD_REQUEST)
-            return { status: BAD_REQUEST }
+        const response = await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
         return { status: CREATED }
     }
     catch(e) {
         if (e.response)
-            return { status: e.response.status }
+            return { status: e.response.status, data: e.response.data}
         else
             return { status: TIMEOUT }
     }
@@ -113,16 +120,12 @@ const signUpUniversity = async (email, password, name) => {
             'password': password,
             'name': name,
         }
-        const response = await api.post(signUpUniversityEndpoint, payload, {
-            headers : {'Content-Type' : 'application/json'}
-        })
-        if(response.status === BAD_REQUEST)
-            return { status: BAD_REQUEST }
+        const response = await api.post(signUpUniversityEndpoint, payload, getRequestHeaders())
         return { status: CREATED }
     }
     catch(e) {
         if (e.response)
-            return { status: e.response.status }
+            return { status: e.response.status, data: e.response.data}
         else
             return { status: TIMEOUT }
     }
@@ -199,6 +202,7 @@ const AuthService   = {
     getUserStore   : getUserStore,
     getToken       : getToken,
     getExp         : getExp,
+    getRequestHeaders: getRequestHeaders,
     logOutIfExpiredJwt: logOutIfExpiredJwt
 }
 

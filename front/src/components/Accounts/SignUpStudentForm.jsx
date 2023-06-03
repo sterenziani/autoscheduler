@@ -7,7 +7,7 @@ import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, CONFLICT } from '../../services/ApiConstants';
+import { OK, CREATED, BAD_REQUEST } from '../../services/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 import AsyncSelect from 'react-select/async'
 
@@ -17,8 +17,11 @@ const SignUpSchema = Yup.object().shape({
         .email('register.errors.email.invalidEmail')
         .required('register.errors.email.isRequired'),
     password: Yup.string()
-        .min(6, 'register.errors.password.requiredLength')
+        .min(8, 'register.errors.password.requiredLength')
         .max(100, 'register.errors.password.maxLength')
+        .matches(/^(?=.*[a-z])/, 'register.errors.password.requiredCharacters')
+        .matches(/^(?=.*[A-Z])/, 'register.errors.password.requiredCharacters')
+        .matches(/^(?=.*[0-9])/, 'register.errors.password.requiredCharacters')
         .required('register.errors.password.isRequired'),
     repeat_password: Yup.string()
         .when('password', (password, schema) => {
@@ -34,10 +37,9 @@ function SignUpStudentForm(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
 
-    const [badConnection, setBadConnection] = useState(false);
     const [selectedSchool, setSelectedSchool] = useState()
     const [selectedProgram, setSelectedProgram] = useState()
-    const [error, setError] = useState(false)
+    const [error, setError] = useState(null)
     const [status, setStatus] = useState(false)
     const [programError, setProgramError] = useState(false)
 
@@ -51,34 +53,31 @@ function SignUpStudentForm(props) {
     }
 
     const register = async (values, setSubmitting, setFieldError) => {
-        const { status, conflicts } = await ApiService.registerStudent(
+        const { status, data } = await ApiService.registerStudent(
             values.email, values.password, selectedSchool, selectedProgram
         );
         switch (status) {
             case CREATED:
                 authenticate(values)
                 break;
-            case CONFLICT:
-                setSubmitting(false);
-                conflicts.forEach((conflict) => {
-                    setFieldError(conflict.field, conflict.i18Key);
-                });
+            case BAD_REQUEST:
+                setSubmitting(false)
+                setError(data.code)
                 break;
             default:
                 setSubmitting(false)
-                setBadConnection(true)
+                setError("TIMEOUT")
                 break;
         }
     }
 
     const authenticate = async (values) => {
-        const { status } = await ApiService.login(values.username, values.password);
+        const { status, data } = await ApiService.login(values.email, values.password)
         switch (status) {
             case OK:
                 navigate("/")
                 break
             default:
-                console.log('Log in failed')
                 navigate("/login")
                 break
         }
@@ -98,9 +97,10 @@ function SignUpStudentForm(props) {
         setTimeout(() => {
             ApiService.getUniversities(inputValue).then((data) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (data && data.status && data.status !== OK)
+                    findError = data.status;
                 if (findError) {
-                    setError(true)
+                    setError(data.status)
                     setStatus(findError)
                     callback([])
                 } else {
@@ -114,9 +114,10 @@ function SignUpStudentForm(props) {
         setTimeout(() => {
             ApiService.getPrograms(selectedSchool, inputValue).then((data) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (data && data.status && data.status !== OK)
+                    findError = data.status;
                 if (findError) {
-                    setError(true)
+                    setError(data.status)
                     setStatus(findError)
                     callback([])
                 } else {
@@ -135,7 +136,7 @@ function SignUpStudentForm(props) {
             {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
                     <FontAwesomeIcon size="3x" icon={faMortarBoard} />
-                    {badConnection && <p className="form-error">{t('register.errors.badConnection')}</p>}
+                    {error && (<p className="form-error">{t('register.errors.codes.'+error)}</p>)}
 
                     <FormInputField
                         label="register.email"
@@ -172,9 +173,7 @@ function SignUpStudentForm(props) {
                         onBlur={handleBlur}
                     />
 
-                    {error ? (
-                        <h1>ERROR {error}</h1>
-                    ) : (
+                    {!error && (
                         <>
                             <Form.Group controlId="school" className="mb-0 row mx-auto form-row">
                                 <div className="col-3 text-end my-auto text-break ">
@@ -235,7 +234,7 @@ function SignUpStudentForm(props) {
                             )}
                         </>
                     )}
-                    <Button className="mt-4 mb-2" variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting}>
+                    <Button className="mt-4 mb-2" variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting || error}>
                         {t('register.submit')}
                     </Button>
                 </Form>

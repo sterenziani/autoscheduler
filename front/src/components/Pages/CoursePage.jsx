@@ -70,7 +70,7 @@ function CoursePage(props) {
 
     if(!user)
         return <React.Fragment/>
-    if(user.type !== Roles.UNIVERSITY)
+    if(user.role !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return (

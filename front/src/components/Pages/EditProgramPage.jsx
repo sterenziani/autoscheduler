@@ -49,16 +49,20 @@ function EditProgramPage(props) {
     useEffect( () => {
         async function execute() {
             if(id){
-                if(user && !program && !courses)
-                    await Promise.all([loadProgram(), loadCourses(user.id)]);
-                else if(user && program && courses)
-                    await Promise.all([loadMandatoryCourses(program.id), loadOptionalCourses(program.id)]);
+                if(user && !program && !courses){
+                    await Promise.all([loadProgram(), loadCourses(user.id)])
+                }
+                else if(user && program && courses){
+                    await Promise.all([loadMandatoryCourses(program.id), loadOptionalCourses(program.id)])
+                }
             }
             else{
-                if(user && !courses)
-                    await Promise.all([loadCourses(user.id)]);
-                else if(user && !program && courses)
+                if(user && !courses){
+                    await Promise.all([loadCourses(user.id)])
+                }
+                else if(user && !program && courses){
                     setProgram({"name": t("forms.placeholders.programName"), "internalId": t("forms.placeholders.programCode")})
+                }
             }
             if(user && program && courses && mandatoryCourses && optionalCourses){
                 setLoading(false)
@@ -180,7 +184,7 @@ function EditProgramPage(props) {
 
     if(!user)
         return <React.Fragment/>
-    if(user.type !== Roles.UNIVERSITY)
+    if(user.role !== Roles.UNIVERSITY)
         return <NoAccess/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
