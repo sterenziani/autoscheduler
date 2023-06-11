@@ -21,6 +21,9 @@ services:
 
   front:
     build: ./front
+    environment:
+      BACK_HOST: back
+      BACK_PORT: 3000
     env_file:
       - ./front/.env
     ports:
