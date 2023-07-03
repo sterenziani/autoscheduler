@@ -155,8 +155,8 @@ export const paginateCollection = <T>(
         first: 0,
         last: lastPage,
     };
-    if (offset - 1 > pagingInfo.first) pagingInfo.prev = offset - 1;
-    if (offset + 1 < pagingInfo.last) pagingInfo.next = offset + 1;
+    if (offset - 1 >= pagingInfo.first) pagingInfo.prev = offset - 1;
+    if (offset + 1 <= pagingInfo.last) pagingInfo.next = offset + 1;
 
     if (collection.length <= 0) return { collection, pagingInfo };
     let newCollection = collection.sort(compareTo);
