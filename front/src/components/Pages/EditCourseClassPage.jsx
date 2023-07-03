@@ -241,8 +241,8 @@ function EditCourseClassPage(props) {
                             selectedCourse &&
                             <AsyncSelect
                                 className="text-black" cacheOptions defaultOptions
-                                defaultValue = {{value:selectedCourse.id, internalId: selectedCourse.internalId, name: selectedCourse.name}}
-                                getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
+                                defaultValue = {{value:selectedCourse.id, code: selectedCourse.code, name: selectedCourse.name}}
+                                getOptionLabel={e => e.code+' - '+e.name} getOptionValue={e => e.id}
                                 loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
                             />
                         }
@@ -251,7 +251,7 @@ function EditCourseClassPage(props) {
                             <AsyncSelect
                                 className="text-black" cacheOptions defaultOptions
                                 placeholder={t("forms.course")}
-                                getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
+                                getOptionLabel={e => e.code+' - '+e.name} getOptionValue={e => e.id}
                                 loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
                             />
                         }
@@ -267,7 +267,7 @@ function EditCourseClassPage(props) {
                         {
                             <Form.Select value={selectedTerm} onChange={onChangeTerm}>
                                 {terms && terms.map((c) => (
-                                    <option key={c.id} value={c.id}> {c.internalId + ' - ' + c.name}</option>
+                                    <option key={c.id} value={c.id}> {c.code + ' - ' + c.name}</option>
                                 ))}
                             </Form.Select>
                         }
@@ -303,7 +303,7 @@ function EditCourseClassPage(props) {
                                         onChange={onChangeEndTime}
                                     />
                                     <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].building} onChange={onChangeBuilding}>
-                                        {buildings.map((b) => (<option key={b.id} value={b.id}>{b.internalId}</option>))}
+                                        {buildings.map((b) => (<option key={b.id} value={b.id}>{b.code}</option>))}
                                     </Form.Select>
                                     <i className="bi bi-trash-fill btn color-primary w-auto my-auto"
                                         id={'trash-' + index} onClick={onClickTrashCan}

@@ -46,7 +46,7 @@ function CourseRequirementsList(props) {
                     courses[props.program.id].map((entry, index) => (
                         <Row key={'row-' + index} xs={1} md={4} className="px-5 mx-5 py-3 justify-content-center">
                             <div className={'my-auto ' + (window.innerWidth > 770 ? 'text-end' : '')}>
-                                {entry.internalId}
+                                {entry.code}
                             </div>
                             <div className={'my-auto w-min-50 ' + (window.innerWidth > 770 ? 'text-start' : '')}>
                                 <a className="text-white" href={'/courses/' + entry.id}>{entry.name}</a>

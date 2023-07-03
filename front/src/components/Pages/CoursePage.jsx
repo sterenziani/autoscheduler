@@ -31,17 +31,17 @@ function CoursePage(props) {
     }, [])
 
     useEffect( () => {
-        ApiService.getCourse(id).then((data) => {
+        ApiService.getCourse(id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else {
-                setCourse(data)
+                setCourse(resp.data)
                 setLoading(false)
             }
         });
@@ -50,15 +50,15 @@ function CoursePage(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(user.id, inputValue).then((data) => {
+            ApiService.getPrograms(user.id, inputValue).then((resp) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED) findError = resp.status;
                 if (findError) {
                     setError(true)
                     setStatus(findError)
                     callback([])
                 } else {
-                    callback(data)
+                    callback(resp.data)
                 }
             })
         })
@@ -84,12 +84,12 @@ function CoursePage(props) {
         <React.Fragment>
             <HelmetProvider>
                 <Helmet>
-                    <title>{course ? course.internalId : ''} - AutoScheduler</title>
+                    <title>{course ? course.code : ''} - AutoScheduler</title>
                 </Helmet>
             </HelmetProvider>
             <div className="container my-5">
                 <div className="mb-3 text-center text-primary">
-                    <h6 className="m-0">{course.internalId}</h6>
+                    <h6 className="m-0">{course.code}</h6>
                     <h2 className="">{course.name}</h2>
                 </div>
                 <Tabs className="borderless-tabs" defaultActiveKey={'classes'} fill>
@@ -103,7 +103,7 @@ function CoursePage(props) {
                                 placeholder={t('register.program')}
                                 cacheOptions
                                 defaultOptions
-                                getOptionLabel={e => e.internalId+' - '+e.name}
+                                getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt)}

@@ -4,19 +4,17 @@ import api from './api'
 import AuthService from './AuthService'
 const RESOLVE_DELAY = 250;
 
-// En package.json se cambia "proxy" por la dirección y puerto donde esté corriendo la API
-const getGames = async () => {
-    try {
-        const response = await fetch('games');
-        return await response.json();
-    } catch (error) {
-        if (error.response) {
-            return { status: error.response.status };
-        } else {
-            return { status: TIMEOUT };
-        }
+const parsePagination = (response) => {
+    let arrData = response.headers.link
+    let links = {}
+
+    arrData = arrData.split(",")
+    for (var d of arrData){
+        let linkInfo = /<([^>]+)>;\s+rel="([^"]+)"/ig.exec(d)
+        links[linkInfo[2]] = api.defaults.baseURL + "/" + linkInfo[1]
     }
-};
+    return links
+}
 
 const paramsToQuery = (params) => {
     let query = '';
@@ -127,12 +125,19 @@ const getTerm = (termId) =>
         setTimeout(() => resolve(term), RESOLVE_DELAY);
     });
 
-const getProgram = (programId) =>
-    new Promise((resolve, reject) => {
-        // eslint-disable-next-line
-        const program = SgaConstants.programs[9].find((p) => p.id == programId);
-        setTimeout(() => resolve(program), RESOLVE_DELAY);
-    });
+const getProgram = async (programId) => {
+    try {
+        const endpoint = "/program/"+programId
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const getBuilding = (buildingId) =>
     new Promise((resolve, reject) => {
@@ -158,17 +163,33 @@ const getRequiredCourses = (courseId) =>
         setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
 
-const getMandatoryCourses = (programId) =>
-    new Promise((resolve, reject) => {
-        const courses = [SgaConstants.informaticaCourses[0], SgaConstants.informaticaCourses[5]];
-        setTimeout(() => resolve(courses), RESOLVE_DELAY);
-    });
+const getMandatoryCourses = async (programId) => {
+    try {
+        const endpoint = "/program/"+programId+"/mandatory-courses"
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
-const getOptionalCourses = (programId) =>
-    new Promise((resolve, reject) => {
-        const courses = [SgaConstants.informaticaCourses[6]];
-        setTimeout(() => resolve(courses), RESOLVE_DELAY);
-    });
+const getOptionalCourses = async (programId) => {
+    try {
+        const endpoint = "/program/"+programId+"/optional-courses"
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const getCourseClassesForTerm = (courseId, termId, page) =>
     new Promise((resolve, reject) => {
@@ -403,11 +424,18 @@ const saveTerm = async (id, name, internalId, startDate) => {
 
 const saveCourse = async (id, name, internalId, requirements) => {
     try {
+        const payload = {
+            'id': id,
+            'name': name,
+            'internalId': internalId,
+            "requirements": requirements,
+        }
         if(id){
-            return { status: OK };
+            console.log("Pretending to PUT")
+            return { status: OK, id: id };
         }
         else{
-            return { status: CREATED };
+            return createCourse(payload)
         }
     } catch (e) {
         if (e.response) return { status: e.response.status };
@@ -415,17 +443,35 @@ const saveCourse = async (id, name, internalId, requirements) => {
     }
 }
 
+const createCourse = async (payload) => {
+    try {
+        const response = await api.post("/course", payload, AuthService.getRequestHeaders())
+        const id = response.headers.location.split('/')[1]
+        return { status: CREATED, id: id }
+    }
+    catch(e) {
+        if (e.response){
+            return { status: e.response.status, data: e.response.data}
+        }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
 const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCourses) => {
     try {
+        let mandatoryCourseIDs = mandatoryCourses.map(a => a.id)
+        let optionalCourseIDs = optionalCourses.map(a => a.id)
         const payload = {
             'id': id,
             'name': name,
             'internalId': internalId,
-            "mandatoryCourses": mandatoryCourses,
-            "optionalCourses": optionalCourses,
+            "mandatoryCourses": mandatoryCourseIDs,
+            "optionalCourses": optionalCourseIDs,
         }
         if(id){
-            return { status: OK };
+            console.log("Pretending to PUT")
+            return { status: OK, id: id };
         }
         else{
             return createProgram(payload)
@@ -526,7 +572,8 @@ const ApiService = {
     saveProgram: saveProgram,
     saveBuilding: saveBuilding,
     getToken: getToken,
-    changePassword: changePassword
+    changePassword: changePassword,
+    parsePagination: parsePagination
 };
 
 export default ApiService;

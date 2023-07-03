@@ -18,7 +18,7 @@ function EditTermPage(props) {
             .min(3, 'forms.errors.term.minLength')
             .max(25, 'forms.errors.term.maxLength')
             .required('forms.errors.term.isRequired'),
-        internalId: Yup.string()
+        code: Yup.string()
             .min(1, 'forms.errors.term.minCodeLength')
             .max(25, 'forms.errors.term.maxCodeLength')
             .required('forms.errors.term.codeIsRequired'),
@@ -53,7 +53,7 @@ function EditTermPage(props) {
             }
             else{
                 if(user && !term){
-                    setTerm({"name": t("forms.placeholders.termName"), "internalId": t("forms.placeholders.termCode")})
+                    setTerm({"name": t("forms.placeholders.termName"), "code": t("forms.placeholders.termCode")})
                     setStartDate(new Date().toISOString().slice(0, 10))
                     setLoading(false)
                 }
@@ -86,9 +86,9 @@ function EditTermPage(props) {
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true);
-        if (startDate && values.termName && values.internalId)
+        if (startDate && values.termName && values.code)
         {
-            const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.internalId, startDate)
+            const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.code, startDate)
             if(resp.status === OK || resp.status === CREATED)
                 navigate("/?tab=terms");
             else{
@@ -120,7 +120,7 @@ function EditTermPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editTerm':'forms.createTerm')}</h2>
-                <Formik initialValues={{ termName: term.name, internalId: term.internalId }} validationSchema={TermSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ termName: term.name, code: term.code }} validationSchema={TermSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
@@ -130,10 +130,10 @@ function EditTermPage(props) {
                         touched={touched.termName} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
-                        label="forms.termCode" name="internalId"
+                        label="forms.termCode" name="code"
                         placeholder="forms.placeholders.termCode"
-                        value={values.internalId} error={errors.internalId}
-                        touched={touched.internalId} onChange={handleChange} onBlur={handleBlur}
+                        value={values.code} error={errors.code}
+                        touched={touched.code} onChange={handleChange} onBlur={handleBlur}
                     />
                     <Form.Group controlId="term-startdate" className="row mx-auto form-row">
                         <div className="col-3 text-end my-auto text-break">

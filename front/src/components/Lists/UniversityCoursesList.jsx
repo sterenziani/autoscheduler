@@ -55,18 +55,19 @@ function StudentCoursesList(props){
 
     const loadCourses = (page) => {
         setLoading(true)
-        ApiService.getCoursesPage(user.id, page).then((data) => {
+        ApiService.getCoursesPage(user.id, page).then(resp => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setCourses(data)
-                setPrevPage(page == 2)
-                setNextPage(page < 2)
+                let links = ApiService.parsePagination(resp)
+                setCourses(resp.data)
+                setPrevPage(links.prev)
+                setNextPage(links.next)
             }
             setLoading(false)
         });

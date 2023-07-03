@@ -53,18 +53,19 @@ function UniversityProgramsList(props){
 
     const loadPrograms = (page) => {
         setLoading(true)
-        ApiService.getProgramsPage(user.id, page).then((data) => {
+        ApiService.getProgramsPage(user.id, page).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setPrograms(data)
-                setPrevPage(page == 2)
-                setNextPage(page < 2)
+                let links = ApiService.parsePagination(resp)
+                setPrograms(resp.data)
+                setPrevPage(links.prev)
+                setNextPage(links.next)
             }
             setLoading(false)
         });
@@ -111,7 +112,7 @@ function UniversityProgramsList(props){
                               >
                                   <div className="my-auto w-50">
                                       <a className="text-white" href={'/programs/' + entry.id}>
-                                          {entry.internalId + ' - ' + entry.name}
+                                          {entry.code + ' - ' + entry.name}
                                       </a>
                                   </div>
                                   <div className="d-flex my-auto justify-content-center">
@@ -148,7 +149,7 @@ function UniversityProgramsList(props){
                     {
                         programToDelete &&
                         t('modal.areYouSureProgram', {
-                            code: programToDelete.internalId,
+                            code: programToDelete.code,
                             name: programToDelete.name,
                         })
                     }

@@ -53,7 +53,7 @@ function CourseList(props){
                                   key={'row-' + index} xs={1} md={4}
                                   className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"
                               >
-                                  <div className="my-auto">{entry.internalId}</div>
+                                  <div className="my-auto">{entry.code}</div>
                                   <div className="my-auto w-min-50">
                                       {user.role === Roles.UNIVERSITY
                                           ? [
@@ -104,7 +104,7 @@ function CourseList(props){
                     {
                         courseToDelete &&
                         t('modal.areYouSureCourse', {
-                            code: courseToDelete.internalId,
+                            code: courseToDelete.code,
                             name: courseToDelete.name,
                         })
                     }

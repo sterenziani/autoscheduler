@@ -179,8 +179,8 @@ function SearchForm(props) {
                             placeholder={t('search.program')}
                             cacheOptions
                             defaultOptions
-                            defaultValue = {{value:user.program.id, internalId: user.program.internalId, name: user.program.name}}
-                            getOptionLabel={e => e.internalId+' - '+e.name}
+                            defaultValue = {{value:user.program.id, code: user.program.code, name: user.program.name}}
+                            getOptionLabel={e => e.code+' - '+e.name}
                             getOptionValue={e => e.id}
                             loadOptions={loadProgramOptions}
                             onChange={opt => onChangePrograms(opt.id)}

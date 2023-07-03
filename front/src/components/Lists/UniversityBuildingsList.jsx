@@ -112,7 +112,7 @@ function UniversityBuildingsList(props) {
                                               <div className="d-flex ms-1">
                                                   <div className="text-start my-auto me-auto">
                                                       <Card.Title className="m-0 h6">
-                                                          {entry.internalId + ' - ' + entry.name}
+                                                          {entry.code + ' - ' + entry.name}
                                                       </Card.Title>
                                                   </div>
                                                   <div className="d-flex my-auto text-center">
@@ -163,7 +163,7 @@ function UniversityBuildingsList(props) {
                     {
                         buildingToDelete &&
                         t('modal.areYouSureBuilding', {
-                            code: buildingToDelete.internalId,
+                            code: buildingToDelete.code,
                             name: buildingToDelete.name,
                         })
                     }

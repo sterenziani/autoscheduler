@@ -166,7 +166,7 @@ function CourseClassesList(props) {
                 <Modal.Body>
                         {
                             t('modal.areYouSureClass', {
-                                code: course.internalId,
+                                code: course.code,
                                 name: course.name,
                                 class: courseClassToDelete.courseClass,
                                 term: term.name,

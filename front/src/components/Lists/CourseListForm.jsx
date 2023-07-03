@@ -35,16 +35,16 @@ function CourseListForm(props) {
 
     const loadRemainingCoursesOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getCourses(user.id, inputValue).then((data) => {
+            ApiService.getCourses(user.id, inputValue).then((resp) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED)
-                    findError = data.status;
+                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                    findError = resp.status;
                 if (findError) {
                     setError(true)
                     setStatus(findError)
                     callback([])
                 } else {
-                    const availableCourses = data.filter((item) => !unavailableCourses.find((c) => c.id === item.id))
+                    const availableCourses = resp.data.filter((item) => !unavailableCourses.find((c) => c.id === item.id))
                     callback(availableCourses)
                 }
             })
@@ -60,7 +60,7 @@ function CourseListForm(props) {
                             key={'row-' + index} xs={1} md={4}
                             className="border-bottom border-primary list-row px-5 pb-2 pt-3 justify-content-center"
                         >
-                            <div className="my-auto">{entry.internalId}</div>
+                            <div className="my-auto">{entry.code}</div>
                             <div className="my-auto w-min-50">
                                 <a key={'link-' + entry.id} href={'/courses/' + entry.id}>
                                     {entry.name}
@@ -96,7 +96,7 @@ function CourseListForm(props) {
                                 return t('selectNoResults')
                             return t('modal.noRemainingCourses')
                         }}
-                        getOptionLabel={e => e.internalId+' - '+e.name}
+                        getOptionLabel={e => e.code+' - '+e.name}
                         getOptionValue={e => e.id}
                         loadOptions={loadRemainingCoursesOptions}
                         onChange={opt => onChangeCourseToAdd(opt)}

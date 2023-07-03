@@ -55,7 +55,7 @@ function EditCoursePage(props) {
                     await Promise.all([loadRequirements(course.id)]);
             }
             else if(user && !course){
-                setCourse({"name": t("forms.placeholders.courseName"), "internalId": t("forms.placeholders.courseCode")})
+                setCourse({"name": t("forms.placeholders.courseName"), "code": t("forms.placeholders.courseCode")})
                 setRequirements({})
                 setLoading(false)
             }
@@ -71,32 +71,32 @@ function EditCoursePage(props) {
     },[requirements])
 
     const loadCourse = async () => {
-        ApiService.getCourse(id).then((data) => {
+        ApiService.getCourse(id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-              setCourse(data)
+              setCourse(resp.data)
             }
         });
     }
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(user.id, inputValue).then((data) => {
+            ApiService.getPrograms(user.id, inputValue).then((resp) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED) findError = resp.status;
                 if (findError) {
                     setError(true)
                     setStatus(findError)
                     callback([])
                 } else {
-                    callback(data)
+                    callback(resp.data)
                 }
             })
         })
@@ -182,7 +182,7 @@ function EditCoursePage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editCourse':'forms.createCourse')}</h2>
-                <Formik initialValues={{ courseName: course.name, courseCode: course.internalId }} validationSchema={CourseSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ courseName: course.name, courseCode: course.code }} validationSchema={CourseSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
@@ -209,7 +209,7 @@ function EditCoursePage(props) {
                                 placeholder={t('register.program')}
                                 cacheOptions
                                 defaultOptions
-                                getOptionLabel={e => e.internalId+' - '+e.name}
+                                getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt)}

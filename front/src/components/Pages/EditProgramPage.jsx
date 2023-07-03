@@ -61,7 +61,7 @@ function EditProgramPage(props) {
                     await Promise.all([loadCourses(user.id)])
                 }
                 else if(user && !program && courses){
-                    setProgram({"name": t("forms.placeholders.programName"), "internalId": t("forms.placeholders.programCode")})
+                    setProgram({"name": t("forms.placeholders.programName"), "code": t("forms.placeholders.programCode")})
                 }
             }
             if(user && program && courses && mandatoryCourses && optionalCourses){
@@ -73,64 +73,64 @@ function EditProgramPage(props) {
     },[program, courses])
 
     const loadProgram = async () => {
-        ApiService.getProgram(id).then((data) => {
+        ApiService.getProgram(id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else
-              setProgram(data)
+              setProgram(resp.data)
         });
     }
 
     const loadCourses = async (universityId) => {
-        ApiService.getCourses(universityId).then((data) => {
+        ApiService.getCourses(universityId).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setCourses(data)
+                setCourses(resp.data)
             }
         });
     }
 
     const loadMandatoryCourses = async (programId) => {
-        ApiService.getMandatoryCourses(programId).then((data) => {
+        ApiService.getMandatoryCourses(programId).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setMandatoryCourses(data)
+                setMandatoryCourses(resp.data)
             }
         });
     }
 
     const loadOptionalCourses = async (programId) => {
-        ApiService.getOptionalCourses(programId).then((data) => {
+        ApiService.getOptionalCourses(programId).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setOptionalCourses(data)
+                setOptionalCourses(resp.data)
             }
         });
     }
@@ -139,7 +139,7 @@ function EditProgramPage(props) {
         setSubmitting(true);
         if (values.programCode && values.programName)
         {
-            const resp = await ApiService.saveProgram(id, values.programCode, values.programName, mandatoryCourses, optionalCourses)
+            const resp = await ApiService.saveProgram(id, values.programName, values.programCode, mandatoryCourses, optionalCourses)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=programs")
             }
@@ -199,7 +199,7 @@ function EditProgramPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editProgram':'forms.createProgram')}</h2>
-                <Formik initialValues={{ programName: program.name, programCode: program.internalId }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ programName: program.name, programCode: program.code }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField

@@ -162,9 +162,9 @@ function StudentCourseLog(props) {
                                 className="text-black m-2"
                                 placeholder={t('search.program')}
                                 defaultOptions
-                                getOptionLabel={e => e.internalId+' - '+e.name}
+                                getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
-                                defaultValue = {{value:user.program.id, internalId: user.program.internalId, name: user.program.name}}
+                                defaultValue = {{value:user.program.id, code: user.program.code, name: user.program.name}}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}
                             />
@@ -179,7 +179,7 @@ function StudentCourseLog(props) {
                                         return t('selectNoResults')
                                     return t('modal.noRemainingCoursesProgram')
                                 }}
-                                getOptionLabel={e => e.internalId+' - '+e.name}
+                                getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
                                 loadOptions={loadRemainingCoursesOptions}
                                 onChange={opt => onChangeCourseToAdd(opt.id)}

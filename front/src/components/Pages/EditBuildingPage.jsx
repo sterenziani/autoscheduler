@@ -52,9 +52,9 @@ function EditBuildingPage(props) {
                 if(user && !buildings)
                     await Promise.all([loadBuildings(user.id)]);
                 else if(user && !building && buildings){
-                    setBuilding({"name": t("forms.placeholders.buildingName"), "internalId": t("forms.placeholders.buildingCode")})
+                    setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
                     const emptyDist = {}
-                    buildings.forEach((b) => emptyDist[b.internalId] = {building: b, distance:0});
+                    buildings.forEach((b) => emptyDist[b.code] = {building: b, distance:0});
                     setDistances(emptyDist)
                 }
             }
@@ -78,7 +78,7 @@ function EditBuildingPage(props) {
             else{
                 setBuilding(data)
                 const dist = {}
-                data.distances.forEach((d) => dist[d.building.internalId] = d)
+                data.distances.forEach((d) => dist[d.building.code] = d)
                 setDistances(dist)
             }
         });
@@ -102,7 +102,7 @@ function EditBuildingPage(props) {
 
     const onChangeTime = (e, entry) => {
         const distancesCopy = Object.assign([], distances);
-        distancesCopy[entry.building.internalId].time = e.target.value;
+        distancesCopy[entry.building.code].time = e.target.value;
         setDistances(distancesCopy)
     }
 
@@ -142,7 +142,7 @@ function EditBuildingPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editBuilding':'forms.createBuilding')}</h2>
-                <Formik initialValues={{ buildingName: building.name, buildingCode: building.internalId }} validationSchema={BuildingSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ buildingName: building.name, buildingCode: building.code }} validationSchema={BuildingSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
@@ -169,7 +169,7 @@ function EditBuildingPage(props) {
                                 Object.values(distances).map((entry, index) => (
                                     <Row key={"time-input-"+index}>
                                     <Col className="my-auto text-end text-break" xs={3} md={2}>
-                                        <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.internalId}</h6></Form.Label>
+                                        <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.code}</h6></Form.Label>
                                     </Col>
                                     <Col className="pe-0" xs={6} md={8}>
                                         <Form.Control type="number" value={entry.time} onChange={(e) => onChangeTime(e, entry)}/>

@@ -46,7 +46,7 @@ function CourseClassesTab(props) {
             <div className="mx-5 py-4">
                 <Form.Select className="w-75 m-auto" value={selectedTerm.id} onChange={onChangeTerms}>
                     {terms.map((p) => (
-                        <option key={p.id} value={p.id}> {p.internalId + ' - ' + p.name} </option>
+                        <option key={p.id} value={p.id}> {p.code + ' - ' + p.name} </option>
                     ))}
                 </Form.Select>
                 <CourseClassesList
