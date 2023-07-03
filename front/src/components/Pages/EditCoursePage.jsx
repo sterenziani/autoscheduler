@@ -103,16 +103,16 @@ function EditCoursePage(props) {
     }
 
     const loadRequirements = async(courseId) => {
-        ApiService.getRequiredCourses(course.id).then((data) => {
+        ApiService.getRequiredCourses(course.id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED) findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setRequirements(data)
+                setRequirements(resp.data)
             }
         });
     }
@@ -121,7 +121,7 @@ function EditCoursePage(props) {
         setSubmitting(true);
         if (values.courseCode && values.courseName)
         {
-            const resp = await ApiService.saveCourse(id, values.courseCode, values.courseName, requirements)
+            const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, requirements)
             if(resp.status === OK || resp.status === CREATED){
                 if(id)
                     navigate("/courses/"+id)
@@ -159,7 +159,7 @@ function EditCoursePage(props) {
     const onChangePrograms = (program) => {
         if(!requirements[program.id]){
             const requirementsCopy = Object.assign({}, requirements)
-            requirementsCopy[program] = []
+            requirementsCopy[program.id] = []
             setRequirements(requirementsCopy)
         }
         setSelectedProgram(program)

@@ -424,6 +424,10 @@ const saveTerm = async (id, name, internalId, startDate) => {
 
 const saveCourse = async (id, name, internalId, requirements) => {
     try {
+        const requirementIDs = {}
+        Object.keys(requirements).map(key => {
+            requirementIDs[key] = requirements[key].map(a => a.id)
+        })
         const payload = {
             'id': id,
             'name': name,
