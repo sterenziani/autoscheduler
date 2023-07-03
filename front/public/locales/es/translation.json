@@ -10,6 +10,7 @@
         "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de institutos.",
         "submit": "Crear cuenta",
         "placeholders": {
+            "nameStudent": "John Johnson",
             "emailStudent": "alumno@university.edu",
             "emailUniversity": "rector@university.edu",
             "email": "example@university.com",

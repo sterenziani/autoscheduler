@@ -34,8 +34,8 @@ export class ProgramController {
         try {
             const program: Program = await this.programService.createProgram(
                 userInfo.id,
-                name,
                 internalId,
+                name,
                 mandatoryCourses,
                 optionalCourses,
             );

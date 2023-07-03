@@ -92,15 +92,15 @@ const logIn = async (email, password) => {
     }
 }
 
-const signUpStudent = async (email, password, universityId, programId) => {
+const signUpStudent = async (name, email, password, universityId, programId) => {
     try {
         const payload = {
             'email': email,
             'password': password,
-            "universityId": "185f8a24-3aff-426d-8071-38cd2b93bd74", //universityId,
-            "programId": "a66b5719-efa5-48d5-bab3-89371dc024e8", //programId,
+            "universityId": universityId,
+            "programId": programId,
             "internalId": "XXXX",
-            "name": "Default"
+            "name": name
         }
         const response = await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
         return { status: CREATED }

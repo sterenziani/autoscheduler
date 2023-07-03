@@ -53,8 +53,8 @@ const getSchedules = async (params) => {
 }
 */
 
-const registerStudent = async (email, password, universityId, programId) => {
-    return AuthService.signUpStudent(email, password, universityId, programId)
+const registerStudent = async (name, email, password, universityId, programId) => {
+    return AuthService.signUpStudent(name, email, password, universityId, programId)
 };
 
 const registerUniversity = async (email, password, name) => {
@@ -81,23 +81,6 @@ const requestPasswordChangeToken = async (username) => {
 
 const getActiveUser = () => {
     return AuthService.getUserStore()
-    /*
-    const student = {
-        id: 1,
-        role: 'STUDENT',
-        email: 'student@itba.edu.ar',
-        name: '1C',
-        university: { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
-        program: { id: 1, internalId: "S10", name: 'Ingeniería Informática' }
-    };
-    const university = {
-        id: 9,
-        role: 'UNIVERSITY',
-        email: 'rector@itba.edu.ar',
-        name: 'Instituto Tecnológico de Buenos Aires',
-        verified: false
-    };
-    */
 }
 
 const getSchedules = (params) =>
@@ -111,7 +94,7 @@ const getSchedules = (params) =>
 
 const getUniversities = async (inputText) => {
     try {
-        const endpoint = "/university?inputText="+inputText
+        const endpoint = "/universities?filter="+inputText
         const response = await api.get(endpoint, AuthService.getRequestHeaders())
         return response
     }
@@ -123,45 +106,19 @@ const getUniversities = async (inputText) => {
     }
 }
 
-/*
-const getUniversities = async (inputText) =>
-    new Promise((resolve, reject) => {
-        const schools = [
-            { id: 9, name: 'Instituto Tecnológico de Buenos Aires' },
-            { id: 1, name: 'Academia para Astronautas' },
-            { id: 2, name: 'Bachiller para Bochincheros' },
-            { id: 3, name: 'Colegio Nacional de las Artes' },
-            { id: 4, name: 'DaVinci' },
-            { id: 5, name: 'Escuela Nacional de Estudiantes' },
-            { id: 6, name: 'Facultad Nacional del Frisbee' },
-            { id: 7, name: 'Universidad Gonzalo Gonzales' },
-            { id: 8, name: 'Universidad Humberto Primo' },
-            { id: 10, name: 'Instituto Julian Weich' },
-            { id: 11, name: 'Universidad Kevingston' },
-            { id: 12, name: 'Liceo Lisa Lissani' },
-            { id: 13, name: 'Universidad de la Milanesa' },
-            { id: 14, name: 'Universidad Nacional de Nicaragua' },
-            { id: 15, name: 'Universidad Ortodoxa' },
-            { id: 16, name: 'Politécnico de Buenos Aires' },
-            { id: 17, name: 'Universidad Católica de Quebec' },
-            { id: 18, name: 'Rectorado para Rectores' },
-            { id: 19, name: 'Universidad Siglo 21' },
-            { id: 20, name: 'UTN' },
-        ]
-        if(!inputText)
-            setTimeout(() => resolve([schools[1], schools[2], schools[3]]), RESOLVE_DELAY)
-        else{
-            const resp = schools.filter((s) => s.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
-            setTimeout(() => resolve(resp), RESOLVE_DELAY)
-        }
-    });
-*/
-
-const getCourse = (courseId) =>
-    new Promise((resolve, reject) => {
-        const course = SgaConstants.courses[9].find((c) => c.id === courseId);
-        setTimeout(() => resolve(course), RESOLVE_DELAY);
-    });
+const getCourse = async (courseId) => {
+    try {
+        const endpoint = "/course/"+courseId
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const getTerm = (termId) =>
     new Promise((resolve, reject) => {
@@ -224,50 +181,61 @@ const getCourseClassesForTerm = (courseId, termId, page) =>
             setTimeout(() => resolve(availableClasses), RESOLVE_DELAY);
     });
 
-const getPrograms = async (universityId, inputText) =>
-    new Promise((resolve, reject) => {
-        const programs = SgaConstants.programs[universityId];
-        if(!inputText)
-            setTimeout(() => resolve(programs), RESOLVE_DELAY)
-        else{
-            const resp = programs.filter((p) => p.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
-            setTimeout(() => resolve(resp), RESOLVE_DELAY)
-        }
-    });
-
-const getProgramsPage = async (universityId, page) =>
-    new Promise((resolve, reject) => {
-        const programs = SgaConstants.programs[9];
-        if(page==1)
-            setTimeout(() => resolve([programs[0], programs[1]]), RESOLVE_DELAY);
-        else if(page==2)
-            setTimeout(() => resolve([programs[2]]), RESOLVE_DELAY);
+const getPrograms = async (universityId, inputText) => {
+    try {
+        const endpoint = "/university/" + universityId + "/programs?filter=" + inputText
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
         else
-            setTimeout(() => resolve([]), RESOLVE_DELAY);
-    });
+            return { status: TIMEOUT }
+    }
+}
 
-const getCourses = async (universityId, inputText) =>
-    new Promise((resolve, reject) => {
-        const courses = SgaConstants.courses;
-        if(!inputText)
-            setTimeout(() => resolve(courses[9]), RESOLVE_DELAY);
-        else{
-            const resp = courses[universityId].filter((c) => c.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
-            setTimeout(() => resolve(resp), RESOLVE_DELAY)
-        }
-    });
-
-const getCoursesPage = async (universityId, page) =>
-    new Promise((resolve, reject) => {
-        const courses = SgaConstants.courses;
-        let full = courses[9]
-        if(page==1)
-            setTimeout(() => resolve([full[0], full[1], full[2], full[3], full[4]]), RESOLVE_DELAY);
-        else if(page==2)
-            setTimeout(() => resolve([full[5], full[6], full[7], full[8], full[9]]), RESOLVE_DELAY);
+const getProgramsPage = async (universityId, page) => {
+    try {
+        const endpoint = "/university/" + universityId + "/programs?page=" + (page-1)
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
         else
-            setTimeout(() => resolve([]), RESOLVE_DELAY);
-    });
+            return { status: TIMEOUT }
+    }
+}
+
+const getCourses = async (universityId, inputText) => {
+    try {
+        const endpoint = "/university/" + universityId + "/courses?filter=" + inputText
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const getCoursesPage = async (universityId, page) => {
+    try {
+        const endpoint = "/university/" + universityId + "/courses?page=" + (page-1)
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const getTerms = async (universityId, page) =>
     new Promise((resolve, reject) => {
@@ -476,7 +444,6 @@ const createProgram = async (payload) => {
     }
     catch(e) {
         if (e.response){
-            console.log(e.response)
             return { status: e.response.status, data: e.response.data}
         }
         else
@@ -519,7 +486,6 @@ const changePassword = async (userId, token, newPassword) => {
 }
 
 const ApiService = {
-    getGames: getGames,
     registerStudent: registerStudent,
     registerUniversity: registerUniversity,
     login: login,

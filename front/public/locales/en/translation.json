@@ -10,6 +10,7 @@
         "pleaseContact": "After registering your account, please contact us at {{email}} with proof so we can review your application and add you to our list of schools.",
         "submit": "Create account",
         "placeholders": {
+            "nameStudent": "John Johnson",
             "emailStudent": "student@university.edu",
             "emailUniversity": "dean@university.edu",
             "email": "example@university.com",

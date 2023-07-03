@@ -33,6 +33,8 @@ const SignUpSchema = Yup.object().shape({
         .required('register.errors.repeatPassword.isRequired'),
 });
 
+const EXISTING_USER_ERROR = "USER_ALREADY_EXISTS"
+
 function SignUpStudentForm(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -54,7 +56,7 @@ function SignUpStudentForm(props) {
 
     const register = async (values, setSubmitting, setFieldError) => {
         const { status, data } = await ApiService.registerStudent(
-            values.email, values.password, selectedSchool, selectedProgram
+            values.name, values.email, values.password, selectedSchool, selectedProgram
         );
         switch (status) {
             case CREATED:
@@ -86,7 +88,7 @@ function SignUpStudentForm(props) {
     const onSubmit = (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true)
         if (selectedSchool && selectedProgram)
-            register(values, setSubmitting, setFieldError);
+            register(values, setSubmitting, setFieldError)
         else {
             setProgramError(true)
             setSubmitting(false)
@@ -95,16 +97,16 @@ function SignUpStudentForm(props) {
 
     const loadSchoolOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getUniversities(inputValue).then((data) => {
+            ApiService.getUniversities(inputValue).then(resp => {
                 let findError = null;
-                if (data && data.status && data.status !== OK)
-                    findError = data.status;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
                 if (findError) {
-                    setError(data.status)
+                    setError(resp.status)
                     setStatus(findError)
                     callback([])
                 } else {
-                    callback(data)
+                    callback(resp.data)
                 }
             })
         })
@@ -112,16 +114,16 @@ function SignUpStudentForm(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(selectedSchool, inputValue).then((data) => {
+            ApiService.getPrograms(selectedSchool, inputValue).then(resp => {
                 let findError = null;
-                if (data && data.status && data.status !== OK)
-                    findError = data.status;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
                 if (findError) {
-                    setError(data.status)
+                    setError(resp.status)
                     setStatus(findError)
                     callback([])
                 } else {
-                    callback(data)
+                    callback(resp.data)
                 }
             })
         })
@@ -129,7 +131,7 @@ function SignUpStudentForm(props) {
 
     return (
         <Formik
-            initialValues={{ email: '', password: '', repeat_password: '' }}
+            initialValues={{ name: '', email: '', password: '', repeat_password: '' }}
             validationSchema={SignUpSchema}
             onSubmit={onSubmit}
         >
@@ -137,6 +139,17 @@ function SignUpStudentForm(props) {
                 <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
                     <FontAwesomeIcon size="3x" icon={faMortarBoard} />
                     {error && (<p className="form-error">{t('register.errors.codes.'+error)}</p>)}
+
+                    <FormInputField
+                        label="register.name"
+                        name="name"
+                        placeholder="register.placeholders.nameStudent"
+                        value={values.name}
+                        error={errors.name}
+                        touched={touched.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                    />
 
                     <FormInputField
                         label="register.email"
@@ -173,7 +186,7 @@ function SignUpStudentForm(props) {
                         onBlur={handleBlur}
                     />
 
-                    {!error && (
+                    {!(error && error != EXISTING_USER_ERROR) && (
                         <>
                             <Form.Group controlId="school" className="mb-0 row mx-auto form-row">
                                 <div className="col-3 text-end my-auto text-break ">
@@ -214,7 +227,7 @@ function SignUpStudentForm(props) {
                                             placeholder={t('register.program')}
                                             cacheOptions
                                             defaultOptions
-                                            getOptionLabel={e => e.internalId+' - '+e.name}
+                                            getOptionLabel={e => e.code+' - '+e.name}
                                             getOptionValue={e => e.id}
                                             loadOptions={loadProgramOptions}
                                             onChange={opt => onChangePrograms(opt.id)}
@@ -234,7 +247,7 @@ function SignUpStudentForm(props) {
                             )}
                         </>
                     )}
-                    <Button className="mt-4 mb-2" variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting || error}>
+                    <Button className="mt-4 mb-2" variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting || (error && error != EXISTING_USER_ERROR)}>
                         {t('register.submit')}
                     </Button>
                 </Form>

@@ -56,7 +56,7 @@ export default class CourseService {
             throw new GenericException(ERRORS.BAD_REQUEST.COURSE_ALREADY_EXISTS);
 
         // TODO add session logic for transactional operations
-        const course: Course = await this.dao.create(name, internalId, universityId);
+        const course: Course = await this.dao.create(universityId, internalId, name);
         for (const programId of Object.keys(requiredCourses)) {
             for (const courseId of requiredCourses[programId]) {
                 await course.setRequiredCourse(programId, courseId);

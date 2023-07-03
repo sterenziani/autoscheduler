@@ -76,40 +76,40 @@ export class UniversityController {
     };
 
     public getUniversityCourses: RequestHandler = async (req, res, next) => {
-        const userInfo = req.user;
+        const userId = req.params.userId;
         const filter = req.query.filter as string | undefined;
         const page = parseInt(req.query.page as string) ?? undefined;
         const per_page = parseInt(req.query.per_page as string) ?? undefined;
 
         try {
-            const courses = await this.courseService.getCoursesByText(userInfo.id, filter, per_page, page);
+            const courses = await this.courseService.getCoursesByText(userId, filter, per_page, page);
             const links: Record<string, string> = {};
             for (const [key, value] of Object.entries(courses.pagingInfo)) {
-                links[key] = UniversityDto.getUniversityCoursesUrl(userInfo.id, filter, value, per_page);
+                links[key] = UniversityDto.getUniversityCoursesUrl(userId, filter, value, per_page);
             }
             res.status(HTTP_STATUS.OK)
                 .links(links)
-                .send(courses.collection.map((c) => CourseDto.courseToDto(c, userInfo.id)));
+                .send(courses.collection.map((c) => CourseDto.courseToDto(c, userId)));
         } catch (e) {
             next(e);
         }
     };
 
     public getUniversityPrograms: RequestHandler = async (req, res, next) => {
-        const userInfo = req.user;
+        const userId = req.params.userId;
         const filter = req.query.filter as string | undefined;
         const page = parseInt(req.query.page as string) ?? undefined;
         const per_page = parseInt(req.query.per_page as string) ?? undefined;
 
         try {
-            const programs = await this.programService.getProgramsByText(userInfo.id, filter, per_page, page);
+            const programs = await this.programService.getProgramsByText(userId, filter, per_page, page);
             const links: Record<string, string> = {};
             for (const [key, value] of Object.entries(programs.pagingInfo)) {
-                links[key] = UniversityDto.getUniversityProgramsUrl(userInfo.id, filter, value, per_page);
+                links[key] = UniversityDto.getUniversityProgramsUrl(userId, filter, value, per_page);
             }
             res.status(HTTP_STATUS.OK)
                 .links(links)
-                .send(programs.collection.map((p) => ProgramDto.programToDto(p, userInfo.id)));
+                .send(programs.collection.map((p) => ProgramDto.programToDto(p, userId)));
         } catch (e) {
             next(e);
         }
