@@ -192,7 +192,8 @@
                 "codeIsRequired":"La materia debe tener un código con el cual la identifique.",
                 "minNameLength":"El nombre de la materia debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre de la materia no puede superar los 50 characters.",
-                "nameIsRequired":"La materia debe tener un nombre."
+                "nameIsRequired":"La materia debe tener un nombre.",
+                "codeAlreadyTaken":"Ya existe una materia con ese código."
             },
             "program":{
                 "minCodeLength":"El plan de carrera debe tener un código con el cual la identifique.",
@@ -200,7 +201,8 @@
                 "codeIsRequired":"El plan de carrera debe tener un código con el cual la identifique.",
                 "minNameLength":"El nombre del plan de carrera debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre del plan de carrera no puede superar los 50 characters.",
-                "nameIsRequired":"El plan de carrera debe tener un nombre."
+                "nameIsRequired":"El plan de carrera debe tener un nombre.",
+                "codeAlreadyTaken":"Ya existe un plan de carrera con ese código."
             },
             "building":{
                 "minCodeLength":"La sede debe tener un código con el cual la identifique.",

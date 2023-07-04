@@ -14,6 +14,8 @@ import Roles from '../../resources/RoleConstants';
 import AsyncSelect from 'react-select/async'
 import ErrorMessage from '../Common/ErrorMessage';
 
+const EXISTING_COURSE_ERROR = "COURSE_ALREADY_EXISTS"
+
 function EditCoursePage(props) {
     const CourseSchema = Yup.object().shape({
         courseCode: Yup.string()
@@ -129,7 +131,7 @@ function EditCoursePage(props) {
                     navigate("/?tab=courses")
             }
             else{
-                setError(true)
+                setError(resp.data.code)
                 setStatus(resp.status)
                 setSubmitting(false);
             }
@@ -173,7 +175,7 @@ function EditCoursePage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error)
+    if (error && error != EXISTING_COURSE_ERROR)
         return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
@@ -182,6 +184,7 @@ function EditCoursePage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editCourse':'forms.createCourse')}</h2>
+                {error && (<p className="form-error">{t('forms.errors.course.codeAlreadyTaken')}</p>)}
                 <Formik initialValues={{ courseName: course.name, courseCode: course.code }} validationSchema={CourseSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>

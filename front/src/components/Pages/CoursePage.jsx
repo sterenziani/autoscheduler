@@ -54,7 +54,7 @@ function CoursePage(props) {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK && resp.status !== CREATED) findError = resp.status;
                 if (findError) {
-                    setError(true)
+                    setError(resp.data.code)
                     setStatus(findError)
                     callback([])
                 } else {

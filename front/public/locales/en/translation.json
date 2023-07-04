@@ -192,7 +192,8 @@
                 "codeIsRequired":"The course must have a code you identify it with.",
                 "minNameLength":"The course's code must be at least 3 characters long.",
                 "maxNameLength":"The course's name can't exceed 50 characters.",
-                "nameIsRequired":"The course must have a name."
+                "nameIsRequired":"The course must have a name.",
+                "codeAlreadyTaken":"A course with that code already exists."
             },
             "program":{
                 "minCodeLength":"The program must have a code you identify it with.",
@@ -200,7 +201,8 @@
                 "codeIsRequired":"The program must have a code you identify it with.",
                 "minNameLength":"The program's code must be at least 3 characters long.",
                 "maxNameLength":"The program's name can't exceed 50 characters.",
-                "nameIsRequired":"The program must have a name."
+                "nameIsRequired":"The program must have a name.",
+                "codeAlreadyTaken":"A program with that code already exists."
             },
             "building":{
                 "minCodeLength":"The building must have a code you identify it with.",

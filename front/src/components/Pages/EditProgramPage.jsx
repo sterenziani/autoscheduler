@@ -13,6 +13,8 @@ import NoAccess from '../Common/NoAccess';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
+const EXISTING_PROGRAM_ERROR = "PROGRAM_ALREADY_EXISTS"
+
 function EditProgramPage(props) {
     const ProgramSchema = Yup.object().shape({
         programCode: Yup.string()
@@ -144,7 +146,7 @@ function EditProgramPage(props) {
                 navigate("/?tab=programs")
             }
             else{
-                setError(true)
+                setError(resp.data.code)
                 setStatus(resp.status)
                 setSubmitting(false);
             }
@@ -190,8 +192,8 @@ function EditProgramPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error)
-        return <ErrorMessage status={status}/>
+        if (error && error != EXISTING_PROGRAM_ERROR)
+            return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
             <HelmetProvider>
@@ -199,6 +201,7 @@ function EditProgramPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editProgram':'forms.createProgram')}</h2>
+                {error && (<p className="form-error">{t('forms.errors.program.codeAlreadyTaken')}</p>)}
                 <Formik initialValues={{ programName: program.name, programCode: program.code }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
