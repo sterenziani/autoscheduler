@@ -16,9 +16,8 @@ function StudentCoursesList(props){
     const [status, setStatus] = useState(null);
     const user = props.user;
 
-    const [prevPage, setPrevPage] = useState(false);
+    const [paginationLinks, setPaginationLinks] = useState(null);
     const [page, setPage] = useState(1);
-    const [nextPage, setNextPage] = useState(false);
     const search = useLocation().search
 
     const readPageInSearchParams = () => {
@@ -65,9 +64,8 @@ function StudentCoursesList(props){
             }
             else{
                 let links = ApiService.parsePagination(resp)
+                setPaginationLinks(links)
                 setCourses(resp.data)
-                setPrevPage(links.prev)
-                setNextPage(links.next)
             }
             setLoading(false)
         });
@@ -80,7 +78,7 @@ function StudentCoursesList(props){
     return (
         <React.Fragment>
             <CourseList key="course-list" reloadCourses={() => loadCourses(page)} courses={courses}/>
-            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
+            <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

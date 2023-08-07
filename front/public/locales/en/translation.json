@@ -234,5 +234,11 @@
     "noDefinedRequirements": "No requirements defined. It is possible this course does not belong to the selected program.",
     "selectNoOptions": "Please type in a character to search for options.",
     "selectNoResults": "No results found for the given query.",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "pagination": {
+        "page": "Page {{page}}",
+        "popover": "Click here for page selection.",
+        "goToPage": "Go to page...",
+        "go": "Go"
+    }
 }

@@ -210,7 +210,7 @@
                 "codeIsRequired":"La sede debe tener un código con el cual la identifique.",
                 "minNameLength":"El nombre de la sede debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre de la sede no puede superar los 50 characters.",
-                "nameIsRequired":"La sede debe tener un nombre.""
+                "nameIsRequired":"La sede debe tener un nombre."
             }
         }
     },
@@ -234,5 +234,11 @@
     "noDefinedRequirements": "No hay correlativas definidas. Es posible que esta materia no sea parte del plan seleccionado.",
     "selectNoOptions": "Ingrese un caracter para buscar.",
     "selectNoResults": "No results found for the given query.",
-    "goHome": "Volver al inicio"
+    "goHome": "Volver al inicio",
+    "pagination": {
+        "page": "Página {{page}}",
+        "popover": "Haga click aquí para seleccionar una página.",
+        "goToPage": "Saltar a la página...",
+        "go": "Ir"
+    }
 }

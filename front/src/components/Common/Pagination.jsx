@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Row, Col } from 'react-bootstrap';
+import { Button, Row, Col, Form, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
 const FormInputField = (props) => {
-    const { t } = useTranslation();
-    const page = props.page;
-    const prevPage = props.prevPage;
-    const nextPage = props.nextPage;
+    const { t } = useTranslation()
+    const page = props.page
+    const links = props.links? props.links : {}
     const loadContent = props.loadContent
+    const [selectedPage, setSelectedPage] = useState(1)
+
+    const prevPage = links.prev;
+    const nextPage = links.next;
+    const lastPage = (links.last)? parseInt(links.last.split("page=")[1].match(/\d+/))+1 : 1
+    const [showModal, setShowModal] = useState(false)
 
     const movePagePrev = () => {
         loadContent(parseInt(page)-1)
@@ -16,6 +21,15 @@ const FormInputField = (props) => {
 
     const movePageNext = () => {
         loadContent(parseInt(page)+1)
+    }
+
+    const goToSelectedPage = (selectedPage) => {
+        if(selectedPage > lastPage)
+            selectedPage = lastPage
+        if(selectedPage <= 0)
+            selectedPage = 1
+        setShowModal(false)
+        loadContent(parseInt(selectedPage))
     }
 
     return (
@@ -31,7 +45,11 @@ const FormInputField = (props) => {
                     ]
                 }
                 </Col>
-                <h6 className="col my-auto page-number">Page {page}</h6>
+
+                <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">{t('pagination.popover')}</Tooltip>}>
+                    <h6 onClick={() => setShowModal(true)} className="col my-auto page-number"><span role="button">{t('pagination.page', {page: page})}</span></h6>
+                </OverlayTrigger>
+
                 <Col className="text-start">
                 {
                     nextPage? [
@@ -43,6 +61,24 @@ const FormInputField = (props) => {
                 }
                 </Col>
             </Row>
+
+            <Modal show={showModal} onHide={() => setShowModal(false)} className="color-warning text-black">
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('pagination.goToPage')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                <Row>
+                    <Col><Form.Control type="number" className="text-end" min="1" max={lastPage} defaultValue={selectedPage} onChange={(e) => setSelectedPage(e.target.value)}/></Col>
+                    <Col xs={1} className="my-auto text-center">/</Col>
+                    <Col className="my-auto text-start ml-5">{lastPage}</Col>
+                </Row>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={() => goToSelectedPage(selectedPage)}>
+                        {t('pagination.go')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </React.Fragment>
     );
 };

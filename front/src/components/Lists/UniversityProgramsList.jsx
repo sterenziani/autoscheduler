@@ -18,9 +18,8 @@ function UniversityProgramsList(props){
     const user = props.user;
     const [programs, setPrograms] = useState(null);
     const [programToDelete, setProgramToDelete] = useState();
-    const [prevPage, setPrevPage] = useState(false);
+    const [paginationLinks, setPaginationLinks] = useState(null);
     const [page, setPage] = useState(1);
-    const [nextPage, setNextPage] = useState(false);
     const search = useLocation().search
 
     const readPageInSearchParams = () => {
@@ -63,9 +62,8 @@ function UniversityProgramsList(props){
             }
             else{
                 let links = ApiService.parsePagination(resp)
+                setPaginationLinks(links)
                 setPrograms(resp.data)
-                setPrevPage(links.prev)
-                setNextPage(links.next)
             }
             setLoading(false)
         });
@@ -134,7 +132,7 @@ function UniversityProgramsList(props){
                           <div key="empty-list">{t('emptyList')}</div>,
                       ]}
             </div>
-            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
+            <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"
