@@ -12,7 +12,7 @@ const FormInputField = (props) => {
 
     const prevPage = links.prev;
     const nextPage = links.next;
-    const lastPage = (links.last)? parseInt(links.last.split("page=")[1].match(/\d+/))+1 : 1
+    const lastPage = (links.last && parseInt(links.last.includes("page=")))? parseInt(links.last.split("page=")[1].match(/\d+/))+1 : 1
     const [showModal, setShowModal] = useState(false)
 
     const movePagePrev = () => {
