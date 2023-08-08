@@ -23,13 +23,13 @@ const FormInputField = (props) => {
         loadContent(parseInt(page)+1)
     }
 
-    const goToSelectedPage = (selectedPage) => {
+    const goToSelectedPage = (requestedPage) => {
         if(selectedPage > lastPage)
-            selectedPage = lastPage
+            requestedPage = lastPage
         if(selectedPage <= 0)
-            selectedPage = 1
+            requestedPage = 1
         setShowModal(false)
-        loadContent(parseInt(selectedPage))
+        loadContent(parseInt(requestedPage))
     }
 
     return (
