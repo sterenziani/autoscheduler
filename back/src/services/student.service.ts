@@ -3,6 +3,7 @@ import Course from '../models/abstract/course.model';
 import StudentDao from '../persistence/abstract/student.dao';
 import StudentDaoFactory from '../factories/studentDao.factory';
 import { ROLE } from '../constants/general.constants';
+import CourseService from './course.service';
 import ProgramService from './program.service';
 import UserService from './user.service';
 import GenericException from '../exceptions/generic.exception';
@@ -10,6 +11,7 @@ import { ERRORS } from '../constants/error.constants';
 
 export default class StudentService {
     private static instance: StudentService;
+    private courseService!: CourseService;
     private programService!: ProgramService;
     private userService!: UserService;
 
@@ -29,6 +31,7 @@ export default class StudentService {
     init() {
         this.programService = ProgramService.getInstance();
         this.userService = UserService.getInstance();
+        this.courseService = CourseService.getInstance();
     }
 
     // public methods
@@ -60,5 +63,51 @@ export default class StudentService {
         const user = await this.userService.createUser(email, password, ROLE.STUDENT);
         // create student
         return await this.dao.create(user.id, universityId, programId, internalId, name);
+    }
+
+    async addStudentCompletedCourses(studentId: string, completedCourses: string[]): Promise<void> {
+        const student = await this.dao.getById(studentId);
+        const studentUniversity = await student.getUniversity();
+
+        // validate existence of courses
+        await Promise.all(
+            Object.keys(completedCourses).map(async (cId) => {
+                const course: Course = await this.courseService.findCourseByInternalId(studentUniversity.id, cId);
+                const university = await course.getUniversity();
+                if (university.id != studentUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
+            }),
+        );
+
+        // TODO add session logic for transactional operations
+        await Promise.all(
+            Object.keys(completedCourses).map(async (cId) => {
+                await student.addCompletedCourse(cId);
+            }),
+        );
+
+        return;
+    }
+
+    async removeStudentCompletedCourses(studentId: string, completedCourses: string[]): Promise<void> {
+        const student = await this.dao.getById(studentId);
+        const studentUniversity = await student.getUniversity();
+
+        // validate existence of courses
+        await Promise.all(
+            Object.keys(completedCourses).map(async (cId) => {
+                const course: Course = await this.courseService.findCourseByInternalId(studentUniversity.id, cId);
+                const university = await course.getUniversity();
+                if (university.id != studentUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
+            }),
+        );
+
+        // TODO add session logic for transactional operations
+        await Promise.all(
+            Object.keys(completedCourses).map(async (cId) => {
+                await student.deleteCompletedCourse(cId);
+            }),
+        );
+
+        return;
     }
 }

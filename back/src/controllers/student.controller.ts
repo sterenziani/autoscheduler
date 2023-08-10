@@ -40,7 +40,30 @@ export class StudentController {
         }
     };
 
-    public getStudentApprovedCourses: RequestHandler = async (req, res, next) => {
+    public createStudent: RequestHandler = async (req, res, next) => {
+        const email = req.body.email as string;
+        const password = req.body.password as string;
+        const universityId = req.body.universityId as string;
+        const programId = req.body.programId as string;
+        const internalId = req.body.internalId as string;
+        const name = req.body.name as string;
+
+        try {
+            const student: Student = await this.studentService.createStudent(
+                email,
+                password,
+                universityId,
+                programId,
+                internalId,
+                name,
+            );
+            res.status(HTTP_STATUS.CREATED).location(getUserUrl(student.id, ROLE.STUDENT)).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentCompletedCourses: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
         const userInfo = req.user;
 
@@ -62,24 +85,31 @@ export class StudentController {
         }
     };
 
-    public createStudent: RequestHandler = async (req, res, next) => {
-        const email = req.body.email as string;
-        const password = req.body.password as string;
-        const universityId = req.body.universityId as string;
-        const programId = req.body.programId as string;
-        const internalId = req.body.internalId as string;
-        const name = req.body.name as string;
+    public addStudentCompletedCourses: RequestHandler = async (req, res, next) => {
+        const userId = req.params.userId;
+        const userInfo = req.user;
+        const completedCourses = req.body.courseIds as string[];
+
+        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
         try {
-            const student: Student = await this.studentService.createStudent(
-                email,
-                password,
-                universityId,
-                programId,
-                internalId,
-                name,
-            );
-            res.status(HTTP_STATUS.CREATED).location(getUserUrl(student.id, ROLE.STUDENT)).send();
+            await this.studentService.addStudentCompletedCourses(userInfo.id, completedCourses);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public removeStudentCompletedCourses: RequestHandler = async (req, res, next) => {
+        const userId = req.params.userId;
+        const userInfo = req.user;
+        const completedCourses = req.body.courseIds as string[];
+
+        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+
+        try {
+            await this.studentService.removeStudentCompletedCourses(userInfo.id, completedCourses);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }

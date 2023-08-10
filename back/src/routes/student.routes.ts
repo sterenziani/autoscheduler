@@ -29,7 +29,19 @@ export class StudentRoutes {
             '/:userId/completed-courses',
             userAuthMiddleware,
             studentsOnlyMiddleware,
-            this.controller.getStudentApprovedCourses,
+            this.controller.getStudentCompletedCourses,
+        );
+        this.router.post(
+            '/:userId/completed-courses',
+            userAuthMiddleware,
+            studentsOnlyMiddleware,
+            this.controller.addStudentCompletedCourses,
+        );
+        this.router.delete(
+            '/:userId/completed-courses',
+            userAuthMiddleware,
+            studentsOnlyMiddleware,
+            this.controller.removeStudentCompletedCourses,
         );
     }
 }

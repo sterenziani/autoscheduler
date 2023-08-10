@@ -36,6 +36,12 @@ export default class CourseService {
         return await this.dao.getById(id);
     }
 
+    async findCourseByInternalId(universityId: string, internalId: string): Promise<Course> {
+        const course = await this.dao.findByInternalId(universityId, internalId);
+        if (!course) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
+        return course;
+    }
+
     async createCourse(
         universityId: string,
         name: string,
