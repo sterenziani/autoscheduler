@@ -17,12 +17,12 @@ export default class StudentService {
 
     private dao: StudentDao;
 
-    static getInstance = (): StudentService => {
+    static getInstance(): StudentService {
         if (!StudentService.instance) {
             StudentService.instance = new StudentService();
         }
         return StudentService.instance;
-    };
+    }
 
     constructor() {
         this.dao = StudentDaoFactory.get();

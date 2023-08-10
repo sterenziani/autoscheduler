@@ -12,12 +12,12 @@ export default class UserService {
 
     private dao: UserDao;
 
-    static getInstance = (): UserService => {
+    static getInstance(): UserService {
         if (!UserService.instance) {
             UserService.instance = new UserService();
         }
         return UserService.instance;
-    };
+    }
 
     constructor() {
         this.dao = UserDaoFactory.get();

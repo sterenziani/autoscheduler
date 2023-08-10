@@ -14,12 +14,12 @@ export default class UniversityService {
     private dao: UniversityDao;
     private userService!: UserService;
 
-    static getInstance = (): UniversityService => {
+    static getInstance(): UniversityService {
         if (!UniversityService.instance) {
             UniversityService.instance = new UniversityService();
         }
         return UniversityService.instance;
-    };
+    }
 
     constructor() {
         this.dao = UniversityDaoFactory.get();

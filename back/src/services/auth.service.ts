@@ -14,12 +14,12 @@ export default class UserAuthService {
     private readonly jwtPublicKey: string;
     private readonly expireTime: string;
 
-    static getInstance = (): UserAuthService => {
+    static getInstance(): UserAuthService {
         if (!UserAuthService.instance) {
             UserAuthService.instance = new UserAuthService();
         }
         return UserAuthService.instance;
-    };
+    }
 
     private constructor() {
         this.jwtKey = process.env.AUTH_TOKEN_KEY!;

@@ -15,12 +15,12 @@ export default class ProgramService {
 
     private dao: ProgramDao;
 
-    static getInstance = (): ProgramService => {
+    static getInstance(): ProgramService {
         if (!ProgramService.instance) {
             ProgramService.instance = new ProgramService();
         }
         return ProgramService.instance;
-    };
+    }
 
     constructor() {
         this.dao = ProgramDaoFactory.get();
