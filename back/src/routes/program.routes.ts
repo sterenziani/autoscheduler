@@ -4,6 +4,7 @@ import { ProgramController } from '../controllers/program.controller';
 import cors from 'cors';
 import userAuthMiddleware from '../middlewares/userAuth.middleware';
 import universitiesOnlyMiddleware from '../middlewares/universitiesOnly.middleware';
+import pagingMiddleware from '../middlewares/paging.middleware';
 
 export class ProgramRoutes {
     public router: Router = Router();
@@ -23,6 +24,8 @@ export class ProgramRoutes {
         this.router.use(cors());
 
         this.router.post('/', userAuthMiddleware, universitiesOnlyMiddleware, this.controller.createProgram);
-        this.router.get('/:programId', userAuthMiddleware, this.controller.getProgram);
+        this.router.get('/:programId', this.controller.getProgram);
+        this.router.get('/:programId/courses/mandatory', pagingMiddleware, this.controller.getProgramMandatoryCourses);
+        this.router.get('/:programId/courses/optional', pagingMiddleware, this.controller.getProgramOptionalCourses);
     }
 }

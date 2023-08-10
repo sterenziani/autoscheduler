@@ -6,6 +6,7 @@ import UniversityService from './university.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import Course from '../models/abstract/course.model';
 
 export default class ProgramService {
     private static instance: ProgramService;
@@ -76,5 +77,23 @@ export default class ProgramService {
         offset?: number,
     ): Promise<PaginatedCollection<Program>> {
         return await this.dao.findByText(universityId, text, limit, offset);
+    }
+
+    async getProgramMandatoryCourses(
+        id: string,
+        limit?: number,
+        offset?: number,
+    ): Promise<PaginatedCollection<Course>> {
+        const program = await this.dao.getById(id);
+        if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
+
+        return await program.getMandatoryCourses(limit, offset);
+    }
+
+    async getProgramOptionalCourses(id: string, limit?: number, offset?: number): Promise<PaginatedCollection<Course>> {
+        const program = await this.dao.getById(id);
+        if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
+
+        return await program.getOptionalCourses(limit, offset);
     }
 }
