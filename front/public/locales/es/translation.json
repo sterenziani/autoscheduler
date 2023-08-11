@@ -23,6 +23,7 @@
                 "401": "Ocurrió un error de permisos al enviar solicitud a AutoScheduler.",
                 "TIMEOUT": "No pudimos conectarnos al servicio de AutoScheduler",
                 "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
+                "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",
                 "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas."
             },
             "gettingUniversitiesData": "Ocurrió un error al buscar datos de universidades.",
@@ -90,6 +91,7 @@
         "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'?",
         "noRemainingCoursesProgram": "No quedan materias correspondientes a este plan.",
         "noRemainingCourses": "No quedan más materias.",
+        "inputTextToSearch": "Escriba el nombre o código de un curso para buscarlo.",
         "cancel": "Cancelar",
         "delete": "Eliminar",
         "add": "Añadir",

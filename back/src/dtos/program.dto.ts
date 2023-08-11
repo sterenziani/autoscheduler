@@ -25,7 +25,7 @@ export const getProgramMandatoryCoursesUrl = (programId: string, page?: number, 
         page: page !== undefined ? page.toString() : page,
         per_page: perPage !== undefined ? perPage.toString() : perPage,
     };
-    return queryParamsStringBuilder(`${getProgramUrl(programId)}/mandatory-courses`, params);
+    return queryParamsStringBuilder(`${getProgramUrl(programId)}/courses/mandatory`, params);
 };
 
 export const getProgramOptionalCoursesUrl = (programId: string, page?: number, perPage?: number): string => {
@@ -33,7 +33,7 @@ export const getProgramOptionalCoursesUrl = (programId: string, page?: number, p
         page: page !== undefined ? page.toString() : page,
         per_page: perPage !== undefined ? perPage.toString() : perPage,
     };
-    return queryParamsStringBuilder(`${getProgramUrl(programId)}/optional-courses`, params);
+    return queryParamsStringBuilder(`${getProgramUrl(programId)}/courses/optional`, params);
 };
 
 interface IProgramDto {

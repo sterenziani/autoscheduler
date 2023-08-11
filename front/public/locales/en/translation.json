@@ -23,6 +23,7 @@
                 "401": "Failed to make request to AutoScheduler service with permissions error.",
                 "TIMEOUT": "Could not connect to AutoScheduler service.",
                 "USER_ALREADY_EXISTS": "A user with that email address already exists.",
+                "UNIVERSITY_ALREADY_EXISTS": "A university with that name is already registered.",
                 "INVALID_PASSWORD": "Invalid password. Please make it longer and ensure it has a mix of numbers, uppercase and lowercase letters."
             },
             "gettingUniversitiesData": "There was an error fetching universities data.",
@@ -90,6 +91,7 @@
         "areYouSureTerm": "Are you sure you want to delete the term '{{code}} - {{name}}'?",
         "noRemainingCoursesProgram": "This program has no remaining courses available.",
         "noRemainingCourses": "No remaining courses available.",
+        "inputTextToSearch": "Type a course's name or code to search for it.",
         "cancel": "Cancel",
         "delete": "Delete",
         "add": "Add",

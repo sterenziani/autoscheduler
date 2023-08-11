@@ -35,19 +35,23 @@ function CourseListForm(props) {
 
     const loadRemainingCoursesOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getCourses(user.id, inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
-                    callback([])
-                } else {
-                    const availableCourses = resp.data.filter((item) => !unavailableCourses.find((c) => c.id === item.id))
-                    callback(availableCourses)
-                }
-            })
+            if(!inputValue){
+                callback([])
+            }
+            else{
+                ApiService.getCoursesNotInList(user.id, inputValue, unavailableCourses).then((resp) => {
+                    let findError = null;
+                    if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                        findError = resp.status;
+                    if (findError) {
+                        setError(true)
+                        setStatus(findError)
+                        callback([])
+                    } else {
+                        callback(resp.data)
+                    }
+                })
+            }
         })
     }
 
@@ -94,7 +98,7 @@ function CourseListForm(props) {
                         noOptionsMessage={(inputValue) => {
                             if(inputValue.inputValue.length > 0)
                                 return t('selectNoResults')
-                            return t('modal.noRemainingCourses')
+                            return t('modal.inputTextToSearch')
                         }}
                         getOptionLabel={e => e.code+' - '+e.name}
                         getOptionValue={e => e.id}

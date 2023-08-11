@@ -92,9 +92,22 @@ const getSchedules = (params) =>
 
 const getUniversities = async (inputText) => {
     try {
-        const endpoint = "/universities?filter="+inputText
-        const response = await api.get(endpoint, AuthService.getRequestHeaders())
-        return response
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage){
+            const endpoint = "/universities?filter="+inputText +"&page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            finalResponse.data = finalResponse.data.concat(response.data)
+            finalResponse.status = response.status
+        }
+        return finalResponse
     }
     catch(e) {
         if (e.response)
@@ -165,9 +178,22 @@ const getRequiredCourses = (courseId) =>
 
 const getMandatoryCourses = async (programId) => {
     try {
-        const endpoint = "/program/"+programId+"/mandatory-courses"
-        const response = await api.get(endpoint, AuthService.getRequestHeaders())
-        return response
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage){
+            const endpoint = "/program/"+programId+"/courses/mandatory" +"?page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            finalResponse.data = finalResponse.data.concat(response.data)
+            finalResponse.status = response.status
+        }
+        return finalResponse
     }
     catch(e) {
         if (e.response)
@@ -179,9 +205,22 @@ const getMandatoryCourses = async (programId) => {
 
 const getOptionalCourses = async (programId) => {
     try {
-        const endpoint = "/program/"+programId+"/optional-courses"
-        const response = await api.get(endpoint, AuthService.getRequestHeaders())
-        return response
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage){
+            const endpoint = "/program/"+programId+"/courses/optional" +"?page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            finalResponse.data = finalResponse.data.concat(response.data)
+            finalResponse.status = response.status
+        }
+        return finalResponse
     }
     catch(e) {
         if (e.response)
@@ -207,6 +246,23 @@ const getPrograms = async (universityId, inputText) => {
         const endpoint = "/university/" + universityId + "/programs?filter=" + inputText
         const response = await api.get(endpoint, AuthService.getRequestHeaders())
         return response
+
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage){
+            const endpoint = "/university/" + universityId + "/programs?filter=" + inputText +"?page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            finalResponse.data = finalResponse.data.concat(response.data)
+            finalResponse.status = response.status
+        }
+        return finalResponse
     }
     catch(e) {
         if (e.response)
@@ -235,6 +291,35 @@ const getCourses = async (universityId, inputText) => {
         const endpoint = "/university/" + universityId + "/courses?filter=" + inputText
         const response = await api.get(endpoint, AuthService.getRequestHeaders())
         return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const getCoursesNotInList = async (universityId, inputText, coursesToFilter) => {
+    try {
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage && finalResponse.data.length < 20){
+            const endpoint = "/university/" + universityId + "/courses?filter=" + inputText +"&page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            const foundCourses = response.data.filter((item) => !coursesToFilter.find((c) => c.id === item.id))
+            finalResponse.data = finalResponse.data.concat(foundCourses)
+            finalResponse.data.length = Math.min(20, finalResponse.data.length)
+            finalResponse.status = response.status
+        }
+        return finalResponse
     }
     catch(e) {
         if (e.response)
@@ -563,6 +648,7 @@ const ApiService = {
     deleteProgram: deleteProgram,
     getCourses: getCourses,
     getCoursesPage: getCoursesPage,
+    getCoursesNotInList: getCoursesNotInList,
     getCourseClass: getCourseClass,
     deleteCourse: deleteCourse,
     deleteBuilding: deleteBuilding,
