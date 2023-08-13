@@ -8,10 +8,12 @@ const parsePagination = (response) => {
     let arrData = response.headers.link
     let links = {}
 
-    arrData = arrData.split(",")
-    for (var d of arrData){
-        let linkInfo = /<([^>]+)>;\s+rel="([^"]+)"/ig.exec(d)
-        links[linkInfo[2]] = api.defaults.baseURL + "/" + linkInfo[1]
+    if(arrData){
+        arrData = arrData.split(",")
+        for (var d of arrData){
+            let linkInfo = /<([^>]+)>;\s+rel="([^"]+)"/ig.exec(d)
+            links[linkInfo[2]] = api.defaults.baseURL + "/" + linkInfo[1]
+        }
     }
     return links
 }
@@ -79,6 +81,30 @@ const requestPasswordChangeToken = async (username) => {
 
 const getActiveUser = () => {
     return AuthService.getUserStore()
+}
+
+const getStudent = async (studentId) => {
+    try{
+        let user = getActiveUser()
+        if(user.id != studentId){
+            const endpoint = "student/"+studentId
+            const resp = await api.get(endpoint, AuthService.getRequestHeaders())
+            user = resp.data
+        }
+        const universityResponse = await api.get(user.universityUrl, AuthService.getRequestHeaders())
+        const programResponse = await api.get(user.programUrl, AuthService.getRequestHeaders())
+        return {
+            ...user,
+            university: universityResponse.data,
+            program: programResponse.data
+        }
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
 }
 
 const getSchedules = (params) =>
@@ -373,64 +399,56 @@ const getBuildings = (universityId, page) =>
         }
     });
 
-const getRemainingCoursesProgram = (user, programId, inputText) =>
-    new Promise((resolve, reject) => {
-        const courses = SgaConstants.remainingCourses[programId-1]
-        if(!inputText)
-            setTimeout(() => resolve(courses), RESOLVE_DELAY);
-        else{
-            const resp = courses.filter((c) => c.name.toLowerCase().indexOf(inputText.toLowerCase()) !== -1)
-            setTimeout(() => resolve(resp), RESOLVE_DELAY)
-        }
-    });
+const getRemainingCoursesProgram = async (user, programId, inputText) => {
+    // TODO: Placeholder. This should be a call to API's getRemainingCoursesProgram, filtering results by program and removing those already finished by user
+    const courses = await getCourses(user.university.id, inputText)
+    return courses
+}
 
-const getFinishedCourses = (studentId, page) =>
-    new Promise((resolve, reject) => {
-        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student == studentId).courses;
-        const courses = SgaConstants.informaticaCourses.filter((c) => {
-            if (courseCodes.includes(c.id))
-                return true;
-            return false;
-        });
-        if(!page)
-            setTimeout(() => resolve(courses), RESOLVE_DELAY);
-        else{
-            if(page==1)
-                setTimeout(() => resolve(courses.slice(0, 5)), RESOLVE_DELAY);
-            else if(page==2)
-                setTimeout(() => resolve(courses.slice(5, 10)), RESOLVE_DELAY);
-            else
-                setTimeout(() => resolve([]), RESOLVE_DELAY);
-        }
-    });
-/*{
+const getFinishedCourses = async (studentId, page) => {
     try {
-        const endpoint = "student/"+student.id;
-        const response = await api.get(endpoint, { headers: { 'Content-Type': 'application/json' , authorization: "Bearer "+AuthService.getToken()}});
-        return response;
-    } catch(err) {
-        if(err.response)
-            return { status : err.response.status };
+        const endpoint = "student/" +studentId +"/completed-courses?page=" + (page-1)
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
         else
-            return { status : TIMEOUT }
+            return { status: TIMEOUT }
     }
 }
-    */
 
+const addFinishedCourse = async (studentId, courseId) => {
+    try {
+        const endpoint = "student/" +studentId +"/completed-courses"
+        const body = {courseIds: [courseId]}
+        const response = await api.post(endpoint, body, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
-const addFinishedCourse = (studentId, courseId) =>
-    new Promise((resolve, reject) => {
-        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student == studentId).courses;
-        courseCodes.unshift(courseId);
-        setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
-    });
-
-const deleteFinishedCourse = (studentId, courseId) =>
-    new Promise((resolve, reject) => {
-        const courseCodes = SgaConstants.finishedCourses.find((c) => c.student == studentId).courses;
-        courseCodes.splice(courseCodes.indexOf(courseId), 1);
-        setTimeout(() => resolve(courseCodes), RESOLVE_DELAY);
-    });
+const deleteFinishedCourse = async (studentId, courseId) => {
+    try {
+        const endpoint = "student/" +studentId +"/completed-courses"
+        const config = AuthService.getRequestHeaders()
+        config.data = {courseIds: [courseId]}
+        const response = await api.delete(endpoint, config) // Data needed for DELETE syntax
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const deleteProgram = (program) =>
     new Promise((resolve, reject) => {
@@ -627,6 +645,7 @@ const ApiService = {
     logout: logout,
     requestPasswordChangeToken: requestPasswordChangeToken,
     getActiveUser: getActiveUser,
+    getStudent: getStudent,
     getSchedules: getSchedules,
     getUniversities: getUniversities,
     getPrograms: getPrograms,

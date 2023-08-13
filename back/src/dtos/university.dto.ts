@@ -50,6 +50,10 @@ export const getUniversitiesUrl = (filter?: string, page?: number, perPage?: num
     return queryParamsStringBuilder('universities', params);
 };
 
+export const getUniversityUrl = (universityId: string): string => {
+    return getUserUrl(universityId, ROLE.UNIVERSITY);
+};
+
 type IUniversityDto = UserDto.IUserDto & {
     name: string;
     verified: boolean;

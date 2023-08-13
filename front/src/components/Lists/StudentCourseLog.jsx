@@ -17,7 +17,7 @@ function StudentCourseLog(props) {
     const [courses, setCourses] = useState(null);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const user = ApiService.getActiveUser();
+    const student = props.student;
 
     const [prevPage, setPrevPage] = useState(false);
     const [page, setPage] = useState(1);
@@ -25,7 +25,7 @@ function StudentCourseLog(props) {
     const search = useLocation().search;
 
     const [showAddModal,setShowAddModal] = useState(false);
-    const [selectedProgram,setSelectedProgram] = useState(user.program.id);
+    const [selectedProgram,setSelectedProgram] = useState(student.program.id);
     const [courseToAdd,setCourseToAdd] = useState();
 
     const readPageInSearchParams = () => {
@@ -58,16 +58,16 @@ function StudentCourseLog(props) {
 
     const loadCourses = (page) => {
         setLoading(true)
-        ApiService.getFinishedCourses(user.id, page).then((data) => {
+        ApiService.getFinishedCourses(student.id, page).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setCourses(data)
+                setCourses(resp.data)
                 setPrevPage(page == 2)
                 setNextPage(page < 2)
             }
@@ -92,7 +92,7 @@ function StudentCourseLog(props) {
         if (!courseToAdd)
             return;
         setLoading(true)
-        ApiService.addFinishedCourse(user.id, courseToAdd).then((data) => {
+        ApiService.addFinishedCourse(student.id, courseToAdd).then((data) => {
             switchAddModal()
             setCourseToAdd()
             loadCourses(page)
@@ -102,15 +102,16 @@ function StudentCourseLog(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(user.university.id, inputValue).then((data) => {
+            ApiService.getPrograms(student.university.id, inputValue).then((resp) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                    findError = resp.status;
                 if (findError) {
                     setError(true)
                     setStatus(findError)
                     callback([])
                 } else {
-                    callback(data)
+                    callback(resp.data)
                 }
             })
         })
@@ -118,27 +119,28 @@ function StudentCourseLog(props) {
 
     const loadRemainingCoursesOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getRemainingCoursesProgram(user, selectedProgram, inputValue).then((data) => {
+            ApiService.getRemainingCoursesProgram(student, selectedProgram, inputValue).then((resp) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
                 if (findError) {
                     setError(true)
                     setStatus(findError)
                     callback([])
                 } else {
-                    callback(data)
+                    callback(resp.data)
                 }
             })
         })
     }
 
-    if (loading === true)
+    if (loading === true || student === null)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
         return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
-            {user &&
+            {
                 <>
                     <CourseList key="course-list" reloadCourses={() => loadCourses(page)} courses={courses}/>
                     <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
@@ -164,7 +166,7 @@ function StudentCourseLog(props) {
                                 defaultOptions
                                 getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
-                                defaultValue = {{value:user.program.id, code: user.program.code, name: user.program.name}}
+                                defaultValue = {{value:student.program.id, code: student.program.code, name: student.program.name}}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}
                             />

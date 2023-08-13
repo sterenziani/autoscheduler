@@ -9,6 +9,7 @@ import StudentService from '../services/student.service';
 import { ROLE } from '../constants/general.constants';
 import Student from '../models/abstract/student.model';
 import University from '../models/abstract/university.model';
+import Program from '../models/abstract/program.model';
 import Course from '../models/abstract/course.model';
 import { courseToDto } from '../dtos/course.dto';
 import { getUserUrl } from '../dtos/user.dto';
@@ -34,7 +35,9 @@ export class StudentController {
 
         try {
             const student: Student = await this.studentService.getStudent(userId);
-            res.status(HTTP_STATUS.OK).send(StudentDto.studentToDto(student));
+            const university: University = await student.getUniversity();
+            const program: Program = await student.getProgram();
+            res.status(HTTP_STATUS.OK).send(StudentDto.studentToDto(student, university, program));
         } catch (e) {
             next(e);
         }

@@ -71,8 +71,8 @@ export default class StudentService {
 
         // validate existence of courses
         await Promise.all(
-            Object.keys(completedCourses).map(async (cId) => {
-                const course: Course = await this.courseService.findCourseByInternalId(studentUniversity.id, cId);
+            completedCourses.map(async (cId) => {
+                const course: Course = await this.courseService.getCourse(cId);
                 const university = await course.getUniversity();
                 if (university.id != studentUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
             }),
@@ -80,7 +80,7 @@ export default class StudentService {
 
         // TODO add session logic for transactional operations
         await Promise.all(
-            Object.keys(completedCourses).map(async (cId) => {
+            completedCourses.map(async (cId) => {
                 await student.addCompletedCourse(cId);
             }),
         );
@@ -94,8 +94,8 @@ export default class StudentService {
 
         // validate existence of courses
         await Promise.all(
-            Object.keys(completedCourses).map(async (cId) => {
-                const course: Course = await this.courseService.findCourseByInternalId(studentUniversity.id, cId);
+            completedCourses.map(async (cId) => {
+                const course: Course = await this.courseService.getCourse(cId);
                 const university = await course.getUniversity();
                 if (university.id != studentUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
             }),
@@ -103,7 +103,7 @@ export default class StudentService {
 
         // TODO add session logic for transactional operations
         await Promise.all(
-            Object.keys(completedCourses).map(async (cId) => {
+            completedCourses.map(async (cId) => {
                 await student.deleteCompletedCourse(cId);
             }),
         );

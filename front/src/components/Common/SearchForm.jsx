@@ -11,14 +11,14 @@ import { DAYS, DEFAULT_DATE } from "../../services/SystemConstants";
 function SearchForm(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const user = ApiService.getActiveUser()
+    const student = props.student
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [programError, setProgramError] = useState();
     const [terms, setTerms] = useState();
     const [params, setParams] = useState({
-        program: user.program.id, term: undefined, hours: 24,
+        program: student.program.id, term: undefined, hours: 24,
         reduceDays: true, prioritizeUnlocks: true,
         unavailableTimeSlots: [JSON.parse(JSON.stringify(DEFAULT_DATE))]
     });
@@ -108,9 +108,9 @@ function SearchForm(props) {
     }
 
     useEffect( () => {
-        if(!user)
+        if(!student)
             navigate("/register")
-        loadTerms(user.university.id)
+        loadTerms(student.university.id)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -135,15 +135,16 @@ function SearchForm(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(user.university.id, inputValue).then((data) => {
+            ApiService.getPrograms(student.university.id, inputValue).then((resp) => {
                 let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
                 if (findError) {
                     setError(true)
                     setStatus(findError)
                     callback([])
                 } else {
-                    callback(data)
+                    callback(resp.data)
                 }
             })
         })
@@ -179,7 +180,7 @@ function SearchForm(props) {
                             placeholder={t('search.program')}
                             cacheOptions
                             defaultOptions
-                            defaultValue = {{value:user.program.id, code: user.program.code, name: user.program.name}}
+                            defaultValue = {{value:student.program.id, code: student.program.code, name: student.program.name}}
                             getOptionLabel={e => e.code+' - '+e.name}
                             getOptionValue={e => e.id}
                             loadOptions={loadProgramOptions}

@@ -30,7 +30,7 @@ function HomePage(props)  {
             <HelmetProvider>
                 <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
-            {user && user.role === Roles.STUDENT && <HomePageStudent/>}
+            {user && user.role === Roles.STUDENT && <HomePageStudent user={user}/>}
             {user && user.role === Roles.UNIVERSITY &&  (<HomePageUniversity user={user}/>)}
         </React.Fragment>
     );
