@@ -3,12 +3,14 @@ import * as dotenv from 'dotenv';
 import cors from 'cors';
 import ErrorHandlerMiddleware from './middlewares/errorHandler.middleware';
 import { HomeRoutes } from './routes/home.routes';
+import { BuildingRoutes } from './routes/building.routes';
 import { CourseRoutes } from './routes/course.routes';
 import { ProgramRoutes } from './routes/program.routes';
 import { StudentRoutes } from './routes/student.routes';
 import { UniversityRoutes } from './routes/university.routes';
 import { UniversitiesRoutes } from './routes/universities.routes';
 import UserAuthService from './services/auth.service';
+import BuildingService from './services/building.service';
 import CourseService from './services/course.service';
 import ProgramService from './services/program.service';
 import StudentService from './services/student.service';
@@ -52,6 +54,7 @@ class App {
     // avoids cyclic dependencies on constructor methods
     private initializeServices() {
         UserAuthService.getInstance().init();
+        BuildingService.getInstance().init();
         CourseService.getInstance().init();
         ProgramService.getInstance().init();
         StudentService.getInstance().init();
@@ -65,6 +68,7 @@ class App {
 
     private setRoutes() {
         this.app.use('/api/', new HomeRoutes().router);
+        this.app.use('/api/building', new BuildingRoutes().router);
         this.app.use('/api/course', new CourseRoutes().router);
         this.app.use('/api/program', new ProgramRoutes().router);
         this.app.use('/api/student', new StudentRoutes().router);

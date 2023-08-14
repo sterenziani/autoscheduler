@@ -63,8 +63,8 @@ export default class ProgramService {
         // TODO add session logic for transactional operations
         const program = await this.dao.create(universityId, internalId, name);
         await Promise.all([
-            Promise.all(mandatoryCourses.map(async (cId) => program.addCourse(cId, false))),
-            Promise.all(optionalCourses.map(async (cId) => program.addCourse(cId, true))),
+            Promise.all(mandatoryCourses.map(async (cId) => await program.addCourse(cId, false))),
+            Promise.all(optionalCourses.map(async (cId) => await program.addCourse(cId, true))),
         ]);
 
         return program;

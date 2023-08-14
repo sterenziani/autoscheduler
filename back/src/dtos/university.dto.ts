@@ -13,6 +13,10 @@ export const universityToDto = (university: University): IUniversityDto => {
     };
 };
 
+export const getUniversityBuildingsUrl = (universityId: string): string => {
+    return `${getUniversityUrl(universityId)}/buildings`;
+};
+
 export const getUniversityCoursesUrl = (
     universityId: string,
     filter?: string,

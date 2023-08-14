@@ -15,6 +15,7 @@ export default abstract class Building extends GenericModel {
 
     // Methods
     public abstract setDistanceInMinutesTo(buildingId: string, distance: number): Promise<void>;
+    public abstract deleteDistanceInMinutesTo(buildingId: string): Promise<void>;
     public abstract getDistanceInMinutesTo(buildingId: string): Promise<number | undefined>;
     public abstract getUniversity(): Promise<University>;
 }

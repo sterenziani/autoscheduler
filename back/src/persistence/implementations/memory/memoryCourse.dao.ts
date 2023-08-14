@@ -1,12 +1,14 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import { addChildToParent, paginateCollection } from '../../../helpers/persistence/memoryPersistence.helper';
+import {
+    addChildToParent,
+    getChildsFromParent,
+    paginateCollection,
+} from '../../../helpers/persistence/memoryPersistence.helper';
 import Course from '../../../models/abstract/course.model';
 import MemoryCourse from '../../../models/implementations/memory/memoryCourse.model';
 import CourseDao from '../../abstract/course.dao';
 import MemoryUniversityDao from './memoryUniversity.dao';
 import { v4 as uuidv4 } from 'uuid';
-import GenericException from '../../../exceptions/generic.exception';
-import { ERRORS } from '../../../constants/error.constants';
 import { PaginatedCollection } from '../../../interfaces/paging.interface';
 
 export default class MemoryCourseDao extends CourseDao {
@@ -36,16 +38,12 @@ export default class MemoryCourseDao extends CourseDao {
     }
 
     public async findByInternalId(universityId: string, internalId: string): Promise<Course | undefined> {
-        // find courses with matching internalId
-        const coursesWithMatchingInternalId: Course[] = Array.from(MEMORY_DATABASE.courses.values()).filter(
-            (c) => c.internalId == internalId,
+        const universityCourses = getChildsFromParent(
+            MEMORY_DATABASE.coursesOfUniversity,
+            MEMORY_DATABASE.courses,
+            universityId,
         );
-        // find university with matching obtained id
-        for (const course of coursesWithMatchingInternalId) {
-            const university = await course.getUniversity();
-            if (university.id == universityId) return course;
-        }
-        return undefined;
+        return universityCourses.find((c) => c.internalId == internalId);
     }
 
     public async set(course: Course): Promise<void> {
@@ -63,13 +61,15 @@ export default class MemoryCourseDao extends CourseDao {
         offset?: number,
     ): Promise<PaginatedCollection<Course>> {
         text = text ? text.toLowerCase() : text;
-        const courses: Course[] = [];
-        for (const course of MEMORY_DATABASE.courses.values()) {
-            const university = await course.getUniversity();
-            if (university.id != universityId) continue;
-            if (!text || course.name.toLowerCase().includes(text) || course.internalId.toLowerCase().includes(text)) {
-                courses.push(course);
-            }
+        let courses: Course[] = getChildsFromParent(
+            MEMORY_DATABASE.coursesOfUniversity,
+            MEMORY_DATABASE.courses,
+            universityId,
+        );
+        if (text) {
+            courses = courses.filter(
+                (c) => c.name.toLowerCase().includes(text!) || c.internalId.toLowerCase().includes(text!),
+            );
         }
 
         // sorting by internalId

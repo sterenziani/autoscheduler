@@ -1,10 +1,9 @@
 import { RequestHandler } from 'express';
+import * as BuildingDto from '../dtos/building.dto';
 import * as CourseDto from '../dtos/course.dto';
 import * as ProgramDto from '../dtos/program.dto';
 import * as UserDto from '../dtos/user.dto';
 import * as UniversityDto from '../dtos/university.dto';
-import { ERRORS } from '../constants/error.constants';
-import GenericException from '../exceptions/generic.exception';
 import UserService from '../services/user.service';
 import CourseService from '../services/course.service';
 import { HTTP_STATUS } from '../constants/http.constants';
@@ -14,14 +13,19 @@ import University from '../models/abstract/university.model';
 import { getUserUrl } from '../dtos/user.dto';
 import { getUniversitiesUrl } from '../dtos/university.dto';
 import ProgramService from '../services/program.service';
+import BuildingService from '../services/building.service';
+import { IDistanceToBuilding } from '../interfaces/building.interface';
+import Building from '../models/abstract/building.model';
 
 export class UniversityController {
+    private buildingService: BuildingService;
     private courseService: CourseService;
     private programService: ProgramService;
     private universityService: UniversityService;
     private userService: UserService;
 
     constructor() {
+        this.buildingService = BuildingService.getInstance();
         this.courseService = CourseService.getInstance();
         this.programService = ProgramService.getInstance();
         this.universityService = UniversityService.getInstance();
@@ -110,6 +114,27 @@ export class UniversityController {
             res.status(HTTP_STATUS.OK)
                 .links(links)
                 .send(programs.collection.map((p) => ProgramDto.programToDto(p, userId)));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityBuildings: RequestHandler = async (req, res, next) => {
+        const userId = req.params.userId;
+        const filter = req.query.filter as string | undefined;
+
+        try {
+            const buildings = await this.buildingService.getUniversityBuildingsByText(userId, filter);
+            const buildingsWithDistances: { building: Building; distances: IDistanceToBuilding[] }[] =
+                await Promise.all(
+                    buildings.map(async (b) => {
+                        return { building: b, distances: await this.buildingService.getBuildingDistances(b.id) };
+                    }),
+                );
+
+            res.status(HTTP_STATUS.OK).send(
+                buildingsWithDistances.map((bwd) => BuildingDto.buildingToDto(bwd.building, bwd.distances)),
+            );
         } catch (e) {
             next(e);
         }

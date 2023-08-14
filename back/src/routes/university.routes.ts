@@ -28,5 +28,6 @@ export class UniversityRoutes {
         this.router.get('/:userId', this.controller.getUniversity);
         this.router.get('/:userId/programs', pagingMiddleware, this.controller.getUniversityPrograms);
         this.router.get('/:userId/courses', pagingMiddleware, this.controller.getUniversityCourses);
+        this.router.get('/:userId/buildings', pagingMiddleware, this.controller.getUniversityBuildings);
     }
 }

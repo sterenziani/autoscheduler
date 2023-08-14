@@ -1,5 +1,9 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import { addChildToParent, paginateCollection } from '../../../helpers/persistence/memoryPersistence.helper';
+import {
+    addChildToParent,
+    getChildsFromParent,
+    paginateCollection,
+} from '../../../helpers/persistence/memoryPersistence.helper';
 import Program from '../../../models/abstract/program.model';
 import MemoryProgram from '../../../models/implementations/memory/memoryProgram.model';
 import ProgramDao from '../../abstract/program.dao';
@@ -35,16 +39,12 @@ export default class MemoryProgramDao extends ProgramDao {
     }
 
     public async findByInternalId(universityId: string, internalId: string): Promise<Program | undefined> {
-        // find programs with matching internalId
-        const programsWithMatchingInternalId: Program[] = Array.from(MEMORY_DATABASE.programs.values()).filter(
-            (p) => p.internalId == internalId,
+        const universityPrograms = getChildsFromParent(
+            MEMORY_DATABASE.programsOfUniversity,
+            MEMORY_DATABASE.programs,
+            universityId,
         );
-        // find university with matching obtained id
-        for (const program of programsWithMatchingInternalId) {
-            const university = await program.getUniversity();
-            if (university.id == universityId) return program;
-        }
-        return undefined;
+        return universityPrograms.find((p) => p.internalId == internalId);
     }
 
     public async set(program: Program): Promise<void> {
@@ -63,14 +63,16 @@ export default class MemoryProgramDao extends ProgramDao {
         offset?: number,
     ): Promise<PaginatedCollection<Program>> {
         text = text ? text.toLowerCase() : text;
-        const programs: Program[] = [];
+        let programs: Program[] = getChildsFromParent(
+            MEMORY_DATABASE.programsOfUniversity,
+            MEMORY_DATABASE.programs,
+            universityId,
+        );
 
-        for (const program of MEMORY_DATABASE.programs.values()) {
-            const university = await program.getUniversity();
-            if (university.id != universityId) continue;
-            if (!text || program.name.toLowerCase().includes(text) || program.internalId.toLowerCase().includes(text)) {
-                programs.push(program);
-            }
+        if (text) {
+            programs = programs.filter(
+                (p) => p.name.toLowerCase().includes(text!) || p.internalId.toLowerCase().includes(text!),
+            );
         }
 
         // sorting by internalId

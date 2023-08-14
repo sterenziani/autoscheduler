@@ -10,4 +10,8 @@ export default abstract class BuildingDao extends GenericDao<Building> {
 
     // Abstract Methods
     public abstract create(universityId: string, internalId: string, name: string): Promise<Building>;
+    public abstract findByUniversityId(universityId: string): Promise<Building[]>;
+    public abstract findByInternalId(universityId: string, internalId: string): Promise<Building[]>;
+    public abstract getUniversityBuildingsByText(universityId: string, text?: string): Promise<Building[]>;
+    public abstract deleteBuilding(buildingId: string): Promise<void>;
 }

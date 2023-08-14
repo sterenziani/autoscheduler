@@ -8,7 +8,7 @@ import * as ProgramDto from './program.dto';
 export const studentToDto = (student: Student, university: University, program: Program): IStudentDto => {
     const userDto: UserDto.IUserDto = UserDto.userToDto(student);
     const universityUrl: string = UniversityDto.getUniversityUrl(university.id);
-    const programUrl : string = ProgramDto.getProgramUrl(program.id);
+    const programUrl: string = ProgramDto.getProgramUrl(program.id);
 
     return {
         ...userDto,
@@ -19,7 +19,7 @@ export const studentToDto = (student: Student, university: University, program: 
 };
 
 type IStudentDto = UserDto.IUserDto & {
-    approvedCoursesUrl: string,
-    universityUrl: string,
-    programUrl: string
+    approvedCoursesUrl: string;
+    universityUrl: string;
+    programUrl: string;
 };
