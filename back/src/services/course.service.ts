@@ -1,6 +1,7 @@
 import CourseDaoFactory from '../factories/courseDao.factory';
 import CourseDao from '../persistence/abstract/course.dao';
 import Course from '../models/abstract/course.model';
+import Program from '../models/abstract/program.model';
 import ProgramService from './program.service';
 import UniversityService from './university.service';
 import GenericException from '../exceptions/generic.exception';
@@ -63,11 +64,38 @@ export default class CourseService {
 
         // TODO add session logic for transactional operations
         const course: Course = await this.dao.create(universityId, internalId, name);
-        for (const programId of Object.keys(requiredCourses)) {
-            for (const courseId of requiredCourses[programId]) {
-                await course.setRequiredCourse(programId, courseId);
+        await course.setRequiredCourses(requiredCourses);
+        return course;
+    }
+
+    async updateCourse(
+        courseId: string,
+        name: string,
+        internalId: string,
+        requiredCourses: { [programId: string]: string[] },
+    ): Promise<Course> {
+        // validate existence of course and programIds
+        const course: Course = await this.getCourse(courseId);
+        const courseUniversity = await course.getUniversity();
+        await Promise.all(
+            Object.keys(requiredCourses).map(async (pId) => {
+                const program = await this.programService.getProgram(pId);
+                const programUniversity = await program.getUniversity();
+                if (programUniversity.id != courseUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
+            }),
+        );
+
+        // check if a course with new internalId already exists
+        if(internalId != course.internalId){
+            const courseWithRequestedInternalId = await this.dao.findByInternalId(courseUniversity.id, internalId);
+            if(courseWithRequestedInternalId && courseWithRequestedInternalId.id != course.id){
+                throw new GenericException(ERRORS.BAD_REQUEST.COURSE_ALREADY_EXISTS);
             }
         }
+        course.internalId = internalId;
+        course.name = name;
+        await course.setRequiredCourses(requiredCourses);
+        await this.dao.set(course);
         return course;
     }
 
@@ -78,5 +106,16 @@ export default class CourseService {
         offset?: number,
     ): Promise<PaginatedCollection<Course>> {
         return await this.dao.getByText(universityId, text, limit, offset);
+    }
+
+    async getProgramsWithRequiredCourses(courseId: string): Promise<Program[]> {
+        const course = await this.getCourse(courseId);
+        return await course.getProgramsWithRequiredCourses();
+    }
+
+    async getCourseRequirementsForProgram(courseId: string, programId: string): Promise<Course[]> {
+        const course = await this.getCourse(courseId);
+        await this.programService.getProgram(programId);
+        return await course.getRequiredCoursesForProgram(programId);
     }
 }

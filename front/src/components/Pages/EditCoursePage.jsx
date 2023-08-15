@@ -105,9 +105,9 @@ function EditCoursePage(props) {
     }
 
     const loadRequirements = async(courseId) => {
-        ApiService.getRequiredCourses(course.id).then((resp) => {
+        ApiService.getRequiredCourses(courseId).then((resp) => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED) findError = resp.status;
+            if (resp && resp.status && resp.status !== OK) findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)

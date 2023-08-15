@@ -62,6 +62,31 @@ export const getGrandchildsFromParent = <T>(
     return res;
 };
 
+// Returns the children of parents that also have grandchildren
+export const getMiddleChildsFromParent = <T>(
+    relationshipMap: Map<string, Map<string, Set<string>>>,
+    childEntityMap: Map<string, T>,
+    parentId: string,
+): T[] => {
+    // We start response
+    let res: T[] = [];
+
+    // We get the ids from the relationshipMap
+    const entityIds: Set<string> | undefined = new Set(relationshipMap.get(parentId)?.keys());
+
+    // If there are entities, we loop over the ids and get the entities from the entityMap
+    if (entityIds) {
+        for (const entityId of entityIds) {
+            const entity = childEntityMap.get(entityId);
+            // If there is no entity then it means relationship has reference to an id of an entity that does not exist, so database is corrupted
+            if (!entity) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.CORRUPTED_DATABASE);
+            res.push(entity);
+        }
+    }
+
+    return res;
+};
+
 // This is similar to getChildsFromParent, except in this case we have 2 parents, so we want the children of both parents and not just one (aka the intersection of the sets)
 export const getChildsFromParents = <T>(
     fatherRelationshipMap: Map<string, Set<string>>,
@@ -127,6 +152,15 @@ export const addChildToParent = (
     relationshipMap.get(parentId)!.add(childId);
 };
 
+// Resets the set for a parentId
+export const clearParentsChildren = (
+    relationshipMap: Map<string, Set<string>>,
+    parentId: string
+): void => {
+    // If it does exist, we have to initialize the array
+    if (relationshipMap.get(parentId)) relationshipMap.set(parentId, new Set());
+};
+
 // Adds a grandchild to a parent, initializing map if necessary
 export const addGrandchildToParent = (
     relationshipMap: Map<string, Map<string, Set<string>>>,
@@ -138,6 +172,15 @@ export const addGrandchildToParent = (
     if (!relationshipMap.get(parentId)) relationshipMap.set(parentId, new Map<string, Set<string>>());
     // Now we can safely add to the array
     addChildToParent(relationshipMap.get(parentId)!, childId, grandchildId);
+};
+
+// Resets the map for a parentId
+export const clearParentsGrandchildren = (
+    relationshipMap: Map<string, Map<string, Set<string>>>,
+    parentId: string
+): void => {
+    // If it does exist, we have to initialize the array
+    if (relationshipMap.get(parentId)) relationshipMap.set(parentId, new Map<string, Set<string>>());
 };
 
 // Sorts collection and applies limit & offset

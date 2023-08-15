@@ -194,13 +194,68 @@ const getCourseClass = (classId) =>
         setTimeout(() => resolve(courseClass[0]), RESOLVE_DELAY);
     });
 
-const getRequiredCourses = (courseId) =>
-    new Promise((resolve, reject) => {
-        const courses = {
-            1: [SgaConstants.informaticaCourses[0], SgaConstants.informaticaCourses[5]]
+const getRequiredCourses = async (courseId) => {
+    try {
+        // get Program IDs
+        let programIDs = []
+        let page = 0
+        let lastPage = 0
+        while(page <= lastPage){
+            const endpoint = "/course/"+courseId+"/requirements?page=" +page
+            const programsResponse = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(programsResponse)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            programIDs = programIDs.concat(programsResponse.data.map(p => p.programId))
         }
-        setTimeout(() => resolve(courses), RESOLVE_DELAY);
-    });
+
+        // Request courses for each program
+        const finalResponse = {data: {}}
+        programIDs.forEach(async (pId) => {
+            finalResponse.data[pId] = []
+            const coursesResponse = await getRequiredCoursesForProgram(courseId, pId)
+            finalResponse.data[pId] = finalResponse.data[pId].concat(coursesResponse.data)
+            finalResponse.status = coursesResponse.status
+        });
+        return finalResponse
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const getRequiredCoursesForProgram = async (courseId, programId) => {
+    try {
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage){
+            const endpoint = "/course/"+courseId+"/requirements/"+programId +"?page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            finalResponse.data = finalResponse.data.concat(response.data)
+            finalResponse.status = response.status
+        }
+        return finalResponse
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const getMandatoryCourses = async (programId) => {
     try {
@@ -269,15 +324,11 @@ const getCourseClassesForTerm = (courseId, termId, page) =>
 
 const getPrograms = async (universityId, inputText) => {
     try {
-        const endpoint = "/university/" + universityId + "/programs?filter=" + inputText
-        const response = await api.get(endpoint, AuthService.getRequestHeaders())
-        return response
-
         let page = 0
         let lastPage = 0
         let finalResponse = {data: []}
         while(page <= lastPage){
-            const endpoint = "/university/" + universityId + "/programs?filter=" + inputText +"?page=" +page
+            const endpoint = "/university/" + universityId + "/programs?filter=" + inputText +"&page=" +page
             const response = await api.get(endpoint, AuthService.getRequestHeaders())
             const links = parsePagination(response)
 
@@ -532,14 +583,12 @@ const saveCourse = async (id, name, internalId, requirements) => {
             requirementIDs[key] = requirements[key].map(a => a.id)
         })
         const payload = {
-            'id': id,
             'name': name,
             'internalId': internalId,
-            "requirements": requirements,
+            "requirements": requirementIDs,
         }
         if(id){
-            console.log("Pretending to PUT")
-            return { status: OK, id: id };
+            return updateCourse(payload, id)
         }
         else{
             return createCourse(payload)
@@ -555,6 +604,21 @@ const createCourse = async (payload) => {
         const response = await api.post("/course", payload, AuthService.getRequestHeaders())
         const id = response.headers.location.split('/')[1]
         return { status: CREATED, id: id }
+    }
+    catch(e) {
+        if (e.response){
+            return { status: e.response.status, data: e.response.data}
+        }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const updateCourse = async (payload, courseId) => {
+    try {
+        const response = await api.put("/course/"+courseId, payload, AuthService.getRequestHeaders())
+        const id = response.headers.location.split('/')[1]
+        return { status: OK, id: id }
     }
     catch(e) {
         if (e.response){

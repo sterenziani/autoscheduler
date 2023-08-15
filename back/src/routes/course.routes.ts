@@ -23,6 +23,9 @@ export class CourseRoutes {
         this.router.use(cors());
 
         this.router.post('/', userAuthMiddleware, universitiesOnlyMiddleware, this.controller.createCourse);
+        this.router.put('/:courseId', userAuthMiddleware, universitiesOnlyMiddleware, this.controller.updateCourse);
         this.router.get('/:courseId', userAuthMiddleware, this.controller.getCourse);
+        this.router.get('/:courseId/requirements/', userAuthMiddleware, this.controller.getProgramsWithCourseRequirements);
+        this.router.get('/:courseId/requirements/:programId', userAuthMiddleware, this.controller.getCourseRequirementsForProgram);
     }
 }
