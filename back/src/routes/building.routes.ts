@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { urlencoded } from 'body-parser';
 import { BuildingController } from '../controllers/building.controller';
 import cors from 'cors';
-import userAuthMiddleware from '../middlewares/userAuth.middleware';
+import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import universitiesOnlyMiddleware from '../middlewares/universitiesOnly.middleware';
 
 export class BuildingRoutes {
@@ -22,11 +22,11 @@ export class BuildingRoutes {
 
         this.router.use(cors());
 
-        this.router.post('/', userAuthMiddleware, universitiesOnlyMiddleware, this.controller.createBuilding);
+        this.router.post('/', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.createBuilding);
         this.router.get('/:buildingId', this.controller.getBuilding);
         this.router.delete(
             '/:buildingId',
-            userAuthMiddleware,
+            authUsersOnlyMiddleware,
             universitiesOnlyMiddleware,
             this.controller.deleteBuilding,
         );

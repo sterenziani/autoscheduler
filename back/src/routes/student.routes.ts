@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { urlencoded } from 'body-parser';
 import { StudentController } from '../controllers/student.controller';
 import cors from 'cors';
-import userAuthMiddleware from '../middlewares/userAuth.middleware';
+import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import studentsOnlyMiddleware from '../middlewares/studentsOnly.middleware';
 
 export class StudentRoutes {
@@ -22,24 +22,24 @@ export class StudentRoutes {
 
         this.router.use(cors());
 
-        this.router.get('/', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getActiveStudent);
+        this.router.get('/', authUsersOnlyMiddleware, studentsOnlyMiddleware, this.controller.getActiveStudent);
         this.router.post('/', this.controller.createStudent);
-        this.router.get('/:userId', userAuthMiddleware, studentsOnlyMiddleware, this.controller.getStudent);
+        this.router.get('/:userId', authUsersOnlyMiddleware, studentsOnlyMiddleware, this.controller.getStudent);
         this.router.get(
             '/:userId/completed-courses',
-            userAuthMiddleware,
+            authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.getStudentCompletedCourses,
         );
         this.router.post(
             '/:userId/completed-courses',
-            userAuthMiddleware,
+            authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.addStudentCompletedCourses,
         );
         this.router.delete(
             '/:userId/completed-courses',
-            userAuthMiddleware,
+            authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.removeStudentCompletedCourses,
         );

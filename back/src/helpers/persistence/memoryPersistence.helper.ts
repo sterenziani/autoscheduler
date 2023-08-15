@@ -140,6 +140,15 @@ export const addGrandchildToParent = (
     addChildToParent(relationshipMap.get(parentId)!, childId, grandchildId);
 };
 
+// removes a child from a parent
+export const removeChildFromParent = (
+    relationshipMap: Map<string, Set<string>>,
+    parentId: string,
+    childId: string,
+): void => {
+    relationshipMap.get(parentId)?.delete(childId);
+};
+
 // Sorts collection and applies limit & offset
 export const paginateCollection = <T>(
     collection: T[],

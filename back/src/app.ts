@@ -1,12 +1,14 @@
 import express, { Application } from 'express';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
+import UserAuthMiddleware from './middlewares/userAuth.middleware';
 import ErrorHandlerMiddleware from './middlewares/errorHandler.middleware';
 import { HomeRoutes } from './routes/home.routes';
 import { BuildingRoutes } from './routes/building.routes';
 import { CourseRoutes } from './routes/course.routes';
 import { ProgramRoutes } from './routes/program.routes';
 import { StudentRoutes } from './routes/student.routes';
+import { TermRoutes } from './routes/term.routes';
 import { UniversityRoutes } from './routes/university.routes';
 import { UniversitiesRoutes } from './routes/universities.routes';
 import UserAuthService from './services/auth.service';
@@ -14,6 +16,7 @@ import BuildingService from './services/building.service';
 import CourseService from './services/course.service';
 import ProgramService from './services/program.service';
 import StudentService from './services/student.service';
+import TermService from './services/term.service';
 import UniversityService from './services/university.service';
 import UserService from './services/user.service';
 import { initializeMongoConnection } from './helpers/persistence/mongoPersistence.helper';
@@ -28,6 +31,7 @@ class App {
         this.setConfig();
         this.initializeDatabases();
         this.initializeServices();
+        this.initializeAuth();
         this.setRoutes();
         this.initializeErrorHandling();
     }
@@ -58,8 +62,13 @@ class App {
         CourseService.getInstance().init();
         ProgramService.getInstance().init();
         StudentService.getInstance().init();
+        TermService.getInstance().init();
         UniversityService.getInstance().init();
         UserService.getInstance().init();
+    }
+
+    private initializeAuth() {
+        this.app.use(UserAuthMiddleware);
     }
 
     private initializeErrorHandling() {
@@ -72,6 +81,7 @@ class App {
         this.app.use('/api/course', new CourseRoutes().router);
         this.app.use('/api/program', new ProgramRoutes().router);
         this.app.use('/api/student', new StudentRoutes().router);
+        this.app.use('/api/term', new TermRoutes().router);
         this.app.use('/api/university', new UniversityRoutes().router);
         this.app.use('/api/universities', new UniversitiesRoutes().router);
     }

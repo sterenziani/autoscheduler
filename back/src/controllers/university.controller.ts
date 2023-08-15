@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import * as BuildingDto from '../dtos/building.dto';
 import * as CourseDto from '../dtos/course.dto';
 import * as ProgramDto from '../dtos/program.dto';
+import * as TermDto from '../dtos/term.dto';
 import * as UserDto from '../dtos/user.dto';
 import * as UniversityDto from '../dtos/university.dto';
 import UserService from '../services/user.service';
@@ -16,10 +17,15 @@ import ProgramService from '../services/program.service';
 import BuildingService from '../services/building.service';
 import { IDistanceToBuilding } from '../interfaces/building.interface';
 import Building from '../models/abstract/building.model';
+import TermService from '../services/term.service';
+import { getDateFromISO, isValidISODate } from '../helpers/time.helper';
+import GenericException from '../exceptions/generic.exception';
+import { ERRORS } from '../constants/error.constants';
 
 export class UniversityController {
     private buildingService: BuildingService;
     private courseService: CourseService;
+    private termService: TermService;
     private programService: ProgramService;
     private universityService: UniversityService;
     private userService: UserService;
@@ -27,6 +33,7 @@ export class UniversityController {
     constructor() {
         this.buildingService = BuildingService.getInstance();
         this.courseService = CourseService.getInstance();
+        this.termService = TermService.getInstance();
         this.programService = ProgramService.getInstance();
         this.universityService = UniversityService.getInstance();
         this.userService = UserService.getInstance();
@@ -135,6 +142,52 @@ export class UniversityController {
             res.status(HTTP_STATUS.OK).send(
                 buildingsWithDistances.map((bwd) => BuildingDto.buildingToDto(bwd.building, bwd.distances)),
             );
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityTerms: RequestHandler = async (req, res, next) => {
+        const userInfo = req.user;
+        const userId = req.params.userId;
+        const filter = req.query.filter as string | undefined;
+        const published = req.query.published as boolean | undefined;
+        const from = req.query.from as string | undefined;
+        const to = req.query.to as string | undefined;
+        const page = parseInt(req.query.page as string) ?? undefined;
+        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+
+        if (!(from && isValidISODate(from)) || !(to && isValidISODate(to)))
+            return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+
+        try {
+            const realPublished = userInfo?.id === userId ? published : true;
+            const fromDate = getDateFromISO(from);
+            const toDate = getDateFromISO(to);
+            const terms = await this.termService.getTerms(
+                userId,
+                filter,
+                realPublished,
+                fromDate,
+                toDate,
+                per_page,
+                page,
+            );
+            const links: Record<string, string> = {};
+            for (const [key, value] of Object.entries(terms.pagingInfo)) {
+                links[key] = UniversityDto.getUniversityTermsUrl(
+                    userId,
+                    filter,
+                    realPublished,
+                    fromDate,
+                    toDate,
+                    value,
+                    per_page,
+                );
+            }
+            res.status(HTTP_STATUS.OK)
+                .links(links)
+                .send(terms.collection.map((t) => TermDto.termToDto(t)));
         } catch (e) {
             next(e);
         }

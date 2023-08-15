@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { urlencoded } from 'body-parser';
 import { CourseController } from '../controllers/course.controller';
 import cors from 'cors';
-import userAuthMiddleware from '../middlewares/userAuth.middleware';
+import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import universitiesOnlyMiddleware from '../middlewares/universitiesOnly.middleware';
 
 export class CourseRoutes {
@@ -22,7 +22,7 @@ export class CourseRoutes {
 
         this.router.use(cors());
 
-        this.router.post('/', userAuthMiddleware, universitiesOnlyMiddleware, this.controller.createCourse);
-        this.router.get('/:courseId', userAuthMiddleware, this.controller.getCourse);
+        this.router.post('/', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.createCourse);
+        this.router.get('/:courseId', authUsersOnlyMiddleware, this.controller.getCourse);
     }
 }

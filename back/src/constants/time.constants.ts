@@ -1,3 +1,4 @@
+export const ARG_TIMEZONE = 'America/Argentina/Buenos_Aires';
 export enum DAY {
     SUNDAY = 0,
     MONDAY = 1,

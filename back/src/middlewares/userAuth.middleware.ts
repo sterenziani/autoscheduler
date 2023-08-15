@@ -6,11 +6,10 @@ import httpException from '../exceptions/http.exception';
 
 const userAuthMiddleware = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.get('authorization');
-    if (!authHeader || !authHeader.match(/^bearer ([^\s]*)/i))
-        throw new GenericException(ERRORS.UNAUTHORIZED.MISSING_TOKEN);
+    if (!authHeader || !authHeader.match(/^bearer ([^\s]*)/i)) next();
 
     // getting last element
-    const token = authHeader.split(/[\s,]+/).pop();
+    const token = authHeader!.split(/[\s,]+/).pop();
     if (!token) throw new GenericException(ERRORS.UNAUTHORIZED.MISSING_TOKEN);
 
     let decodedToken;
