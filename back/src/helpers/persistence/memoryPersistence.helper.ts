@@ -183,6 +183,15 @@ export const clearParentsGrandchildren = (
     if (relationshipMap.get(parentId)) relationshipMap.set(parentId, new Map<string, Set<string>>());
 };
 
+// removes a child from a parent
+export const removeChildFromParent = (
+    relationshipMap: Map<string, Set<string>>,
+    parentId: string,
+    childId: string,
+): void => {
+    relationshipMap.get(parentId)?.delete(childId);
+};
+
 // Sorts collection and applies limit & offset
 export const paginateCollection = <T>(
     collection: T[],

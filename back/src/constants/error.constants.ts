@@ -44,6 +44,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'PROGRAM_ALREADY_EXISTS',
             message: 'A program with provided internalId already exists.',
         },
+        TERM_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'TERM_ALREADY_EXISTS',
+            message: 'A term with provided internalId already exists.',
+        },
         USER_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'USER_ALREADY_EXISTS',

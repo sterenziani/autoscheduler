@@ -4,6 +4,8 @@ import { HTTP_STATUS } from '../constants/http.constants';
 import * as BuildingDto from '../dtos/building.dto';
 import { IDistanceToBuilding } from '../interfaces/building.interface';
 import Building from '../models/abstract/building.model';
+import GenericException from '../exceptions/generic.exception';
+import { ERRORS } from '../constants/error.constants';
 
 export class BuildingController {
     private buildingService: BuildingService;
@@ -26,9 +28,11 @@ export class BuildingController {
 
     public createBuilding: RequestHandler = async (req, res, next) => {
         const userInfo = req.user;
-        const internalId = req.body.email as string;
-        const name = req.body.name as string;
-        const distances = req.body.distances as { [internalId: string]: number };
+        const internalId = req.body.email as string | undefined;
+        const name = req.body.name as string | undefined;
+        const distances = req.body.distances as { [internalId: string]: number } | undefined;
+
+        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
             const building: Building = await this.buildingService.createBuilding(
