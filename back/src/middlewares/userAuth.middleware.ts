@@ -6,7 +6,7 @@ import httpException from '../exceptions/http.exception';
 
 const userAuthMiddleware = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.get('authorization');
-    if (!authHeader || !authHeader.match(/^bearer ([^\s]*)/i)) next();
+    if (!authHeader || !authHeader.match(/^bearer ([^\s]*)/i)) return next();
 
     // getting last element
     const token = authHeader!.split(/[\s,]+/).pop();
