@@ -56,7 +56,7 @@ export class CourseController {
         const userInfo = req.user;
         const name = req.body.name as string;
         const internalId = req.body.internalId as string;
-        const requirements = req.body.requirements as { [p: string]: string[] };
+        const requirements = req.body.requirements as { [programId: string]: string[] };
 
         try {
             const course: Course = await this.courseService.createCourse(userInfo.id, name, internalId, requirements);

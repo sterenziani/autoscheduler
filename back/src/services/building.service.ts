@@ -40,14 +40,14 @@ export default class BuildingService {
     async getBuildingDistances(id: string): Promise<IDistanceToBuilding[]> {
         const building = await this.getBuilding(id);
         const buildingUniversity = await building.getUniversity();
-        const universityBuildings = await this.getUniversityBuildingsByText(buildingUniversity.id);
+        const universityBuildings = await buildingUniversity.getBuildings();
         const distances: IDistanceToBuilding[] = [];
 
         for (const b of universityBuildings) {
             // skip if current building
             if (b.id === id) continue;
 
-            const time = await building.getDistanceInMinutesTo(id);
+            const time = await building.getDistanceInMinutesTo(b.id);
             if (time) distances.push({ buildingId: b.id, time });
         }
 
@@ -58,7 +58,7 @@ export default class BuildingService {
         universityId: string,
         internalId: string,
         name: string,
-        distances: { [internalId: string]: number } = {},
+        distances: { [buildingId: string]: number } = {},
     ): Promise<Building> {
         // validate existence of university & buildings in distance
         await this.universityService.getUniversity(universityId);
@@ -72,7 +72,7 @@ export default class BuildingService {
             throw new GenericException(ERRORS.BAD_REQUEST.BUILDING_ALREADY_EXISTS);
         await Promise.all(
             Object.keys(distances).map(async (bId) => {
-                const building = await this.dao.findByInternalId(universityId, bId);
+                const building = await this.dao.findById(bId);
                 if (!building) throw new GenericException(ERRORS.NOT_FOUND.BUILDING);
             }),
         );

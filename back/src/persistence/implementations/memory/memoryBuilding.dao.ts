@@ -36,8 +36,13 @@ export default class MemoryBuildingDao extends BuildingDao {
         return getChildsFromParent(MEMORY_DATABASE.buildingsOfUniversity, MEMORY_DATABASE.buildings, universityId);
     }
 
-    public async findByInternalId(universityId: string, internalId: string): Promise<Building[]> {
-        return (await this.findByUniversityId(universityId)).filter((b) => b.internalId === internalId);
+    public async findByInternalId(universityId: string, internalId: string): Promise<Building | undefined> {
+        const universityBuildings = getChildsFromParent(
+            MEMORY_DATABASE.buildingsOfUniversity,
+            MEMORY_DATABASE.buildings,
+            universityId,
+        );
+        return universityBuildings.find((b) => b.internalId == internalId);
     }
 
     public async set(building: Building): Promise<void> {

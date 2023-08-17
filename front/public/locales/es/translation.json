@@ -186,7 +186,8 @@
                 "isRequired":"El período debe tener un nombre.",
                 "minCodeLength":"El período necesita un código con el cual lo identifique.",
                 "maxCodeLength":"El código del período no puede superar los 25 characters.",
-                "codeIsRequired":"El período necesita un código con el cual lo identifique."
+                "codeIsRequired":"El período necesita un código con el cual lo identifique.",
+                "codeAlreadyTaken":"Ya existe un período con ese código."
             },
             "course":{
                 "minCodeLength":"La materia debe tener un código con el cual la identifique.",
@@ -212,7 +213,8 @@
                 "codeIsRequired":"La sede debe tener un código con el cual la identifique.",
                 "minNameLength":"El nombre de la sede debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre de la sede no puede superar los 50 characters.",
-                "nameIsRequired":"La sede debe tener un nombre."
+                "nameIsRequired":"La sede debe tener un nombre.",
+                "codeAlreadyTaken":"Ya existe una sede con ese código."
             }
         }
     },

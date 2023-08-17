@@ -12,6 +12,8 @@ import NoAccess from '../Common/NoAccess';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
+const EXISTING_BUILDING_ERROR = "BUILDING_ALREADY_EXISTS"
+
 function EditBuildingPage(props) {
     const BuildingSchema = Yup.object().shape({
         buildingCode: Yup.string()
@@ -54,7 +56,7 @@ function EditBuildingPage(props) {
                 else if(user && !building && buildings){
                     setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
                     const emptyDist = {}
-                    buildings.forEach((b) => emptyDist[b.code] = {building: b, distance:0});
+                    buildings.forEach((b) => emptyDist[b.id] = {building: b, time: "0"});
                     setDistances(emptyDist)
                 }
             }
@@ -66,56 +68,56 @@ function EditBuildingPage(props) {
     },[building, buildings])
 
     const loadBuilding = async () => {
-        ApiService.getBuilding(id).then((data) => {
+        ApiService.getBuilding(id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setBuilding(data)
+                setBuilding(resp.data)
                 const dist = {}
-                data.distances.forEach((d) => dist[d.building.code] = d)
+                resp.data.distances.forEach((d) => dist[d.building.id] = d)
                 setDistances(dist)
             }
         });
     }
 
     const loadBuildings = async (universityId) => {
-        ApiService.getBuildings(universityId).then((data) => {
+        ApiService.getAllBuildings(universityId).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setBuildings(data)
+                setBuildings(resp.data)
             }
         });
     }
 
     const onChangeTime = (e, entry) => {
         const distancesCopy = Object.assign([], distances);
-        distancesCopy[entry.building.code].time = e.target.value;
+        distancesCopy[entry.building.id].time = e.target.value;
         setDistances(distancesCopy)
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true);
-        if (values.buildingCode && values.buildingName)
+        if(values.buildingCode && values.buildingName)
         {
-            const resp = await ApiService.saveBuilding(id, values.buildingCode, values.buildingName, Object.values(distances))
+            const resp = await ApiService.saveBuilding(id, values.buildingName, values.buildingCode, distances)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=buildings")
             }
             else{
-                setError(true)
+                setError(resp.data.code)
                 setStatus(resp.status)
                 setSubmitting(false)
             }
@@ -133,7 +135,7 @@ function EditBuildingPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error)
+    if (error && error != EXISTING_BUILDING_ERROR)
         return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
@@ -142,6 +144,7 @@ function EditBuildingPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editBuilding':'forms.createBuilding')}</h2>
+                {error && (<p className="form-error">{t('forms.errors.building.codeAlreadyTaken')}</p>)}
                 <Formik initialValues={{ buildingName: building.name, buildingCode: building.code }} validationSchema={BuildingSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>

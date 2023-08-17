@@ -435,20 +435,74 @@ const getTerms = async (universityId, page) =>
         }
     });
 
-const getBuildings = (universityId, page) =>
-    new Promise((resolve, reject) => {
-        const buildings = SgaConstants.buildings[9];
-        if(!page)
-            setTimeout(() => resolve(buildings), RESOLVE_DELAY);
-        else{
-            if(page==1)
-                setTimeout(() => resolve([buildings[0], buildings[1]]), RESOLVE_DELAY);
-            else if(page==2)
-                setTimeout(() => resolve([buildings[2], buildings[3]]), RESOLVE_DELAY);
-            else
-                setTimeout(() => resolve([]), RESOLVE_DELAY);
+const getBuildings = async (universityId, page) => {
+    try {
+        const endpoint = "/university/" + universityId + "/buildings?page=" +(page-1)
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const getAllBuildings = async (universityId, page) => {
+    try {
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage){
+            const endpoint = "/university/" + universityId + "/buildings?page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+            finalResponse.data = finalResponse.data.concat(response.data)
+            finalResponse.status = response.status
         }
-    });
+        return finalResponse
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const getBuildingDictionary = async (universityId, page) => {
+    try {
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: {}}
+        while(page <= lastPage){
+            const endpoint = "/university/" + universityId + "/buildings?page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            const links = parsePagination(response)
+
+            page = page+1
+            if(links && links.last && links.last.includes("page=")){
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            }
+
+            response.data.forEach(b => finalResponse.data[b.id] = b)
+            finalResponse.status = response.status
+        }
+        return finalResponse
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const getRemainingCoursesProgram = async (user, programId, inputText) => {
     // TODO: Placeholder. This should be a call to API's getRemainingCoursesProgram, filtering results by program and removing those already finished by user
@@ -670,15 +724,52 @@ const createProgram = async (payload) => {
 
 const saveBuilding = async (id, name, internalId, distances) => {
     try {
-        if(id){
-            return { status: OK };
+        const distanceIDs = {}
+        for (let [key, pair] of Object.entries(distances)){
+            distanceIDs[pair.building.id] = pair.time
         }
-        else{
-            return { status: CREATED };
+        const payload = {
+            'name': name,
+            'internalId': internalId,
+            "distances": distanceIDs,
         }
+        if(id)
+            return updateBuilding(payload, id)
+        else
+            return createBuilding(payload)
     } catch (e) {
         if (e.response) return { status: e.response.status };
         else return { status: TIMEOUT };
+    }
+}
+
+const createBuilding = async (payload) => {
+    try {
+        const response = await api.post("/building", payload, AuthService.getRequestHeaders())
+        const id = response.headers.location.split('/')[1]
+        return { status: CREATED, id: id }
+    }
+    catch(e) {
+        if (e.response){
+            return { status: e.response.status, data: e.response.data}
+        }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const updateBuilding = async (payload, buildingId) => {
+    try {
+        const response = await api.put("/building/"+buildingId, payload, AuthService.getRequestHeaders())
+        const id = response.headers.location.split('/')[1]
+        return { status: OK, id: id }
+    }
+    catch(e) {
+        if (e.response){
+            return { status: e.response.status, data: e.response.data}
+        }
+        else
+            return { status: TIMEOUT }
     }
 }
 
@@ -716,6 +807,8 @@ const ApiService = {
     getProgramsPage: getProgramsPage,
     getTerms: getTerms,
     getBuildings: getBuildings,
+    getAllBuildings: getAllBuildings,
+    getBuildingDictionary: getBuildingDictionary,
     getRemainingCoursesProgram: getRemainingCoursesProgram,
     getFinishedCourses: getFinishedCourses,
     getCourse: getCourse,

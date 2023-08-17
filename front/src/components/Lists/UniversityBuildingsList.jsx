@@ -17,10 +17,10 @@ function UniversityBuildingsList(props) {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const user = props.user;
     const [buildings, setBuildings] = useState(null);
+    const [buildingDictionary, setBuildingDictionary] = useState(null);
     const [buildingToDelete, setBuildingToDelete] = useState();
-    const [prevPage, setPrevPage] = useState(false);
+    const [paginationLinks, setPaginationLinks] = useState(null);
     const [page, setPage] = useState(1);
-    const [nextPage, setNextPage] = useState(false);
     const search = useLocation().search
 
     const readPageInSearchParams = () => {
@@ -38,9 +38,10 @@ function UniversityBuildingsList(props) {
         let requestedPage = readPageInSearchParams()
         if(!requestedPage)
             requestedPage = 1
-        if(!buildings || requestedPage != page){
+        if((!buildings && !buildingDictionary) || requestedPage != page){
             setPage(requestedPage)
             loadBuildings(requestedPage)
+            loadBuildingDictionary()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [useLocation().search])
@@ -53,18 +54,35 @@ function UniversityBuildingsList(props) {
 
     const loadBuildings = (page) => {
         setLoading(true)
-        ApiService.getBuildings(user.id, page).then((data) => {
+        ApiService.getBuildings(user.id, page).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setBuildings(data)
-                setPrevPage(page == 2)
-                setNextPage(page < 2)
+                let links = ApiService.parsePagination(resp)
+                setPaginationLinks(links)
+                setBuildings(resp.data)
+            }
+            setLoading(false)
+        });
+    }
+
+    const loadBuildingDictionary = () => {
+        setLoading(true)
+        ApiService.getBuildingDictionary(user.id).then((resp) => {
+            let findError = null;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
+            if (findError){
+                setError(true)
+                setStatus(findError)
+            }
+            else{
+                setBuildingDictionary(resp.data)
             }
             setLoading(false)
         });
@@ -102,7 +120,7 @@ function UniversityBuildingsList(props) {
     return (
         <React.Fragment>
             <div className="pt-4">
-                {buildings && buildings.length > 0
+                {buildingDictionary && buildings && buildings.length > 0
                     ? [
                           <div key="buildings-list" className="my-3 container">
                               <Row xs={1} md={2} lg={3} className="g-4 m-auto justify-content-center">
@@ -132,7 +150,7 @@ function UniversityBuildingsList(props) {
                                           <Card.Body className="bg-grey text-black">
                                               {entry.distances.map((b, bidx) => (
                                                   <Row key={'row-' + index + '-' + bidx}>
-                                                        <Col className="text-end">{b.building.name}</Col>
+                                                        <Col className="text-end">{buildingDictionary[b.buildingId].code}</Col>
                                                         <Col className="text-start">{t('minutes', { minutes: b.time })}</Col>
                                                   </Row>
                                               ))}
@@ -146,7 +164,7 @@ function UniversityBuildingsList(props) {
                           <div key="empty-list">{t('emptyList')}</div>,
                       ]}
             </div>
-            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
+            <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

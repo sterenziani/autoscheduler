@@ -28,9 +28,9 @@ export class BuildingController {
 
     public createBuilding: RequestHandler = async (req, res, next) => {
         const userInfo = req.user;
-        const internalId = req.body.email as string | undefined;
+        const internalId = req.body.internalId as string | undefined;
         const name = req.body.name as string | undefined;
-        const distances = req.body.distances as { [internalId: string]: number } | undefined;
+        const distances = req.body.distances as { [buildingId: string]: number } | undefined;
 
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
