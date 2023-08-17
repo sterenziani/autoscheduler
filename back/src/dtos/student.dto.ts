@@ -12,6 +12,7 @@ export const studentToDto = (student: Student, university: University, program: 
 
     return {
         ...userDto,
+        name: student.name,
         approvedCoursesUrl: `${userDto.url}/completed-courses`,
         universityUrl: universityUrl,
         programUrl: programUrl,
@@ -22,4 +23,5 @@ type IStudentDto = UserDto.IUserDto & {
     approvedCoursesUrl: string;
     universityUrl: string;
     programUrl: string;
+    name: string;
 };
