@@ -33,7 +33,7 @@ function CoursePage(props) {
     useEffect( () => {
         ApiService.getCourse(id).then((resp) => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+            if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
             if (findError){
                 setLoading(false)
@@ -52,7 +52,7 @@ function CoursePage(props) {
         setTimeout(() => {
             ApiService.getPrograms(user.id, inputValue).then((resp) => {
                 let findError = null;
-                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED) findError = resp.status;
+                if (resp && resp.status && resp.status !== OK) findError = resp.status;
                 if (findError) {
                     setError(resp.data.code)
                     setStatus(findError)

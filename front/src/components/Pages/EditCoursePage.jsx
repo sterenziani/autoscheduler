@@ -125,10 +125,7 @@ function EditCoursePage(props) {
         {
             const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, requirements)
             if(resp.status === OK || resp.status === CREATED){
-                if(id)
-                    navigate("/courses/"+id)
-                else
-                    navigate("/?tab=courses")
+                navigate("/courses/"+resp.id)
             }
             else{
                 setError(resp.data.code)

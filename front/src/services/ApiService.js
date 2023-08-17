@@ -723,6 +723,7 @@ const ApiService = {
     getProgram: getProgram,
     getBuilding: getBuilding,
     getRequiredCourses: getRequiredCourses,
+    getRequiredCoursesForProgram: getRequiredCoursesForProgram,
     getMandatoryCourses: getMandatoryCourses,
     getOptionalCourses: getOptionalCourses,
     getCourseClassesForTerm: getCourseClassesForTerm,

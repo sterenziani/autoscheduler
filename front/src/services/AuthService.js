@@ -40,7 +40,7 @@ const getRequestHeaders = () => {
     if(!headerToken)
         return { headers : {'Content-Type': 'application/json'} }
     return {
-        headers : { 'Content-Type': 'application/json', authorization: "Bearer "+getToken()}
+        headers : { 'Content-Type': 'application/json', authorization: "Bearer "+headerToken}
     }
 }
 
