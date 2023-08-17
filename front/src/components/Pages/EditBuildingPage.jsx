@@ -46,18 +46,21 @@ function EditBuildingPage(props) {
 
     useEffect( () => {
         async function execute() {
+            if(user && !buildings)
+                await Promise.all([loadBuildings(user.id)]);
             if(id){
-                if(user && !building && !buildings)
-                    await Promise.all([loadBuilding(), loadBuildings(user.id)]);
+                if(user && buildings && !building)
+                    await Promise.all([loadBuilding(id)]);
             }
             else{
-                if(user && !buildings)
-                    await Promise.all([loadBuildings(user.id)]);
-                else if(user && !building && buildings){
-                    setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
+                if(user && buildings && !building){
                     const emptyDist = {}
-                    buildings.forEach((b) => emptyDist[b.id] = {building: b, time: "0"});
+                    //buildings.forEach((b) => emptyDist[b.id] = {building: b, time: "0"});
+                    for (let [bId, b] of Object.entries(buildings)){
+                        emptyDist[bId] = {building: b, time: "0"}
+                    }
                     setDistances(emptyDist)
+                    setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
                 }
             }
             if(user && building && buildings)
@@ -80,14 +83,14 @@ function EditBuildingPage(props) {
             else{
                 setBuilding(resp.data)
                 const dist = {}
-                resp.data.distances.forEach((d) => dist[d.building.id] = d)
+                resp.data.distances.forEach((d) => dist[d.buildingId] = {building: buildings[d.buildingId], time: d.time})
                 setDistances(dist)
             }
         });
     }
 
     const loadBuildings = async (universityId) => {
-        ApiService.getAllBuildings(universityId).then((resp) => {
+        ApiService.getBuildingDictionary(universityId).then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;

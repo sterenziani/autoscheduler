@@ -178,12 +178,19 @@ const getProgram = async (programId) => {
     }
 }
 
-const getBuilding = (buildingId) =>
-    new Promise((resolve, reject) => {
-        // eslint-disable-next-line
-        const building = SgaConstants.buildings[9].find((b) => b.id == buildingId);
-        setTimeout(() => resolve(building), RESOLVE_DELAY);
-    });
+const getBuilding = async (buildingId) => {
+    try {
+        const endpoint = "/building/"+buildingId
+        const response = await api.get(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const getCourseClass = (classId) =>
     new Promise((resolve, reject) => {
