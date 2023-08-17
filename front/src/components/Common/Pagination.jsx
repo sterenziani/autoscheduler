@@ -12,7 +12,7 @@ const FormInputField = (props) => {
 
     const prevPage = links.prev;
     const nextPage = links.next;
-    const lastPage = (links.last && parseInt(links.last.includes("page=")))? parseInt(links.last.split("page=")[1].match(/\d+/))+1 : 1
+    const lastPage = (links.last && (links.last.includes("page=")))? parseInt(links.last.split("page=")[1].match(/\d+/))+1 : 1
     const [showModal, setShowModal] = useState(false)
 
     const movePagePrev = () => {
@@ -46,9 +46,11 @@ const FormInputField = (props) => {
                 }
                 </Col>
 
-                <OverlayTrigger overlay={<Tooltip id="tooltip-disabled">{t('pagination.popover')}</Tooltip>}>
+                <Col className="d-flex">
+                <OverlayTrigger overlay={(props) => (<Tooltip id="tooltip" {...props}>{t('pagination.popover')}</Tooltip>)}>
                     <h6 onClick={() => setShowModal(true)} className="col my-auto page-number"><span role="button">{t('pagination.page', {page: page})}</span></h6>
                 </OverlayTrigger>
+                </Col>
 
                 <Col className="text-start">
                 {
@@ -68,7 +70,7 @@ const FormInputField = (props) => {
                 </Modal.Header>
                 <Modal.Body>
                 <Row>
-                    <Col><Form.Control type="number" className="text-end" min="1" max={lastPage} defaultValue={selectedPage} onChange={(e) => setSelectedPage(e.target.value)}/></Col>
+                    <Col><Form.Control type="number" className="text-end" min="1" max={lastPage} defaultValue={page} onChange={(e) => setSelectedPage(e.target.value)}/></Col>
                     <Col xs={1} className="my-auto text-center">/</Col>
                     <Col className="my-auto text-start ml-5">{lastPage}</Col>
                 </Row>
