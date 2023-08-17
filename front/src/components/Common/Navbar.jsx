@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react';
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { Navbar as BootstrapNavbar } from 'react-bootstrap';
+import { useLocation, useNavigate } from "react-router-dom";
+import { Col, Navbar as BootstrapNavbar } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import AuthService from '../../services/AuthService';
 import { Link } from 'react-router-dom';
@@ -28,19 +27,25 @@ function Navbar(props){
 
     return (
         <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight flex-wrap">
-            <div className="ms-5 my-2 col">
+            <Col className="ms-5 my-2 justify-content-start">
                 <BootstrapNavbar.Brand as={Link} to="/">
                     <b className="text-light">Auto</b>
                     <b className="text-secondary">Scheduler</b>
                 </BootstrapNavbar.Brand>
-            </div>
+            </Col>
             {
-                user && (<div className="me-3 my-2 col">
-                            <div className="d-flex justify-content-end flex-wrap">
-                                <p className="my-auto me-2 text-end">{user.email}</p>
-                                <LinkButton variant="secondary" textKey="logout" onClick={logOut}/>
+                user && (<Col className="me-3 my-2 d-flex justify-content-end">
+                            <div className="d-flex text-end flex-wrap">
+                                <Col className="mx-auto justify-content-end align-items-center">
+                                    <p className="my-auto me-2 text-end fw-bold">{user.name}</p>
+                                    <p className="my-auto me-2 text-end fst-italic">{user.email}</p>
+                                </Col>
+                                <Col className="mx-auto d-flex justify-content-end">
+                                    <LinkButton variant="secondary" textKey="logout" onClick={logOut}/>
+                                </Col>
+
                             </div>
-                        </div>)
+                        </Col>)
             }
         </BootstrapNavbar>
     );
