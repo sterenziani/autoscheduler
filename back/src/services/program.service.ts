@@ -70,6 +70,40 @@ export default class ProgramService {
         return program;
     }
 
+    async updateProgram(
+        programId: string,
+        internalId: string,
+        name: string,
+        mandatoryCourses: string[] = [],
+        optionalCourses: string[] = [],
+    ): Promise<Program> {
+        // validate existence of course and programIds
+        const program: Program = await this.getProgram(programId);
+        const programUniversity = await program.getUniversity();
+        await Promise.all(
+            mandatoryCourses.concat(optionalCourses).map(async (cId) => {
+                const course = await this.courseService.getCourse(cId);
+                const university = await course.getUniversity();
+                if (university.id != programUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
+            }),
+        );
+
+        // check if a program with new internalId already exists
+        if(internalId != program.internalId){
+            const programWithRequestedInternalId = await this.dao.findByInternalId(programUniversity.id, internalId);
+            if(programWithRequestedInternalId && programWithRequestedInternalId.id != program.id){
+                throw new GenericException(ERRORS.BAD_REQUEST.PROGRAM_ALREADY_EXISTS);
+            }
+        }
+
+        program.internalId = internalId;
+        program.name = name;
+        await program.setMandatoryCourses(mandatoryCourses);
+        program.setOptionalCourses(optionalCourses);
+        await this.dao.set(program);
+        return program;
+    }
+
     async getProgramsByText(
         universityId: string,
         text?: string,

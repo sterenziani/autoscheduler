@@ -701,13 +701,10 @@ const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCours
             "mandatoryCourses": mandatoryCourseIDs,
             "optionalCourses": optionalCourseIDs,
         }
-        if(id){
-            console.log("Pretending to PUT")
-            return { status: OK, id: id };
-        }
-        else{
+        if(id)
+            return updateProgram(payload, id)
+        else
             return createProgram(payload)
-        }
     } catch (e) {
         if (e.response) return { status: e.response.status };
         else return { status: TIMEOUT };
@@ -719,6 +716,21 @@ const createProgram = async (payload) => {
         const response = await api.post("/program", payload, AuthService.getRequestHeaders())
         const id = response.headers.location.split('/')[1]
         return { status: CREATED, id: id }
+    }
+    catch(e) {
+        if (e.response){
+            return { status: e.response.status, data: e.response.data}
+        }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+const updateProgram = async (payload, programId) => {
+    try {
+        const response = await api.put("/program/"+programId, payload, AuthService.getRequestHeaders())
+        const id = response.headers.location.split('/')[1]
+        return { status: OK, id: id }
     }
     catch(e) {
         if (e.response){

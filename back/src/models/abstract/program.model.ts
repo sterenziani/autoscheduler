@@ -17,6 +17,8 @@ export default abstract class Program extends GenericModel {
 
     // Methods
     public abstract addCourse(courseId: string, optional: boolean): Promise<void>;
+    public abstract setMandatoryCourses(mandatoryCourseIds: string[]): Promise<void>;
+    public abstract setOptionalCourses(mandatoryCourseIds: string[]): Promise<void>;
     public abstract getMandatoryCourses(limit?: number, offset?: number): Promise<PaginatedCollection<Course>>;
     public abstract getOptionalCourses(limit?: number, offset?: number): Promise<PaginatedCollection<Course>>;
     public abstract getUniversity(): Promise<University>;

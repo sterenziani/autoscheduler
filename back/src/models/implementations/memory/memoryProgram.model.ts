@@ -5,6 +5,7 @@ import {
     addChildToParent,
     getChildsFromParent,
     getParentFromChild,
+    clearParentsChildren,
     paginateCollection,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import Course from '../../abstract/course.model';
@@ -20,6 +21,20 @@ export default class MemoryProgram extends Program {
             this.id,
             courseId,
         );
+    }
+
+    public async setMandatoryCourses(mandatoryCourseIds: string[]): Promise<void> {
+        clearParentsChildren(MEMORY_DATABASE.mandatoryCoursesOfProgram, this.id);
+        await Promise.all([
+            Promise.all(mandatoryCourseIds.map(async (cId) => await this.addCourse(cId, false))),
+        ]);
+    }
+
+    public async setOptionalCourses(optionalCourseIds: string[]): Promise<void> {
+        clearParentsChildren(MEMORY_DATABASE.optionalCoursesOfProgram, this.id);
+        await Promise.all([
+            Promise.all(optionalCourseIds.map(async (cId) => await this.addCourse(cId, true))),
+        ]);
     }
 
     public async getMandatoryCourses(limit?: number, offset?: number): Promise<PaginatedCollection<Course>> {
