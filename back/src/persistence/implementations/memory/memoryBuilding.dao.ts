@@ -63,7 +63,13 @@ export default class MemoryBuildingDao extends BuildingDao {
             );
         }
 
-        return universityBuildings;
+        // sorting by internalId
+        const compareBuildings = (b1: Building, b2: Building) => {
+            if (b1.internalId < b2.internalId) return -1;
+            if (b1.internalId > b2.internalId) return 1;
+            return 0;
+        };
+        return universityBuildings.sort(compareBuildings);
     }
 
     public async deleteBuilding(id: string) {

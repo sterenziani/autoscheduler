@@ -80,11 +80,48 @@ export default class BuildingService {
         // TODO add session logic for transactional operations
         const building = await this.dao.create(universityId, internalId, name);
         await Promise.all(
-            Object.entries(distances).map(async ([buildingId, distance]) => {
-                await building.setDistanceInMinutesTo(buildingId, distance);
+            Object.entries(distances).map(async ([otherBuildingId, distance]) => {
+                const otherBuilding: Building = await this.getBuilding(otherBuildingId);
+                await building.setDistanceInMinutesTo(otherBuildingId, distance);
+                await otherBuilding.setDistanceInMinutesTo(building.id, distance);
             }),
         );
 
+        return building;
+    }
+
+    async updateBuilding(
+        buildingId: string,
+        internalId: string,
+        name: string,
+        distances: { [buildingId: string]: number } = {},
+    ): Promise<Building> {
+        // validate existence of building and programIds
+        const building: Building = await this.getBuilding(buildingId);
+        const buildingUniversity = await building.getUniversity();
+        const differentBuildingIds: Set<string> = new Set();
+        for (const buildingId of Object.keys(distances)) {
+            if (differentBuildingIds.has(buildingId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+            differentBuildingIds.add(buildingId);
+        }
+
+        // check if a building with new internalId already exists
+        if(internalId != building.internalId){
+            const buildingWithRequestedInternalId = await this.dao.findByInternalId(buildingUniversity.id, internalId);
+            if(buildingWithRequestedInternalId && buildingWithRequestedInternalId.id != building.id){
+                throw new GenericException(ERRORS.BAD_REQUEST.BUILDING_ALREADY_EXISTS);
+            }
+        }
+        building.internalId = internalId;
+        building.name = name;
+        await Promise.all(
+            Object.entries(distances).map(async ([otherBuildingId, distance]) => {
+                const otherBuilding: Building = await this.getBuilding(otherBuildingId);
+                await building.setDistanceInMinutesTo(otherBuildingId, distance);
+                await otherBuilding.setDistanceInMinutesTo(buildingId, distance);
+            }),
+        );
+        await this.dao.set(building);
         return building;
     }
 

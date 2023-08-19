@@ -28,8 +28,8 @@ export class BuildingController {
 
     public createBuilding: RequestHandler = async (req, res, next) => {
         const userInfo = req.user;
-        const internalId = req.body.internalId as string | undefined;
-        const name = req.body.name as string | undefined;
+        const internalId = req.body.internalId as string;
+        const name = req.body.name as string;
         const distances = req.body.distances as { [buildingId: string]: number } | undefined;
 
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
@@ -42,6 +42,24 @@ export class BuildingController {
                 distances,
             );
             res.status(HTTP_STATUS.CREATED).location(BuildingDto.getBuildingUrl(building.id)).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public updateBuilding: RequestHandler = async (req, res, next) => {
+        const buildingId = req.params.buildingId;
+        const userInfo = req.user;
+
+        const internalId = req.body.internalId as string;
+        const name = req.body.name as string;
+        const distances = req.body.distances as { [buildingId: string]: number } | undefined;
+
+        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+
+        try {
+            const building: Building = await this.buildingService.updateBuilding(buildingId, internalId, name, distances);
+            res.status(HTTP_STATUS.OK).location(BuildingDto.getBuildingUrl(building.id)).send();
         } catch (e) {
             next(e);
         }

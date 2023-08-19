@@ -551,7 +551,7 @@ const deleteFinishedCourse = async (studentId, courseId) => {
         const endpoint = "student/" +studentId +"/completed-courses"
         const config = AuthService.getRequestHeaders()
         config.data = {courseIds: [courseId]}
-        const response = await api.delete(endpoint, config) // Data needed for DELETE syntax
+        const response = await api.delete(endpoint, config) // config.data needed for DELETE syntax
         return response
     }
     catch(e) {
@@ -813,53 +813,53 @@ const changePassword = async (userId, token, newPassword) => {
 }
 
 const ApiService = {
-    registerStudent: registerStudent,
-    registerUniversity: registerUniversity,
-    login: login,
-    logout: logout,
-    requestPasswordChangeToken: requestPasswordChangeToken,
-    getActiveUser: getActiveUser,
-    getStudent: getStudent,
-    getSchedules: getSchedules,
-    getUniversities: getUniversities,
-    getPrograms: getPrograms,
-    getProgramsPage: getProgramsPage,
-    getTerms: getTerms,
-    getBuildings: getBuildings,
-    getAllBuildings: getAllBuildings,
-    getBuildingDictionary: getBuildingDictionary,
-    getRemainingCoursesProgram: getRemainingCoursesProgram,
-    getFinishedCourses: getFinishedCourses,
-    getCourse: getCourse,
-    getTerm: getTerm,
-    getProgram: getProgram,
-    getBuilding: getBuilding,
-    getRequiredCourses: getRequiredCourses,
-    getRequiredCoursesForProgram: getRequiredCoursesForProgram,
-    getMandatoryCourses: getMandatoryCourses,
-    getOptionalCourses: getOptionalCourses,
-    getCourseClassesForTerm: getCourseClassesForTerm,
-    addFinishedCourse: addFinishedCourse,
-    deleteFinishedCourse: deleteFinishedCourse,
-    deleteProgram: deleteProgram,
-    getCourses: getCourses,
-    getCoursesPage: getCoursesPage,
-    getCoursesNotInList: getCoursesNotInList,
-    getCourseClass: getCourseClass,
+    registerStudent: registerStudent, // OK
+    registerUniversity: registerUniversity, // OK
+    login: login, // OK
+    logout: logout, // OK
+    getActiveUser: getActiveUser, // OK
+    getStudent: getStudent, // OK
+    getUniversities: getUniversities, // OK
+    getPrograms: getPrograms, // OK
+    getProgramsPage: getProgramsPage, // OK
+    getBuildings: getBuildings, // OK
+    getAllBuildings: getAllBuildings, // OK
+    getBuildingDictionary: getBuildingDictionary, // OK
+    getFinishedCourses: getFinishedCourses, // OK
+    getCourse: getCourse, // OK
+    getProgram: getProgram, // OK
+    getBuilding: getBuilding, // OK
+    getRequiredCourses: getRequiredCourses, // OK
+    getRequiredCoursesForProgram: getRequiredCoursesForProgram, // OK
+    getMandatoryCourses: getMandatoryCourses, // OK
+    getOptionalCourses: getOptionalCourses, // OK
+    addFinishedCourse: addFinishedCourse, // OK
+    deleteFinishedCourse: deleteFinishedCourse, // OK
+    getCourses: getCourses, // OK
+    getCoursesPage: getCoursesPage, // OK
+    getCoursesNotInList: getCoursesNotInList, // OK
+    saveCourse: saveCourse, // OK
+    saveProgram: saveProgram, // OK
+    saveBuilding: saveBuilding, // OK
     deleteCourse: deleteCourse,
+    deleteProgram: deleteProgram,
+    getRemainingCoursesProgram: getRemainingCoursesProgram,
     deleteBuilding: deleteBuilding,
+    getTerm: getTerm,
     deleteTerm: deleteTerm,
-    deleteCourseClass: deleteCourseClass,
     publishTerm: publishTerm,
     unpublishTerm: unpublishTerm,
-    saveCourseClass: saveCourseClass,
     saveTerm: saveTerm,
-    saveCourse: saveCourse,
-    saveProgram: saveProgram,
-    saveBuilding: saveBuilding,
+    getTerms: getTerms,
+    getCourseClass: getCourseClass,
+    getCourseClassesForTerm: getCourseClassesForTerm,
+    deleteCourseClass: deleteCourseClass,
+    saveCourseClass: saveCourseClass,
+    getSchedules: getSchedules,
+    requestPasswordChangeToken: requestPasswordChangeToken,
     getToken: getToken,
     changePassword: changePassword,
-    parsePagination: parsePagination
+    parsePagination: parsePagination // OK
 };
 
 export default ApiService;

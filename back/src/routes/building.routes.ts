@@ -23,6 +23,7 @@ export class BuildingRoutes {
         this.router.use(cors());
 
         this.router.post('/', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.createBuilding);
+        this.router.put('/:buildingId', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.updateBuilding);
         this.router.get('/:buildingId', this.controller.getBuilding);
         this.router.delete(
             '/:buildingId',
