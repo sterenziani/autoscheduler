@@ -48,7 +48,7 @@ export default class BuildingService {
             if (b.id === id) continue;
 
             const time = await building.getDistanceInMinutesTo(b.id);
-            if (time) distances.push({ buildingId: b.id, time });
+            distances.push({ buildingId: b.id, time: time? time:0 });
         }
 
         return distances;
@@ -65,6 +65,7 @@ export default class BuildingService {
         const differentBuildingIds: Set<string> = new Set();
         for (const buildingId of Object.keys(distances)) {
             if (differentBuildingIds.has(buildingId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+            if (typeof distances[buildingId] !== "number") throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
             differentBuildingIds.add(buildingId);
         }
         // check if a building with internalId already exists

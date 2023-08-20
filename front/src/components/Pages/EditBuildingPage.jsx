@@ -55,9 +55,8 @@ function EditBuildingPage(props) {
             else{
                 if(user && buildings && !building){
                     const emptyDist = {}
-                    //buildings.forEach((b) => emptyDist[b.id] = {building: b, time: "0"});
                     for (let [bId, b] of Object.entries(buildings)){
-                        emptyDist[bId] = {building: b, time: "0"}
+                        emptyDist[bId] = {building: b, time: 0}
                     }
                     setDistances(emptyDist)
                     setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
@@ -106,8 +105,8 @@ function EditBuildingPage(props) {
     }
 
     const onChangeTime = (e, entry) => {
-        const distancesCopy = Object.assign([], distances);
-        distancesCopy[entry.building.id].time = e.target.value;
+        const distancesCopy = Object.assign([], distances)
+        distancesCopy[entry.building.id].time = Number(e.target.value);
         setDistances(distancesCopy)
     }
 
