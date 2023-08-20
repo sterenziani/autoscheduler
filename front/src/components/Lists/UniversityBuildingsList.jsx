@@ -101,6 +101,7 @@ function UniversityBuildingsList(props) {
             return;
         ApiService.deleteBuilding(buildingToDelete);
         closeDeleteModal()
+        loadBuildings()
     }
 
     const closeDeleteModal = () => {

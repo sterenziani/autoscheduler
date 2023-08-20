@@ -576,12 +576,19 @@ const deleteCourse = (course) =>
         setTimeout(() => resolve(courses), RESOLVE_DELAY);
     });
 
-const deleteBuilding = (building) =>
-    new Promise((resolve, reject) => {
-        const buildings = SgaConstants.buildings[9];
-        buildings.splice(buildings.indexOf(building), 1);
-        setTimeout(() => resolve(buildings), RESOLVE_DELAY);
-    });
+const deleteBuilding = async (building) => {
+    try {
+        const endpoint = "/building/"+building.id
+        const response = await api.delete(endpoint, AuthService.getRequestHeaders())
+        return response
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
 
 const deleteCourseClass = (courseClass) =>
     new Promise((resolve, reject) => {
@@ -841,10 +848,10 @@ const ApiService = {
     saveCourse: saveCourse, // OK
     saveProgram: saveProgram, // OK
     saveBuilding: saveBuilding, // OK
+    deleteBuilding: deleteBuilding, // OK
     deleteCourse: deleteCourse,
     deleteProgram: deleteProgram,
     getRemainingCoursesProgram: getRemainingCoursesProgram,
-    deleteBuilding: deleteBuilding,
     getTerm: getTerm,
     deleteTerm: deleteTerm,
     publishTerm: publishTerm,

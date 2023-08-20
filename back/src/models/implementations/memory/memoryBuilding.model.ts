@@ -21,9 +21,6 @@ export default class MemoryBuilding extends Building {
     }
 
     public async deleteDistanceInMinutesTo(buildingId: string): Promise<void> {
-        const maybeBuilding = await this.getDistanceInMinutesTo(buildingId);
-        if (!maybeBuilding) throw new GenericException(ERRORS.NOT_FOUND.BUILDING);
-
         MEMORY_DATABASE.distanceBetweenBuildings.get(this.id)?.delete(buildingId);
     }
 

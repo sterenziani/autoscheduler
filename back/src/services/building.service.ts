@@ -135,11 +135,12 @@ export default class BuildingService {
         const universityBuildings = await this.getUniversityBuildingsByText(buildingUniversity.id);
 
         // TODO add session logic for transactional operations
-        await this.dao.deleteBuilding(id);
         await Promise.all(
             universityBuildings.map(async (b) => {
                 await building.deleteDistanceInMinutesTo(b.id);
+                await b.deleteDistanceInMinutesTo(building.id);
             }),
         );
+        await this.dao.deleteBuilding(id);
     }
 }

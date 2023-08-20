@@ -1,6 +1,7 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import { addChildToParent, getChildsFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import { addChildToParent, getChildsFromParent, removeChildFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
 import Building from '../../../models/abstract/building.model';
+import University from '../../../models/abstract/university.model';
 import MemoryBuilding from '../../../models/implementations/memory/memoryBuilding.model';
 import BuildingDao from '../../abstract/building.dao';
 import { v4 as uuidv4 } from 'uuid';
@@ -73,6 +74,10 @@ export default class MemoryBuildingDao extends BuildingDao {
     }
 
     public async deleteBuilding(id: string) {
+        const building: Building = await this.getById(id);
+        const university: University = await building.getUniversity();
+
         MEMORY_DATABASE.buildings.delete(id);
+        removeChildFromParent(MEMORY_DATABASE.buildingsOfUniversity, university.id, id);
     }
 }
