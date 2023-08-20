@@ -3,6 +3,7 @@ import SgaConstants from '../resources/SgaConstants';
 import api from './api'
 import AuthService from './AuthService'
 const RESOLVE_DELAY = 250;
+const MULTI_PAGE_SEARCH_LIMIT = 20;
 
 //////////////////////////
 //// HELPER FUNCTIONS ////
@@ -11,6 +12,44 @@ const RESOLVE_DELAY = 250;
 const simpleApiGetRequest = async (endpoint) => {
     try {
         return await api.get(endpoint, AuthService.getRequestHeaders())
+    }
+    catch(e) {
+        if (e.response) return { status: e.response.status }
+        else return { status: TIMEOUT }
+    }
+}
+
+const simpleApiMultiPageGetRequest = async (baseEndpoint, inputText, limit, idsToFilter) => {
+    try {
+        if(!inputText)
+            inputText = ""
+        let page = 0
+        let lastPage = 0
+        let finalResponse = {data: []}
+        while(page <= lastPage && (!limit || finalResponse.data.length < limit)) {
+            const endpoint = baseEndpoint + "?filter="+inputText +"&page=" +page
+            const response = await api.get(endpoint, AuthService.getRequestHeaders())
+
+            // Process page data (last is checked every time in case one has been added after first page was read)
+            const links = parsePagination(response)
+            page = page+1
+            if(links && links.last && links.last.includes("page="))
+                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+
+            // Add the items we're interested in to finalResponse array
+            if(idsToFilter){
+                const foundItems = response.data.filter((item) => !idsToFilter.find((c) => c.id === item.id))
+                finalResponse.data = finalResponse.data.concat(foundItems)
+            } else {
+                finalResponse.data = finalResponse.data.concat(response.data)
+            }
+
+            // Update our potential response
+            finalResponse.status = response.status
+            if(limit)
+                finalResponse.data.length = Math.min(limit, finalResponse.data.length)
+        }
+        return finalResponse
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
@@ -208,11 +247,18 @@ const deleteFinishedCourse = async (studentId, courseId) => {
     return simpleApiDeleteRequest(endpoint, body)
 }
 
-// TODO: Placeholder. This should be a call to API's getRemainingCoursesProgram, filtering results by program and removing those already finished by user
-// Should return a list of courses belonging to a program that haven't yet been passed by the user
+// TODO: Placeholder. This should be a call to API's getRemainingCoursesProgram, filtering results by program and removing those already finished by the user
 const getRemainingCoursesProgram = async (user, programId, inputText) => {
     // TODO: Fix
-    return await getCourses(user.university.id, inputText)
+    const mandatoryCoursesResp = await getMandatoryCourses(programId)
+    if(mandatoryCoursesResp.status != OK)
+        return mandatoryCoursesResp
+
+    const optionalCoursesResp = await getOptionalCourses(programId)
+    if(optionalCoursesResp.status != OK)
+        return optionalCoursesResp
+
+    return {status: OK, data: [...mandatoryCoursesResp.data, ...optionalCoursesResp.data]}
 }
 
 // TODO: Implement me
@@ -231,30 +277,7 @@ const getSchedules = (params) =>
 //////////////////////////////////////////////////////////////////////////////
 
 const getUniversities = async (inputText) => {
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: []}
-        while(page <= lastPage){
-            const endpoint = "/universities?filter="+inputText +"&page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            finalResponse.data = finalResponse.data.concat(response.data)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    return simpleApiMultiPageGetRequest("universities", inputText)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -267,58 +290,22 @@ const getBuildings = async (universityId, page) => {
 }
 
 const getAllBuildings = async (universityId) => {
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: []}
-        while(page <= lastPage){
-            const endpoint = "/university/" + universityId + "/buildings?page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            finalResponse.data = finalResponse.data.concat(response.data)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    console.log("Getting all Buildings")
+    return simpleApiMultiPageGetRequest("university/"+universityId+"/buildings")
 }
 
-const getBuildingDictionary = async (universityId, page) => {
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: {}}
-        while(page <= lastPage){
-            const endpoint = "/university/" + universityId + "/buildings?page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
+const getBuildingDictionary = async (universityId) => {
+    // Get all buildings
+    const buildingsResp = await getAllBuildings(universityId)
+    if(buildingsResp.status != OK)
+        return buildingsResp
 
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
+    // Build dictionary
+    let finalResponse = { data: {} }
+    buildingsResp.data.forEach(b => finalResponse.data[b.id] = b)
+    finalResponse.status = buildingsResp.status
 
-            response.data.forEach(b => finalResponse.data[b.id] = b)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    return finalResponse
 }
 
 const getBuilding = async (buildingId) => {
@@ -348,44 +335,12 @@ const deleteBuilding = async (building) => {
 //////////////////////////////////////////////////////////////////////////////
 
 const getPrograms = async (universityId, inputText) => {
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: []}
-        while(page <= lastPage){
-            const endpoint = "/university/" + universityId + "/programs?filter=" + inputText +"&page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            finalResponse.data = finalResponse.data.concat(response.data)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    return simpleApiMultiPageGetRequest("/university/"+universityId+"/programs", inputText)
 }
 
 const getProgramsPage = async (universityId, page) => {
-    try {
-        const endpoint = "/university/" + universityId + "/programs?page=" + (page-1)
-        const response = await api.get(endpoint, AuthService.getRequestHeaders())
-        return response
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    const endpoint = "university/" + universityId + "/programs?page=" +(page-1)
+    return simpleApiGetRequest(endpoint)
 }
 
 const getProgram = async (programId) => {
@@ -393,57 +348,11 @@ const getProgram = async (programId) => {
 }
 
 const getMandatoryCourses = async (programId) => {
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: []}
-        while(page <= lastPage){
-            const endpoint = "/program/"+programId+"/courses/mandatory" +"?page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            finalResponse.data = finalResponse.data.concat(response.data)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    return simpleApiMultiPageGetRequest("/program/"+programId+"/courses/mandatory")
 }
 
 const getOptionalCourses = async (programId) => {
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: []}
-        while(page <= lastPage){
-            const endpoint = "/program/"+programId+"/courses/optional" +"?page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            finalResponse.data = finalResponse.data.concat(response.data)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    return simpleApiMultiPageGetRequest("/program/"+programId+"/courses/optional")
 }
 
 const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCourses) => {
@@ -476,34 +385,8 @@ const getCourses = async (universityId, inputText) => {
     return simpleApiGetRequest(endpoint)
 }
 
-const getCoursesNotInList = async (universityId, inputText, coursesToFilter, limit) => {
-    let listSize = limit? limit:20
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: []}
-        while(page <= lastPage && finalResponse.data.length < listSize){
-            const endpoint = "/university/" + universityId + "/courses?filter=" + inputText +"&page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            const foundCourses = response.data.filter((item) => !coursesToFilter.find((c) => c.id === item.id))
-            finalResponse.data = finalResponse.data.concat(foundCourses)
-            finalResponse.data.length = Math.min(20, finalResponse.data.length)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+const getCoursesNotInList = async (universityId, inputText, courseIDsToFilter, limit) => {
+    return simpleApiMultiPageGetRequest("university/" + universityId + "/courses", inputText, MULTI_PAGE_SEARCH_LIMIT, courseIDsToFilter)
 }
 
 const getCoursesPage = async (universityId, page) => {
@@ -552,30 +435,7 @@ const getRequiredCourses = async (courseId) => {
 }
 
 const getRequiredCoursesForProgram = async (courseId, programId) => {
-    try {
-        let page = 0
-        let lastPage = 0
-        let finalResponse = {data: []}
-        while(page <= lastPage){
-            const endpoint = "/course/"+courseId+"/requirements/"+programId +"?page=" +page
-            const response = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(response)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            finalResponse.data = finalResponse.data.concat(response.data)
-            finalResponse.status = response.status
-        }
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    return simpleApiMultiPageGetRequest("course/"+courseId+"/requirements/"+programId)
 }
 
 const saveCourse = async (id, name, internalId, requirements) => {
