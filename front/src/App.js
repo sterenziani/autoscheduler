@@ -12,8 +12,9 @@ import EditTermPage from './components/Pages/EditTermPage';
 import EditProgramPage from './components/Pages/EditProgramPage';
 import EditBuildingPage from './components/Pages/EditBuildingPage';
 import ResetPasswordPage from './components/Pages/ResetPasswordPage';
-import NoMatch from './components/Common/NoMatch';
+import ErrorMessage from './components/Common/ErrorMessage';
 import AuthService from './services/AuthService';
+import { NOT_FOUND } from './services/ApiConstants';
 import './resources/style.scss';
 
 function App() {
@@ -37,7 +38,7 @@ function App() {
                 <Route path="/buildings/:id" element={<EditBuildingPage />} />
                 <Route path="/buildings/new" element={<EditBuildingPage />} />
                 <Route path="/reset/:token" element={<ResetPasswordPage />} />
-                <Route path="*" element={<NoMatch />} />
+                <Route path="*" element={<ErrorMessage status={NOT_FOUND} />} />
             </Routes>
         </Router>
     );

@@ -8,8 +8,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import CourseListForm from '../Lists/CourseListForm';
-import { OK, CREATED } from '../../services/ApiConstants';
-import NoAccess from '../Common/NoAccess';
+import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import AsyncSelect from 'react-select/async'
 import ErrorMessage from '../Common/ErrorMessage';
@@ -167,9 +166,9 @@ function EditCoursePage(props) {
     }
 
     if(!user)
-        return <React.Fragment/>
+        return <ErrorMessage status={UNAUTHORIZED}/>
     if(user.role !== Roles.UNIVERSITY)
-        return <NoAccess/>
+        return <ErrorMessage status={FORBIDDEN}/>
     if (loading === true)
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />

@@ -4,10 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import CourseRequirementsList from '../Lists/CourseRequirementsList';
 import CourseClassesTab from '../Common/CourseClassesTab';
-import NoAccess from '../Common/NoAccess';
 import Roles from '../../resources/RoleConstants';
 import LinkButton from '../Common/LinkButton';
 import ErrorMessage from '../Common/ErrorMessage';
@@ -69,9 +68,9 @@ function CoursePage(props) {
     }
 
     if(!user)
-        return <React.Fragment/>
+        return <ErrorMessage status={UNAUTHORIZED}/>
     if(user.role !== Roles.UNIVERSITY)
-        return <NoAccess/>
+        return <ErrorMessage status={FORBIDDEN}/>
     if (loading === true)
         return (
             <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>

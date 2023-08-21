@@ -5,10 +5,9 @@ import { Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import { useLocation } from 'react-router-dom';
 import LinkButton from '../Common/LinkButton';
-import NoAccess from '../Common/NoAccess';
 import ErrorMessage from '../Common/ErrorMessage';
 import Roles from '../../resources/RoleConstants';
 
@@ -170,9 +169,9 @@ function SearchResults(props) {
     }
 
     if(!user)
-        return <React.Fragment/>
+        return <ErrorMessage status={UNAUTHORIZED}/>
     if(user.role !== Roles.STUDENT)
-        return <NoAccess/>
+        return <ErrorMessage status={FORBIDDEN}/>
     if (loading === true) {
         return (
             <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
