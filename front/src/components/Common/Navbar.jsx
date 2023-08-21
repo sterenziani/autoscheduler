@@ -26,7 +26,7 @@ function Navbar(props){
     }, [location]);
 
     return (
-        <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight flex-wrap">
+        <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight flex-wrap border-bottom border-secondary border-3">
             <Col className="ms-5 my-2 justify-content-start">
                 <BootstrapNavbar.Brand as={Link} to="/">
                     <b className="text-light">Auto</b>

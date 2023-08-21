@@ -72,25 +72,25 @@ function UniversityTermsList(props) {
     }
 
     const redirectToEdit = (id) => {
-        navigate("/terms/"+id);
+        navigate("/terms/"+id)
     }
 
     const redirectToCreate = () => {
-        navigate("/terms/new");
+        navigate("/terms/new")
     }
 
     const switchTermStatus = async (index) => {
-        const term = terms[index];
+        const term = terms[index]
         const changingPublishStatusCopy = Object.assign({}, changingPublishStatus)
-        changingPublishStatusCopy[index] = true;
+        changingPublishStatusCopy[index] = true
         setChangingPublishStatus(changingPublishStatusCopy)
-        let resp;
+        let resp
         if (term.published)
-            resp = await ApiService.unpublishTerm(term);
+            resp = await ApiService.unpublishTerm(term)
         else
-            resp = await ApiService.publishTerm(term);
+            resp = await ApiService.publishTerm(term)
         if (resp.status === OK)
-            loadTerms();
+            loadTerms()
         else{
             setError(true)
             setStatus(resp.status)
@@ -101,6 +101,7 @@ function UniversityTermsList(props) {
         if (!termToDelete) return;
         ApiService.deleteTerm(termToDelete);
         closeDeleteModal()
+        loadTerms()
     }
 
     const closeDeleteModal = () => {

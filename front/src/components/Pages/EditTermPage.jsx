@@ -83,10 +83,6 @@ function EditTermPage(props) {
         });
     }
 
-    useEffect( () => {
-        console.log(startDate)
-    }, [startDate])
-
     const onChangeStartDate = (e) => {
         setStartDate(e.target.value)
     }

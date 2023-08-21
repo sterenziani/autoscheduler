@@ -462,34 +462,23 @@ const deleteCourse = (course) =>
 /////////////////////////////// TERM FUNCTIONS ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-// TODO: Implement me
 const getTerms = async (universityId, page) => {
     const endpoint = "university/" + universityId + "/terms?page=" +(page-1)
     return simpleApiGetRequest(endpoint)
 }
 
-// TODO: Implement me
 const getTerm = async (termId) => {
     return simpleApiGetRequest("term/"+termId)
 }
 
-// TODO: Implement me
-async function publishTerm(term) {
-    const terms = SgaConstants.terms;
-    const found_term = terms[terms.indexOf(term)];
-    if (found_term) found_term.published = true;
-    return { status: OK };
+const publishTerm = async (term) => {
+    return saveTerm(term.id, term.name, term.internalId, term.startDate, true)
 }
 
-// TODO: Implement me
-async function unpublishTerm(term) {
-    const terms = SgaConstants.terms;
-    const found_term = terms[terms.indexOf(term)];
-    if (found_term) found_term.published = false;
-    return { status: OK };
+const unpublishTerm = async (term) => {
+    return saveTerm(term.id, term.name, term.internalId, term.startDate, false)
 }
 
-// TODO: Implement me
 const saveTerm = async (id, name, internalId, startDate, published) => {
     const payload = {
         'name': name,
@@ -500,7 +489,6 @@ const saveTerm = async (id, name, internalId, startDate, published) => {
     return createOrUpdateObject("term/", payload, id)
 }
 
-// TODO: Implement me
 const deleteTerm = async (term) => {
     return simpleApiDeleteRequest("term/"+term.id)
 }
@@ -569,7 +557,6 @@ const ApiService = {
     requestPasswordChangeToken: requestPasswordChangeToken, // TODO
     changePassword: changePassword, // TODO
     requestPasswordChangeToken:requestPasswordChangeToken, // TODO
-    changePassword:changePassword, // TODO
 
     getStudent: getStudent,
     getFinishedCourses: getFinishedCourses,
@@ -603,12 +590,12 @@ const ApiService = {
     saveCourse: saveCourse,
     deleteCourse: deleteCourse, // TODO
 
-    getTerms: getTerms, // TODO
-    getTerm: getTerm, // TODO
-    publishTerm: publishTerm, // TODO
-    unpublishTerm: unpublishTerm, // TODO
-    saveTerm: saveTerm, // TODO
-    deleteTerm: deleteTerm, // TODO
+    getTerms: getTerms,
+    getTerm: getTerm,
+    publishTerm: publishTerm,
+    unpublishTerm: unpublishTerm,
+    saveTerm: saveTerm,
+    deleteTerm: deleteTerm,
 
     getCourseClassesForTerm: getCourseClassesForTerm, // TODO
     getCourseClass: getCourseClass, // TODO

@@ -15,17 +15,17 @@ function CourseClassesTab(props) {
     const course = props.course;
 
     useEffect( () => {
-        ApiService.getTerms(user.id).then((data) => {
+        ApiService.getTerms(user.id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setTerms(data)
-                setSelectedTerm(data[0])
+                setTerms(resp.data)
+                setSelectedTerm(resp.data[0])
             }
             setLoading(false)
         });
