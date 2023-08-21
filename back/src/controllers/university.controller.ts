@@ -157,13 +157,13 @@ export class UniversityController {
         const page = parseInt(req.query.page as string) ?? undefined;
         const per_page = parseInt(req.query.per_page as string) ?? undefined;
 
-        if (!(from && isValidISODate(from)) || !(to && isValidISODate(to)))
+        if ((from && !isValidISODate(from)) || (to && !isValidISODate(to)))
             return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
             const realPublished = userInfo?.id === userId ? published : true;
-            const fromDate = getDateFromISO(from);
-            const toDate = getDateFromISO(to);
+            const fromDate = from? getDateFromISO(from) : undefined;
+            const toDate = to? getDateFromISO(to) : undefined;
             const terms = await this.termService.getTerms(
                 userId,
                 filter,

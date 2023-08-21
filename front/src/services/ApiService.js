@@ -290,7 +290,6 @@ const getBuildings = async (universityId, page) => {
 }
 
 const getAllBuildings = async (universityId) => {
-    console.log("Getting all Buildings")
     return simpleApiMultiPageGetRequest("university/"+universityId+"/buildings")
 }
 
@@ -464,28 +463,15 @@ const deleteCourse = (course) =>
 //////////////////////////////////////////////////////////////////////////////
 
 // TODO: Implement me
-const getTerms = async (universityId, page) =>
-    new Promise((resolve, reject) => {
-        const terms = SgaConstants.terms;
-        if(!page)
-            setTimeout(() => resolve(terms), RESOLVE_DELAY);
-        else{
-            if(page==1)
-                setTimeout(() => resolve([terms[0], terms[1]]), RESOLVE_DELAY);
-            else if(page==2)
-                setTimeout(() => resolve([terms[2]]), RESOLVE_DELAY);
-            else
-                setTimeout(() => resolve([]), RESOLVE_DELAY);
-        }
-    });
+const getTerms = async (universityId, page) => {
+    const endpoint = "university/" + universityId + "/terms?page=" +(page-1)
+    return simpleApiGetRequest(endpoint)
+}
 
 // TODO: Implement me
-const getTerm = (termId) =>
-    new Promise((resolve, reject) => {
-        // eslint-disable-next-line
-        const term = SgaConstants.terms.find((t) => t.id == termId);
-        setTimeout(() => resolve(term), RESOLVE_DELAY);
-    });
+const getTerm = async (termId) => {
+    return simpleApiGetRequest("term/"+termId)
+}
 
 // TODO: Implement me
 async function publishTerm(term) {
@@ -504,27 +490,20 @@ async function unpublishTerm(term) {
 }
 
 // TODO: Implement me
-const saveTerm = async (id, name, internalId, startDate) => {
-    try {
-        if(id){
-            return { status: OK };
-        }
-        else{
-            return { status: CREATED };
-        }
-    } catch (e) {
-        if (e.response) return { status: e.response.status };
-        else return { status: TIMEOUT };
+const saveTerm = async (id, name, internalId, startDate, published) => {
+    const payload = {
+        'name': name,
+        'internalId': internalId,
+        "startDate": startDate,
+        "published": published
     }
+    return createOrUpdateObject("term/", payload, id)
 }
 
 // TODO: Implement me
-const deleteTerm = (term) =>
-    new Promise((resolve, reject) => {
-        const terms = SgaConstants.terms;
-        terms.splice(terms.indexOf(term), 1);
-        setTimeout(() => resolve(terms), RESOLVE_DELAY);
-    });
+const deleteTerm = async (term) => {
+    return simpleApiDeleteRequest("term/"+term.id)
+}
 
 
 //////////////////////////////////////////////////////////////////////////////

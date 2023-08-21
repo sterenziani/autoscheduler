@@ -19,9 +19,8 @@ function UniversityTermsList(props) {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [changingPublishStatus, setChangingPublishStatus] = useState([]);
     const [termToDelete, setTermToDelete] = useState();
-    const [prevPage, setPrevPage] = useState(false);
+    const [paginationLinks, setPaginationLinks] = useState(null);
     const [page, setPage] = useState(1);
-    const [nextPage, setNextPage] = useState(false);
     const search = useLocation().search
 
     const readPageInSearchParams = () => {
@@ -54,19 +53,19 @@ function UniversityTermsList(props) {
 
     const loadTerms = (page) => {
         setLoading(true)
-        ApiService.getTerms(user.id, page).then((data) => {
+        ApiService.getTerms(user.id, page).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setError(true)
                 setStatus(findError)
             }
             else{
-                setTerms(data)
-                setPrevPage(page == 2)
-                setNextPage(page < 2)
-                setChangingPublishStatus(new Array(data.length).fill(false))
+                let links = ApiService.parsePagination(resp)
+                setPaginationLinks(links)
+                setTerms(resp.data)
+                setChangingPublishStatus(new Array(resp.data.length).fill(false))
             }
             setLoading(false)
         });
@@ -114,6 +113,13 @@ function UniversityTermsList(props) {
         setTermToDelete(e)
     }
 
+    const convertDateFormat = (dateString) => {
+        const date = new Date(dateString)
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const locale = (navigator.userLanguage || (navigator.languages && navigator.languages.length && navigator.languages[0]) || navigator.language || navigator.browserLanguage || navigator.systemLanguage)
+        return date.toLocaleDateString(locale, options) // Undefined locale should use local
+    }
+
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
@@ -127,7 +133,7 @@ function UniversityTermsList(props) {
                               <Row key={'row-' + index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
                                   <div className="m-auto">{entry.code}</div>
                                   <div className="m-auto">{entry.name}</div>
-                                  <div className="m-auto">{entry.startDate}</div>
+                                  <div className="m-auto">{convertDateFormat(entry.startDate)}</div>
                                   <div className="d-flex m-auto justify-content-center">
                                       <i
                                           className="bi bi-pencil-fill btn btn-lg text-white"
@@ -140,7 +146,7 @@ function UniversityTermsList(props) {
                                           onClick={() => openDeleteModal(entry)}
                                       ></i>
                                   </div>
-                                  <div className="my-auto p-0 d-flex justify-content-center">
+                                  <div className="m-auto d-flex justify-content-center">
                                       {changingPublishStatus[index]
                                           ? [
                                                 <div key={'spinner-' + index} className="mx-auto">
@@ -178,7 +184,7 @@ function UniversityTermsList(props) {
                           <div key="empty-list">{t('emptyList')}</div>,
                       ]}
             </div>
-            <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
+            <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
                     className="bi bi-plus-circle-fill btn btn-lg color-white plus-button-big"

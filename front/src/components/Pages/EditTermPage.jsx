@@ -12,6 +12,8 @@ import NoAccess from '../Common/NoAccess';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
+const EXISTING_TERM_ERROR = "TERM_ALREADY_EXISTS"
+
 function EditTermPage(props) {
     const TermSchema = Yup.object().shape({
         termName: Yup.string()
@@ -64,21 +66,26 @@ function EditTermPage(props) {
     },[term])
 
     const loadTerm = async () => {
-        ApiService.getTerm(id).then((data) => {
+        ApiService.getTerm(id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setError(true)
                 setStatus(findError)
             }
             else{
-              setTerm(data)
-              setStartDate(data.startDate)
+                const date = new Date(resp.data.startDate)
+                setStartDate(date.toISOString().split('T')[0])
+                setTerm(resp.data)
             }
             setLoading(false)
         });
     }
+
+    useEffect( () => {
+        console.log(startDate)
+    }, [startDate])
 
     const onChangeStartDate = (e) => {
         setStartDate(e.target.value)
@@ -88,13 +95,14 @@ function EditTermPage(props) {
         setSubmitting(true);
         if (startDate && values.termName && values.code)
         {
-            const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.code, startDate)
+            const published = id? term.published : false
+            const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.code, startDate, published)
             if(resp.status === OK || resp.status === CREATED)
                 navigate("/?tab=terms");
             else{
-                setError(true)
+                setError(resp.data.code)
                 setStatus(resp.status)
-                setSubmitting(false);
+                setSubmitting(false)
             }
         }
         else {
@@ -111,7 +119,7 @@ function EditTermPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error)
+    if (error && error != EXISTING_TERM_ERROR)
         return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
@@ -120,20 +128,21 @@ function EditTermPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editTerm':'forms.createTerm')}</h2>
+                {error && (<p className="form-error">{t('forms.errors.term.codeAlreadyTaken')}</p>)}
                 <Formik initialValues={{ termName: term.name, code: term.code }} validationSchema={TermSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
-                    <FormInputField
-                        label="forms.termName" name="termName"
-                        placeholder="forms.placeholders.termName"
-                        value={values.termName} error={errors.termName}
-                        touched={touched.termName} onChange={handleChange} onBlur={handleBlur}
-                    />
                     <FormInputField
                         label="forms.termCode" name="code"
                         placeholder="forms.placeholders.termCode"
                         value={values.code} error={errors.code}
                         touched={touched.code} onChange={handleChange} onBlur={handleBlur}
+                    />
+                    <FormInputField
+                        label="forms.termName" name="termName"
+                        placeholder="forms.placeholders.termName"
+                        value={values.termName} error={errors.termName}
+                        touched={touched.termName} onChange={handleChange} onBlur={handleBlur}
                     />
                     <Form.Group controlId="term-startdate" className="row mx-auto form-row">
                         <div className="col-3 text-end my-auto text-break">

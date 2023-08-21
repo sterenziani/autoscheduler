@@ -234,7 +234,7 @@
     "noPermission": "No cuenta con permisos para ver esta página.",
     "notFound": "NO ENCONTRADO",
     "requestedDoesntExist": "El recurso solicitado no existe.",
-    "noSchedulesFound:" "No hubo planes encontrados para su búsqueda.",
+    "noSchedulesFound": "No hubo planes encontrados para su búsqueda.",
     "noDefinedRequirements": "No hay correlativas definidas. Es posible que esta materia no sea parte del plan seleccionado.",
     "selectNoOptions": "Ingrese un caracter para buscar.",
     "selectNoResults": "No results found for the given query.",

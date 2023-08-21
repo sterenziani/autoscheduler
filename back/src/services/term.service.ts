@@ -48,7 +48,7 @@ export default class TermService {
         if (!maybeUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
 
         if (await this.dao.findByInternalId(universityId, internalId))
-            throw new GenericException(ERRORS.ALREADY_EXISTS.TERM);
+            throw new GenericException(ERRORS.BAD_REQUEST.TERM_ALREADY_EXISTS);
 
         return await this.dao.create(universityId, internalId, name, false, startDate);
     }
@@ -80,9 +80,13 @@ export default class TermService {
         // validate permission
         if (maybeUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
-        // validate internalId
-        if (internalId && (await this.dao.findByInternalId(universityId, internalId)))
-            throw new GenericException(ERRORS.ALREADY_EXISTS.TERM);
+        // check if a program with new internalId already exists
+        if(internalId && internalId != term.internalId){
+            const termWithRequestedInternalId = await this.dao.findByInternalId(maybeUniversity.id, internalId);
+            if(termWithRequestedInternalId && termWithRequestedInternalId.id != term.id){
+                throw new GenericException(ERRORS.BAD_REQUEST.TERM_ALREADY_EXISTS);
+            }
+        }
 
         if (internalId) term.internalId = internalId;
         if (name) term.name = name;

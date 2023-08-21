@@ -28,7 +28,7 @@ export class TermController {
     public createTerm: RequestHandler = async (req, res, next) => {
         const userInfo = req.user;
         const internalId = req.body.internalId as string | undefined;
-        const name = req.body.internalId as string | undefined;
+        const name = req.body.name as string | undefined;
         const startDate = req.body.startDate as string | undefined;
 
         if (!internalId || !name || !(startDate && isValidISODate(startDate)))
@@ -51,7 +51,7 @@ export class TermController {
         const userInfo = req.user;
         const termId = req.params.termId;
         const internalId = req.body.internalId as string | undefined;
-        const name = req.body.internalId as string | undefined;
+        const name = req.body.name as string | undefined;
         const published = req.body.published as boolean | undefined;
         const startDate = req.body.startDate as string | undefined;
 

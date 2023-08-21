@@ -90,8 +90,8 @@ export default class MemoryTermDao extends TermDao {
 
         // sorting by startDate then internalId
         const compareTerms = (t1: Term, t2: Term) => {
-            if (t1.startDate < t2.startDate) return -1;
-            if (t1.startDate > t2.startDate) return 1;
+            if (t1.startDate < t2.startDate) return 1;
+            if (t1.startDate > t2.startDate) return -1;
 
             if (t1.internalId < t2.internalId) return -1;
             if (t1.internalId > t2.internalId) return 1;

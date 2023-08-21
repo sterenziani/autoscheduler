@@ -92,7 +92,8 @@ function EditCoursePage(props) {
         setTimeout(() => {
             ApiService.getPrograms(user.id, inputValue).then((resp) => {
                 let findError = null;
-                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED) findError = resp.status;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
                 if (findError) {
                     setError(true)
                     setStatus(findError)
@@ -107,7 +108,8 @@ function EditCoursePage(props) {
     const loadRequirements = async(courseId) => {
         ApiService.getRequiredCourses(courseId).then((resp) => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK) findError = resp.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
@@ -130,7 +132,7 @@ function EditCoursePage(props) {
             else{
                 setError(resp.data.code)
                 setStatus(resp.status)
-                setSubmitting(false);
+                setSubmitting(false)
             }
         }
         else {
