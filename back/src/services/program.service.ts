@@ -89,9 +89,9 @@ export default class ProgramService {
         );
 
         // check if a program with new internalId already exists
-        if(internalId != program.internalId){
+        if (internalId != program.internalId) {
             const programWithRequestedInternalId = await this.dao.findByInternalId(programUniversity.id, internalId);
-            if(programWithRequestedInternalId && programWithRequestedInternalId.id != program.id){
+            if (programWithRequestedInternalId && programWithRequestedInternalId.id != program.id) {
                 throw new GenericException(ERRORS.BAD_REQUEST.PROGRAM_ALREADY_EXISTS);
             }
         }

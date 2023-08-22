@@ -162,8 +162,8 @@ export class UniversityController {
 
         try {
             const realPublished = userInfo?.id === userId ? published : true;
-            const fromDate = from? getDateFromISO(from) : undefined;
-            const toDate = to? getDateFromISO(to) : undefined;
+            const fromDate = from ? getDateFromISO(from) : undefined;
+            const toDate = to ? getDateFromISO(to) : undefined;
             const terms = await this.termService.getTerms(
                 userId,
                 filter,

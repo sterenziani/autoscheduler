@@ -1,5 +1,9 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import { addChildToParent, getChildsFromParent, removeChildFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import {
+    addChildToParent,
+    getChildsFromParent,
+    removeChildFromParent,
+} from '../../../helpers/persistence/memoryPersistence.helper';
 import Building from '../../../models/abstract/building.model';
 import University from '../../../models/abstract/university.model';
 import MemoryBuilding from '../../../models/implementations/memory/memoryBuilding.model';

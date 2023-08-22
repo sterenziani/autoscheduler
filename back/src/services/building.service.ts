@@ -48,7 +48,7 @@ export default class BuildingService {
             if (b.id === id) continue;
 
             const time = await building.getDistanceInMinutesTo(b.id);
-            distances.push({ buildingId: b.id, time: time? time:0 });
+            distances.push({ buildingId: b.id, time: time ? time : 0 });
         }
 
         return distances;
@@ -65,7 +65,8 @@ export default class BuildingService {
         const differentBuildingIds: Set<string> = new Set();
         for (const buildingId of Object.keys(distances)) {
             if (differentBuildingIds.has(buildingId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
-            if (typeof distances[buildingId] !== "number") throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+            if (typeof distances[buildingId] !== 'number')
+                throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
             differentBuildingIds.add(buildingId);
         }
         // check if a building with internalId already exists
@@ -107,9 +108,9 @@ export default class BuildingService {
         }
 
         // check if a building with new internalId already exists
-        if(internalId != building.internalId){
+        if (internalId != building.internalId) {
             const buildingWithRequestedInternalId = await this.dao.findByInternalId(buildingUniversity.id, internalId);
-            if(buildingWithRequestedInternalId && buildingWithRequestedInternalId.id != building.id){
+            if (buildingWithRequestedInternalId && buildingWithRequestedInternalId.id != building.id) {
                 throw new GenericException(ERRORS.BAD_REQUEST.BUILDING_ALREADY_EXISTS);
             }
         }

@@ -24,7 +24,7 @@ export default class MemoryCourse extends Course {
         clearParentsGrandchildren(MEMORY_DATABASE.requiredCoursesOfCourse, this.id);
         for (const programId of Object.keys(requiredCourses)) {
             for (const courseId of requiredCourses[programId]) {
-                addGrandchildToParent(MEMORY_DATABASE.requiredCoursesOfCourse, this.id, programId, courseId);;
+                addGrandchildToParent(MEMORY_DATABASE.requiredCoursesOfCourse, this.id, programId, courseId);
             }
         }
     }
@@ -33,7 +33,7 @@ export default class MemoryCourse extends Course {
         const programs: Program[] = getMiddleChildsFromParent<Program>(
             MEMORY_DATABASE.requiredCoursesOfCourse,
             MEMORY_DATABASE.programs,
-            this.id
+            this.id,
         );
 
         // sorting by internalId

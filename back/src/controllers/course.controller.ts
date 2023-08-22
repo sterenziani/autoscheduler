@@ -30,8 +30,9 @@ export class CourseController {
         try {
             const course: Course = await this.courseService.getCourse(courseId);
             const programs = await this.courseService.getProgramsWithRequiredCourses(courseId);
-            res.status(HTTP_STATUS.OK)
-                .send(programs.map((p) => CourseDto.programToRequirementsForProgramDto(course, p.id)));
+            res.status(HTTP_STATUS.OK).send(
+                programs.map((p) => CourseDto.programToRequirementsForProgramDto(course, p.id)),
+            );
         } catch (e) {
             next(e);
         }
@@ -45,8 +46,7 @@ export class CourseController {
             const course = await this.courseService.getCourse(courseId);
             const university = await course.getUniversity();
             const courses = await this.courseService.getCourseRequirementsForProgram(courseId, programId);
-            res.status(HTTP_STATUS.OK)
-                .send(courses.map((c) => CourseDto.courseToDto(c, university.id)));
+            res.status(HTTP_STATUS.OK).send(courses.map((c) => CourseDto.courseToDto(c, university.id)));
         } catch (e) {
             next(e);
         }

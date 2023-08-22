@@ -86,9 +86,9 @@ export default class CourseService {
         );
 
         // check if a course with new internalId already exists
-        if(internalId != course.internalId){
+        if (internalId != course.internalId) {
             const courseWithRequestedInternalId = await this.dao.findByInternalId(courseUniversity.id, internalId);
-            if(courseWithRequestedInternalId && courseWithRequestedInternalId.id != course.id){
+            if (courseWithRequestedInternalId && courseWithRequestedInternalId.id != course.id) {
                 throw new GenericException(ERRORS.BAD_REQUEST.COURSE_ALREADY_EXISTS);
             }
         }

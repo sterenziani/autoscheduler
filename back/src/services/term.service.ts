@@ -81,9 +81,9 @@ export default class TermService {
         if (maybeUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
         // check if a program with new internalId already exists
-        if(internalId && internalId != term.internalId){
+        if (internalId && internalId != term.internalId) {
             const termWithRequestedInternalId = await this.dao.findByInternalId(maybeUniversity.id, internalId);
-            if(termWithRequestedInternalId && termWithRequestedInternalId.id != term.id){
+            if (termWithRequestedInternalId && termWithRequestedInternalId.id != term.id) {
                 throw new GenericException(ERRORS.BAD_REQUEST.TERM_ALREADY_EXISTS);
             }
         }

@@ -56,7 +56,13 @@ export class ProgramController {
         const optionalCourses = req.body.optionalCourses as string[] | undefined;
 
         try {
-            const program: Program = await this.programService.updateProgram(programId, internalId, name, mandatoryCourses, optionalCourses);
+            const program: Program = await this.programService.updateProgram(
+                programId,
+                internalId,
+                name,
+                mandatoryCourses,
+                optionalCourses,
+            );
             res.status(HTTP_STATUS.OK).location(ProgramDto.getProgramUrl(program.id)).send();
         } catch (e) {
             next(e);

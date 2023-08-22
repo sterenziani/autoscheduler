@@ -153,10 +153,7 @@ export const addChildToParent = (
 };
 
 // Resets the set for a parentId
-export const clearParentsChildren = (
-    relationshipMap: Map<string, Set<string>>,
-    parentId: string
-): void => {
+export const clearParentsChildren = (relationshipMap: Map<string, Set<string>>, parentId: string): void => {
     // If it does exist, we have to initialize the array
     if (relationshipMap.get(parentId)) relationshipMap.set(parentId, new Set());
 };
@@ -177,7 +174,7 @@ export const addGrandchildToParent = (
 // Resets the map for a parentId
 export const clearParentsGrandchildren = (
     relationshipMap: Map<string, Map<string, Set<string>>>,
-    parentId: string
+    parentId: string,
 ): void => {
     // If it does exist, we have to initialize the array
     if (relationshipMap.get(parentId)) relationshipMap.set(parentId, new Map<string, Set<string>>());

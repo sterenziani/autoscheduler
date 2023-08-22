@@ -24,7 +24,12 @@ export class ProgramRoutes {
         this.router.use(cors());
 
         this.router.post('/', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.createProgram);
-        this.router.put('/:programId', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.updateProgram);
+        this.router.put(
+            '/:programId',
+            authUsersOnlyMiddleware,
+            universitiesOnlyMiddleware,
+            this.controller.updateProgram,
+        );
         this.router.get('/:programId', this.controller.getProgram);
         this.router.get('/:programId/courses/mandatory', pagingMiddleware, this.controller.getProgramMandatoryCourses);
         this.router.get('/:programId/courses/optional', pagingMiddleware, this.controller.getProgramOptionalCourses);

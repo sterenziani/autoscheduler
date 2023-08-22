@@ -58,7 +58,12 @@ export class BuildingController {
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
-            const building: Building = await this.buildingService.updateBuilding(buildingId, internalId, name, distances);
+            const building: Building = await this.buildingService.updateBuilding(
+                buildingId,
+                internalId,
+                name,
+                distances,
+            );
             res.status(HTTP_STATUS.OK).location(BuildingDto.getBuildingUrl(building.id)).send();
         } catch (e) {
             next(e);
