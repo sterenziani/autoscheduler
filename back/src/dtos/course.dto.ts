@@ -2,7 +2,6 @@ import Course from '../models/abstract/course.model';
 import { getUserUrl } from './user.dto';
 import { getProgramUrl } from './program.dto';
 import { ROLE } from '../constants/general.constants';
-import { queryParamsStringBuilder } from '../helpers/url.helper';
 
 export const courseToDto = (course: Course, universityId: string): ICourseDto => {
     return {
@@ -11,6 +10,7 @@ export const courseToDto = (course: Course, universityId: string): ICourseDto =>
         name: course.name,
         code: course.internalId,
         requirements: getCourseRequirementsUrl(course.id),
+        courseClasses: getCourseCourseClassesUrl(course.id),
         universityId: universityId,
         universityUrl: getUserUrl(universityId, ROLE.UNIVERSITY),
     };
@@ -36,12 +36,29 @@ export const getCourseRequirementsForProgramUrl = (courseId: string, programId: 
     return `${getCourseRequirementsUrl(courseId)}/${programId}`;
 };
 
+export const getCourseCourseClassesUrl = (
+    courseId: string,
+    termId?: string,
+    filter?: string,
+    page?: number,
+    perPage?: number,
+): string => {
+    const params = {
+        termId,
+        filter,
+        page: page ? page.toString() : undefined,
+        per_page: perPage ? perPage.toString() : undefined,
+    };
+    return `${getCourseUrl(courseId)}/course-classes`;
+};
+
 interface ICourseDto {
     id: string;
     url: string;
     name: string;
     code: string;
     requirements: string;
+    courseClasses: string;
     universityId: string;
     universityUrl: string;
 }

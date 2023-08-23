@@ -29,4 +29,23 @@ export default class Time {
         if (diff == 0) diff = this.minute - other.minute;
         return diff;
     }
+
+    /**
+     * returns time in string format
+     * hh:mm
+     */
+    toString(): string {
+        return `${this.hour}:${this.minute}`;
+    }
+
+    /**
+     * Creates a new Time object from a string in hh:mm format
+     * @param timeString
+     */
+    static fromString(timeString: string): Time {
+        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timeRegex.test(timeString)) throw new Error('Invalid time format, timeString should have hh:mm format.');
+        const [hour, minute]: number[] = timeString.split(':', 2).map((n) => parseInt(n));
+        return new Time(hour, minute);
+    }
 }

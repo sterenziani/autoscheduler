@@ -2,15 +2,20 @@ import CourseService from '../services/course.service';
 import { RequestHandler } from 'express';
 import { HTTP_STATUS } from '../constants/http.constants';
 import Course from '../models/abstract/course.model';
-import Program from '../models/abstract/program.model';
 import University from '../models/abstract/university.model';
 import * as CourseDto from '../dtos/course.dto';
+import * as CourseClassDto from '../dtos/courseClass.dto';
+import CourseClassService from '../services/courseClass.service';
+import CourseClass from '../models/abstract/courseClass.model';
+import Term from '../models/abstract/term.model';
 
 export class CourseController {
     private courseService: CourseService;
+    private courseClassService: CourseClassService;
 
     constructor() {
         this.courseService = CourseService.getInstance();
+        this.courseClassService = CourseClassService.getInstance();
     }
 
     public getCourse: RequestHandler = async (req, res, next) => {
@@ -47,6 +52,45 @@ export class CourseController {
             const university = await course.getUniversity();
             const courses = await this.courseService.getCourseRequirementsForProgram(courseId, programId);
             res.status(HTTP_STATUS.OK).send(courses.map((c) => CourseDto.courseToDto(c, university.id)));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getCourseCourseClasses: RequestHandler = async (req, res, next) => {
+        const courseId = req.params.courseId;
+        const termId = req.query.termId as string | undefined;
+        const filter = req.query.filter as string | undefined;
+        const page = parseInt(req.query.page as string) ?? undefined;
+        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+
+        try {
+            const courseClasses = await this.courseClassService.getCourseClassesByCourse(
+                courseId,
+                termId,
+                filter,
+                per_page,
+                page,
+            );
+            const courseClassesWithCourseAndTerm: { courseClass: CourseClass; course: Course; term: Term }[] =
+                await Promise.all(
+                    courseClasses.collection.map(async (cc) => {
+                        return {
+                            courseClass: cc,
+                            course: await cc.getCourse(),
+                            term: await cc.getTerm(),
+                        };
+                    }),
+                );
+            const links: Record<string, string> = {};
+            for (const [key, value] of Object.entries(courseClasses.pagingInfo)) {
+                links[key] = CourseDto.getCourseCourseClassesUrl(courseId, termId, filter, value, per_page);
+            }
+            res.status(HTTP_STATUS.OK).send(
+                courseClassesWithCourseAndTerm.map((ccwcat) =>
+                    CourseClassDto.courseClassToDto(ccwcat.courseClass, ccwcat.course.id, ccwcat.term.id),
+                ),
+            );
         } catch (e) {
             next(e);
         }
