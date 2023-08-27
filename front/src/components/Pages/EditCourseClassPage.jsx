@@ -177,7 +177,7 @@ function EditCourseClassPage(props) {
     }
 
     const loadBuildings = async (universityId) => {
-        ApiService.getBuildings(universityId).then((resp) => {
+        ApiService.getAllBuildings(universityId).then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
