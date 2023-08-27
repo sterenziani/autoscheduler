@@ -68,6 +68,12 @@ export default class CourseClassService {
         await this.universityService.getUniversity(universityId);
         const course = await this.courseService.getCourse(courseId);
         const courseUniversity = await course.getUniversity();
+
+        // check if a building with internalId already exists
+        const matches = await this.dao.findByCourseId(courseId, termId, name)
+        if (matches.collection && matches.collection.length > 0)
+            throw new GenericException(ERRORS.BAD_REQUEST.COURSE_CLASS_ALREADY_EXISTS);
+
         if (courseUniversity.id !== universityId) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
         await this.termService.getTerm(termId);
         await Promise.all(

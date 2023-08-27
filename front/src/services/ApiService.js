@@ -560,12 +560,14 @@ const getCourseClass = async (classId) => {
 
 // TODO: Implement me
 const saveCourseClass = async (id, courseId, termId, name, lectures) => {
-    lectures.forEach((l) => l.day = DAYS.indexOf(l.day))
+    let formattedLectures = []
+    lectures.forEach((l) => formattedLectures.push(Object.assign({}, l)))
+    formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
     const payload = {
         courseId: courseId,
         termId: termId,
         name: name,
-        lectures: lectures
+        lectures: formattedLectures
     }
     return createOrUpdateObject("course-class/", payload, id)
 }

@@ -39,6 +39,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'COURSE_ALREADY_EXISTS',
             message: 'A course with provided internalId already exists.',
         },
+        COURSE_CLASS_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_CLASS_ALREADY_EXISTS',
+            message: 'A class with provided name already exists for this course and term.',
+        },
         PROGRAM_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'PROGRAM_ALREADY_EXISTS',

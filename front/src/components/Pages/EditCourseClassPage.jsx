@@ -15,6 +15,8 @@ import Roles from '../../resources/RoleConstants';
 import AsyncSelect from 'react-select/async'
 import ErrorMessage from '../Common/ErrorMessage';
 
+const EXISTING_CLASS_ERROR = "COURSE_CLASS_ALREADY_EXISTS"
+
 function EditCourseClassPage(props) {
     const CourseClassSchema = Yup.object().shape({
         className: Yup.string()
@@ -247,7 +249,7 @@ function EditCourseClassPage(props) {
             if(resp.status === OK || resp.status === CREATED)
                 navigate("/courses/"+selectedCourse.id);
             else{
-                setError(true)
+                setError(resp.data.code)
                 setStatus(resp.status)
                 setSubmitting(false);
             }
@@ -266,7 +268,7 @@ function EditCourseClassPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error)
+    if (error && error != EXISTING_CLASS_ERROR)
         return <ErrorMessage status={status}/>
 
     if(!terms || terms.length < 1 || !buildings || buildings.length < 1)
@@ -289,6 +291,7 @@ function EditCourseClassPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
+                {error && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
                 <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>

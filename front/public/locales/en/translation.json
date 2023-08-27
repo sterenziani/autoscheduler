@@ -180,7 +180,7 @@
                 "minLength":"The class must have a name.",
                 "maxLength":"The class name can't exceed 25 characters.",
                 "isRequired":"The class must have a name.",
-                "codeAlreadyTaken":"A class with that code already exists for this course."
+                "codeAlreadyTaken":"A class with that name already exists for this course and term."
             },
             "term":{
                 "minLength":"The term's name must be at least 3 characters long.",
