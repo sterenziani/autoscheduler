@@ -8,6 +8,7 @@ import CourseClass from '../../../models/abstract/courseClass.model';
 import MemoryCourseClass from '../../../models/implementations/memory/memoryCourseClass.model';
 import CourseClassDao from '../../abstract/courseClass.dao';
 import { v4 as uuidv4 } from 'uuid';
+import MemoryCourseDao from './memoryCourse.dao';
 import MemoryTermDao from './memoryTerm.dao';
 import { PaginatedCollection } from '../../../interfaces/paging.interface';
 
@@ -24,7 +25,7 @@ export default class MemoryCourseClassDao extends CourseClassDao {
     // Abstract Methods Implementations
     public async create(courseId: string, termId: string, name: string): Promise<CourseClass> {
         // We get the course and term to check that they exist
-        const course = await MemoryCourseClassDao.getInstance().getById(courseId);
+        const course = await MemoryCourseDao.getInstance().getById(courseId);
         const term = await MemoryTermDao.getInstance().getById(termId);
         const newCourseClass = new MemoryCourseClass(uuidv4(), name);
 

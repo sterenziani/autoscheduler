@@ -21,6 +21,7 @@
         "errors": {
             "codes": {
                 "401": "Failed to make request to AutoScheduler service with permissions error.",
+                "408": "Could not connect to the AutoScheduler server.",
                 "TIMEOUT": "Could not connect to AutoScheduler service.",
                 "USER_ALREADY_EXISTS": "A user with that email address already exists.",
                 "UNIVERSITY_ALREADY_EXISTS": "A university with that name is already registered.",
@@ -239,7 +240,9 @@
         "403": "You do not have permission to view this page.",
         "404": "The requested resource could not be found.",
         "408": "Received no response from server. Please check your internet connection.",
-        "500": "The AutoScheduler server had an internal error."
+        "500": "The AutoScheduler server had an internal error.",
+        "noTerms": "No terms have been found. Create at least one term to define classes for a course.",
+        "noBuildings": "No buildings have been found. Create at least one building to define classes for a course."
     },
     "noSchedulesFound": "Could not find any recommended schedules for your search.",
     "noDefinedRequirements": "No requirements defined. It is possible this course does not belong to the selected program.",

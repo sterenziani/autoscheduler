@@ -1,8 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner, Row } from 'react-bootstrap';
+import Alert from 'react-bootstrap/Alert';
+import LinkButton from '../Common/LinkButton';
 import ApiService from '../../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -25,6 +27,7 @@ function EditCourseClassPage(props) {
     const {t} = useTranslation();
     const {id} = useParams()
     const user = ApiService.getActiveUser();
+    const search = useLocation().search
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -48,25 +51,24 @@ function EditCourseClassPage(props) {
 
     useEffect( () => {
         async function execute() {
-            if(id){
-                if(user && !courseClass)
-                    await Promise.all([loadCourseClass()]);
-                if(user && courseClass){
-                    if(!terms && !buildings)
-                        await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
-                    else if (terms && buildings)
-                        setLoading(false)
-                }
-            }
-            else{
-                if(user){
-                    if(!terms && !buildings)
-                        await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
-                    else if (terms && buildings){
-                        setSelectedTerm(terms[0].id)
-                        setClassName("X")
-                        setLectures([DEFAULT_DATE])
-                        setLoading(false)
+            if(id && user && !courseClass)
+                await Promise.all([loadCourseClass()])
+            if(!id && !courseClass)
+                setCourseClass({name: t("forms.placeholders.className")})
+
+            if(user && courseClass) {
+                if(!terms && !buildings)
+                    await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
+                else if (terms && buildings) {
+                    if(!id) {
+                        if(buildings.length > 0){
+                            setClassName("X")
+                            const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
+                            setLectures([{...firstLecture, buildingId: buildings[0].id}])
+                            await Promise.all([readCourseAndTerm()])
+                        }
+                        else
+                            setLoading(false)
                     }
                 }
             }
@@ -76,52 +78,120 @@ function EditCourseClassPage(props) {
     },[courseClass, terms, buildings])
 
     const loadCourseClass = async () => {
-        ApiService.getCourseClass(id).then((data) => {
+        ApiService.getCourseClass(id).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else{
-              setCourseClass(data)
-              setSelectedCourse(data.course)
-              setSelectedTerm(data.term)
-              setClassName(data.courseClass)
-              setLectures(data.lectures)
+                console.log(resp.data)
+                setCourseClass(resp.data)
+                setSelectedCourse(resp.data.course)
+                setSelectedTerm(resp.data.term.id)
+                setClassName(resp.data.courseClass)
+                setLectures(resp.data.lectures)
             }
         });
     }
 
+    const readCourseAndTerm = async () => {
+        const params = new URLSearchParams(search)
+        const courseId = params.get('course')
+        const termId = params.get('term')
+        setLoading(true)
+
+        if(courseId) {
+            ApiService.getCourse(courseId).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                  setSelectedCourse(resp.data)
+                }
+            });
+        } else {
+            setSelectedCourse()
+        }
+        if(termId) {
+            ApiService.getTerm(termId).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                  setSelectedTerm(resp.data.id)
+                }
+            })
+        } else {
+            setSelectedTerm(terms[0].id)
+        }
+    }
+
+    useEffect(() => {
+        if(selectedTerm)
+            setLoading(false)
+    }, [selectedCourse, selectedTerm])
+
+    const loadCourseOptions = (inputValue, callback) => {
+        setTimeout(() => {
+            if(!inputValue){
+                callback([])
+            } else {
+                ApiService.getCourses(user.id, inputValue).then((resp) => {
+                    let findError = null;
+                    if (resp && resp.status && resp.status !== OK) findError = resp.status
+                    if (findError) {
+                        setError(true)
+                        setStatus(findError)
+                        callback([])
+                    } else {
+                        callback(resp.data)
+                    }
+                })
+            }
+        })
+    }
+
     const loadTerms = async (universityId) => {
-        ApiService.getTerms(universityId).then((data) => {
+        ApiService.getTerms(universityId).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else
-              setTerms(data)
+              setTerms(resp.data)
         });
     }
 
     const loadBuildings = async (universityId) => {
-        ApiService.getBuildings(universityId).then((data) => {
+        ApiService.getBuildings(universityId).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError){
                 setLoading(false)
                 setError(true)
                 setStatus(findError)
             }
             else
-              setBuildings(data)
+              setBuildings(resp.data)
         });
     }
 
@@ -157,7 +227,7 @@ function EditCourseClassPage(props) {
     const onChangeBuilding = (e) => {
         const index = e.target.id.match(/\d/g)[0];
         const lecturesCopy = Object.assign([], lectures);
-        lecturesCopy[index].building = e.target.value;
+        lecturesCopy[index].buildingId = e.target.value;
         setLectures(lecturesCopy)
     }
 
@@ -169,8 +239,9 @@ function EditCourseClassPage(props) {
     }
 
     const onClickPlusSign = (e) => {
-        const lecturesCopy = Object.assign([], lectures);
-        lecturesCopy.push(JSON.parse(JSON.stringify(DEFAULT_DATE))); // Clone DEFAULT_DATE
+        const lecturesCopy = Object.assign([], lectures)
+        const newLecture = JSON.parse(JSON.stringify(DEFAULT_DATE)) // Clone DEFAULT_DATE
+        lecturesCopy.push({...newLecture, buildingId: buildings[0].id})
         setLectures(lecturesCopy)
     }
 
@@ -178,7 +249,7 @@ function EditCourseClassPage(props) {
         setSubmitting(true);
         if (selectedCourse && selectedTerm && values.className)
         {
-            const resp = await ApiService.saveCourseClass(id, selectedCourse, selectedTerm, values.className, lectures)
+            const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTerm, values.className, lectures)
             if(resp.status === OK || resp.status === CREATED)
                 navigate("/courses/"+selectedCourse.id);
             else{
@@ -193,22 +264,6 @@ function EditCourseClassPage(props) {
         }
     };
 
-    const loadCourseOptions = (inputValue, callback) => {
-        setTimeout(() => {
-            ApiService.getCourses(user.id, inputValue).then((data) => {
-                let findError = null;
-                if (data && data.status && data.status !== OK && data.status !== CREATED) findError = data.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
-                    callback([])
-                } else {
-                    callback(data)
-                }
-            })
-        })
-    }
-
     if(!user)
         return <ErrorMessage status={UNAUTHORIZED}/>
     if(user.role !== Roles.UNIVERSITY)
@@ -219,6 +274,20 @@ function EditCourseClassPage(props) {
         </div>
     if (error)
         return <ErrorMessage status={status}/>
+
+    if(!terms || terms.length < 1 || !buildings || buildings.length < 1)
+        return (
+        <Alert variant="danger" className="text-center m-5">
+            {
+                (!buildings || buildings.length < 1) && <p className="mx-4">{t("errors.noBuildings")}</p>
+            }
+            {
+                (!terms || terms.length < 1) && <p className="mx-4">{t("errors.noTerms")}</p>
+            }
+            <LinkButton variant="primary" textKey="goHome" href="/"/>
+        </Alert>
+    )
+
     return (
         <React.Fragment>
             <HelmetProvider>
@@ -226,7 +295,7 @@ function EditCourseClassPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
-                <Formik initialValues={{ className: className }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <Form.Group controlId="course" className="row mx-auto form-row">
@@ -242,6 +311,11 @@ function EditCourseClassPage(props) {
                                 className="text-black" cacheOptions defaultOptions
                                 defaultValue = {{value:selectedCourse.id, code: selectedCourse.code, name: selectedCourse.name}}
                                 getOptionLabel={e => e.code+' - '+e.name} getOptionValue={e => e.id}
+                                noOptionsMessage={(inputValue) => {
+                                    if(inputValue.inputValue.length > 0)
+                                        return t('selectNoResults')
+                                    return t('modal.inputTextToSearch')
+                                }}
                                 loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
                             />
                         }
@@ -251,6 +325,11 @@ function EditCourseClassPage(props) {
                                 className="text-black" cacheOptions defaultOptions
                                 placeholder={t("forms.course")}
                                 getOptionLabel={e => e.code+' - '+e.name} getOptionValue={e => e.id}
+                                noOptionsMessage={(inputValue) => {
+                                    if(inputValue.inputValue.length > 0)
+                                        return t('selectNoResults')
+                                    return t('modal.inputTextToSearch')
+                                }}
                                 loadOptions={loadCourseOptions} onChange={opt => onChangeCourse(opt)}
                             />
                         }
@@ -272,12 +351,14 @@ function EditCourseClassPage(props) {
                         }
                         </div>
                     </Form.Group>
-                    <FormInputField
-                        label="forms.className" name="className"
-                        placeholder="forms.placeholders.className"
-                        value={values.className} error={errors.className}
-                        touched={touched.className} onChange={handleChange} onBlur={handleBlur}
-                    />
+                    <Form.Group controlId="class">
+                        <FormInputField
+                            label="forms.className" name="className"
+                            placeholder="forms.placeholders.className"
+                            value={values.className} error={errors.className}
+                            touched={touched.className} onChange={handleChange} onBlur={handleBlur}
+                        />
+                    </Form.Group>
                     <Form.Group controlId="schedule" className="row mx-auto form-row">
                         <div className="col-3 text-end text-break my-4">
                             <Form.Label className="">
@@ -287,7 +368,7 @@ function EditCourseClassPage(props) {
                         <div className="col-9 align-items-start align-items-center">
                             {lectures.map((entry, index) => (
                                 <Row key={'timerow-' + index} xs={1} md={6} className="list-row pb-2 pt-3 ms-1 justify-content-center">
-                                    <Form.Select id={'day-' + index} className="w-auto mx-auto" value={lectures[index].day} onChange={onChangeDay}>
+                                    <Form.Select id={'day-' + index} className="w-auto mx-3" value={lectures[index].day} onChange={onChangeDay}>
                                         {DAYS.map((p) => (<option key={p} value={p}>{t('days.' + p)}</option>))}
                                     </Form.Select>
                                     <input
@@ -301,7 +382,7 @@ function EditCourseClassPage(props) {
                                         value={lectures[index].endTime}
                                         onChange={onChangeEndTime}
                                     />
-                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].building} onChange={onChangeBuilding}>
+                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].buildingId} onChange={onChangeBuilding}>
                                         {buildings.map((b) => (<option key={b.id} value={b.id}>{b.code}</option>))}
                                     </Form.Select>
                                     <i className="bi bi-trash-fill btn color-primary w-auto my-auto"

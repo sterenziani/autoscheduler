@@ -23,16 +23,19 @@ export const validateEnum = <T>(data: any, enumObject: any): T | undefined => {
 export const validateArray = <T>(data: any, memberValidator: (data: any) => T | undefined): T[] | undefined => {
     if (data == undefined) return undefined;
     let isValid = Array.isArray(data);
+    let validatedArray: T[] = []
     if (isValid) {
         for (const member of data) {
             const maybeMember = memberValidator(member);
             if (maybeMember === undefined) {
                 isValid = false;
                 break;
+            } else {
+                validatedArray.push(maybeMember)
             }
         }
     }
-    if (isValid) return data as T[];
+    if (isValid) return validatedArray;
     return undefined;
 };
 

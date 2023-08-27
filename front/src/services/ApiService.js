@@ -1,4 +1,5 @@
 import { CREATED, CONFLICT, TIMEOUT, NOT_FOUND, OK } from './ApiConstants';
+import { DAYS } from './SystemConstants';
 import SgaConstants from '../resources/SgaConstants';
 import api from './api'
 import AuthService from './AuthService'
@@ -102,7 +103,7 @@ const createOrUpdateObject = async (baseEndpoint, body, id) => {
         } else {
             response = await api.post(endpoint, body, AuthService.getRequestHeaders())
         }
-        const responseId = response.headers.location.split('/')[1]
+        const responseId = response.headers.location? response.headers.location.split('/')[1] : undefined
         return { status: successStatus, id: responseId }
     }
     catch(e) {
@@ -499,38 +500,74 @@ const deleteTerm = async (term) => {
 //////////////////////////////////////////////////////////////////////////////
 
 // TODO: Implement me
-const getCourseClassesForTerm = (courseId, termId, page) =>
-    new Promise((resolve, reject) => {
-        const availableClasses = SgaConstants.courseClasses[termId].filter((com) => com.course.id === courseId);
-        if(availableClasses.length >= 2 && page==1)
-            setTimeout(() => resolve([availableClasses[0], availableClasses[1]]), RESOLVE_DELAY);
-        else if(availableClasses.length >= 3 && page==2)
-            setTimeout(() => resolve([availableClasses[2]]), RESOLVE_DELAY);
-        else
-            setTimeout(() => resolve(availableClasses), RESOLVE_DELAY);
-    });
-
-// TODO: Implement me
-const getCourseClass = (classId) =>
-    new Promise((resolve, reject) => {
-        // eslint-disable-next-line
-        const courseClass = Object.values(SgaConstants.courseClasses).flat().filter((com) => com.id == classId);
-        if(!courseClass)
-            return { status: NOT_FOUND }
-        setTimeout(() => resolve(courseClass[0]), RESOLVE_DELAY);
-    });
-
-// TODO: Implement me
-const saveCourseClass = async (id, course, term, name, lectures) => {
+const getCourseClassesForTerm = async (courseId, termId, page) => {
     try {
-        if(id)
-            return { status: OK };
-        else
-            return { status: CREATED };
-    } catch (e) {
-        if (e.response) return { status: e.response.status };
-        else return { status: TIMEOUT };
+        const endpoint = "course/" + courseId + "/course-classes?termId=" +termId +"&page=" +(page-1)
+        const listOfClassesResponse = await api.get(endpoint, AuthService.getRequestHeaders())
+
+        // Load lecture data
+        let finalData = []
+        for (const c of listOfClassesResponse.data) {
+            const courseClassResponse = await getCourseClass(c.id)
+            if(courseClassResponse.status !== OK)
+                return courseClassResponse
+            finalData.push(courseClassResponse.data)
+        }
+        listOfClassesResponse.data = finalData
+        return listOfClassesResponse
     }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+// TODO: Implement me
+const getCourseClass = async (classId) => {
+    try {
+        const courseClassResponse = await api.get("course-class/"+classId, AuthService.getRequestHeaders())
+        const courseClass = courseClassResponse.data
+
+        const courseResponse = await api.get(courseClass.courseUrl, AuthService.getRequestHeaders())
+        courseClass.course = courseResponse.data
+
+        const termResponse = await api.get(courseClass.termUrl, AuthService.getRequestHeaders())
+        courseClass.term = termResponse.data
+
+        const listOfLecturesResponse = await api.get(courseClass.lecturesUrl, AuthService.getRequestHeaders())
+        for (const l of listOfLecturesResponse.data) {
+            const buildingDataResponse = await api.get(l.buildingUrl, AuthService.getRequestHeaders())
+            l.building = buildingDataResponse.data
+
+            const startTime = l.startTime.split(':')
+            const endTime = l.endTime.split(':')
+            l.startTime = String(startTime[0]).padStart(2, '0') + ":" + String(startTime[1]).padStart(2, '0')
+            l.endTime = String(endTime[0]).padStart(2, '0') + ":" + String(endTime[1]).padStart(2, '0')
+            l.day = DAYS[l.day]
+        }
+        courseClass.lectures = listOfLecturesResponse.data
+        return courseClassResponse
+    }
+    catch(e) {
+        if (e.response)
+            return { status: e.response.status }
+        else
+            return { status: TIMEOUT }
+    }
+}
+
+// TODO: Implement me
+const saveCourseClass = async (id, courseId, termId, name, lectures) => {
+    lectures.forEach((l) => l.day = DAYS.indexOf(l.day))
+    const payload = {
+        courseId: courseId,
+        termId: termId,
+        name: name,
+        lectures: lectures
+    }
+    return createOrUpdateObject("course-class/", payload, id)
 }
 
 // TODO: Implement me

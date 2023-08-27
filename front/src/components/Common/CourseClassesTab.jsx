@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Spinner, Form } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
@@ -6,6 +7,7 @@ import CourseClassesList from '../Lists/CourseClassesList';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseClassesTab(props) {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -41,13 +43,13 @@ function CourseClassesTab(props) {
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
         return <ErrorMessage status={status}/>
+    if(!terms || terms.length < 1)
+        return <React.Fragment><div className="mx-5 py-4"><p>{t('errors.noTerms')}</p></div></React.Fragment>
     return (
         <React.Fragment>
             <div className="mx-5 py-4">
                 <Form.Select className="w-75 m-auto" value={selectedTerm.id} onChange={onChangeTerms}>
-                    {terms.map((p) => (
-                        <option key={p.id} value={p.id}> {p.code + ' - ' + p.name} </option>
-                    ))}
+                    { terms.map((p) => ( <option key={p.id} value={p.id}> {p.code + ' - ' + p.name} </option>)) }
                 </Form.Select>
                 <CourseClassesList
                     user={user}

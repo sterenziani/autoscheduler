@@ -21,6 +21,7 @@
         "errors": {
             "codes": {
                 "401": "Ocurrió un error de permisos al enviar solicitud a AutoScheduler.",
+                "408": "No pudimos conectarnos al servicio de AutoScheduler.",
                 "TIMEOUT": "No pudimos conectarnos al servicio de AutoScheduler",
                 "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
                 "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",
@@ -178,7 +179,8 @@
             "courseClass":{
                 "minLength":"La comisión debe tener un nombre.",
                 "maxLength":"El nombre de la comisión no puede superar los 25 characters.",
-                "isRequired":"La comisión debe tener un nombre."
+                "isRequired":"La comisión debe tener un nombre.",
+                "codeAlreadyTaken":"Ya existe una comisión con ese código para este curso."
             },
             "term":{
                 "minLength":"El nombre del período debe tener al menos 3 caracteres.",
@@ -238,12 +240,14 @@
         "403": "No cuenta con permisos para ver esta página.",
         "404": "El recurso solicitado no fue encontrado.",
         "408": "No se recibió respuesta del servidor. Revise su conexión a internet.",
-        "500": "El servidor de AutoScheduler tuvo un error interno."
+        "500": "El servidor de AutoScheduler tuvo un error interno.",
+        "noTerms": "No se encontraron períodos. Cree al menos uno para crear comisiones.",
+        "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones."
     },
     "noSchedulesFound": "No hubo planes encontrados para su búsqueda.",
     "noDefinedRequirements": "No hay correlativas definidas. Es posible que esta materia no sea parte del plan seleccionado.",
     "selectNoOptions": "Ingrese un caracter para buscar.",
-    "selectNoResults": "No results found for the given query.",
+    "selectNoResults": "No se hallaron resultados para su búsqueda.",
     "goHome": "Volver al inicio",
     "pagination": {
         "page": "Página {{page}}",

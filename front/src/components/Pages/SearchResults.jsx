@@ -6,12 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
+import { DAYS } from "../../services/SystemConstants";
 import { useLocation } from 'react-router-dom';
 import LinkButton from '../Common/LinkButton';
 import ErrorMessage from '../Common/ErrorMessage';
 import Roles from '../../resources/RoleConstants';
-
-const DAYS = ['SUN', 'M', 'T', 'W', 'TH', 'F', 'SAT'];
 
 function SearchResults(props) {
     const {t} = useTranslation();
