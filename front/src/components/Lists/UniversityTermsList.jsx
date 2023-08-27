@@ -101,7 +101,7 @@ function UniversityTermsList(props) {
         if (!termToDelete) return;
         ApiService.deleteTerm(termToDelete);
         closeDeleteModal()
-        loadTerms()
+        loadTerms(page)
     }
 
     const closeDeleteModal = () => {

@@ -198,7 +198,7 @@ export const paginateCollection = <T>(
 ): PaginatedCollection<T> => {
     // building pagingInfo
     limit = limit || DEFAULT_PAGE_SIZE;
-    const lastPage = Math.floor(collection.length / limit);
+    const lastPage = Math.max(0, Math.ceil(collection.length / limit) - 1);
     offset = offset ? (lastPage > 0 ? (offset + lastPage + 1) % (lastPage + 1) : 0) : 0;
     const pagingInfo: PagingInfo = {
         first: 0,
