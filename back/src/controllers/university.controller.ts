@@ -129,17 +129,23 @@ export class UniversityController {
     public getUniversityBuildings: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
         const filter = req.query.filter as string | undefined;
+        const page = parseInt(req.query.page as string) ?? undefined;
+        const per_page = parseInt(req.query.per_page as string) ?? undefined;
 
         try {
-            const buildings = await this.buildingService.getUniversityBuildingsByText(userId, filter);
+            const buildings = await this.buildingService.getUniversityBuildingsByText(userId, filter, per_page, page);
+            const links: Record<string, string> = {};
+            for (const [key, value] of Object.entries(buildings.pagingInfo)) {
+                links[key] = UniversityDto.getUniversityBuildingsUrl(userId, filter, value, per_page);
+            }
             const buildingsWithDistances: { building: Building; distances: IDistanceToBuilding[] }[] =
                 await Promise.all(
-                    buildings.map(async (b) => {
+                    buildings.collection.map(async (b) => {
                         return { building: b, distances: await this.buildingService.getBuildingDistances(b.id) };
                     }),
                 );
 
-            res.status(HTTP_STATUS.OK).send(
+            res.status(HTTP_STATUS.OK).links(links).send(
                 buildingsWithDistances.map((bwd) => BuildingDto.buildingToDto(bwd.building, bwd.distances)),
             );
         } catch (e) {

@@ -18,8 +18,18 @@ export const universityToDto = (university: University): IUniversityDto => {
     };
 };
 
-export const getUniversityBuildingsUrl = (universityId: string): string => {
-    return `${getUniversityUrl(universityId)}/buildings`;
+export const getUniversityBuildingsUrl = (
+    universityId: string,
+    filter?: string,
+    page?: number,
+    perPage?: number,
+): string => {
+    const params = {
+        filter,
+        page: page ? page.toString() : undefined,
+        per_page: perPage ? perPage.toString() : undefined,
+    };
+    return queryParamsStringBuilder(`${getUserUrl(universityId, ROLE.UNIVERSITY)}/buildings`, params);
 };
 
 export const getUniversityCoursesUrl = (

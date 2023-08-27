@@ -5,6 +5,7 @@ import UniversityService from './university.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 import { IDistanceToBuilding } from '../interfaces/building.interface';
+import { PaginatedCollection } from '../interfaces/paging.interface';
 
 export default class BuildingService {
     private static instance: BuildingService;
@@ -33,8 +34,8 @@ export default class BuildingService {
         return await this.dao.getById(id);
     }
 
-    async getUniversityBuildingsByText(universityId: string, text?: string): Promise<Building[]> {
-        return await this.dao.getUniversityBuildingsByText(universityId, text);
+    async getUniversityBuildingsByText(universityId: string, text?: string, limit?: number, offset?: number): Promise<PaginatedCollection<Building>> {
+        return await this.dao.getUniversityBuildingsByText(universityId, text, limit, offset);
     }
 
     async getBuildingDistances(id: string): Promise<IDistanceToBuilding[]> {
@@ -134,7 +135,7 @@ export default class BuildingService {
         // check if university owns building
         if (buildingUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
-        const universityBuildings = await this.getUniversityBuildingsByText(buildingUniversity.id);
+        const universityBuildings = await this.dao.findByUniversityId(buildingUniversity.id);
 
         // TODO add session logic for transactional operations
         await Promise.all(

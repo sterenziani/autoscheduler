@@ -499,7 +499,6 @@ const deleteTerm = async (term) => {
 /////////////////////////////// CLASS FUNCTIONS //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-// TODO: Implement me
 const getCourseClassesForTerm = async (courseId, termId, page) => {
     try {
         const endpoint = "course/" + courseId + "/course-classes?termId=" +termId +"&page=" +(page-1)
@@ -524,7 +523,6 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
     }
 }
 
-// TODO: Implement me
 const getCourseClass = async (classId) => {
     try {
         const courseClassResponse = await api.get("course-class/"+classId, AuthService.getRequestHeaders())
@@ -558,7 +556,6 @@ const getCourseClass = async (classId) => {
     }
 }
 
-// TODO: Implement me
 const saveCourseClass = async (id, courseId, termId, name, lectures) => {
     let formattedLectures = []
     lectures.forEach((l) => formattedLectures.push(Object.assign({}, l)))
@@ -636,9 +633,9 @@ const ApiService = {
     saveTerm: saveTerm,
     deleteTerm: deleteTerm,
 
-    getCourseClassesForTerm: getCourseClassesForTerm, // TODO
-    getCourseClass: getCourseClass, // TODO
-    saveCourseClass: saveCourseClass, // TODO
+    getCourseClassesForTerm: getCourseClassesForTerm,
+    getCourseClass: getCourseClass,
+    saveCourseClass: saveCourseClass,
     deleteCourseClass: deleteCourseClass, // TODO
 };
 

@@ -3,6 +3,7 @@ import {
     addChildToParent,
     getChildsFromParent,
     removeChildFromParent,
+    paginateCollection,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import Building from '../../../models/abstract/building.model';
 import University from '../../../models/abstract/university.model';
@@ -10,6 +11,7 @@ import MemoryBuilding from '../../../models/implementations/memory/memoryBuildin
 import BuildingDao from '../../abstract/building.dao';
 import { v4 as uuidv4 } from 'uuid';
 import MemoryUniversityDao from './memoryUniversity.dao';
+import { PaginatedCollection } from '../../../interfaces/paging.interface';
 
 export default class MemoryBuildingDao extends BuildingDao {
     private static instance: BuildingDao;
@@ -59,7 +61,12 @@ export default class MemoryBuildingDao extends BuildingDao {
         MEMORY_DATABASE.buildings.set(building.id, building);
     }
 
-    public async getUniversityBuildingsByText(universityId: string, text?: string): Promise<Building[]> {
+    public async getUniversityBuildingsByText(
+        universityId: string,
+        text?: string,
+        limit?: number,
+        offset?: number
+    ): Promise<PaginatedCollection<Building>> {
         text = text ? text.toLowerCase() : text;
         let universityBuildings: Building[] = await this.findByUniversityId(universityId);
         if (text) {
@@ -74,7 +81,7 @@ export default class MemoryBuildingDao extends BuildingDao {
             if (b1.internalId > b2.internalId) return 1;
             return 0;
         };
-        return universityBuildings.sort(compareBuildings);
+        return paginateCollection(universityBuildings, compareBuildings, limit, offset)
     }
 
     public async deleteBuilding(id: string) {
