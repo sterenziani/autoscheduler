@@ -76,7 +76,7 @@ function EditProgramPage(props) {
     const loadProgram = async () => {
         ApiService.getProgram(id).then((resp) => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+            if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
             if (findError){
                 setLoading(false)
@@ -91,7 +91,7 @@ function EditProgramPage(props) {
     const loadCourses = async (universityId) => {
         ApiService.getCourses(universityId).then((resp) => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+            if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
             if (findError){
                 setLoading(false)
@@ -107,7 +107,7 @@ function EditProgramPage(props) {
     const loadMandatoryCourses = async (programId) => {
         ApiService.getMandatoryCourses(programId).then((resp) => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+            if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
             if (findError){
                 setLoading(false)
@@ -123,7 +123,7 @@ function EditProgramPage(props) {
     const loadOptionalCourses = async (programId) => {
         ApiService.getOptionalCourses(programId).then((resp) => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+            if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
             if (findError){
                 setLoading(false)

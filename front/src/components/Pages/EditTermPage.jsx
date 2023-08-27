@@ -119,7 +119,7 @@ function EditTermPage(props) {
     return (
         <React.Fragment>
             <HelmetProvider>
-                <Helmet><title>{t(id?'forms.editClass':'forms.createClass')}</title></Helmet>
+                <Helmet><title>{t(id?'forms.editTerm':'forms.createTerm')}</title></Helmet>
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editTerm':'forms.createTerm')}</h2>

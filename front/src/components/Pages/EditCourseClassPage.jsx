@@ -60,16 +60,14 @@ function EditCourseClassPage(props) {
                 if(!terms && !buildings)
                     await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
                 else if (terms && buildings) {
-                    if(!id) {
-                        if(buildings.length > 0){
+                    if(!id && buildings.length > 0){
                             setClassName("X")
                             const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
                             setLectures([{...firstLecture, buildingId: buildings[0].id}])
                             await Promise.all([readCourseAndTerm()])
-                        }
-                        else
-                            setLoading(false)
                     }
+                    else
+                        setLoading(false)
                 }
             }
         }
@@ -138,12 +136,8 @@ function EditCourseClassPage(props) {
         } else {
             setSelectedTerm(terms[0].id)
         }
+        setLoading(false)
     }
-
-    useEffect(() => {
-        if(selectedTerm)
-            setLoading(false)
-    }, [selectedCourse, selectedTerm])
 
     const loadCourseOptions = (inputValue, callback) => {
         setTimeout(() => {
