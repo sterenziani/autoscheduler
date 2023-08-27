@@ -90,7 +90,7 @@ function UniversityTermsList(props) {
         else
             resp = await ApiService.publishTerm(term)
         if (resp.status === OK)
-            loadTerms()
+            loadTerms(page)
         else{
             setError(true)
             setStatus(resp.status)
