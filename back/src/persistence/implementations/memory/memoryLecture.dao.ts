@@ -1,11 +1,13 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
 import TimeRange from '../../../helpers/classes/timeRange.class';
-import { addChildToParent } from '../../../helpers/persistence/memoryPersistence.helper';
+import { addChildToParent, removeChildFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
 import Lecture from '../../../models/abstract/lecture.model';
 import MemoryLecture from '../../../models/implementations/memory/memoryLecture.model';
 import LectureDao from '../../abstract/lecture.dao';
 import MemoryBuildingDao from './memoryBuilding.dao';
 import MemoryCourseClassDao from './memoryCourseClass.dao';
+import GenericException from '../../../exceptions/generic.exception';
+import { ERRORS } from '../../../constants/error.constants';
 import { v4 as uuidv4 } from 'uuid';
 
 export default class MemoryLectureDao extends LectureDao {
@@ -42,5 +44,17 @@ export default class MemoryLectureDao extends LectureDao {
         if (!(lecture instanceof MemoryLecture)) lecture = new MemoryLecture(lecture.id, lecture.time);
 
         MEMORY_DATABASE.lectures.set(lecture.id, lecture);
+    }
+
+    public async deleteLecture(lectureId: string): Promise<void> {
+        const lecture = await this.findById(lectureId);
+        if (!lecture) throw new GenericException(ERRORS.NOT_FOUND.LECTURE);
+        const courseClass = await lecture.getCourseClass();
+        const building = await lecture.getBuilding();
+
+        // TODO add session logic for transactional operations
+        removeChildFromParent(MEMORY_DATABASE.lecturesOfCourseClass, courseClass.id, lecture.id);
+        removeChildFromParent(MEMORY_DATABASE.lecturesOfBuilding, building.id, lecture.id);
+        MEMORY_DATABASE.lectures.delete(lecture.id);
     }
 }

@@ -11,4 +11,5 @@ export default abstract class LectureDao extends GenericDao<Lecture> {
 
     // Abstract Methods
     public abstract create(courseClassId: string, buildingId: string, time: TimeRange): Promise<Lecture>;
+    public abstract deleteLecture(lectureId: string): Promise<void>;
 }

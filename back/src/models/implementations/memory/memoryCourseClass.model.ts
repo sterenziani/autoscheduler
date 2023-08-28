@@ -1,7 +1,7 @@
 import { ERRORS } from '../../../constants/error.constants';
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
 import GenericException from '../../../exceptions/generic.exception';
-import { getChildsFromParent, getParentFromChild } from '../../../helpers/persistence/memoryPersistence.helper';
+import { getChildsFromParent, getParentFromChild, addChildToParent, removeChildFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
 import Course from '../../abstract/course.model';
 import CourseClass from '../../abstract/courseClass.model';
 import Lecture from '../../abstract/lecture.model';
@@ -13,6 +13,12 @@ export default class MemoryCourseClass extends CourseClass {
         const maybeTerm = getParentFromChild<Term>(MEMORY_DATABASE.courseClassesOfTerm, MEMORY_DATABASE.terms, this.id);
         if (!maybeTerm) throw new GenericException(ERRORS.NOT_FOUND.TERM);
         return maybeTerm;
+    }
+
+    public async setTerm(termId: string): Promise<void> {
+        const oldTerm = await this.getTerm()
+        if(oldTerm) removeChildFromParent(MEMORY_DATABASE.courseClassesOfTerm, oldTerm.id, this.id);
+        addChildToParent(MEMORY_DATABASE.courseClassesOfTerm, termId, this.id);
     }
 
     public async getLectures(): Promise<Lecture[]> {
@@ -27,5 +33,11 @@ export default class MemoryCourseClass extends CourseClass {
         );
         if (!maybeCourse) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
         return maybeCourse;
+    }
+
+    public async setCourse(courseId: string): Promise<void> {
+        const oldCourse = await this.getCourse()
+        if(oldCourse) removeChildFromParent(MEMORY_DATABASE.courseClassesOfCourse, oldCourse.id, this.id);
+        addChildToParent(MEMORY_DATABASE.courseClassesOfCourse, courseId, this.id);
     }
 }

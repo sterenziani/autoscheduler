@@ -79,4 +79,27 @@ export class CourseClassController {
             next(e);
         }
     };
+
+    public updateCourseClass: RequestHandler = async (req, res, next) => {
+        const userInfo = req.user;
+        const courseClassId = req.params.courseClassId;
+        const courseId = req.body.courseId;
+        const termId = req.body.termId;
+        const name = req.body.name as string | undefined;
+        const lectures = validateArray(req.body.lectures, validateLecture);
+
+        try {
+            const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(
+                courseClassId,
+                userInfo.id,
+                courseId,
+                termId,
+                name,
+                lectures,
+            );
+            res.status(HTTP_STATUS.CREATED).send(CourseClassDto.courseClassToDto(courseClass, courseId, termId));
+        } catch (e) {
+            next(e);
+        }
+    };
 }

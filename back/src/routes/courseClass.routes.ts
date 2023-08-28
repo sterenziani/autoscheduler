@@ -23,6 +23,7 @@ export class CourseClassRoutes {
         this.router.use(cors());
 
         this.router.post('/', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.createCourseClass);
+        this.router.put('/:courseClassId', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.updateCourseClass);
         this.router.get('/:courseClassId', this.controller.getCourseClass);
         this.router.get('/:courseClassId/lectures', this.controller.getLectures);
     }

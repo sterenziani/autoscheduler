@@ -69,7 +69,7 @@ export default class CourseClassService {
         const course = await this.courseService.getCourse(courseId);
         const courseUniversity = await course.getUniversity();
 
-        // check if a building with internalId already exists
+        // Check if name is valid for course + term
         const matches = await this.dao.findByCourseId(courseId, termId, name)
         if (matches.collection && matches.collection.length > 0)
             throw new GenericException(ERRORS.BAD_REQUEST.COURSE_CLASS_ALREADY_EXISTS);
@@ -91,6 +91,68 @@ export default class CourseClassService {
             }),
         );
 
+        return courseClass;
+    }
+
+    async modifyCourseClass(
+        id: string,
+        universityId: string,
+        courseId?: string,
+        termId?: string,
+        name?: string,
+        lectures?: ILecture[],
+    ) {
+        // Check courseClass to modify exists
+        const courseClass = await this.getCourseClass(id);
+        if (!courseClass) throw new GenericException(ERRORS.NOT_FOUND.COURSE_CLASS);
+
+        // Check university exists and same as user
+        const courseClassCourse = await courseClass.getCourse();
+        const courseClassUniversity = await courseClassCourse.getUniversity();
+        const userUniversity = await this.universityService.getUniversity(universityId);
+        if (!userUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
+        if (userUniversity.id !== courseClassUniversity.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+
+        // Check term and Course exist
+        if(courseId) await this.courseService.getCourse(courseId);
+        if(termId) await this.termService.getTerm(termId);
+
+        // Check if name is valid for course + term
+        if(!name) name = courseClass.name;
+        const oldCourse = await courseClass.getCourse();
+        const oldTerm = await courseClass.getTerm();
+        const matches = await this.dao.findByCourseId(courseId? courseId:oldCourse.id, termId? termId:oldTerm.id, name);
+        if(matches.collection && matches.collection.length > 0 && matches.collection[0].id !== courseClass.id){
+            throw new GenericException(ERRORS.BAD_REQUEST.COURSE_CLASS_ALREADY_EXISTS);
+        }
+
+        // Check lectures are valid
+        if(lectures){
+            await Promise.all(
+                lectures.map(async (l) => {
+                    const building = await this.buildingService.getBuilding(l.buildingId);
+                    if (!building) throw new GenericException(ERRORS.NOT_FOUND.BUILDING);
+                }),
+            );
+        }
+
+        // Overwrite fields
+        if(name) courseClass.name = name;
+        if(termId) courseClass.setTerm(termId);
+        if(courseId) courseClass.setCourse(courseId);
+        // Reset lectures
+        if(lectures){
+            const oldLectures = await courseClass.getLectures();
+            for(const l of oldLectures){
+                this.lectureDao.deleteLecture(l.id);
+            }
+            await Promise.all(
+                lectures.map(async (l) => {
+                    await this.lectureDao.create(courseClass.id, l.buildingId, l.time);
+                }),
+            );
+        }
+        await this.dao.set(courseClass);
         return courseClass;
     }
 }
