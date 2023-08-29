@@ -25,7 +25,8 @@
                 "TIMEOUT": "No pudimos conectarnos al servicio de AutoScheduler",
                 "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
                 "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",
-                "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas."
+                "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas.",
+                "INVALID_PARAMS": "El formulario no se completó correctamente. Revise que no haya campos vacíos."
             },
             "gettingUniversitiesData": "Ocurrió un error al buscar datos de universidades.",
             "email": {
@@ -46,6 +47,10 @@
             "name": {
                 "requiredLength": "El nombre de su instituto debe contener al menos 4 caracteres.",
                 "maxLength": "El nombre de su instituto no debe exceder los 100 caracteres.",
+                "isRequired": "Este campo es obligatorio."
+            },
+            "studentName": {
+                "maxLength": "Su nombre no puede exceder los 50 caracteres.",
                 "isRequired": "Este campo es obligatorio."
             },
             "school": {
@@ -100,6 +105,7 @@
     },
     "search": {
         "search": "Búsqueda",
+        "submit": "Buscar",
         "program": "Carrera",
         "term": "Período",
         "hoursPerWeek": "Horas semanales",
@@ -107,7 +113,8 @@
         "reduceDays": "Reducir días",
         "unavailableSlots": "Horarios a evitar",
         "programError":"Por favor seleccione una carrera.",
-        "invalidParams":"Se recibieron parámetros inválidos."
+        "invalidParams":"Se recibieron parámetros inválidos.",
+        "noTermsFromUniversity": "Su universidad no tiene períodos públicamente disponibles ahora, por lo cual no podemos ofrecerle propuestas de cronogramas."
     },
     "days": {
         "M": "Lunes",
@@ -230,7 +237,6 @@
     "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",
     "minutes": "{{minutes}} mins",
     "edit": "Editar",
-    "submit": "Buscar",
     "logout": "Cerrar sesión",
     "errors": {
         "accessDenied": "ACCESSO DENEGADO",

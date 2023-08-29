@@ -129,8 +129,8 @@ const parsePagination = (response) => {
 const scheduleParamsToQuery = (params) => {
     let query = '';
     if (params) {
-        query += '?program=' + params.program;
-        query += '&term=' + params.term;
+        query += '?programId=' + params.programId;
+        query += '&termId=' + params.termId;
         query += '&hours=' + params.hours;
         query += '&reduceDays=' + params.reduceDays;
         query += '&prioritizeUnlocks=' + params.prioritizeUnlocks;
@@ -142,24 +142,6 @@ const scheduleParamsToQuery = (params) => {
     }
     return query;
 };
-
-/*
-TO USE ONCE ALGORITHM IS MOVED TO BACK-END
-const getSchedules = async (params) => {
-    try{
-      const query = scheduleParamsToQuery(params);
-      const response = await fetch('schedules'+query);
-      return await response.json();
-    }catch(error) {
-      console.log("ERROR")
-      if(error.response) {
-        return { status : error.response.status };
-      } else {
-        return { status : TIMEOUT }
-      }
-    }
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// USER FUNCTIONS ///////////////////////////////
@@ -263,15 +245,17 @@ const getRemainingCoursesProgram = async (user, programId, inputText) => {
 }
 
 // TODO: Implement me
-const getSchedules = (params) =>
-    new Promise((resolve, reject) => {
+const getSchedules = async (userId, params) => {
+    const query = scheduleParamsToQuery(params)
+    return simpleApiGetRequest("student/"+userId+"/schedules"+query)
+}
+        /*
         let availableClasses = getAvailableClasses(params.userAsking, params.program); // Gets the classes the user is enabled to be in
         availableClasses = filterUnattendableClasses(availableClasses, params.unavailableTimeSlots); // Deletes classes that conflict with busy time
         calculateDurationOfEachClass(availableClasses); // Updates classes with time spent in each
         const schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays); // Returns sorted array
         setTimeout(() => resolve(schedules), RESOLVE_DELAY);
-    }
-);
+        */
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////// UNIVERSITY FUNCTIONS ////////////////////////////

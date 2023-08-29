@@ -25,7 +25,8 @@
                 "TIMEOUT": "Could not connect to AutoScheduler service.",
                 "USER_ALREADY_EXISTS": "A user with that email address already exists.",
                 "UNIVERSITY_ALREADY_EXISTS": "A university with that name is already registered.",
-                "INVALID_PASSWORD": "Invalid password. Please make it longer and ensure it has a mix of numbers, uppercase and lowercase letters."
+                "INVALID_PASSWORD": "Invalid password. Please make it longer and ensure it has a mix of numbers, uppercase and lowercase letters.",
+                "INVALID_PARAMS": "The form was not completed correctly. Please make sure all fields have been filled in."
             },
             "gettingUniversitiesData": "There was an error fetching universities data.",
             "email": {
@@ -46,6 +47,10 @@
             "name": {
                 "requiredLength": "Your school's name must contain at least 4 characters.",
                 "maxLength": "Your school's name must not exceed 100 characters.",
+                "isRequired": "This field is required."
+            },
+            "studentName": {
+                "maxLength": "Your name must not exceed 50 characters.",
                 "isRequired": "This field is required."
             },
             "school": {
@@ -100,6 +105,7 @@
     },
     "search": {
         "search": "Search",
+        "submit": "Search",
         "program": "Program",
         "term": "Term",
         "hoursPerWeek": "Weekly hours",
@@ -107,7 +113,8 @@
         "reduceDays": "Reduce days",
         "unavailableSlots": "Timeslots to avoid",
         "programError":"Please select a program.",
-        "invalidParams":"Received invalid params."
+        "invalidParams":"Received invalid params.",
+        "noTermsFromUniversity": "Your university has no publicly available terms right now, so you can't search for schedule proposals."
     },
     "days": {
         "M": "Monday",
@@ -230,7 +237,6 @@
     "noRequiredCourses": "This course can be taken at any point.",
     "minutes": "{{minutes}} mins",
     "edit": "Edit",
-    "submit": "Search",
     "logout": "Log out",
     "errors": {
         "accessDenied": "ACCESS DENIED",

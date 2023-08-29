@@ -4,6 +4,7 @@ import * as StudentDto from '../dtos/student.dto';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import UserService from '../services/user.service';
+import ScheduleService from '../services/schedule.service';
 import { HTTP_STATUS } from '../constants/http.constants';
 import StudentService from '../services/student.service';
 import { ROLE } from '../constants/general.constants';
@@ -11,15 +12,19 @@ import Student from '../models/abstract/student.model';
 import University from '../models/abstract/university.model';
 import Program from '../models/abstract/program.model';
 import Course from '../models/abstract/course.model';
+import Schedule from '../models/abstract/schedule.model';
 import { courseToDto } from '../dtos/course.dto';
 import { getUserUrl } from '../dtos/user.dto';
+import { validateArray, validateUnavailableTime } from '../helpers/validation.helper';
 
 export class StudentController {
     private userService: UserService;
+    private scheduleService: ScheduleService;
     private studentService: StudentService;
 
     constructor() {
         this.userService = UserService.getInstance();
+        this.scheduleService = ScheduleService.getInstance();
         this.studentService = StudentService.getInstance();
     }
 
@@ -113,6 +118,48 @@ export class StudentController {
         try {
             await this.studentService.removeStudentCompletedCourses(userInfo.id, completedCourses);
             res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getSchedules: RequestHandler = async (req, res, next) => {
+        const userId = req.params.userId;
+
+        const programId = req.query.programId as string;
+        const termId = req.query.termId as string;
+        const hours = Number(req.query.hours);
+        const reduceDays = req.query.reduceDays as boolean | undefined;
+        const prioritizeUnlocks = req.query.prioritizeUnlocks as boolean | undefined;
+
+        let unavailableTimeSlots;
+        if(req.query.unavailable){
+            if(Array.isArray(req.query.unavailable)){
+                // Multiple items, pass as it is
+                unavailableTimeSlots = validateArray(req.query.unavailable, validateUnavailableTime);
+            } else{
+                // 1 item, must convert to array
+                unavailableTimeSlots = validateArray([req.query.unavailable], validateUnavailableTime);
+            }
+        } else {
+            // Empty array
+            unavailableTimeSlots = validateArray([], validateUnavailableTime);
+        }
+
+        if (!programId || !termId || !hours || !unavailableTimeSlots)
+            return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+
+        try {
+            const schedules: Schedule[] = await this.scheduleService.getSchedules(
+                userId,
+                programId,
+                termId,
+                hours,
+                reduceDays? reduceDays:false,
+                prioritizeUnlocks? prioritizeUnlocks:false,
+                unavailableTimeSlots
+            );
+            res.status(HTTP_STATUS.OK).send([]);
         } catch (e) {
             next(e);
         }

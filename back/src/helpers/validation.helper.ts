@@ -31,7 +31,7 @@ export const validateArray = <T>(data: any, memberValidator: (data: any) => T | 
                 isValid = false;
                 break;
             } else {
-                validatedArray.push(maybeMember)
+                validatedArray.push(maybeMember);
             }
         }
     }
@@ -55,6 +55,32 @@ export const validateLecture = (maybeLecture: any): ILecture | undefined => {
 
         const time = new TimeRange(day, Time.fromString(startTime!), Time.fromString(endTime!));
         return { buildingId, time };
+    } catch (e) {
+        return undefined;
+    }
+};
+
+export const validateUnavailableTime = (maybeTime: any): TimeRange | undefined => {
+    try {
+        let time = validateString(maybeTime);
+        if (time === undefined) return undefined;
+
+        const splitTime = time.split('-');
+        if(splitTime.length != 3) return undefined;
+        const maybeDay = splitTime[0];
+        const maybeStartTime = splitTime[1];
+        const maybeEndTime = splitTime[2];
+
+        const day = validateEnum<DAY>(Number(maybeDay), DAY);
+        if (day === undefined) return undefined;
+
+        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+        const startTime = validateString(maybeStartTime);
+        if (!timeRegex.test(startTime ?? '')) return undefined;
+        const endTime = validateString(maybeEndTime);
+        if (!timeRegex.test(endTime ?? '')) return undefined;
+
+        return new TimeRange(day, Time.fromString(startTime!), Time.fromString(endTime!));
     } catch (e) {
         return undefined;
     }

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
 import AsyncSelect from 'react-select/async'
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../../services/SystemConstants";
 
 function SearchForm(props) {
@@ -18,7 +18,7 @@ function SearchForm(props) {
     const [programError, setProgramError] = useState();
     const [terms, setTerms] = useState();
     const [params, setParams] = useState({
-        program: student.program.id, term: undefined, hours: 24,
+        programId: student.program.id, termId: undefined, hours: 24,
         reduceDays: true, prioritizeUnlocks: true,
         unavailableTimeSlots: [JSON.parse(JSON.stringify(DEFAULT_DATE))]
     });
@@ -30,8 +30,9 @@ function SearchForm(props) {
     }
 
     const onChangeHours = (e) => {
+        const newValue = e.target.value? e.target.value : 0
         const paramsCopy = Object.assign({}, params);
-        paramsCopy.hours = parseInt(e.target.value);
+        paramsCopy.hours = parseInt(newValue);
         setParams(paramsCopy)
     }
 
@@ -81,53 +82,51 @@ function SearchForm(props) {
         setParams(paramsCopy)
     }
 
-    const getPath = (studentName) => {
+    const getPath = () => {
         let path = 'results';
-        var prog = params.program;
-        var term = params.term ? params.term : terms[0];
-        path += '?program=' + prog;
-        path += '&term=' + term;
+        path += '?programId=' + params.programId;
+        path += '&termId=' + (params.termId ? params.termId : terms[0]);
         path += '&hours=' + params.hours;
         path += '&reduceDays=' + params.reduceDays;
         path += '&prioritizeUnlocks=' + params.prioritizeUnlocks;
-        path += '&userAsking=' + studentName;
         if (params.unavailableTimeSlots) {
             params.unavailableTimeSlots.forEach((slot) => {
                 if (slot.startTime < slot.endTime)
-                    path += '&unavailable=' + slot.day + '-' + slot.startTime + '-' + slot.endTime;
+                    path += '&unavailable=' + DAYS.indexOf(slot.day) + '-' + slot.startTime + '-' + slot.endTime;
             });
         }
         return path;
     }
 
     const onButtonSubmit = (studentName) => {
-        if(params && !params.program)
+        if(params && !params.programId)
             setProgramError(true)
         else
-            navigate(getPath(studentName))
+            navigate(getPath())
     }
 
     useEffect( () => {
         if(!student)
             navigate("/register")
-        loadTerms(student.university.id)
+        loadTerms()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const loadTerms = (university) => {
-        ApiService.getTerms(university).then((dataTerm) => {
+    const loadTerms = () => {
+        ApiService.getTerms(student.university.id).then((respTerm) => {
             let findError = null;
-            if (dataTerm && dataTerm.status && dataTerm.status !== OK && dataTerm.status !== CREATED)
-                findError = dataTerm.status;
+            if (respTerm && respTerm.status && respTerm.status !== OK)
+                findError = respTerm.status;
             if (findError) {
                 setError(true)
                 setStatus(findError)
             }
             else {
-                const paramsCopy = Object.assign({}, params);
-                paramsCopy.term = dataTerm[0].id;
-                setTerms(dataTerm)
+                const paramsCopy = Object.assign({}, params)
+                if(respTerm.data.length > 0)
+                    paramsCopy.termId = respTerm.data[0].id;
                 setParams(paramsCopy)
+                setTerms(respTerm.data)
             }
             setLoading(false)
         });
@@ -152,7 +151,7 @@ function SearchForm(props) {
 
     const onChangePrograms = (programId) => {
         const paramsCopy = Object.assign({}, params);
-        paramsCopy.program = programId;
+        paramsCopy.programId = programId;
         setParams(paramsCopy)
         setProgramError(false)
     }
@@ -161,6 +160,8 @@ function SearchForm(props) {
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
         return <ErrorMessage status={status}/>
+    if(terms.length == 0)
+        return <React.Fragment><div className="bg-primary rounded-bottom mx-5 py-4"><p>{t('search.noTermsFromUniversity')}</p></div></React.Fragment>
     return (
         <React.Fragment>
             <Form className="p-3 mx-auto text-center color-white">
@@ -330,16 +331,7 @@ function SearchForm(props) {
                 </Form.Group>
                 <div className="row">
                     <div className="col text-center">
-                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('Newcomer')}>Newcomer</Button>
-                    </div>
-                    <div className="col text-center">
-                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('Algebra')}>Algebra + Intro Inf</Button>
-                    </div>
-                    <div className="col text-center">
-                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('1C')}>1° Semester Done</Button>
-                    </div>
-                    <div className="col text-center">
-                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit('2C')}>2° Semester Done</Button>
+                        <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit()}>{t("search.submit")}</Button>
                     </div>
                 </div>
             </Form>

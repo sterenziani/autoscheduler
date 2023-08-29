@@ -17,6 +17,7 @@ import BuildingService from './services/building.service';
 import CourseService from './services/course.service';
 import CourseClassService from './services/courseClass.service';
 import ProgramService from './services/program.service';
+import ScheduleService from './services/schedule.service';
 import StudentService from './services/student.service';
 import TermService from './services/term.service';
 import UniversityService from './services/university.service';
@@ -64,6 +65,7 @@ class App {
         CourseService.getInstance().init();
         CourseClassService.getInstance().init();
         ProgramService.getInstance().init();
+        ScheduleService.getInstance().init();
         StudentService.getInstance().init();
         TermService.getInstance().init();
         UniversityService.getInstance().init();

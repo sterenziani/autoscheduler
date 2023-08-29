@@ -12,6 +12,9 @@ import FormInputField from '../Common/FormInputField';
 import AsyncSelect from 'react-select/async'
 
 const SignUpSchema = Yup.object().shape({
+    name: Yup.string()
+        .max(50, 'register.errors.studentName.maxLength')
+        .required('register.errors.studentName.isRequired'),
     email: Yup.string()
         .max(100, 'register.errors.email.maxLength')
         .email('register.errors.email.invalidEmail')

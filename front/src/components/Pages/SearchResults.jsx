@@ -113,15 +113,14 @@ function SearchResults(props) {
 
     const readParams = () => {
         const params = {
-            program: query.get('program'),
-            term: query.get('term'),
+            programId: query.get('programId'),
+            termId: query.get('termId'),
             hours: query.get('hours'),
             reduceDays: query.get('reduceDays'),
             prioritizeUnlocks: query.get('prioritizeUnlocks'),
             unavailableTimeSlots: query.getAll('unavailable'),
-            userAsking: query.get('userAsking'),
         };
-        if(!params.program || !params.term || !params.hours || !params.userAsking)
+        if(!params.programId || !params.termId || !params.hours)
             return null
         return params;
     }
@@ -135,22 +134,22 @@ function SearchResults(props) {
             setLoading(false)
             return
         }
-        ApiService.getSchedules(params).then((data) => {
+        ApiService.getSchedules(user.id, params).then((resp) => {
             let findError = null;
-            if (data && data.status && data.status !== OK && data.status !== CREATED)
-                findError = data.status;
+            if (resp && resp.status && resp.status !== OK)
+                findError = resp.status;
             if (findError) {
                 setError(true);
                 setStatus(findError);
             }
             else {
                 var tables = [];
-                data.forEach((s, idx) => {
-                    const earliest = Number(data[idx].earliest.split(':')[0])
-                    const latest = Number(data[idx].latest.split(':')[0])
+                resp.data.forEach((s, idx) => {
+                    const earliest = Number(resp.data[idx].earliest.split(':')[0])
+                    const latest = Number(resp.data[idx].latest.split(':')[0])
                     tables.push(drawTable(getTimeTable(s), earliest-1, latest+1, idx));
                 });
-                setSchedules(data)
+                setSchedules(resp.data)
                 setScheduleIndex(0)
                 setTables(tables)
             }

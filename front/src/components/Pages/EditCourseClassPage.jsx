@@ -88,7 +88,6 @@ function EditCourseClassPage(props) {
                 setStatus(findError)
             }
             else{
-                console.log(resp.data)
                 setCourseClass(resp.data)
                 setSelectedCourse(resp.data.course)
                 setSelectedTerm(resp.data.term.id)
