@@ -25,9 +25,7 @@ export default class Time {
      * @param other
      */
     compareTo(other: Time): number {
-        let diff = this.hour - other.hour;
-        if (diff == 0) diff = this.minute - other.minute;
-        return diff;
+        return this.getValueInMinutes()-other.getValueInMinutes();
     }
 
     /**
@@ -35,7 +33,14 @@ export default class Time {
      * hh:mm
      */
     toString(): string {
-        return `${this.hour}:${this.minute}`;
+        return `${String(this.hour).padStart(2, '0')}:${String(this.minute).padStart(2, '0')}`;
+    }
+
+    /**
+     * returns time in minutes passed since midnight
+     */
+    getValueInMinutes(): number {
+        return this.hour*60 + this.minute;
     }
 
     /**

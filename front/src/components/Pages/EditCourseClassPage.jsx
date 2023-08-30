@@ -43,6 +43,7 @@ function EditCourseClassPage(props) {
     const [lectures, setLectures] = useState([]);
 
     const [selectionError, setSelectionError] = useState();
+    const [timeError, setTimeError] = useState();
     const [badConnection, setBadConnection] = useState();
 
     useEffect(() => {
@@ -210,6 +211,7 @@ function EditCourseClassPage(props) {
         const lecturesCopy = Object.assign([], lectures);
         lecturesCopy[index].startTime = e.target.value;
         setLectures(lecturesCopy)
+        setTimeError(false)
     }
 
     const onChangeEndTime = (e) => {
@@ -217,6 +219,7 @@ function EditCourseClassPage(props) {
         const lecturesCopy = Object.assign([], lectures);
         lecturesCopy[index].endTime = e.target.value;
         setLectures(lecturesCopy)
+        setTimeError(false)
     }
 
     const onChangeBuilding = (e) => {
@@ -241,7 +244,15 @@ function EditCourseClassPage(props) {
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
-        setSubmitting(true);
+        setSubmitting(true)
+        for(const l of lectures){
+            if(l.startTime > l.endTime){
+                setTimeError(true)
+                setSubmitting(false)
+                return
+            }
+        }
+
         if (selectedCourse && selectedTerm && values.className)
         {
             const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTerm, values.className, lectures)
@@ -291,6 +302,7 @@ function EditCourseClassPage(props) {
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
                 {error && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
+                { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
                 <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>

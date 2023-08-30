@@ -224,7 +224,8 @@
                 "maxNameLength":"El nombre de la sede no puede superar los 50 characters.",
                 "nameIsRequired":"La sede debe tener un nombre.",
                 "codeAlreadyTaken":"Ya existe una sede con ese código."
-            }
+            },
+            "timeRange": "Asegúrese de que los rangos horarios que definió finalicen después de iniciar."
         }
     },
     "changePassword": {

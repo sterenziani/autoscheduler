@@ -224,7 +224,8 @@
                 "maxNameLength":"The building's name can't exceed 50 characters.",
                 "nameIsRequired":"The building must have a name.",
                 "codeAlreadyTaken":"A building with that code already exists."
-            }
+            },
+            "timeRange": "Please make sure your time ranges end at a time after they start."
         }
     },
     "changePassword": {

@@ -16,6 +16,7 @@ function SearchForm(props) {
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [programError, setProgramError] = useState();
+    const [timeError, setTimeError] = useState();
     const [terms, setTerms] = useState();
     const [params, setParams] = useState({
         programId: student.program.id, termId: undefined, hours: 24,
@@ -60,6 +61,7 @@ function SearchForm(props) {
         const index = e.target.id.match(/\d/g)[0];
         paramsCopy.unavailableTimeSlots[index].startTime = e.target.value;
         setParams(paramsCopy)
+        setTimeError(false)
     }
 
     const onChangeEndTime = (e) => {
@@ -67,6 +69,7 @@ function SearchForm(props) {
         const index = e.target.id.match(/\d/g)[0];
         paramsCopy.unavailableTimeSlots[index].endTime = e.target.value;
         setParams(paramsCopy)
+        setTimeError(false)
     }
 
     const onClickTrashCan = (e) => {
@@ -99,9 +102,22 @@ function SearchForm(props) {
     }
 
     const onButtonSubmit = (studentName) => {
-        if(params && !params.programId)
-            setProgramError(true)
-        else
+        let noErrors = true;
+        if(params){
+            for(const tr of params.unavailableTimeSlots){
+                if(tr.startTime > tr.endTime){
+                    noErrors = false
+                    setTimeError(true)
+                }
+            }
+            if(!params.programId){
+                setProgramError(true)
+                noErrors = false
+            }
+        } else {
+            noErrors = false
+        }
+        if(noErrors)
             navigate(getPath())
     }
 
@@ -278,6 +294,7 @@ function SearchForm(props) {
                         </Form.Label>
                     </div>
                     <div className="col-8 align-items-start align-items-center">
+                        { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
                         {params.unavailableTimeSlots.map((entry, index) => (
                             <Row
                                 key={'timerow-' + index}
