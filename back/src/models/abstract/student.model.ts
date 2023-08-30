@@ -24,5 +24,6 @@ export default abstract class Student extends User {
     public abstract getCompletedCourses(): Promise<Course[]>;
     public abstract addCompletedCourse(courseId: string): Promise<void>;
     public abstract deleteCompletedCourse(courseId: string): Promise<void>;
-    public abstract getSchedules(termId: string): Promise<Schedule[]>;
+    public abstract getRemainingCoursesProgram(programId: string): Promise<Course[]>;
+    public abstract getEnabledCourses(programId: string): Promise<Course[]>;
 }

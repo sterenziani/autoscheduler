@@ -20,6 +20,7 @@ export default abstract class Course extends GenericModel {
     public abstract setRequiredCourses(requiredCourses: { [programId: string]: string[] }): Promise<void>;
     public abstract getProgramsWithRequiredCourses(): Promise<Program[]>;
     public abstract getRequiredCoursesForProgram(programId: string): Promise<Course[]>;
+    public abstract getIndirectCorrelatives(programId: string): Promise<Course[]>;
     public abstract getCourseClasses(termId: string): Promise<CourseClass[]>;
     public abstract getUniversity(): Promise<University>;
 }

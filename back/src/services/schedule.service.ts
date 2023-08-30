@@ -47,11 +47,19 @@ export default class ScheduleService {
         const program = await this.programService.getProgram(programId);
         const term = await this.termService.getTerm(termId);
 
-        // TODO: Implement
-
         // STEP 1 - Get mandatory and optional courses in program
-        // STEP 2 - Filter already finished courses and courses the student is not yet enabled to sign up for
+        const mandatoryCourses = await program.getMandatoryCourses();
+        const optionalCourses = await program.getOptionalCourses();
+        const courses = [...mandatoryCourses.collection, ...optionalCourses.collection];
+
+        // STEP 2 - Filter already completed courses and courses the student is not yet enabled to sign up for
+        const enabledCourses = await student.getEnabledCourses(program.id);
+
         // STEP 3 - Calculate "importance" of each course (direct + indirect unlockables)
+        const correlatives = await this.getIndirectCorrelatives(programId, enabledCourses);
+        const importance: { [courseId: string]: number } = {};
+        for(const c of courses) importance[c.id] = correlatives[c.id].size;
+
         // STEP 4 - Get all courseClasses for each course
         // STEP 5 - Remove courseClasses that fall inside unavailableTimeSlots
         // STEP 6 - Get all possible schedules based on those remaining courseClasses
@@ -78,4 +86,43 @@ export default class ScheduleService {
 
         return [];
     }
+
+    // This is also implemented in course model, but being able to access the created map is much more efficient than starting from scratch for each course.
+    // If coursesToAnalyze is defined, we recursively expand only those courses for efficiency.
+    private async getIndirectCorrelatives(programId: string, coursesToAnalyze?: Course[]): Promise<{ [courseId: string]: Set<Course> }> {
+        const program = await this.programService.getProgram(programId);
+        const mandatoryCourses = await program.getMandatoryCourses();
+        const optionalCourses = await program.getOptionalCourses();
+        const programCourses = [...mandatoryCourses.collection, ...optionalCourses.collection];
+
+        // Create map where key is a course ID and values are the courses enabled immediately after completing the key.
+        const unlocks: { [courseId: string]: Set<Course> } = {};
+        for(const c of programCourses) unlocks[c.id] = new Set();
+        for(const c of programCourses) {
+            const requirements = await c.getRequiredCoursesForProgram(programId);
+            requirements.forEach( r => unlocks[r.id].add(c) );
+        };
+
+        // Expand each map entry to also include the courses indirectly correlative to it.
+        if(coursesToAnalyze){
+            for (const c of coursesToAnalyze)
+                unlocks[c.id] = this.findIndirectCorrelativesRec(unlocks, c.id);
+            // Clear courses we don't wish to analyze to avoid confusion
+            for (const key in unlocks)
+                if(!coursesToAnalyze.find(x => x.id === key)) unlocks[key] = new Set();
+        } else {
+            for (const key in unlocks)
+                unlocks[key] = this.findIndirectCorrelativesRec(unlocks, key);
+        }
+        return unlocks;
+    }
+
+    private findIndirectCorrelativesRec(unlocks: { [courseId: string]: Set<Course> }, courseId: string): Set<Course> {
+        if (!unlocks[courseId]) return new Set();
+        unlocks[courseId].forEach( u => {
+            const unlockablesFromU = this.findIndirectCorrelativesRec(unlocks, u.id);
+            unlocks[courseId] = new Set([...unlocks[courseId], ...unlockablesFromU]);
+        });
+        return unlocks[courseId];
+    };
 }

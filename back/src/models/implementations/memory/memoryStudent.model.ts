@@ -47,13 +47,36 @@ export default class MemoryStudent extends Student {
         MEMORY_DATABASE.completedCoursesOfStudent.get(this.id)?.delete(courseId);
     }
 
-    public async getSchedules(termId: string): Promise<Schedule[]> {
-        return getChildsFromParents<Schedule>(
-            MEMORY_DATABASE.schedulesOfStudent,
-            MEMORY_DATABASE.schedulesOfTerm,
-            MEMORY_DATABASE.schedules,
-            this.id,
-            termId,
+    public async getRemainingCoursesProgram(programId: string): Promise<Course[]> {
+        const completedCourses = await this.getCompletedCourses();
+        const mandatoryCourses = getChildsFromParent<Course>(
+            MEMORY_DATABASE.mandatoryCoursesOfProgram,
+            MEMORY_DATABASE.courses,
+            programId,
         );
+        const optionalCourses = getChildsFromParent<Course>(
+            MEMORY_DATABASE.optionalCoursesOfProgram,
+            MEMORY_DATABASE.courses,
+            programId,
+        );
+        const nonFinishedMandatoryCourses = mandatoryCourses.filter(item => !completedCourses.includes(item));
+        const nonFinishedOptionalCourses = optionalCourses.filter(item => !completedCourses.includes(item));
+        return [...nonFinishedMandatoryCourses, ...nonFinishedOptionalCourses];
+    }
+
+    public async getEnabledCourses(programId: string): Promise<Course[]> {
+        const completedCourses = await this.getCompletedCourses();
+        const nonFinishedCourses = await this.getRemainingCoursesProgram(programId);
+        const enabledCourses = [];
+
+        for(const c of nonFinishedCourses){
+            const requirements = await c.getRequiredCoursesForProgram(programId);
+            let enabled = true;
+            for(const r of requirements){
+                if(!completedCourses.find(f => f.id === r.id)) enabled = false;
+            }
+            if(enabled) enabledCourses.push(c);
+        }
+        return enabledCourses;
     }
 }

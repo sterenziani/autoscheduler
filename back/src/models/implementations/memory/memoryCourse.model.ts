@@ -4,6 +4,7 @@ import GenericException from '../../../exceptions/generic.exception';
 import {
     addGrandchildToParent,
     getGrandchildsFromParent,
+    getChildsFromParent,
     getChildsFromParents,
     getMiddleChildsFromParent,
     getParentFromChild,
@@ -61,6 +62,41 @@ export default class MemoryCourse extends Course {
         };
         return courses.sort(compareCourses);
     }
+
+    public async getIndirectCorrelatives(programId: string): Promise<Course[]> {
+        const mandatoryCourses = getChildsFromParent<Course>(
+            MEMORY_DATABASE.mandatoryCoursesOfProgram,
+            MEMORY_DATABASE.courses,
+            programId,
+        );
+        const optionalCourses = getChildsFromParent<Course>(
+            MEMORY_DATABASE.optionalCoursesOfProgram,
+            MEMORY_DATABASE.courses,
+            programId,
+        );
+        const programCourses = [...mandatoryCourses, ...optionalCourses];
+
+        // Create map where key is a course ID and values are the courses enabled immediately after completing the key.
+        const unlocks: { [courseId: string]: Set<Course> } = {};
+        for(const c of programCourses) unlocks[c.id] = new Set();
+        for(const c of programCourses) {
+            const requirements = await c.getRequiredCoursesForProgram(programId);
+            requirements.forEach( r => unlocks[r.id].add(c) );
+        };
+
+        // Expand the map entry to also include the courses indirectly correlative to it.
+        unlocks[this.id] = this.findIndirectCorrelativesRec(unlocks, this.id);
+        return Array.from(unlocks[this.id]);
+    }
+
+    private findIndirectCorrelativesRec(unlocks: { [courseId: string]: Set<Course> }, courseId: string): Set<Course> {
+        if (!unlocks[courseId]) return new Set();
+        unlocks[courseId].forEach( u => {
+            const unlockablesFromU = this.findIndirectCorrelativesRec(unlocks, u.id);
+            unlocks[courseId] = new Set([...unlocks[courseId], ...unlockablesFromU]);
+        });
+        return unlocks[courseId];
+    };
 
     // I know this is inefficient but i don't see the point of making it better when memory database is just for testing
     public async getCourseClasses(termId: string): Promise<CourseClass[]> {
