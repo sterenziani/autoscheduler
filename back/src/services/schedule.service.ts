@@ -67,28 +67,12 @@ export default class ScheduleService {
 
         // STEP 4 - Get all courseClasses for each course
         // STEP 5 - Remove courseClasses that fall inside unavailableTimeSlots
-        const viableCourseClassesMap: Map<string, CourseClass[]> = new Map<string, CourseClass[]>();
-        for(const c of enabledCourses) {
-            viableCourseClassesMap.set(c.id, []);
-            for(const cc of await c.getCourseClasses(termId)) {
-                const ccLectures: Lecture[] = await cc.getLectures();
-                if(this.areTimeRangesCompatible(ccLectures.map(l => l.time), unavailableTimeSlots))
-                    viableCourseClassesMap.get(c.id)?.push(cc);
-            }
-        }
+        const viableCourseClassesMap = await this.getViableCourseClassesMap(enabledCourses, term.id, unavailableTimeSlots);
 
-        // STEP 6 - Get all possible schedules based on those remaining courseClasses
+        // STEP 6 - Based on those remaining courseClasses, get all possible combinations
+        // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         const viableCourseClassesArray = Array.from(viableCourseClassesMap.values());
-        let courseClassCombinations = this.getCourseClassCombinations(viableCourseClassesArray);
-
-        // STEP 7 - Remove invalid schedules
-        for(let i=0; i < courseClassCombinations.length; i++){
-            const combination = courseClassCombinations[i];
-            if(!await this.isClassCombinationValid(combination)){
-                courseClassCombinations.splice(i, 1);
-                i--;
-            }
-        }
+        let courseClassCombinations = await this.getCourseClassCombinations(viableCourseClassesArray);
 
         // STEP 8 - Calculate stats for every valid schedule
             // diasTotales := Número de días en los cuales hay al menos una clase.
@@ -158,18 +142,45 @@ export default class ScheduleService {
         return true;
     }
 
+    private async getViableCourseClassesMap(courses: Course[], termId: string, unavailableTimeSlots: TimeRange[]): Promise<Map<string, CourseClass[]>> {
+        const viableCourseClassesMap: Map<string, CourseClass[]> = new Map<string, CourseClass[]>();
+        for(const c of courses) {
+            viableCourseClassesMap.set(c.id, []);
+            for(const cc of await c.getCourseClasses(termId)) {
+                const ccLectures: Lecture[] = await cc.getLectures();
+                if(this.areTimeRangesCompatible(ccLectures.map(l => l.time), unavailableTimeSlots))
+                    viableCourseClassesMap.get(c.id)?.push(cc);
+            }
+        }
+        return viableCourseClassesMap;
+    }
+
     // Receives matrix where each array contains classes belonging to a course, example:
     // [ [c1A, c1B], [c2A, c2B], [c3A] ]
-    // Returns all combinations of classes belonging to different courses.
-    private getCourseClassCombinations(arr: CourseClass[][]): CourseClass[][] {
+    // Returns all valid combinations of classes belonging to different courses.
+    private async getCourseClassCombinations(arr: CourseClass[][]): Promise<CourseClass[][]> {
         if(arr.length === 0) return [[]];
         if(arr.length === 1) return [arr[0]];
 
+        // We will focus on the first array. This will be our "current course" to work on.
+        // allCasesOfRest calls this function recursively on all arrays that come after the current course.
+        let allCasesOfRest = await this.getCourseClassCombinations(arr.slice(1));
         let result: CourseClass[][] = [];
-        let allCasesOfRest = this.getCourseClassCombinations(arr.slice(1));  // recur with the rest of array
+
+        // Consider the case where this course is the only one in the schedule
+        for(const cc of arr[0])
+            result.push([cc]);
+
         for (let c in allCasesOfRest) {
+            // Consider the case where our current course is not used (not every course must be included in a schedule)
+            result.push([...allCasesOfRest[c]]);
+
+            // Now consider all combinations between c and each courseClass of our current course
             for (let i = 0; i < arr[0].length; i++) {
-                result.push([arr[0][i], ...allCasesOfRest[c]]);
+                const combinationProposal = [arr[0][i], ...allCasesOfRest[c]];
+                // To avoid expanding upon an invalid combination, we only add a combination to the array if it's valid
+                if(await this.isClassCombinationValid(combinationProposal))
+                    result.push(combinationProposal);
             }
         }
         return result;
