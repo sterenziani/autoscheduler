@@ -12,8 +12,9 @@ import Student from '../models/abstract/student.model';
 import University from '../models/abstract/university.model';
 import Program from '../models/abstract/program.model';
 import Course from '../models/abstract/course.model';
-import Schedule from '../models/abstract/schedule.model';
+import { ISchedule } from '../interfaces/schedule.interface';
 import { courseToDto } from '../dtos/course.dto';
+import { scheduleToDto } from '../dtos/schedule.dto';
 import { getUserUrl } from '../dtos/user.dto';
 import { validateArray, validateUnavailableTime } from '../helpers/validation.helper';
 
@@ -128,9 +129,9 @@ export class StudentController {
 
         const programId = req.query.programId as string;
         const termId = req.query.termId as string;
-        const hours = Number(req.query.hours);
-        const reduceDays = req.query.reduceDays as boolean | undefined;
-        const prioritizeUnlocks = req.query.prioritizeUnlocks as boolean | undefined;
+        const targetHours = Number(req.query.hours);
+        const reduceDays = (req.query.reduceDays === 'true');
+        const prioritizeUnlocks = (req.query.prioritizeUnlocks === 'true');
 
         let unavailableTimeSlots;
         if(req.query.unavailable){
@@ -146,20 +147,21 @@ export class StudentController {
             unavailableTimeSlots = validateArray([], validateUnavailableTime);
         }
 
-        if (!programId || !termId || !hours || !unavailableTimeSlots)
+        if (!programId || !termId || !targetHours || !unavailableTimeSlots)
             return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
-            const schedules: Schedule[] = await this.scheduleService.getSchedules(
+            const schedules: {schedule:ISchedule, score:number}[] = await this.scheduleService.getSchedules(
                 userId,
                 programId,
                 termId,
-                hours,
-                reduceDays? reduceDays:false,
-                prioritizeUnlocks? prioritizeUnlocks:false,
+                targetHours,
+                reduceDays,
+                prioritizeUnlocks,
                 unavailableTimeSlots
             );
-            res.status(HTTP_STATUS.OK).send([]);
+            const scheduleDtos = schedules.map(s => scheduleToDto(s.schedule, s.score));
+            res.status(HTTP_STATUS.OK).send(scheduleDtos);
         } catch (e) {
             next(e);
         }

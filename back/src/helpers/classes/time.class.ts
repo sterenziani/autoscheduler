@@ -53,4 +53,18 @@ export default class Time {
         const [hour, minute]: number[] = timeString.split(':', 2).map((n) => parseInt(n));
         return new Time(hour, minute);
     }
+
+    /**
+     * Returns Time with max allowed value
+     */
+    static minValue(): Time {
+        return new Time(0, 0);
+    }
+
+    /**
+     * Returns Time with max allowed value
+     */
+    static maxValue(): Time {
+        return new Time(23, 59);
+    }
 }

@@ -1,7 +1,6 @@
 import { ROLE } from '../../constants/general.constants';
 import Course from './course.model';
 import Program from './program.model';
-import Schedule from './schedule.model';
 import University from './university.model';
 import User from './user.model';
 

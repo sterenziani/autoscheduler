@@ -78,4 +78,11 @@ export default class TimeRange {
             return Math.min(thisStartMinute-otherEndMinute, otherStartMinute+7*DAY_LENGTH_IN_MINUTES - thisEndMinute);
         return -1;
     }
+
+    /**
+     * Returns minutes between startTime and endTime
+     */
+    getDurationInMinutes(): number {
+        return this.endTime.getValueInMinutes() - this.startTime.getValueInMinutes();
+    }
 }

@@ -9,7 +9,6 @@ import {
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import Course from '../../abstract/course.model';
 import Program from '../../abstract/program.model';
-import Schedule from '../../abstract/schedule.model';
 import Student from '../../abstract/student.model';
 import University from '../../abstract/university.model';
 

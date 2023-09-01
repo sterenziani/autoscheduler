@@ -1,4 +1,5 @@
 import { ERRORS } from '../../../constants/error.constants';
+import { DAY } from '../../../constants/time.constants';
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
 import GenericException from '../../../exceptions/generic.exception';
 import { getChildsFromParent, getParentFromChild, addChildToParent, removeChildFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
@@ -23,6 +24,22 @@ export default class MemoryCourseClass extends CourseClass {
 
     public async getLectures(): Promise<Lecture[]> {
         return getChildsFromParent<Lecture>(MEMORY_DATABASE.lecturesOfCourseClass, MEMORY_DATABASE.lectures, this.id);
+    }
+
+    public async getWeeklyClassTimeInMinutes(): Promise<number> {
+        const lectures = await this.getLectures();
+        let duration = 0;
+        for(const l of lectures)
+            duration += l.time.getDurationInMinutes();
+        return duration;
+    }
+
+    public async getDaysWithLectures(): Promise<Set<DAY>> {
+        const lectures = await this.getLectures();
+        const busyDays = new Set<DAY>();
+        for(const l of lectures)
+            busyDays.add(l.time.dayOfWeek);
+        return busyDays;
     }
 
     public async getCourse(): Promise<Course> {

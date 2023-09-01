@@ -126,6 +126,8 @@
         "SUN": "Domingo"
     },
     "results": {
+        "loading": "Procesando...",
+        "pleaseWait": "¡Estamos buscando los cronogramas que mejor se ajusten a sus necesidades! Espere por favor.",
         "results": "Resultados",
         "scheduleNumber": "Cronograma #{{value}}",
         "recap": "{{days}} días, {{hours}} horas en total",

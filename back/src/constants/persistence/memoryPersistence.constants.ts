@@ -3,7 +3,6 @@ import Course from '../../models/abstract/course.model';
 import CourseClass from '../../models/abstract/courseClass.model';
 import Lecture from '../../models/abstract/lecture.model';
 import Program from '../../models/abstract/program.model';
-import Schedule from '../../models/abstract/schedule.model';
 import Student from '../../models/abstract/student.model';
 import Term from '../../models/abstract/term.model';
 import University from '../../models/abstract/university.model';
@@ -21,7 +20,6 @@ interface IMemoryDatabase {
     courseClasses: Map<string, CourseClass>;
     lectures: Map<string, Lecture>;
     students: Map<string, Student>;
-    schedules: Map<string, Schedule>;
 
     // Belongs to relationships
     programsOfUniversity: Map<string, Set<string>>; // universityId -> Set<programId>
@@ -34,9 +32,6 @@ interface IMemoryDatabase {
     lecturesOfBuilding: Map<string, Set<string>>; // buildingId -> Set<lectureId>
     studentsOfUniversity: Map<string, Set<string>>; // universityId -> Set<studentId>
     studentsOfProgram: Map<string, Set<string>>; // programId -> Set<studentId>
-    schedulesOfStudent: Map<string, Set<string>>; // studentId -> Set<scheduleId>
-    schedulesOfTerm: Map<string, Set<string>>; // termId -> Set<scheduleId>
-    courseClassesOfSchedule: Map<string, Set<string>>; // scheduleId -> Set<courseClassId>
 
     // Course belongs to program relationship (Separate from others because it also has if it's optional or not)
     optionalCoursesOfProgram: Map<string, Set<string>>; // programId -> Set<courseId>
@@ -62,7 +57,6 @@ export const MEMORY_DATABASE: IMemoryDatabase = {
     courseClasses: new Map(),
     lectures: new Map(),
     students: new Map(),
-    schedules: new Map(),
 
     programsOfUniversity: new Map(),
     buildingsOfUniversity: new Map(),
@@ -74,9 +68,6 @@ export const MEMORY_DATABASE: IMemoryDatabase = {
     lecturesOfBuilding: new Map(),
     studentsOfUniversity: new Map(),
     studentsOfProgram: new Map(),
-    schedulesOfStudent: new Map(),
-    schedulesOfTerm: new Map(),
-    courseClassesOfSchedule: new Map(),
 
     optionalCoursesOfProgram: new Map(),
     mandatoryCoursesOfProgram: new Map(),

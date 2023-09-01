@@ -9,8 +9,9 @@ import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Course from '../models/abstract/course.model';
 import CourseClass from '../models/abstract/courseClass.model';
-import Schedule from '../models/abstract/schedule.model';
+import {ISchedule} from '../interfaces/schedule.interface';
 import Lecture from '../models/abstract/lecture.model';
+import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
 
 export default class ScheduleService {
@@ -40,17 +41,18 @@ export default class ScheduleService {
         studentId: string,
         programId: string,
         termId: string,
-        hours: number,
+        targetHours: number,
         reduceDays: boolean,
         prioritizeUnlocks: boolean,
         unavailableTimeSlots: TimeRange[]
-    ): Promise<Schedule[]> {
+    ): Promise<{schedule:ISchedule, score:number}[]> {
         const student = await this.studentService.getStudent(studentId);
         const program = await this.programService.getProgram(programId);
         const term = await this.termService.getTerm(termId);
         if (!student) throw new GenericException(ERRORS.NOT_FOUND.STUDENT);
         if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
         if (!term) throw new GenericException(ERRORS.NOT_FOUND.TERM);
+        unavailableTimeSlots = unavailableTimeSlots.filter(t => t.startTime < t.endTime);
 
         // STEP 1 - Get mandatory and optional courses in program
         const mandatoryCourses = await program.getMandatoryCourses();
@@ -72,26 +74,19 @@ export default class ScheduleService {
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         const viableCourseClassesArray = Array.from(viableCourseClassesMap.values());
-        let courseClassCombinations = await this.getCourseClassCombinations(viableCourseClassesArray);
+        const courseClassCombinations = await this.getCourseClassCombinations(viableCourseClassesArray);
 
         // STEP 8 - Calculate stats for every valid schedule
-            // diasTotales := Número de días en los cuales hay al menos una clase.
-            // horasTotales := Horas totales de clase por semana.
-            // importanciaTotal := Suma de valores importancia de cada materia que conforme el cronograma.
-            // tasaElectivas := Cantidad de horas semanales correspondientes a materias electivas para el plan, dividido por la cantidad de horas totales en el cronograma.
-            // Horario más temprano en el que inicia una clase
-            // Horario más tardío en el que termina una clase
         // STEP 9 - Calculate score for each schedule
-            // p1 := 1 - tasaElectivas
-            // p2 := abs(horasDeseadas - horasTotales)
-            // p3 := 7 - diasTotales
-            // p4 := importanciaTotal
-            // A := 1 si reducirDías es verdadero, 0 si es falso
-            // B := 1 si priorizarCorrelativas es verdadero, 0 si es falso
-            // score := 10*p1 – p2 + A*3.5*p3 + B*p4
-        // STEP 10 - Return sorted list of schedules by score
+        const schedules = [];
+        for(const combo of courseClassCombinations){
+            const schedule = await this.createSchedule(combo, program, importance);
+            const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks);
+            schedules.push({schedule: schedule, score: score});
+        }
 
-        return [];
+        // STEP 10 - Return sorted list of schedules by score
+        return schedules.sort((a, b) =>  b.score-a.score).slice(0, 10);
     }
 
     // This is also implemented in course model, but being able to access the created map is much more efficient than starting from scratch for each course.
@@ -156,7 +151,7 @@ export default class ScheduleService {
     }
 
     // Receives matrix where each array contains classes belonging to a course, example:
-    // [ [c1A, c1B], [c2A, c2B], [c3A] ]
+    // arr = [ [c1A, c1B], [c2A, c2B], [c3A] ]
     // Returns all valid combinations of classes belonging to different courses.
     private async getCourseClassCombinations(arr: CourseClass[][]): Promise<CourseClass[][]> {
         if(arr.length === 0) return [[]];
@@ -210,5 +205,52 @@ export default class ScheduleService {
             }
         }
         return true;
+    }
+
+    private async createSchedule(courseClasses: CourseClass[], program: Program, importanceMap: { [courseId: string]: number }): Promise<ISchedule> {
+        const mandatoryCoursesInProgram = await program.getMandatoryCourses();
+
+        let totalMinutes = 0;
+        let totalDays = new Set();
+        let totalImportance = 0;
+        let amountOfMandatoryCourses = 0;
+        let earliestLecture = Time.maxValue();
+        let latestLecture = Time.minValue();
+
+        for(const cc of courseClasses) {
+            const course = await cc.getCourse();
+            const lectures = await cc.getLectures();
+
+            totalImportance += importanceMap[course.id];
+            if(mandatoryCoursesInProgram.collection.includes(course))
+                amountOfMandatoryCourses++;
+
+            for(const l of lectures){
+                totalMinutes += l.time.getDurationInMinutes();
+                totalDays.add(l.time.dayOfWeek);
+                if (!earliestLecture || l.time.startTime < earliestLecture) earliestLecture = l.time.startTime;;
+                if (!latestLecture || l.time.endTime > latestLecture) latestLecture = l.time.endTime;
+            }
+        }
+
+        return {
+            courseClasses: courseClasses,
+            totalHours: totalMinutes/60,
+            totalDays: totalDays.size,
+            totalImportance: totalImportance,
+            mandatoryRate: amountOfMandatoryCourses / courseClasses.length,
+            earliestLecture: earliestLecture,
+            latestLecture: latestLecture,
+        }
+    }
+
+    private calculateScheduleScore(schedule: ISchedule, targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean): number {
+        const p1 = schedule.mandatoryRate;
+        const p2 = Math.abs(targetHours - schedule.totalHours);
+        const p3 = 7 - schedule.totalDays;
+        const p4 = schedule.totalImportance;
+        const a = (reduceDays)? 1:0;
+        const b = (prioritizeUnlocks)? 1:0;
+        return 10*p1 - 1.25*p2 + a*3.5*p3 + b*p4
     }
 }

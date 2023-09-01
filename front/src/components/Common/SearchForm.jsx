@@ -6,7 +6,7 @@ import ApiService from '../../services/ApiService';
 import AsyncSelect from 'react-select/async'
 import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../../services/SystemConstants";
+import { DAYS, INSTANT_DATE } from "../../services/SystemConstants";
 
 function SearchForm(props) {
     const { t } = useTranslation()
@@ -21,7 +21,7 @@ function SearchForm(props) {
     const [params, setParams] = useState({
         programId: student.program.id, termId: undefined, hours: 24,
         reduceDays: true, prioritizeUnlocks: true,
-        unavailableTimeSlots: [JSON.parse(JSON.stringify(DEFAULT_DATE))]
+        unavailableTimeSlots: [JSON.parse(JSON.stringify(INSTANT_DATE))]
     });
 
     const onChangeTerms = (e) => {
@@ -81,7 +81,7 @@ function SearchForm(props) {
 
     const onClickPlusSign = (e) => {
         const paramsCopy = Object.assign({}, params);
-        paramsCopy.unavailableTimeSlots.push(JSON.parse(JSON.stringify(DEFAULT_DATE)));
+        paramsCopy.unavailableTimeSlots.push(JSON.parse(JSON.stringify(INSTANT_DATE)));
         setParams(paramsCopy)
     }
 

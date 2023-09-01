@@ -244,18 +244,25 @@ const getRemainingCoursesProgram = async (user, programId, inputText) => {
     return {status: OK, data: [...mandatoryCoursesResp.data, ...optionalCoursesResp.data]}
 }
 
-// TODO: Implement me
 const getSchedules = async (userId, params) => {
     const query = scheduleParamsToQuery(params)
-    return simpleApiGetRequest("student/"+userId+"/schedules"+query)
+    const scheduleResponse = await simpleApiGetRequest("student/"+userId+"/schedules"+query)
+    console.log(new Date() +"   Got schedules from server.")
+    if(scheduleResponse.status != OK)
+        return scheduleResponse
+    for(const schedule of scheduleResponse.data){
+        for(let i=0; i < schedule.courseClasses.length; i++){
+            const courseClassResponse = await getCourseClass(schedule.courseClasses[i].courseClassId)
+            if(courseClassResponse.status != OK)
+                return {status: courseClassResponse.status}
+            schedule.courseClasses[i] = courseClassResponse.data
+        }
+    }
+    //const delay = ms => new Promise(res => setTimeout(res, ms));
+    //await delay(5000);
+    console.log(new Date() +"   Done fetching classes data.")
+    return scheduleResponse
 }
-        /*
-        let availableClasses = getAvailableClasses(params.userAsking, params.program); // Gets the classes the user is enabled to be in
-        availableClasses = filterUnattendableClasses(availableClasses, params.unavailableTimeSlots); // Deletes classes that conflict with busy time
-        calculateDurationOfEachClass(availableClasses); // Updates classes with time spent in each
-        const schedules = getBestSchedules(availableClasses, params.hours, params.prioritizeUnlocks, params.reduceDays); // Returns sorted array
-        setTimeout(() => resolve(schedules), RESOLVE_DELAY);
-        */
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////// UNIVERSITY FUNCTIONS ////////////////////////////
@@ -583,7 +590,7 @@ const ApiService = {
     addFinishedCourse: addFinishedCourse,
     deleteFinishedCourse: deleteFinishedCourse,
     getRemainingCoursesProgram: getRemainingCoursesProgram, // TODO
-    getSchedules: getSchedules, // TODO
+    getSchedules: getSchedules,
     getUniversities: getUniversities,
 
     getBuildings: getBuildings,
@@ -624,158 +631,3 @@ const ApiService = {
 };
 
 export default ApiService;
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////// ALGORITMO, ESTO SE MOVERÍA AL BACK //////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-const getAvailableClasses = (student, programId) => {
-    const map = calculateImportanceOfEachCourse(SgaConstants.programCourses[programId], programId);
-    const passedCourses = SgaConstants.finishedCourses.find((c) => c.student === student).courses;
-    const availableCourses = SgaConstants.programCourses[programId].filter((c) => {
-        if (passedCourses.includes(c.id))
-            return false;
-        if (c.requirements && c.requirements[programId])
-            return c.requirements[programId].every((req) => passedCourses.includes(req));
-        return true;
-    });
-    const availableCourseCodes = [];
-    availableCourses.forEach((c) => availableCourseCodes.push(c.id));
-    const availableClasses = SgaConstants.courseClasses2022A.filter((com) => availableCourseCodes.includes(com.course.id));
-    availableClasses.forEach((c) => {
-        c.unlockables = map[c.course.id] ? map[c.course.id] : 0; // Adds importance of that course to the class
-    });
-    return availableClasses;
-};
-
-const filterUnattendableClasses = (availableClasses, unavailableTimeSlots) => {
-    const busySlots = [];
-    unavailableTimeSlots.forEach((t) => {
-        t = t.split('-');
-        busySlots.push({ day: t[0], startTime: t[1], endTime: t[2] });
-    });
-    return availableClasses.filter((com) => areTimeSlotsCompatible(com.lectures, busySlots));
-};
-
-const areTimeSlotsCompatible = (slotsA, slotsB) => {
-    for (const t of slotsA) {
-        for (const l of slotsB) {
-            if (l.day === t.day) {
-                if (t.startTime <= l.startTime && l.startTime < t.endTime) return false;
-                if (l.startTime <= t.startTime && t.startTime < l.endTime) return false;
-            }
-        }
-    }
-    return true;
-};
-
-const calculateImportanceOfEachCourse = (programCourses, programId) => {
-    const map = {};
-    programCourses.forEach((c) => {
-        if (c.requirements && c.requirements[programId])
-            c.requirements[programId].forEach((r) => {
-                if (!map[r])
-                    map[r] = [];
-                map[r].push(c);
-            });
-    });
-    const importanceMap = {};
-    for (const key in map) importanceMap[key] = importanceRec(map, key);
-    programCourses.forEach((c) => {
-        c.unlockables = map[c.id] ? map[c.id] : 0;
-    });
-    return importanceMap;
-};
-
-const importanceRec = (map, c) => {
-    if (!map[c]) return 0;
-    let resp = map[c].length;
-    map[c].forEach((u) => {
-        resp += importanceRec(map, u);
-    });
-    return resp;
-};
-
-const calculateDurationOfEachClass = (classes) => {
-    classes.forEach((c) => {
-        c.weeklyHours = 0;
-        c.days = new Set();
-        c.earliest = '23:59';
-        c.latest = '00:00';
-        c.lectures.forEach((l) => {
-            let startTime = l.startTime.split(/\D+/);
-            let endTime = l.endTime.split(/\D+/);
-            startTime = startTime[0] * 60 + startTime[1] * 1;
-            endTime = endTime[0] * 60 + endTime[1] * 1;
-            c.weeklyHours += (endTime - startTime) / 60;
-            c.days.add(l.day);
-            if (l.startTime < c.earliest) c.earliest = l.startTime;
-            if (l.endTime > c.latest) c.latest = l.endTime;
-        });
-    });
-};
-
-const getBestSchedules = (availableClasses, desiredHours, prioritizeUnlocks, reduceDays) => {
-    const courseCombinations = getCourseCombinations(availableClasses);
-    const schedules = [];
-    courseCombinations.forEach((combo, idx) => {
-        let lectureHours = 0;
-        let days = new Set();
-        let unlockables = 0;
-        let earliest = '23:59';
-        let latest = '00:00';
-        combo.forEach((c) => {
-            lectureHours += c.weeklyHours;
-            unlockables += c.unlockables;
-            days = new Set([...days, ...c.days]);
-            if (c.earliest < earliest) earliest = c.earliest;
-            if (c.latest > latest) latest = c.latest;
-        });
-
-        let score = -Math.abs(desiredHours - lectureHours);
-        if (reduceDays) score += (7 - days.size) * 3.5;
-        if (prioritizeUnlocks) score += unlockables;
-        schedules.push({
-            courseClasses: combo,
-            score: score,
-            hours: lectureHours,
-            days: days.size,
-            earliest: earliest,
-            latest: latest,
-        });
-    });
-    return schedules
-        .sort((a, b) => {
-            return b.score - a.score;
-        })
-        .slice(0, 10);
-};
-
-const getCourseCombinations = (arr = []) => {
-    const combine = (sub, ind) => {
-        let result = [];
-        let i, l, p;
-        for (i = ind, l = arr.length; i < l; i++) {
-            p = sub.slice(0);
-            p.push(arr[i]);
-            result = result.concat(combine(p, i + 1));
-            if (isValidSchedule(p)) result.push(p);
-        }
-        return result;
-    };
-    return combine([], 0);
-};
-
-const isValidSchedule = (courseClasses) => {
-    for (const [i1, c1] of courseClasses.entries()) {
-        for (const [i2, c2] of courseClasses.entries()) {
-            // Same course, different class
-            if (c1.course.id === c2.course.id && i1 !== i2) return false;
-            // Lectures overlap
-            if (c1 !== c2 && !areTimeSlotsCompatible(c1.lectures, c2.lectures)) return false;
-        }
-    }
-    return true;
-};

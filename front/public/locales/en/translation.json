@@ -126,6 +126,8 @@
         "SUN": "Sunday"
     },
     "results": {
+        "loading": "Processing...",
+        "pleaseWait": "We're looking for schedules that best fit your needs! Please wait.",
         "results": "Results",
         "scheduleNumber": "Schedule #{{value}}",
         "recap": "{{days}} days, {{hours}} hours total",

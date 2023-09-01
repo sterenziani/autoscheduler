@@ -57,10 +57,10 @@ function SearchResults(props) {
             <table key={'t-' + id} className="table table-bordered text-center">
                 <thead>
                     <tr className="bg-primary border-dark text-white">
-                        <th className="text-uppercase"></th>
+                        <th className="text-uppercase bg-primary text-white"></th>
                         {DAYS.map((d) => {
                             return (
-                                <th key={'t-' + id + '-d-' + d} className="text-uppercase">
+                                <th key={'t-' + id + '-d-' + d} className="text-uppercase bg-primary text-white">
                                     {t('days.' + d)}
                                 </th>
                             );
@@ -82,8 +82,8 @@ function SearchResults(props) {
                                             >
                                                 <div>
                                                     <div className="col">
-                                                        <b> {c.courseClass.course.id} - {c.courseClass.course.name} </b>
-                                                        <i>&nbsp;({c.courseClass.courseClass})</i>
+                                                        <b> {c.courseClass.course.code} - {c.courseClass.course.name} </b>
+                                                        <i>&nbsp;({c.courseClass.name})</i>
                                                     </div>
                                                     <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} </div>
                                                 </div>
@@ -145,8 +145,8 @@ function SearchResults(props) {
             else {
                 var tables = [];
                 resp.data.forEach((s, idx) => {
-                    const earliest = Number(resp.data[idx].earliest.split(':')[0])
-                    const latest = Number(resp.data[idx].latest.split(':')[0])
+                    const earliest = Number(resp.data[idx].stats.earliestLecture.split(':')[0])
+                    const latest = Number(resp.data[idx].stats.latestLecture.split(':')[0])
                     tables.push(drawTable(getTimeTable(s), earliest-1, latest+1, idx));
                 });
                 setSchedules(resp.data)
@@ -172,10 +172,14 @@ function SearchResults(props) {
         return <ErrorMessage status={FORBIDDEN}/>
     if (loading === true) {
         return (
-            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-                <Spinner animation="border" variant="primary" />
+            <div className="p-5">
+                <Alert variant="primary" className="text-center">
+                    <Alert.Heading>{t("results.loading")}</Alert.Heading>
+                    <p className="mx-4">{t("results.pleaseWait")}</p>
+                    <Spinner animation="border" variant="primary" />
+                </Alert>
             </div>
-        );
+        )
     }
     if (error)
         return <ErrorMessage status={status}/>
@@ -220,15 +224,15 @@ function SearchResults(props) {
                         <p>
                             {
                                 t('results.recap', {
-                                    days: schedules[scheduleIndex].days,
-                                    hours: schedules[scheduleIndex].hours,
+                                    days: schedules[scheduleIndex].stats.totalDays,
+                                    hours: schedules[scheduleIndex].stats.totalHours,
                                 })
                             }
                             <br />
                             {
                                 t('results.timeRange', {
-                                    earliest: schedules[scheduleIndex].earliest,
-                                    latest: schedules[scheduleIndex].latest,
+                                    earliest: schedules[scheduleIndex].stats.earliestLecture,
+                                    latest: schedules[scheduleIndex].stats.latestLecture,
                                 })
                             }
                         </p>
@@ -258,13 +262,13 @@ function SearchResults(props) {
                         {schedules[scheduleIndex].courseClasses.map((c, cidx) => {
                             return (
                                 <li key={'ci-' + cidx} className="list-item col border border-primary py-2">
-                                    {c.course.id} - {c.course.name} ({c.courseClass})
+                                    {c.course.code} - {c.course.name} ({c.name})
                                     <ul>
                                         {c.lectures.map((l, lidx) => {
                                             return (
                                                 <li key={'li-' + lidx}>
                                                     <b> {t('days.' + l.day)}: </b>{' '}
-                                                    {l.startTime}-{l.endTime} ({l.building})
+                                                    {l.startTime}-{l.endTime} ({l.building.code})
                                                 </li>
                                             );
                                         })}
