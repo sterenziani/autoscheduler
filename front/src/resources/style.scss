@@ -185,8 +185,9 @@ $theme-colors: (
     height: 100vh;
 }
 
-table {
-    font-size: 0.95vw;
+.schedule-table {
+    font-size: 0.7vw;
+    width: 100%;
 }
 
 html,

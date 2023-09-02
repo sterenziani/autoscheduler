@@ -206,54 +206,56 @@ function SearchResults(props) {
             <HelmetProvider>
                 <Helmet><title>{t("results.results") +" - AutoScheduler"}</title></Helmet>
             </HelmetProvider>
-            <div className="m-5 text-black">
-                <div className="d-flex justify-content-center align-items-center">
-                    {
-                        scheduleIndex > 0? [
-                            <i
-                                  key="back-e"
-                                  className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big color-primary"
-                                  onClick={onClickLeftArrow}
-                            ></i>,
-                          ]
-                        : [<i key="back-d" className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big disabled color-disabled"></i>]}
-                    <div key={'schedule-' + scheduleIndex} className="mx-3 px-5 text-center">
-                        <h1>
-                            {t('results.scheduleNumber', { value: 1 + scheduleIndex })}
-                        </h1>
-                        <p>
-                            {
-                                t('results.recap', {
-                                    days: schedules[scheduleIndex].stats.totalDays,
-                                    hours: schedules[scheduleIndex].stats.totalHours,
-                                })
-                            }
-                            <br />
-                            {
-                                t('results.timeRange', {
-                                    earliest: schedules[scheduleIndex].stats.earliestLecture,
-                                    latest: schedules[scheduleIndex].stats.latestLecture,
-                                })
-                            }
-                        </p>
+            <div className="m-5 text-black ">
+                <div className="text-center ">
+                    <div className="d-inline-flex flex-wrap justify-content-center align-items-center">
+                        {
+                            scheduleIndex > 0? [
+                                <i
+                                      key="back-e"
+                                      className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big color-primary"
+                                      onClick={onClickLeftArrow}
+                                ></i>,
+                              ]
+                            : [<i key="back-d" className="bi bi-arrow-left-circle-fill btn btn-lg arrow-button-big disabled color-disabled"></i>]}
+                        <div key={'schedule-' + scheduleIndex} className="mx-3 px-5 text-center">
+                            <h1>
+                                {t('results.scheduleNumber', { value: 1 + scheduleIndex })}
+                            </h1>
+                            <p>
+                                {
+                                    t('results.recap', {
+                                        days: schedules[scheduleIndex].stats.totalDays,
+                                        hours: schedules[scheduleIndex].stats.totalHours,
+                                    })
+                                }
+                                <br />
+                                {
+                                    t('results.timeRange', {
+                                        earliest: schedules[scheduleIndex].stats.earliestLecture,
+                                        latest: schedules[scheduleIndex].stats.latestLecture,
+                                    })
+                                }
+                            </p>
+                        </div>
+                        {scheduleIndex < schedules.length - 1 ? [
+                                <i
+                                    key="back-e"
+                                    className="bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big color-primary"
+                                    onClick={onClickRightArrow}
+                                ></i>,
+                              ]
+                            : [
+                                <i
+                                    key="back-d"
+                                    className="bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big disabled color-disabled"
+                                ></i>,
+                            ]}
                     </div>
-                    {scheduleIndex < schedules.length - 1 ? [
-                            <i
-                                key="back-e"
-                                className="bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big color-primary"
-                                onClick={onClickRightArrow}
-                            ></i>,
-                          ]
-                        : [
-                            <i
-                                key="back-d"
-                                className="bi bi-arrow-right-circle-fill btn btn-lg arrow-button-big disabled color-disabled"
-                            ></i>,
-                        ]}
                 </div>
                 {window.innerWidth > 1000 && (
-                    <div className="container my-3 justify-content-center align-items-center">
-                        <div className="table-responsive">{tables[scheduleIndex]}</div>
+                    <div className="d-flex my-3 justify-content-center align-items-center">
+                        <div className="schedule-table">{tables[scheduleIndex]}</div>
                     </div>
                 )}
 
