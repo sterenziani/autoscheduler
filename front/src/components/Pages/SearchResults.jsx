@@ -85,7 +85,7 @@ function SearchResults(props) {
                                                         <b> {c.courseClass.course.code} - {c.courseClass.course.name} </b>
                                                         <i>&nbsp;({c.courseClass.name})</i>
                                                     </div>
-                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} </div>
+                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} ( {c.lecture.building.code} ) </div>
                                                 </div>
                                             </td>
                                         );

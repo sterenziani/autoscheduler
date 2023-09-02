@@ -155,7 +155,6 @@ export default class ScheduleService {
     // Returns all valid combinations of classes belonging to different courses.
     private async getCourseClassCombinations(arr: CourseClass[][]): Promise<CourseClass[][]> {
         if(arr.length === 0) return [[]];
-        if(arr.length === 1) return [arr[0]];
 
         // We will focus on the first array. This will be our "current course" to work on.
         // allCasesOfRest calls this function recursively on all arrays that come after the current course.

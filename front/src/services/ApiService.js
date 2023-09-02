@@ -247,7 +247,6 @@ const getRemainingCoursesProgram = async (user, programId, inputText) => {
 const getSchedules = async (userId, params) => {
     const query = scheduleParamsToQuery(params)
     const scheduleResponse = await simpleApiGetRequest("student/"+userId+"/schedules"+query)
-    console.log(new Date() +"   Got schedules from server.")
     if(scheduleResponse.status != OK)
         return scheduleResponse
     for(const schedule of scheduleResponse.data){
@@ -258,9 +257,6 @@ const getSchedules = async (userId, params) => {
             schedule.courseClasses[i] = courseClassResponse.data
         }
     }
-    //const delay = ms => new Promise(res => setTimeout(res, ms));
-    //await delay(5000);
-    console.log(new Date() +"   Done fetching classes data.")
     return scheduleResponse
 }
 
