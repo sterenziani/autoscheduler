@@ -94,6 +94,38 @@ export class StudentController {
         }
     };
 
+    public getRemainingCourses: RequestHandler = async (req, res, next) => {
+        const userId = req.params.userId;
+        const programId = req.params.programId;
+        const userInfo = req.user;
+
+        const filter = req.query.filter as string | undefined;
+        const page = parseInt(req.query.page as string) ?? undefined;
+        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+
+        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+
+        try {
+            const remainingCourses = await this.studentService.getStudentRemainingCoursesForProgram(userId, programId, filter, page, per_page);
+            const links: Record<string, string> = {};
+            for (const [key, value] of Object.entries(remainingCourses.pagingInfo)) {
+                links[key] = StudentDto.getRemainingCoursesUrl(userId, programId, filter, value, per_page);
+            }
+
+            // getting courses with their respective universities, see if we can cache universities
+            const coursesWithUniversity: { course: Course; university: University }[] = await Promise.all(
+                remainingCourses.collection.map(async (course) => {
+                    return { course, university: await course.getUniversity() };
+                }),
+            );
+            res.status(HTTP_STATUS.OK).links(links).send(
+                coursesWithUniversity.map((cwu) => courseToDto(cwu.course, cwu.university.id)),
+            );
+        } catch (e) {
+            next(e);
+        }
+    };
+
     public addStudentCompletedCourses: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
         const userInfo = req.user;

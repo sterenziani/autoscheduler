@@ -1,3 +1,4 @@
+import { queryParamsStringBuilder } from '../helpers/url.helper';
 import Student from '../models/abstract/student.model';
 import University from '../models/abstract/university.model';
 import Program from '../models/abstract/program.model';
@@ -17,6 +18,21 @@ export const studentToDto = (student: Student, university: University, program: 
         universityUrl: universityUrl,
         programUrl: programUrl,
     };
+};
+
+export const getRemainingCoursesUrl = (
+    studentId: string,
+    programId: string,
+    filter?: string,
+    page?: number,
+    perPage?: number,
+): string => {
+    const params = {
+        filter,
+        page: page ? page.toString() : undefined,
+        per_page: perPage ? perPage.toString() : undefined,
+    };
+    return queryParamsStringBuilder(`student/${studentId}/remaining-courses/${programId}`, params);
 };
 
 type IStudentDto = UserDto.IUserDto & {

@@ -3,8 +3,8 @@ import {
     addChildToParent,
     getChildsFromParent,
     removeChildFromParent,
-    paginateCollection,
 } from '../../../helpers/persistence/memoryPersistence.helper';
+import { paginateCollection } from '../../../helpers/collection.helper';
 import Building from '../../../models/abstract/building.model';
 import University from '../../../models/abstract/university.model';
 import MemoryBuilding from '../../../models/implementations/memory/memoryBuilding.model';

@@ -6,12 +6,10 @@ import {
     getChildsFromParent,
     getParentFromChild,
     clearParentsChildren,
-    paginateCollection,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import Course from '../../abstract/course.model';
 import Program from '../../abstract/program.model';
 import University from '../../abstract/university.model';
-import { PaginatedCollection } from '../../../interfaces/paging.interface';
 
 export default class MemoryProgram extends Program {
     /////////////////// Abstract Methods Implementation ///////////////////
@@ -33,38 +31,22 @@ export default class MemoryProgram extends Program {
         await Promise.all([Promise.all(optionalCourseIds.map(async (cId) => await this.addCourse(cId, true)))]);
     }
 
-    public async getMandatoryCourses(limit?: number, offset?: number): Promise<PaginatedCollection<Course>> {
+    public async getMandatoryCourses(limit?: number, offset?: number): Promise<Course[]> {
         const courses = getChildsFromParent<Course>(
             MEMORY_DATABASE.mandatoryCoursesOfProgram,
             MEMORY_DATABASE.courses,
             this.id,
         );
-
-        // sorting by internalId
-        const compareCourses = (c1: Course, c2: Course) => {
-            if (c1.internalId < c2.internalId) return -1;
-            if (c1.internalId > c2.internalId) return 1;
-            return 0;
-        };
-
-        return paginateCollection(courses, compareCourses, limit, offset);
+        return courses;
     }
 
-    public async getOptionalCourses(limit?: number, offset?: number): Promise<PaginatedCollection<Course>> {
+    public async getOptionalCourses(limit?: number, offset?: number): Promise<Course[]> {
         const courses = getChildsFromParent<Course>(
             MEMORY_DATABASE.optionalCoursesOfProgram,
             MEMORY_DATABASE.courses,
             this.id,
         );
-
-        // sorting by internalId
-        const compareCourses = (c1: Course, c2: Course) => {
-            if (c1.internalId < c2.internalId) return -1;
-            if (c1.internalId > c2.internalId) return 1;
-            return 0;
-        };
-
-        return paginateCollection(courses, compareCourses, limit, offset);
+        return courses;
     }
 
     public async getUniversity(): Promise<University> {

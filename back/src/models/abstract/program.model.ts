@@ -1,7 +1,6 @@
 import Course from './course.model';
 import GenericModel from './generic.model';
 import University from './university.model';
-import { PaginatedCollection } from '../../interfaces/paging.interface';
 
 export default abstract class Program extends GenericModel {
     // Properties
@@ -19,7 +18,7 @@ export default abstract class Program extends GenericModel {
     public abstract addCourse(courseId: string, optional: boolean): Promise<void>;
     public abstract setMandatoryCourses(mandatoryCourseIds: string[]): Promise<void>;
     public abstract setOptionalCourses(mandatoryCourseIds: string[]): Promise<void>;
-    public abstract getMandatoryCourses(limit?: number, offset?: number): Promise<PaginatedCollection<Course>>;
-    public abstract getOptionalCourses(limit?: number, offset?: number): Promise<PaginatedCollection<Course>>;
+    public abstract getMandatoryCourses(limit?: number, offset?: number): Promise<Course[]>;
+    public abstract getOptionalCourses(limit?: number, offset?: number): Promise<Course[]>;
     public abstract getUniversity(): Promise<University>;
 }

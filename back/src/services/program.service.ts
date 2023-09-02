@@ -6,6 +6,7 @@ import UniversityService from './university.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { paginateCollection } from '../helpers/collection.helper';
 import Course from '../models/abstract/course.model';
 
 export default class ProgramService {
@@ -121,13 +122,17 @@ export default class ProgramService {
         const program = await this.dao.getById(id);
         if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
 
-        return await program.getMandatoryCourses(limit, offset);
+        const mandatoryCourses = await program.getMandatoryCourses();
+        const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
+        return paginateCollection(mandatoryCourses, compareCourses);
     }
 
     async getProgramOptionalCourses(id: string, limit?: number, offset?: number): Promise<PaginatedCollection<Course>> {
         const program = await this.dao.getById(id);
         if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
 
-        return await program.getOptionalCourses(limit, offset);
+        const optionalCourses = await program.getOptionalCourses();
+        const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
+        return paginateCollection(optionalCourses, compareCourses);
     }
 }

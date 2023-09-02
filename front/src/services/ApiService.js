@@ -230,18 +230,9 @@ const deleteFinishedCourse = async (studentId, courseId) => {
     return simpleApiDeleteRequest(endpoint, body)
 }
 
-// TODO: Placeholder. This should be a call to API's getRemainingCoursesProgram, filtering results by program and removing those already finished by the user
-const getRemainingCoursesProgram = async (user, programId, inputText) => {
-    // TODO: Fix
-    const mandatoryCoursesResp = await getMandatoryCourses(programId)
-    if(mandatoryCoursesResp.status != OK)
-        return mandatoryCoursesResp
-
-    const optionalCoursesResp = await getOptionalCourses(programId)
-    if(optionalCoursesResp.status != OK)
-        return optionalCoursesResp
-
-    return {status: OK, data: [...mandatoryCoursesResp.data, ...optionalCoursesResp.data]}
+const getRemainingCoursesProgram = async (studentId, programId, inputText) => {
+    const endpoint = "student/"+studentId+"/remaining-courses/"+programId+"?filter="+inputText;
+    return simpleApiGetRequest(endpoint)
 }
 
 const getSchedules = async (userId, params) => {
@@ -585,7 +576,7 @@ const ApiService = {
     getFinishedCourses: getFinishedCourses,
     addFinishedCourse: addFinishedCourse,
     deleteFinishedCourse: deleteFinishedCourse,
-    getRemainingCoursesProgram: getRemainingCoursesProgram, // TODO
+    getRemainingCoursesProgram: getRemainingCoursesProgram,
     getSchedules: getSchedules,
     getUniversities: getUniversities,
 

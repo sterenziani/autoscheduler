@@ -2,8 +2,8 @@ import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistenc
 import {
     addChildToParent,
     getChildsFromParent,
-    paginateCollection,
 } from '../../../helpers/persistence/memoryPersistence.helper';
+import { paginateCollection } from '../../../helpers/collection.helper';
 import CourseClass from '../../../models/abstract/courseClass.model';
 import MemoryCourseClass from '../../../models/implementations/memory/memoryCourseClass.model';
 import CourseClassDao from '../../abstract/courseClass.dao';

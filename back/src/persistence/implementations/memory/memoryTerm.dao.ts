@@ -7,9 +7,9 @@ import MemoryUniversityDao from './memoryUniversity.dao';
 import {
     addChildToParent,
     getChildsFromParent,
-    paginateCollection,
     removeChildFromParent,
 } from '../../../helpers/persistence/memoryPersistence.helper';
+import { paginateCollection } from '../../../helpers/collection.helper';
 import { PaginatedCollection } from '../../../interfaces/paging.interface';
 import { ERRORS } from '../../../constants/error.constants';
 import GenericException from '../../../exceptions/generic.exception';

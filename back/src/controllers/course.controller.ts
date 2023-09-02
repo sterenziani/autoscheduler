@@ -86,10 +86,12 @@ export class CourseController {
             for (const [key, value] of Object.entries(courseClasses.pagingInfo)) {
                 links[key] = CourseDto.getCourseCourseClassesUrl(courseId, termId, filter, value, per_page);
             }
-            res.status(HTTP_STATUS.OK).send(
-                courseClassesWithCourseAndTerm.map((ccwcat) =>
-                    CourseClassDto.courseClassToDto(ccwcat.courseClass, ccwcat.course.id, ccwcat.term.id),
-                ),
+            res.status(HTTP_STATUS.OK)
+                .links(links)
+                .send(
+                    courseClassesWithCourseAndTerm.map((ccwcat) =>
+                        CourseClassDto.courseClassToDto(ccwcat.courseClass, ccwcat.course.id, ccwcat.term.id),
+                    ),
             );
         } catch (e) {
             next(e);

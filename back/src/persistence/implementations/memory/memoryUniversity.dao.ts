@@ -4,7 +4,7 @@ import MemoryUniversity from '../../../models/implementations/memory/memoryUnive
 import UniversityDao from '../../abstract/university.dao';
 import MemoryUserDao from './memoryUser.dao';
 import { PaginatedCollection } from '../../../interfaces/paging.interface';
-import { paginateCollection } from '../../../helpers/persistence/memoryPersistence.helper';
+import { paginateCollection } from '../../../helpers/collection.helper';
 
 export default class MemoryUniversityDao extends UniversityDao {
     private static instance: UniversityDao;

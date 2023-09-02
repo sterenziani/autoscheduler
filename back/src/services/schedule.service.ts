@@ -57,7 +57,7 @@ export default class ScheduleService {
         // STEP 1 - Get mandatory and optional courses in program
         const mandatoryCourses = await program.getMandatoryCourses();
         const optionalCourses = await program.getOptionalCourses();
-        const courses = [...mandatoryCourses.collection, ...optionalCourses.collection];
+        const courses = [...mandatoryCourses, ...optionalCourses];
 
         // STEP 2 - Filter already completed courses and courses the student is not yet enabled to sign up for
         const enabledCourses = await student.getEnabledCourses(program.id);
@@ -95,7 +95,7 @@ export default class ScheduleService {
         const program = await this.programService.getProgram(programId);
         const mandatoryCourses = await program.getMandatoryCourses();
         const optionalCourses = await program.getOptionalCourses();
-        const programCourses = [...mandatoryCourses.collection, ...optionalCourses.collection];
+        const programCourses = [...mandatoryCourses, ...optionalCourses];
 
         // Create map where key is a course ID and values are the courses enabled immediately after completing the key.
         const unlocks: { [courseId: string]: Set<Course> } = {};
@@ -221,7 +221,7 @@ export default class ScheduleService {
             const lectures = await cc.getLectures();
 
             totalImportance += importanceMap[course.id];
-            if(mandatoryCoursesInProgram.collection.includes(course))
+            if(mandatoryCoursesInProgram.includes(course))
                 amountOfMandatoryCourses++;
 
             for(const l of lectures){

@@ -25,7 +25,7 @@ function StudentCourseLog(props) {
     const search = useLocation().search;
 
     const [showAddModal,setShowAddModal] = useState(false);
-    const [selectedProgram,setSelectedProgram] = useState(student.program.id);
+    const [selectedProgramId,setselectedProgramId] = useState(student.program.id);
     const [courseToAdd,setCourseToAdd] = useState();
 
     const readPageInSearchParams = () => {
@@ -80,7 +80,7 @@ function StudentCourseLog(props) {
     }
 
     const onChangePrograms = (programId) => {
-        setSelectedProgram(programId)
+        setselectedProgramId(programId)
         setCourseToAdd()
     }
 
@@ -119,18 +119,22 @@ function StudentCourseLog(props) {
 
     const loadRemainingCoursesOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getRemainingCoursesProgram(student, selectedProgram, inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
-                    callback([])
-                } else {
-                    callback(resp.data)
-                }
-            })
+            if(!inputValue){
+                callback([])
+            } else {
+                ApiService.getRemainingCoursesProgram(student.id, selectedProgramId, inputValue).then((resp) => {
+                    let findError = null;
+                    if (resp && resp.status && resp.status !== OK)
+                        findError = resp.status;
+                    if (findError) {
+                        setError(true)
+                        setStatus(findError)
+                        callback([])
+                    } else {
+                        callback(resp.data)
+                    }
+                })
+            }
         })
     }
 
@@ -170,7 +174,7 @@ function StudentCourseLog(props) {
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}
                             />
-                            <AsyncSelect key={selectedProgram}
+                            <AsyncSelect key={selectedProgramId}
                                 aria-label="course-select"
                                 className="text-black m-2"
                                 placeholder={t('forms.course')}
@@ -179,7 +183,7 @@ function StudentCourseLog(props) {
                                 noOptionsMessage={(inputValue) => {
                                     if(inputValue.inputValue.length > 0)
                                         return t('selectNoResults')
-                                    return t('modal.noRemainingCoursesProgram')
+                                    return t('modal.inputTextToSearch')
                                 }}
                                 getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}

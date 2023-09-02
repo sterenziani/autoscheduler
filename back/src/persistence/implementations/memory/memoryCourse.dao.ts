@@ -2,8 +2,8 @@ import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistenc
 import {
     addChildToParent,
     getChildsFromParent,
-    paginateCollection,
 } from '../../../helpers/persistence/memoryPersistence.helper';
+import { paginateCollection } from '../../../helpers/collection.helper';
 import Course from '../../../models/abstract/course.model';
 import MemoryCourse from '../../../models/implementations/memory/memoryCourse.model';
 import CourseDao from '../../abstract/course.dao';
@@ -72,13 +72,7 @@ export default class MemoryCourseDao extends CourseDao {
             );
         }
 
-        // sorting by internalId
-        const compareCourses = (c1: Course, c2: Course) => {
-            if (c1.internalId < c2.internalId) return -1;
-            if (c1.internalId > c2.internalId) return 1;
-            return 0;
-        };
-
+        const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
         return paginateCollection(courses, compareCourses, limit, offset);
     }
 }

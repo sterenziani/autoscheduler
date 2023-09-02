@@ -8,6 +8,8 @@ import ProgramService from './program.service';
 import UserService from './user.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
+import { PaginatedCollection } from '../interfaces/paging.interface';
+import { paginateCollection } from '../helpers/collection.helper';
 
 export default class StudentService {
     private static instance: StudentService;
@@ -43,6 +45,26 @@ export default class StudentService {
     async getStudentCompletedCourses(studentId: string): Promise<Course[]> {
         const student = await this.dao.getById(studentId);
         return await student.getCompletedCourses();
+    }
+
+    async getStudentRemainingCoursesForProgram(
+        studentId: string,
+        programId: string,
+        text?: string,
+        limit?: number,
+        offset?: number,
+    ): Promise<PaginatedCollection<Course>>  {
+        const student = await this.dao.getById(studentId);
+        const finishedCourses = await student.getCompletedCourses();
+
+        const program = await this.programService.getProgram(programId);
+        const mandatoryCourses = await program.getMandatoryCourses();
+        const optionalCourses = await program.getOptionalCourses();
+        let courses = [...mandatoryCourses, ...optionalCourses];
+
+        courses = courses.filter(c => !finishedCourses.includes(c) && (!text || c.name.toLowerCase().includes(text) || c.internalId.toLowerCase().includes(text)));
+        const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
+        return paginateCollection(courses, compareCourses, limit, offset);
     }
 
     async createStudent(
