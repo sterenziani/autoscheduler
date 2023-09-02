@@ -210,6 +210,7 @@ function EditCoursePage(props) {
                                 placeholder={t('register.program')}
                                 cacheOptions
                                 defaultOptions
+                                noOptionsMessage={() => t('selectNoResults')}
                                 getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
                                 loadOptions={loadProgramOptions}

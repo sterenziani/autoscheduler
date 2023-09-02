@@ -185,7 +185,7 @@ function SearchResults(props) {
         return <ErrorMessage status={status}/>
     if (params == null)
         return <ErrorMessage message={"search.invalidParams"}/>
-    if(schedules.length === 0)
+    if(schedules.length === 0 || schedules[0].courseClasses.length == 0)
         return (
             <React.Fragment>
                 <HelmetProvider>

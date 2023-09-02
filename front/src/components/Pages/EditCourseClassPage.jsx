@@ -246,7 +246,7 @@ function EditCourseClassPage(props) {
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true)
         for(const l of lectures){
-            if(l.startTime > l.endTime){
+            if(l.startTime >= l.endTime){
                 setTimeError(true)
                 setSubmitting(false)
                 return
