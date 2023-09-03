@@ -38,7 +38,7 @@ function EditCourseClassPage(props) {
     const [buildings, setBuildings] = useState();
 
     const [selectedCourse, setSelectedCourse] = useState();
-    const [selectedTerm, setSelectedTerm] = useState();
+    const [selectedTermId, setselectedTermId] = useState();
     const [className, setClassName] = useState();
     const [lectures, setLectures] = useState([]);
 
@@ -91,7 +91,7 @@ function EditCourseClassPage(props) {
             else{
                 setCourseClass(resp.data)
                 setSelectedCourse(resp.data.course)
-                setSelectedTerm(resp.data.term.id)
+                setselectedTermId(resp.data.term.id)
                 setClassName(resp.data.courseClass)
                 setLectures(resp.data.lectures)
             }
@@ -132,11 +132,11 @@ function EditCourseClassPage(props) {
                     setStatus(findError)
                 }
                 else{
-                  setSelectedTerm(resp.data.id)
+                  setselectedTermId(resp.data.id)
                 }
             })
         } else {
-            setSelectedTerm(terms[0].id)
+            setselectedTermId(terms[0].id)
         }
         setLoading(false)
     }
@@ -196,7 +196,7 @@ function EditCourseClassPage(props) {
     }
 
     const onChangeTerm = (e) => {
-        setSelectedTerm(e.target.value)
+        setselectedTermId(e.target.value)
     }
 
     const onChangeDay = (e) => {
@@ -253,11 +253,11 @@ function EditCourseClassPage(props) {
             }
         }
 
-        if (selectedCourse && selectedTerm && values.className)
+        if (selectedCourse && selectedTermId && values.className)
         {
-            const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTerm, values.className, lectures)
+            const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTermId, values.className, lectures)
             if(resp.status === OK || resp.status === CREATED)
-                navigate("/courses/"+selectedCourse.id);
+                navigate("/courses/"+selectedCourse.id+"?termId="+selectedTermId);
             else{
                 setError(resp.data.code)
                 setStatus(resp.status)
@@ -351,7 +351,7 @@ function EditCourseClassPage(props) {
                         </div>
                         <div className="col-9 text-center">
                         {
-                            <Form.Select value={selectedTerm} onChange={onChangeTerm}>
+                            <Form.Select value={selectedTermId} onChange={onChangeTerm}>
                                 {terms && terms.map((c) => (
                                     <option key={c.id} value={c.id}> {c.code + ' - ' + c.name}</option>
                                 ))}

@@ -44,7 +44,7 @@ function CourseClassesList(props) {
     const changePage = (newPage) => {
         setPage(newPage)
         loadClasses(newPage)
-        navigate("/courses/"+course.id+"?page="+newPage)
+        navigate("/courses/"+course.id+"?termId="+term.id+"&page="+newPage)
     }
 
     const loadClasses = (page) => {

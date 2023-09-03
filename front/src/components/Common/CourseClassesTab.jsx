@@ -5,9 +5,11 @@ import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 import CourseClassesList from '../Lists/CourseClassesList';
 import ErrorMessage from '../Common/ErrorMessage';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function CourseClassesTab(props) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -15,6 +17,12 @@ function CourseClassesTab(props) {
     const [selectedTerm, setSelectedTerm] = useState(null);
     const user = props.user;
     const course = props.course;
+    const search = useLocation().search
+
+    const readTermInSearchParams = () => {
+        const params = new URLSearchParams(search)
+        return params.get('termId')
+    }
 
     useEffect( () => {
         ApiService.getTerms(user.id).then((resp) => {
@@ -27,7 +35,8 @@ function CourseClassesTab(props) {
             }
             else{
                 setTerms(resp.data)
-                setSelectedTerm(resp.data[0])
+                const requestedTerm = resp.data.find(t => t.id == readTermInSearchParams())
+                setSelectedTerm(requestedTerm? requestedTerm:resp.data[0])
             }
             setLoading(false)
         });
@@ -36,6 +45,7 @@ function CourseClassesTab(props) {
 
     const onChangeTerms = (e) => {
         // eslint-disable-next-line
+        navigate("/courses/"+course.id+"?termId="+e.target.value)
         setSelectedTerm(terms.filter((t) => t.id == e.target.value)[0])
     }
 
