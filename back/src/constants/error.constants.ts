@@ -97,6 +97,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         PROGRAM: { status: HTTP_STATUS.NOT_FOUND, code: 'PROGRAM_NOT_FOUND', message: 'Program not found.' },
         LECTURE: { status: HTTP_STATUS.NOT_FOUND, code: 'LECTURE_NOT_FOUND', message: 'Lecture not found.' },
         SCHEDULE: { status: HTTP_STATUS.NOT_FOUND, code: 'SCHEDULE_NOT_FOUND', message: 'Schedule not found.' },
+        RESET_TOKEN: { status: HTTP_STATUS.NOT_FOUND, code: 'RESET_TOKEN_NOT_FOUND', message: 'Reset token not found.' },
     },
     CONFLICT: {
         GENERAL: { status: HTTP_STATUS.CONFLICT, code: 'CONFLICT', message: 'Conflict.' },

@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 import UserAuthService from '../services/auth.service';
+import UserService from '../services/user.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 import { HTTP_STATUS } from '../constants/http.constants';

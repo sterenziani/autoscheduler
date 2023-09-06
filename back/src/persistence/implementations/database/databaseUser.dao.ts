@@ -1,4 +1,5 @@
 import { ROLE } from '../../../constants/general.constants';
+import { ERRORS } from '../../../constants/error.constants';
 import GenericException from '../../../exceptions/generic.exception';
 import {
     createDocument,
@@ -9,6 +10,7 @@ import {
 import User from '../../../models/abstract/user.model';
 import DatabaseUser, { UserDocument, UserModel } from '../../../models/implementations/database/databaseUser.model';
 import UserDao from '../../abstract/user.dao';
+import ResetToken from '../../../models/abstract/resetToken.model';
 
 // TODO: see if transactions matter
 export default class DatabaseUserDao extends UserDao {
@@ -44,6 +46,25 @@ export default class DatabaseUserDao extends UserDao {
     public async findByEmail(email: string): Promise<User | undefined> {
         const maybeUser = await getDocumentByQuery<UserDocument>(UserModel, { email: email }, true);
         return maybeUser ? this.documentToModel(maybeUser) : undefined;
+    }
+
+    // TODO: Implement
+    public async createResetToken(userId: string, expirationDate: Date): Promise<ResetToken> {
+        return {id: "", expirationDate: expirationDate, isCurrentlyValid:() => true, getUser: () => {throw new GenericException(ERRORS.NOT_FOUND.USER)}};
+    }
+
+    // TODO: Implement
+    public async getResetToken(token: string): Promise<ResetToken | undefined> {
+        return undefined;
+    }
+
+    // TODO: Implement
+    public async findByResetToken(tokenId: string): Promise<User | undefined> {
+        return undefined;
+    }
+
+    // TODO: Implement
+    public async deleteResetToken(userId: string): Promise<void> {
     }
 
     // Private helper methods

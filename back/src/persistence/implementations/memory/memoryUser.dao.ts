@@ -5,6 +5,8 @@ import GenericException from '../../../exceptions/generic.exception';
 import User from '../../../models/abstract/user.model';
 import MemoryUser from '../../../models/implementations/memory/memoryUser.model';
 import UserDao from '../../abstract/user.dao';
+import ResetToken from '../../../models/abstract/resetToken.model';
+import MemoryResetToken from '../../../models/implementations/memory/memoryResetToken.model';
 import { v4 as uuidv4 } from 'uuid';
 
 export default class MemoryUserDao extends UserDao {
@@ -41,5 +43,31 @@ export default class MemoryUserDao extends UserDao {
             if (value.email == email) return value;
         }
         return undefined;
+    }
+
+    public async createResetToken(userId: string, expirationDate: Date): Promise<ResetToken> {
+        const newToken = new MemoryResetToken(uuidv4(), expirationDate);
+        MEMORY_DATABASE.resetTokens.set(userId, newToken);
+        return newToken;
+    }
+
+    public async getResetToken(token: string): Promise<ResetToken | undefined> {
+        for (const [key, value] of MEMORY_DATABASE.resetTokens) {
+            if (value.id == token && value.isCurrentlyValid())
+                return value;
+        }
+        return undefined;
+    }
+
+    public async findByResetToken(tokenId: string): Promise<User | undefined> {
+        for (const [key, value] of MEMORY_DATABASE.resetTokens) {
+            if (value.id == tokenId && value.isCurrentlyValid())
+                return await this.findById(key);
+        }
+        return undefined;
+    }
+
+    public async deleteResetToken(userId: string): Promise<void> {
+        MEMORY_DATABASE.resetTokens.delete(userId);
     }
 }

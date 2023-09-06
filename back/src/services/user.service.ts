@@ -1,4 +1,5 @@
 import User from '../models/abstract/user.model';
+import ResetToken from '../models/abstract/resetToken.model';
 import UserDao from '../persistence/abstract/user.dao';
 import UserDaoFactory from '../factories/userDao.factory';
 import { hashPassword } from '../helpers/auth.helper';
@@ -46,6 +47,41 @@ export default class UserService {
 
         const hashedPassword = hashPassword(password);
         return this.dao.create(email, hashedPassword, role);
+    }
+
+    async createResetToken(email: string): Promise<void> {
+        if (!(await this.dao.findByEmail(email))) throw new GenericException(ERRORS.NOT_FOUND.USER);
+        const user = await this.getUserByEmail(email);
+        if (!user) throw new GenericException(new GenericException(ERRORS.NOT_FOUND.USER));
+
+        var expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 2); // Valid for 2 days
+
+        const token = await this.dao.createResetToken(user.id, expirationDate);
+	    // TODO: emailService.sendAccountRecoveryEmail(user.email, token.id);
+    }
+
+    async getUserWithResetToken(token: string): Promise<User> {
+        const user = await this.dao.findByResetToken(token);
+        if (!user) throw new GenericException(new GenericException(ERRORS.NOT_FOUND.USER));
+        return user;
+    }
+
+    async getResetToken(token: string): Promise<ResetToken> {
+        const maybeToken = await this.dao.getResetToken(token);
+        if (!maybeToken) throw new GenericException(new GenericException(ERRORS.NOT_FOUND.RESET_TOKEN));
+        return maybeToken;
+    }
+
+    async changePassword(userId: string, password: string): Promise<User> {
+        const user = await this.dao.findById(userId);
+        if (!user) throw new GenericException(new GenericException(ERRORS.NOT_FOUND.USER));
+
+        user.password = hashPassword(password);
+        await this.dao.set(user)
+
+        await this.dao.deleteResetToken(user.id)
+        return user;
     }
 
     // private functions

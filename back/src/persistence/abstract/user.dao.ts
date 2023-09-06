@@ -2,6 +2,7 @@ import { ERRORS } from '../../constants/error.constants';
 import { ROLE } from '../../constants/general.constants';
 import GenericException from '../../exceptions/generic.exception';
 import User from '../../models/abstract/user.model';
+import ResetToken from '../../models/abstract/resetToken.model';
 import GenericDao from './generic.dao';
 
 export default abstract class UserDao extends GenericDao<User> {
@@ -13,6 +14,10 @@ export default abstract class UserDao extends GenericDao<User> {
     // Abstract Methods
     public abstract create(email: string, password: string, role: ROLE): Promise<User>;
     public abstract findByEmail(email: string): Promise<User | undefined>;
+    public abstract createResetToken(userId: string, expirationDate: Date): Promise<ResetToken>;
+    public abstract getResetToken(token: string): Promise<ResetToken | undefined>;
+    public abstract findByResetToken(tokenId: string): Promise<User | undefined>;
+    public abstract deleteResetToken(userId: string): Promise<void>;
 
     // Public Methods implementations
     public async getByEmail(email: string): Promise<User> {

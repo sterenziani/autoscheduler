@@ -12,6 +12,7 @@ import { StudentRoutes } from './routes/student.routes';
 import { TermRoutes } from './routes/term.routes';
 import { UniversityRoutes } from './routes/university.routes';
 import { UniversitiesRoutes } from './routes/universities.routes';
+import { UsersRoutes } from './routes/users.routes';
 import UserAuthService from './services/auth.service';
 import BuildingService from './services/building.service';
 import CourseService from './services/course.service';
@@ -90,6 +91,7 @@ class App {
         this.app.use('/api/term', new TermRoutes().router);
         this.app.use('/api/university', new UniversityRoutes().router);
         this.app.use('/api/universities', new UniversitiesRoutes().router);
+        this.app.use('/api/users', new UsersRoutes().router);
     }
 }
 
