@@ -233,7 +233,7 @@
     "changePassword": {
         "title": "Change password",
         "forUser": "Enter the new password to use by {{email}}",
-        "notFound": "The requested token was not found, please make sure you've accessed the AutoScheduler password reset link provided by the latest email sent.",
+        "notFound": "El token solicitado no se encontró. Asegúrese de que haya accedido al link en el último email enviado por AutoScheduler dentro del plazo establecido en el mismo.",
         "submit": "Reset password"
     },
     "emptyList": "No hay elementos en esta lista.",

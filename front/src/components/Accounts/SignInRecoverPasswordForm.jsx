@@ -22,16 +22,15 @@ function SignInRecoverPasswordForm(props) {
     const [emailNotFound, setEmailNotFound] = useState(false);
 
     const onSubmit = (values, { setSubmitting }) => {
-        console.log('Sending email to '+ values.email);
-        ApiService.requestPasswordChangeToken(values.email).then((data) => {
-            if (data && data.status === CREATED){
+        ApiService.requestPasswordChangeToken(values.email).then((resp) => {
+            if (resp && resp.status === CREATED){
                 setEmailNotFound(false)
                 setBadConnection(false)
                 setFinished(true)
             }
             else {
                 setSubmitting(false);
-                if (data && data.status === NOT_FOUND){
+                if (resp && resp.status === NOT_FOUND){
                     setEmailNotFound(true)
                     setBadConnection(false)
                 }

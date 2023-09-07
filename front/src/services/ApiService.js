@@ -167,20 +167,19 @@ const getActiveUser = () => {
     return AuthService.getUserStore()
 }
 
-// TODO: Implement me
-const requestPasswordChangeToken = async (username) => {
-    try {
-        // Hacer algo
-        return { status: CREATED };
-    } catch (e) {
-        if (e.response) return { status: e.response.status };
-        else return { status: TIMEOUT };
-    }
+const requestPasswordChangeToken = async (email) => {
+    const endpoint = "users/token"
+    const payload = {'email': email}
+    return simpleApiPostRequest(endpoint, payload)
 }
 
-// TODO: Implement me
+const getPasswordChangeToken = async (token) => {
+    const endpoint = "users/token/"+token
+    return simpleApiGetRequest(endpoint)
+}
+
 const changePassword = async (userId, token, newPassword) => {
-    const endpoint = "users/"+userId+"/password";
+    const endpoint = "users/"+userId+"/password"
     const payload = {'token': token, 'password': newPassword}
     return simpleApiPutRequest(endpoint, payload)
 }
@@ -568,9 +567,9 @@ const ApiService = {
     login: login,
     logout: logout,
     getActiveUser: getActiveUser,
-    requestPasswordChangeToken: requestPasswordChangeToken, // TODO
-    changePassword: changePassword, // TODO
-    requestPasswordChangeToken:requestPasswordChangeToken, // TODO
+    requestPasswordChangeToken: requestPasswordChangeToken,
+    getPasswordChangeToken: getPasswordChangeToken,
+    changePassword: changePassword,
 
     getStudent: getStudent,
     getFinishedCourses: getFinishedCourses,

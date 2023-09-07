@@ -76,6 +76,7 @@ export default class UserService {
     async changePassword(userId: string, password: string): Promise<User> {
         const user = await this.dao.findById(userId);
         if (!user) throw new GenericException(new GenericException(ERRORS.NOT_FOUND.USER));
+        if (!this.isValidPassword(password)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PASSWORD);
 
         user.password = hashPassword(password);
         await this.dao.set(user)
