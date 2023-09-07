@@ -62,7 +62,7 @@
         "submit": "Sign In",
         "forgotPassword": "Forgot your password?",
         "recoverPasswordDescription": "Type in your email address and we'll help you recover your account.",
-        "emailSent": "An email has been sent to your inbox with instructions on what to do next. The message may take a while to deliver.",
+        "emailSent": "An email has been sent to your inbox with instructions on what to do next. The message may take a while to deliver. Make sure to check your Spam inbox as well.",
         "emailNotFound": "The provided email address is not associated to any AutoScheduler account.",
         "errors": {
             "loginFailed": "Incorrect email and/or password.",

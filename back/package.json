@@ -37,6 +37,7 @@
     }
   },
   "dependencies": {
+    "@types/nodemailer": "^6.4.9",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -47,6 +48,7 @@
     "mongoose": "^7.1.1",
     "mongoose-lean-virtuals": "^0.9.1",
     "neo4j-driver": "^5.8.0",
+    "nodemailer": "^6.9.5",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

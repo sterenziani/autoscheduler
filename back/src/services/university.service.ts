@@ -2,6 +2,7 @@ import UniversityDaoFactory from '../factories/universityDao.factory';
 import University from '../models/abstract/university.model';
 import UniversityDao from '../persistence/abstract/university.dao';
 import UserService from './user.service';
+import EmailService from './email.service';
 import { ROLE } from '../constants/general.constants';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
@@ -13,6 +14,7 @@ export default class UniversityService {
 
     private dao: UniversityDao;
     private userService!: UserService;
+    private emailService!: EmailService;
 
     static getInstance(): UniversityService {
         if (!UniversityService.instance) {
@@ -27,6 +29,7 @@ export default class UniversityService {
 
     init() {
         this.userService = UserService.getInstance();
+        this.emailService = EmailService.getInstance();
     }
 
     // public methods
@@ -43,7 +46,9 @@ export default class UniversityService {
         // create user
         const user = await this.userService.createUser(email, password, ROLE.UNIVERSITY);
         // create University
-        return await this.dao.create(user.id, name, this.universityDefaultVerified);
+        const university = await this.dao.create(user.id, name, this.universityDefaultVerified);
+        this.emailService.sendUniversityWelcomeEmail(university.email);
+        return university;
     }
 
     async getUniversitiesByText(

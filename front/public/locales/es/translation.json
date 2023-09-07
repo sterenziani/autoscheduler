@@ -62,7 +62,7 @@
         "submit": "Iniciar Sesión",
         "forgotPassword": "¿Olvidó su contraseña?",
         "recoverPasswordDescription": "Ingrese su dirección de email y lo ayudaremos a recuperar su cuenta.",
-        "emailSent": "Se ha enviado un email a su casilla con instrucciones para recuperar su cuenta. El mensaje puede demorar en llegar.",
+        "emailSent": "Se ha enviado un email a su casilla con instrucciones para recuperar su cuenta. El mensaje puede demorar en llegar. Asegúrese también de revisar su casilla de Spam.",
         "emailNotFound": "La dirección de email ingresada no corresponde a ninguna cuenta de AutoScheduler.",
         "errors": {
             "loginFailed": "Email y/o contraseña incorrecto.",
