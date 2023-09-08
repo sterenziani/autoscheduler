@@ -1,5 +1,6 @@
 import User from '../models/abstract/user.model';
 import ResetToken from '../models/abstract/resetToken.model';
+import EmailService from './email.service';
 import UserDao from '../persistence/abstract/user.dao';
 import UserDaoFactory from '../factories/userDao.factory';
 import { hashPassword } from '../helpers/auth.helper';
@@ -12,6 +13,7 @@ export default class UserService {
     private readonly passwordMinLength: number = 8;
 
     private dao: UserDao;
+    private emailService!: EmailService;
 
     static getInstance(): UserService {
         if (!UserService.instance) {
@@ -25,7 +27,7 @@ export default class UserService {
     }
 
     init() {
-        // init services if required
+        this.emailService = EmailService.getInstance();
     }
 
     // public methods
@@ -58,7 +60,10 @@ export default class UserService {
         expirationDate.setDate(expirationDate.getDate() + 2); // Valid for 2 days
 
         const token = await this.dao.createResetToken(user.id, expirationDate);
-	    // TODO: emailService.sendAccountRecoveryEmail(user.email, token.id);
+
+        // TODO: Define base URL
+        const resetLink = process.env.BASE_URL+"/reset/"+token.id;
+        this.emailService.sendPasswordResetEmail(email, resetLink);
     }
 
     async getUserWithResetToken(token: string): Promise<User> {

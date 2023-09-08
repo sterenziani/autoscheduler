@@ -231,8 +231,8 @@
         }
     },
     "changePassword": {
-        "title": "Change password",
-        "forUser": "Enter the new password to use by {{email}}",
+        "title": "Cambiar contraseña",
+        "forUser": "Ingrese la nueva contraseña que le gustaría usar.",
         "notFound": "El token solicitado no se encontró. Asegúrese de que haya accedido al link en el último email enviado por AutoScheduler dentro del plazo establecido en el mismo.",
         "submit": "Reset password"
     },

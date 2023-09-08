@@ -47,7 +47,7 @@ export default class UniversityService {
         const user = await this.userService.createUser(email, password, ROLE.UNIVERSITY);
         // create University
         const university = await this.dao.create(user.id, name, this.universityDefaultVerified);
-        this.emailService.sendUniversityWelcomeEmail(university.email);
+        this.emailService.sendUniversityWelcomeEmail(university.email, university.name);
         return university;
     }
 

@@ -60,7 +60,7 @@ function SignInRecoverPasswordForm(props) {
                 {finished
                     ? [
                           <Modal.Body key="answer-body" className="text-black">
-                              <p key="password-email-sent" className="px-5 pt-3">
+                              <p key="password-email-sent" className="px-5 pt-3 text-center">
                                   {t('login.emailSent')}
                               </p>
                           </Modal.Body>,

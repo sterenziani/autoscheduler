@@ -13,6 +13,8 @@ export default class EmailService {
 
     constructor() {
         const nodemailer = require("nodemailer");
+        const path = require("path");
+        const hbs = require("nodemailer-express-handlebars");
         this.transporter = nodemailer.createTransport({
             host: "smtp.gmail.com", // SMTP server address (usually mail.your-domain.com)
             port: 465, // Port for SMTP (usually 465)
@@ -23,12 +25,22 @@ export default class EmailService {
                 //  For better security, use environment variables set on the server for these values when deploying
             },
         });
+        const handlebarOptions = {
+            viewEngine: {
+                extName: ".handlebars",
+                partialsDir: path.resolve('./resources/emailTemplates'),
+                defaultLayout: false,
+            },
+            viewPath: path.resolve('./resources/emailTemplates'),
+            extName: ".handlebars",
+        }
+        this.transporter.use('compile', hbs(handlebarOptions));
     }
 
     // public methods
     async sendEmail(destination: string, subject: string, html: string): Promise<void> {
         try {
-            let info = await this.transporter.sendMail({
+            await this.transporter.sendMail({
                 from: process.env.EMAIL_USER,
                 to: destination,
                 subject: subject,
@@ -39,9 +51,31 @@ export default class EmailService {
         }
     }
 
-    // TODO: Translate body and subject
-    async sendUniversityWelcomeEmail(destination: string): Promise<void> {
-        const body = "<h1>Thank you for joining AutoScheduler!</h1><p>Currently your university is not verified. To make yourself visible to your students, please contact us at "+process.env.EMAIL_VERIFICATION_ADDRESS +" attaching proof that you represent the university.</p>"
-        this.sendEmail(destination, "Welcome to AutoScheduler!", body);
+    async sendEmailTemplate(destination: string, subject: string, template: string, context: any): Promise<void> {
+        var mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: destination,
+            subject: subject,
+            template: template,
+            context: context
+        }
+        try {
+            await this.transporter.sendMail(mailOptions);
+        } catch(err) {
+            console.log(err);
+        }
+    }
+
+    // TODO: Translate bodies and subjects
+    async sendUniversityWelcomeEmail(destination: string, universityName: string): Promise<void> {
+        const template = "welcome";
+        const context = { verificationEmail: process.env.EMAIL_VERIFICATION_ADDRESS, universityName: universityName };
+        this.sendEmailTemplate(destination, "Welcome to AutoScheduler!", template, context);
+    }
+
+    async sendPasswordResetEmail(destination: string, resetLink: string): Promise<void> {
+        const template = "resetPassword";
+        const context = { link: resetLink};
+        this.sendEmailTemplate(destination, "Reset your AutoScheduler Password", template, context);
     }
 }

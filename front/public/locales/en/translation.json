@@ -232,7 +232,7 @@
     },
     "changePassword": {
         "title": "Change password",
-        "forUser": "Enter the new password to use by {{email}}",
+        "forUser": "Enter the new password you'd like to use.",
         "notFound": "The requested token was not found, please make sure you've accessed the AutoScheduler password reset link provided by the latest email sent within the time frame specified within it.",
         "submit": "Reset password"
     },
