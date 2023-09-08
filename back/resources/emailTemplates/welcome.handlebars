@@ -3,7 +3,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://cdn.jsdelivr.net/npm/handlebars-i18n@1.6.2/dist/handlebars-i18n.min.js"></script>
     <title>Document</title>
+
 
     <style>
   		.title-box{
@@ -27,10 +29,10 @@
   <body>
       <div>
           <div class="title-box">
-              <h1>Welcome to AutoScheduler!</h1>
+              <h1>{{__ "welcome" lng=locale}}</h1>
           </div>
           <div class="body-box">
-              <p>Thank you for joining AutoScheduler! To make your university visible to your students, please write to us at {{verificationEmail}} with proof that you represent {{universityName}} so we can begin the verification process.</p>
+              <p>{{__ "howToVerify" verificationEmail=verificationEmail universityName=universityName lng=locale}}</p>
           </div>
       </div>
   </body>

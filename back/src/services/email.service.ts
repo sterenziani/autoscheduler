@@ -1,5 +1,31 @@
 import nodemailer from 'nodemailer';
 
+const translations: {[key:string]:any} = {
+    resources : {
+        "en" : {
+            translation : {
+                "welcome": "Welcome to AutoScheduler!",
+                "howToVerify": "Thank you for joining AutoScheduler! To make your university visible to your students, please write to us at {{verificationEmail}} with proof that you represent {{universityName}} so we can begin the verification process.",
+                "resetYourPasswordSubject": "Reset your AutoScheduler password",
+                "resetYourPassword": "Reset Your Password",
+                "clickLinkBelow": "Did you forget your password? If so, just click on the link below to pick a new password! Do keep in mind the link will expire in 3 days.",
+                "clickHereToReset": "Click here to reset your password."
+            }
+        },
+        "es" : {
+            translation: {
+                "welcome": "¡Bienvenido a AutoScheduler!",
+                "howToVerify": "Gracias por unirse a AutoScheduler. Para hacer que su universidad sea visible a sus estudiantes, por favor escríbanos a {{verificationEmail}} con documentación que demuestre su vínculo con {{universityName}} para que podamos comenzar el proceso de verificación.",
+                "resetYourPasswordSubject": "Restablezca su contraseña de AutoScheduler",
+                "resetYourPassword": "Restablezca su Contraseña",
+                "clickLinkBelow": "¿Olvidó su contraseña? Si es así, haga click sobre el siguiente link para elegir una nueva contraseña. Tenga en cuenta que este link expirará en 3 días.",
+                "clickHereToReset": "Haga click aquí para cambiar su contraseña."
+            }
+        }
+    },
+    lng : "en"
+}
+
 export default class EmailService {
     private static instance: EmailService;
     private transporter: nodemailer.Transporter;
@@ -15,6 +41,7 @@ export default class EmailService {
         const nodemailer = require("nodemailer");
         const path = require("path");
         const hbs = require("nodemailer-express-handlebars");
+
         this.transporter = nodemailer.createTransport({
             host: "smtp.gmail.com", // SMTP server address (usually mail.your-domain.com)
             port: 465, // Port for SMTP (usually 465)
@@ -25,6 +52,13 @@ export default class EmailService {
                 //  For better security, use environment variables set on the server for these values when deploying
             },
         });
+
+        const i18next = require("i18next");
+        i18next.init(translations);
+
+        const HandlebarsI18n = require("handlebars-i18n");
+        HandlebarsI18n.init();
+
         const handlebarOptions = {
             viewEngine: {
                 extName: ".handlebars",
@@ -66,16 +100,25 @@ export default class EmailService {
         }
     }
 
-    // TODO: Translate bodies and subjects
-    async sendUniversityWelcomeEmail(destination: string, universityName: string): Promise<void> {
+    async sendUniversityWelcomeEmail(destination: string, universityName: string, locale: string|undefined): Promise<void> {
         const template = "welcome";
-        const context = { verificationEmail: process.env.EMAIL_VERIFICATION_ADDRESS, universityName: universityName };
-        this.sendEmailTemplate(destination, "Welcome to AutoScheduler!", template, context);
+        const emailLanguage = (locale && translations.resources[locale])? locale:translations.lng;
+        const subject = translations.resources[emailLanguage].translation.welcome;
+        
+        const context = {
+            verificationEmail: process.env.EMAIL_VERIFICATION_ADDRESS,
+            universityName: universityName,
+            locale: emailLanguage
+        };
+        this.sendEmailTemplate(destination, subject, template, context);
     }
 
-    async sendPasswordResetEmail(destination: string, resetLink: string): Promise<void> {
+    async sendPasswordResetEmail(destination: string, internalResetPath: string, locale: string|undefined): Promise<void> {
         const template = "resetPassword";
-        const context = { link: resetLink};
-        this.sendEmailTemplate(destination, "Reset your AutoScheduler Password", template, context);
+        const emailLanguage = (locale && translations.resources[locale])? locale:translations.lng;
+        const subject = translations.resources[emailLanguage].translation.resetYourPasswordSubject;
+
+        const context = { link: process.env.BASE_URL+"/"+internalResetPath, locale: emailLanguage };
+        this.sendEmailTemplate(destination, subject, template, context);
     }
 }

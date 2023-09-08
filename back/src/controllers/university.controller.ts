@@ -58,9 +58,10 @@ export class UniversityController {
         const email = req.body.email as string;
         const password = req.body.password as string;
         const name = req.body.name as string;
+        const locale = req.headers['accept-language'];
 
         try {
-            const university: University = await this.universityService.createUniversity(email, password, name);
+            const university: University = await this.universityService.createUniversity(email, password, name, locale);
             res.status(HTTP_STATUS.CREATED).location(getUserUrl(university.id, ROLE.UNIVERSITY)).send();
         } catch (e) {
             next(e);

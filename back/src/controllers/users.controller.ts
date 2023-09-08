@@ -15,9 +15,11 @@ export class UsersController {
 
     public createResetToken: RequestHandler = async (req, res, next) => {
         const email = req.body.email;
+        const locale = req.headers['accept-language'];
+
         try {
             if (!email) return next(new GenericException(ERRORS.BAD_REQUEST.GENERAL));
-            await this.userService.createResetToken(email);
+            await this.userService.createResetToken(email, locale);
             res.status(HTTP_STATUS.CREATED).send();
         } catch (e) {
             next(e);

@@ -51,7 +51,7 @@ export default class UserService {
         return this.dao.create(email, hashedPassword, role);
     }
 
-    async createResetToken(email: string): Promise<void> {
+    async createResetToken(email: string, locale: string|undefined): Promise<void> {
         if (!(await this.dao.findByEmail(email))) throw new GenericException(ERRORS.NOT_FOUND.USER);
         const user = await this.getUserByEmail(email);
         if (!user) throw new GenericException(new GenericException(ERRORS.NOT_FOUND.USER));
@@ -62,8 +62,8 @@ export default class UserService {
         const token = await this.dao.createResetToken(user.id, expirationDate);
 
         // TODO: Define base URL
-        const resetLink = process.env.BASE_URL+"/reset/"+token.id;
-        this.emailService.sendPasswordResetEmail(email, resetLink);
+        const path = "reset/"+token.id;
+        this.emailService.sendPasswordResetEmail(email, path, locale);
     }
 
     async getUserWithResetToken(token: string): Promise<User> {

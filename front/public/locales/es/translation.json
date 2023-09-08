@@ -5,9 +5,9 @@
         "password": "Contraseña",
         "repeatPassword": "Repetir contraseña",
         "name": "Nombre",
-        "school": "Instituto",
+        "school": "Universidad",
         "program": "Carrera",
-        "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de institutos.",
+        "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de universidades.",
         "submit": "Crear cuenta",
         "placeholders": {
             "nameStudent": "John Johnson",
@@ -45,8 +45,8 @@
                 "passwordsMismatch": "Las contraseñas no coinciden."
             },
             "name": {
-                "requiredLength": "El nombre de su instituto debe contener al menos 4 caracteres.",
-                "maxLength": "El nombre de su instituto no debe exceder los 100 caracteres.",
+                "requiredLength": "El nombre de su universidad debe contener al menos 4 caracteres.",
+                "maxLength": "El nombre de su universidad no debe exceder los 100 caracteres.",
                 "isRequired": "Este campo es obligatorio."
             },
             "studentName": {
@@ -54,7 +54,7 @@
                 "isRequired": "Este campo es obligatorio."
             },
             "school": {
-                "programNotSelected": "Seleccione el instituto y carrera en la que esté inscripto."
+                "programNotSelected": "Seleccione la universidad y carrera en la que esté inscripto."
             }
         }
     },
@@ -135,7 +135,7 @@
         "newSearch": "Realizar una nueva búsqueda"
     },
     "home": {
-        "getVerified": "Su instituto aún no ha sido verificado. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir el instituto a nuestra lista."
+        "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir la universidad a nuestra lista."
     },
     "terms": {
         "hide": "Ocultar",
