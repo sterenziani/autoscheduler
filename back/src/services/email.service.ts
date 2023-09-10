@@ -1,4 +1,6 @@
 import { TRANSLATIONS } from '../constants/email.constants';
+import University from '../models/abstract/university.model';
+import User from '../models/abstract/user.model';
 import nodemailer from 'nodemailer';
 
 export default class EmailService {
@@ -74,38 +76,38 @@ export default class EmailService {
         }
     }
 
-    async sendUniversityWelcomeEmail(destination: string, universityName: string, locale: string|undefined): Promise<void> {
+    async sendUniversityWelcomeEmail(user: University): Promise<void> {
         const template = "welcome";
-        const emailLanguage = this.getAvailableLocale(locale);
+        const emailLanguage = this.getAvailableLocale(user.locale);
         const subject = TRANSLATIONS.resources[emailLanguage].translation.welcome;
 
         const context = {
             verificationEmail: process.env.EMAIL_VERIFICATION_ADDRESS,
-            universityName: universityName,
+            universityName: user.name,
             locale: emailLanguage
         };
-        this.sendEmailTemplate(destination, subject, template, context);
+        this.sendEmailTemplate(user.email, subject, template, context);
     }
 
-    async sendUniversityVerifiedEmail(destination: string, universityName: string, locale: string|undefined): Promise<void> {
+    async sendUniversityVerifiedEmail(user: University): Promise<void> {
         const template = "verified";
-        const emailLanguage = this.getAvailableLocale(locale);
+        const emailLanguage = this.getAvailableLocale(user.locale);
         const subject = TRANSLATIONS.resources[emailLanguage].translation.youAreVerified;
 
         const context = {
-            universityName: universityName,
+            universityName: user.name,
             locale: emailLanguage
         };
-        this.sendEmailTemplate(destination, subject, template, context);
+        this.sendEmailTemplate(user.email, subject, template, context);
     }
 
-    async sendPasswordResetEmail(destination: string, internalResetPath: string, locale: string|undefined): Promise<void> {
+    async sendPasswordResetEmail(user: User, internalResetPath: string): Promise<void> {
         const template = "resetPassword";
-        const emailLanguage = this.getAvailableLocale(locale);
+        const emailLanguage = this.getAvailableLocale(user.locale);
         const subject = TRANSLATIONS.resources[emailLanguage].translation.resetYourPasswordSubject;
 
         const context = { link: process.env.BASE_URL+"/"+internalResetPath, locale: emailLanguage };
-        this.sendEmailTemplate(destination, subject, template, context);
+        this.sendEmailTemplate(user.email, subject, template, context);
     }
 
     private getAvailableLocale(locale: string|undefined){

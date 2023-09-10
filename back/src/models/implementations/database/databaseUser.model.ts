@@ -12,6 +12,7 @@ export interface UserDocument extends Document {
     email: string;
     password: string;
     role: ROLE;
+    locale: string;
 }
 
 const userSchema: Schema = new mongoose.Schema(
@@ -19,6 +20,7 @@ const userSchema: Schema = new mongoose.Schema(
         email: { type: String, maxLength: 80, required: true, unique: true },
         password: { type: String, maxLength: 80, required: true },
         role: { type: String, required: true, enum: ROLE },
+        locale: { type: String, required: true},
     },
     {
         toJSON: { virtuals: true },

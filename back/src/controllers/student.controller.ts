@@ -56,6 +56,7 @@ export class StudentController {
         const programId = req.body.programId as string;
         const internalId = req.body.internalId as string;
         const name = req.body.name as string;
+        const locale = req.headers['accept-language'];
 
         try {
             const student: Student = await this.studentService.createStudent(
@@ -65,6 +66,7 @@ export class StudentController {
                 programId,
                 internalId,
                 name,
+                locale??"en"
             );
             res.status(HTTP_STATUS.CREATED).location(getUserUrl(student.id, ROLE.STUDENT)).send();
         } catch (e) {

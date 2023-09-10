@@ -38,16 +38,16 @@ export default class UniversityService {
         return await this.dao.getById(id);
     }
 
-    async createUniversity(email: string, password: string, name: string, locale: string|undefined): Promise<University> {
+    async createUniversity(email: string, password: string, name: string, locale: string): Promise<University> {
         // validate name
         if (!name) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
         if (await this.dao.findByName(name)) throw new GenericException(ERRORS.BAD_REQUEST.UNIVERSITY_ALREADY_EXISTS);
 
         // create user
-        const user = await this.userService.createUser(email, password, ROLE.UNIVERSITY);
+        const user = await this.userService.createUser(email, password, ROLE.UNIVERSITY, locale);
         // create University
         const university = await this.dao.create(user.id, name, this.universityDefaultVerified);
-        this.emailService.sendUniversityWelcomeEmail(university.email, university.name, locale);
+        this.emailService.sendUniversityWelcomeEmail(university);
         return university;
     }
 
@@ -59,7 +59,7 @@ export default class UniversityService {
         await this.dao.set(university);
 
         if(!oldStatus && verified)
-            this.emailService.sendUniversityVerifiedEmail(university.email, university.name, "en");
+            this.emailService.sendUniversityVerifiedEmail(university);
         return university;
     }
 

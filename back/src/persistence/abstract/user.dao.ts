@@ -11,11 +11,11 @@ export default abstract class UserDao extends GenericDao<User> {
     constructor() {
         super(ERRORS.NOT_FOUND.USER);
         // Initialize DB with admin user
-        this.create(process.env.ADMIN_EMAIL??"", hashPassword(process.env.ADMIN_PASS??""), ROLE.ADMIN);
+        this.create(process.env.ADMIN_EMAIL??"", hashPassword(process.env.ADMIN_PASS??""), ROLE.ADMIN, "en");
     }
 
     // Abstract Methods
-    public abstract create(email: string, password: string, role: ROLE): Promise<User>;
+    public abstract create(email: string, password: string, role: ROLE, locale: string): Promise<User>;
     public abstract findByEmail(email: string): Promise<User | undefined>;
     public abstract createResetToken(userId: string, expirationDate: Date): Promise<ResetToken>;
     public abstract getResetToken(token: string): Promise<ResetToken | undefined>;

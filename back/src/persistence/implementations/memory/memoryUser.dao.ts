@@ -20,8 +20,8 @@ export default class MemoryUserDao extends UserDao {
     };
 
     // Abstract Methods Implementations
-    public async create(email: string, password: string, role: ROLE): Promise<User> {
-        const newUser = new MemoryUser(uuidv4(), email, password, role);
+    public async create(email: string, password: string, role: ROLE, locale: string): Promise<User> {
+        const newUser = new MemoryUser(uuidv4(), email, password, role, locale);
         MEMORY_DATABASE.users.set(newUser.id, newUser);
         return newUser;
     }
@@ -33,7 +33,7 @@ export default class MemoryUserDao extends UserDao {
     public async set(user: User): Promise<void> {
         await this.getById(user.id);
 
-        if (!(user instanceof MemoryUser)) user = new MemoryUser(user.id, user.email, user.password, user.role);
+        if (!(user instanceof MemoryUser)) user = new MemoryUser(user.id, user.email, user.password, user.role, user.locale);
 
         MEMORY_DATABASE.users.set(user.id, user);
     }

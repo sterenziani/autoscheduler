@@ -20,7 +20,7 @@ export default class MemoryUniversityDao extends UniversityDao {
     public async create(userId: string, name: string, verified: boolean): Promise<University> {
         // We get the user to check that it exists and to get the rest of the info
         const user = await MemoryUserDao.getInstance().getById(userId);
-        const newUniversity = new MemoryUniversity(user.id, user.email, user.password, name, verified);
+        const newUniversity = new MemoryUniversity(user.id, user.email, user.password, user.locale, name, verified);
         MEMORY_DATABASE.universities.set(newUniversity.id, newUniversity);
         return newUniversity;
     }
@@ -37,6 +37,7 @@ export default class MemoryUniversityDao extends UniversityDao {
                 university.id,
                 university.email,
                 university.password,
+                university.locale,
                 university.name,
                 university.verified,
             );

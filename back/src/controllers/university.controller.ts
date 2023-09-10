@@ -61,7 +61,7 @@ export class UniversityController {
         const locale = req.headers['accept-language'];
 
         try {
-            const university: University = await this.universityService.createUniversity(email, password, name, locale);
+            const university: University = await this.universityService.createUniversity(email, password, name, locale??"en");
             res.status(HTTP_STATUS.CREATED).location(getUserUrl(university.id, ROLE.UNIVERSITY)).send();
         } catch (e) {
             next(e);

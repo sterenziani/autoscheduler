@@ -7,13 +7,15 @@ export default abstract class User extends GenericModel {
     email: string; // Email the user uses to log in
     password: string; // Hashed password with bcrypt to match when logging in
     role: ROLE;
+    locale: string;
 
     // Abstract class constructor
-    constructor(id: string, email: string, password: string, role: ROLE) {
+    constructor(id: string, email: string, password: string, role: ROLE, locale: string) {
         super(id);
         this.email = email;
         this.password = password;
         this.role = role;
+        this.locale = locale;
     }
 
     // Methods

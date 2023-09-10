@@ -29,7 +29,7 @@ export default class MemoryStudentDao extends StudentDao {
         const user = await MemoryUserDao.getInstance().getById(userId);
         const university = await MemoryUniversityDao.getInstance().getById(universityId);
         const program = await MemoryProgramDao.getInstance().getById(programId);
-        const newStudent = new MemoryStudent(user.id, user.email, user.password, internalId, name);
+        const newStudent = new MemoryStudent(user.id, user.email, user.password, user.locale, internalId, name);
 
         MEMORY_DATABASE.students.set(newStudent.id, newStudent);
         addChildToParent(MEMORY_DATABASE.studentsOfUniversity, university.id, newStudent.id);
@@ -46,7 +46,7 @@ export default class MemoryStudentDao extends StudentDao {
         await this.getById(student.id);
 
         if (!(student instanceof MemoryStudent))
-            student = new MemoryStudent(student.id, student.email, student.password, student.internalId, student.name);
+            student = new MemoryStudent(student.id, student.email, student.password, student.locale, student.internalId, student.name);
 
         MEMORY_DATABASE.students.set(student.id, student);
     }

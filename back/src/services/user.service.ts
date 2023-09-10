@@ -39,7 +39,7 @@ export default class UserService {
         return await this.dao.getByEmail(email);
     }
 
-    async createUser(email: string, password: string, role: ROLE): Promise<User> {
+    async createUser(email: string, password: string, role: ROLE, locale: string): Promise<User> {
         // validate email
         if (!this.isValidEmail(email)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
         // email must not belong to existing user
@@ -48,7 +48,7 @@ export default class UserService {
         if (!this.isValidPassword(password)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PASSWORD);
 
         const hashedPassword = hashPassword(password);
-        return this.dao.create(email, hashedPassword, role);
+        return this.dao.create(email, hashedPassword, role, locale);
     }
 
     async createResetToken(email: string, locale: string|undefined): Promise<void> {
@@ -63,7 +63,7 @@ export default class UserService {
 
         // TODO: Define base URL
         const path = "reset/"+token.id;
-        this.emailService.sendPasswordResetEmail(email, path, locale);
+        this.emailService.sendPasswordResetEmail(user, path);
     }
 
     async getUserWithResetToken(token: string): Promise<User> {

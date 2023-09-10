@@ -74,6 +74,7 @@ export default class DatabaseUserDao extends UserDao {
             userDocument.email,
             userDocument.password,
             userDocument.role,
+            userDocument.locale,
         );
     }
 }
