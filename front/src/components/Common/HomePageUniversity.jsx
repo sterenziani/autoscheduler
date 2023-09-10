@@ -8,7 +8,7 @@ import UniversityCoursesList from '../Lists/UniversityCoursesList';
 import UniversityBuildingsList from '../Lists/UniversityBuildingsList';
 import UniversityTermsList from '../Lists/UniversityTermsList';
 
-const CONTACT_EMAIL = 'juan@autoscheduler.com';
+const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS;
 
 function HomePageUniversity(props) {
     const { t } = useTranslation()
@@ -42,8 +42,8 @@ function HomePageUniversity(props) {
             <HelmetProvider>
                 <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
-            {props.user && !props.user.verified && (
-                <Alert className="m-5" variant="danger">
+            {props.user && !JSON.parse(props.user.verified) && (
+                <Alert className="m-5 text-center" variant="danger">
                     {t('home.getVerified', { email: CONTACT_EMAIL })}
                 </Alert>
             )}

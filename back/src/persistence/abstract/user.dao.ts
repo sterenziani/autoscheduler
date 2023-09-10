@@ -4,11 +4,14 @@ import GenericException from '../../exceptions/generic.exception';
 import User from '../../models/abstract/user.model';
 import ResetToken from '../../models/abstract/resetToken.model';
 import GenericDao from './generic.dao';
+import { hashPassword } from '../../helpers/auth.helper';
 
 export default abstract class UserDao extends GenericDao<User> {
     // Constructor
     constructor() {
         super(ERRORS.NOT_FOUND.USER);
+        // Initialize DB with admin user
+        this.create(process.env.ADMIN_EMAIL??"", hashPassword(process.env.ADMIN_PASS??""), ROLE.ADMIN);
     }
 
     // Abstract Methods

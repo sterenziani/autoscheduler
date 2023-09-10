@@ -208,6 +208,7 @@ function SignUpStudentForm(props) {
                                         defaultOptions
                                         getOptionLabel={e => e.name}
                                         getOptionValue={e => e.id}
+                                        noOptionsMessage={() => t('selectNoResults')}
                                         loadOptions={loadSchoolOptions}
                                         onChange={opt => onChangeSchools(opt.id)}
                                     />
@@ -232,6 +233,7 @@ function SignUpStudentForm(props) {
                                             defaultOptions
                                             getOptionLabel={e => e.code+' - '+e.name}
                                             getOptionValue={e => e.id}
+                                            noOptionsMessage={() => t('selectNoResults')}
                                             loadOptions={loadProgramOptions}
                                             onChange={opt => onChangePrograms(opt.id)}
                                         />

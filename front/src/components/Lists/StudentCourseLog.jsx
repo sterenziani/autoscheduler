@@ -170,6 +170,7 @@ function StudentCourseLog(props) {
                                 defaultOptions
                                 getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
+                                noOptionsMessage={() => t('selectNoResults')}
                                 defaultValue = {{value:student.program.id, code: student.program.code, name: student.program.name}}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}

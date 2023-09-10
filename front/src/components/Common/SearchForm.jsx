@@ -198,6 +198,7 @@ function SearchForm(props) {
                             cacheOptions
                             defaultOptions
                             defaultValue = {{value:student.program.id, code: student.program.code, name: student.program.name}}
+                            noOptionsMessage={() => t('selectNoResults')}
                             getOptionLabel={e => e.code+' - '+e.name}
                             getOptionValue={e => e.id}
                             loadOptions={loadProgramOptions}

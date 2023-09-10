@@ -87,6 +87,18 @@ export default class EmailService {
         this.sendEmailTemplate(destination, subject, template, context);
     }
 
+    async sendUniversityVerifiedEmail(destination: string, universityName: string, locale: string|undefined): Promise<void> {
+        const template = "verified";
+        const emailLanguage = this.getAvailableLocale(locale);
+        const subject = TRANSLATIONS.resources[emailLanguage].translation.youAreVerified;
+
+        const context = {
+            universityName: universityName,
+            locale: emailLanguage
+        };
+        this.sendEmailTemplate(destination, subject, template, context);
+    }
+
     async sendPasswordResetEmail(destination: string, internalResetPath: string, locale: string|undefined): Promise<void> {
         const template = "resetPassword";
         const emailLanguage = this.getAvailableLocale(locale);

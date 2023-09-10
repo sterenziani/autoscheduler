@@ -56,7 +56,8 @@ export default class MemoryUniversityDao extends UniversityDao {
         const universities: University[] = [];
 
         for (const maybeUniversity of MEMORY_DATABASE.universities.values()) {
-            if (!text || maybeUniversity.name.toLowerCase().includes(text)) universities.push(maybeUniversity);
+            if(maybeUniversity.verified && (!text || maybeUniversity.name.toLowerCase().includes(text)))
+                universities.push(maybeUniversity);
         }
 
         // sorting by name

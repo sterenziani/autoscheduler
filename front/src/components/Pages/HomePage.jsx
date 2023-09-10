@@ -4,6 +4,7 @@ import { Spinner } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import HomePageUniversity from '../Common/HomePageUniversity';
 import HomePageStudent from '../Common/HomePageStudent';
+import HomePageAdmin from '../Common/HomePageAdmin';
 import ApiService from '../../services/ApiService';
 import Roles from '../../resources/RoleConstants';
 
@@ -32,6 +33,7 @@ function HomePage(props)  {
             </HelmetProvider>
             {user && user.role === Roles.STUDENT && <HomePageStudent user={user}/>}
             {user && user.role === Roles.UNIVERSITY &&  (<HomePageUniversity user={user}/>)}
+            {user && user.role === Roles.ADMIN && (<HomePageAdmin user={user}/>)}
         </React.Fragment>
     );
 }

@@ -10,7 +10,7 @@ import { PaginatedCollection } from '../interfaces/paging.interface';
 
 export default class UniversityService {
     private static instance: UniversityService;
-    private readonly universityDefaultVerified: boolean = true; // TODO: change to false once we have ADMIN validation
+    private readonly universityDefaultVerified: boolean = false;
 
     private dao: UniversityDao;
     private userService!: UserService;
@@ -48,6 +48,18 @@ export default class UniversityService {
         // create University
         const university = await this.dao.create(user.id, name, this.universityDefaultVerified);
         this.emailService.sendUniversityWelcomeEmail(university.email, university.name, locale);
+        return university;
+    }
+
+    async setUniversityVerificationStatus(id: string, verified: boolean): Promise<University> {
+        const university: University = await this.getUniversity(id);
+        const oldStatus = university.verified;
+
+        university.verified = verified;
+        await this.dao.set(university);
+
+        if(!oldStatus && verified)
+            this.emailService.sendUniversityVerifiedEmail(university.email, university.name, "en");
         return university;
     }
 

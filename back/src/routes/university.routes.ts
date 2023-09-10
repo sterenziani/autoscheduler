@@ -4,6 +4,7 @@ import { UniversityController } from '../controllers/university.controller';
 import cors from 'cors';
 import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import universitiesOnlyMiddleware from '../middlewares/universitiesOnly.middleware';
+import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
 import pagingMiddleware from '../middlewares/paging.middleware';
 
 export class UniversityRoutes {
@@ -30,5 +31,6 @@ export class UniversityRoutes {
         this.router.get('/:userId/courses', pagingMiddleware, this.controller.getUniversityCourses);
         this.router.get('/:userId/buildings', pagingMiddleware, this.controller.getUniversityBuildings);
         this.router.get('/:userId/terms', pagingMiddleware, this.controller.getUniversityTerms);
+        this.router.put('/:userId/verified', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.editUniversityVerificationStatus);
     }
 }

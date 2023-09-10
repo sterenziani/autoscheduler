@@ -199,4 +199,16 @@ export class UniversityController {
             next(e);
         }
     };
+
+    public editUniversityVerificationStatus: RequestHandler = async (req, res, next) => {
+        const universityId = req.params.userId;
+        const newVerifiedStatus = (req.body.verified === 'true');
+
+        try {
+            const university: University = await this.universityService.setUniversityVerificationStatus(universityId, newVerifiedStatus);
+            res.status(HTTP_STATUS.OK).send(UniversityDto.universityToDto(university));
+        } catch (e) {
+            next(e);
+        }
+    };
 }

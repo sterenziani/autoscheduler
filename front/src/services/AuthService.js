@@ -1,4 +1,5 @@
 import api from './api';
+import Roles from '../resources/RoleConstants';
 import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, CREATED } from './ApiConstants';
 
 const logInEndpoint = '/';
@@ -79,6 +80,16 @@ const logIn = async (email, password) => {
         ExpStore.setExp(expirationDate)
 
         const tokenUserData = parseUserFromJwt(token)
+        if(tokenUserData.role == Roles.ADMIN) {
+            UserStore.setUser({
+                id: tokenUserData.id,
+                name: Roles.ADMIN,
+                email: tokenUserData.email,
+                role: tokenUserData.role
+            })
+            return { status: OK }
+        }
+
         const endpoint = tokenUserData.role.toLowerCase() +'/'+ tokenUserData.id
         const userData = await api.get(endpoint, getRequestHeaders())
         UserStore.setUser(userData.data)

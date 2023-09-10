@@ -100,7 +100,7 @@ export default class ProgramService {
         program.internalId = internalId;
         program.name = name;
         await program.setMandatoryCourses(mandatoryCourses);
-        program.setOptionalCourses(optionalCourses);
+        await program.setOptionalCourses(optionalCourses);
         await this.dao.set(program);
         return program;
     }

@@ -135,6 +135,7 @@
         "newSearch": "Realizar una nueva búsqueda"
     },
     "home": {
+        "welcomeAdmin": "Bienvenido, administrator. Por favor lea la documentación oficial sobre cómo verificar universidades a través de la API.",
         "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir la universidad a nuestra lista."
     },
     "terms": {
