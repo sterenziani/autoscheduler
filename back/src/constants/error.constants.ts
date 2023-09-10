@@ -72,6 +72,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'MISSING_TOKEN',
             message: 'Missing token in Authorization header.',
         },
+        EXPIRED_TOKEN: {
+            status: HTTP_STATUS.UNAUTHORIZED,
+            code: 'EXPIRED_TOKEN',
+            message: 'Expired token in Authorization header.',
+        },
     },
     FORBIDDEN: {
         GENERAL: { status: HTTP_STATUS.FORBIDDEN, code: 'FORBIDDEN', message: 'Forbidden.' },

@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ERRORS } from '../constants/error.constants';
 import UserAuthService from '../services/auth.service';
 import httpException from '../exceptions/http.exception';
+import * as jwt from 'jsonwebtoken';
 
 const userAuthMiddleware = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.get('authorization');
@@ -18,6 +19,9 @@ const userAuthMiddleware = (req: Request, res: Response, next: NextFunction): vo
     } catch (e) {
         if (e instanceof httpException) {
             res.status(e.status).send({ code: e.code, message: e.message });
+        } else if(e instanceof jwt.TokenExpiredError) {
+            const newError = ERRORS.UNAUTHORIZED.EXPIRED_TOKEN;
+            res.status(newError.status).send({ code: newError.code, message: newError.message });
         } else {
             const newError = ERRORS.INTERNAL_SERVER_ERROR.GENERAL;
             res.status(newError.status).send({ code: newError.code, message: newError.message });
