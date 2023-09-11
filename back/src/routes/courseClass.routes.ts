@@ -26,5 +26,6 @@ export class CourseClassRoutes {
         this.router.put('/:courseClassId', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.updateCourseClass);
         this.router.get('/:courseClassId', this.controller.getCourseClass);
         this.router.get('/:courseClassId/lectures', this.controller.getLectures);
+        this.router.delete('/:courseClassId', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.deleteCourseClass);
     }
 }

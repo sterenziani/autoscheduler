@@ -102,4 +102,16 @@ export class CourseClassController {
             next(e);
         }
     };
+
+    public deleteCourseClass: RequestHandler = async (req, res, next) => {
+        const userInfo = req.user;
+        const courseClassId = req.params.courseClassId;
+
+        try {
+            await this.courseClassService.deleteCourseClass(userInfo.id, courseClassId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
 }

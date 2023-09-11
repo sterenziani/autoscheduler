@@ -77,7 +77,7 @@ function CourseClassesList(props) {
     const deleteCourseClass = () => {
         if (!courseClassToDelete)
             return;
-        ApiService.deleteCourseClass(courseClassToDelete).then(() => {
+        ApiService.deleteCourseClass(courseClassToDelete.id).then(() => {
             loadClasses()
             closeDeleteModal()
             setCourseClassToDelete({})
@@ -166,7 +166,7 @@ function CourseClassesList(props) {
                             t('modal.areYouSureClass', {
                                 code: course.code,
                                 name: course.name,
-                                class: courseClassToDelete.courseClass,
+                                class: courseClassToDelete.name,
                                 term: term.name,
                             })
                         }
@@ -175,7 +175,7 @@ function CourseClassesList(props) {
                     <Button variant="grey" onClick={() => closeDeleteModal()}>
                         {t('modal.cancel')}
                     </Button>
-                    <Button variant="danger" onClick={() => deleteCourseClass(courseClassToDelete)}>
+                    <Button variant="danger" onClick={() => deleteCourseClass()}>
                         {t('modal.delete')}
                     </Button>
                 </Modal.Footer>

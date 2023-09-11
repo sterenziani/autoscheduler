@@ -181,15 +181,9 @@ function SearchForm(props) {
     return (
         <React.Fragment>
             <Form className="p-3 mx-auto text-center color-white">
-                <Form.Group controlId="program" className="row mx-auto form-row">
+                <Row className="mx-auto form-row">
                     <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.program')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
+                        <h5 className="my-0"><strong>{t('search.program')}</strong></h5>
                     </div>
                     <div className="col-8 text-center">
                         <AsyncSelect
@@ -206,7 +200,7 @@ function SearchForm(props) {
                         />
                         { programError && <p key="program-error" className="form-error text-start my-0">{t('search.programError')}</p>}
                     </div>
-                </Form.Group>
+                </Row>
 
                 <Form.Group controlId="term" className="row mx-auto form-row">
                     <div className="col-4 text-end my-auto text-break">
@@ -284,15 +278,9 @@ function SearchForm(props) {
                     </div>
                 </Form.Group>
 
-                <Form.Group controlId="unavailableSlots" className="row mx-auto form-row">
+                <Row className="row mx-auto form-row">
                     <div className="col-4 text-end my-3 text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.unavailableSlots')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
+                        <h5 className="my-0"><strong>{t('search.unavailableSlots')}</strong></h5>
                     </div>
                     <div className="col-8 align-items-start align-items-center">
                         { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
@@ -346,7 +334,7 @@ function SearchForm(props) {
                             ></i>
                         </div>
                     </div>
-                </Form.Group>
+                </Row>
                 <div className="row">
                     <div className="col text-center">
                         <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit()}>{t("search.submit")}</Button>

@@ -155,4 +155,15 @@ export default class CourseClassService {
         await this.dao.set(courseClass);
         return courseClass;
     }
+
+    async deleteCourseClass(universityId: string, id: string) {
+        const courseClass = await this.getCourseClass(id);
+        const course = await courseClass.getCourse();
+        const courseClassUniversity = await course.getUniversity();
+
+        // check if university owns courseClass
+        if (courseClassUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+
+        await this.dao.delete(id);
+    }
 }

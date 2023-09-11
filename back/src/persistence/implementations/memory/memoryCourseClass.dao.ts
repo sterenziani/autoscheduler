@@ -1,10 +1,12 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import {
-    addChildToParent,
-    getChildsFromParent,
-} from '../../../helpers/persistence/memoryPersistence.helper';
+import { addChildToParent, getChildsFromParent, removeChildFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
+import Building from '../../../models/abstract/building.model';
 import CourseClass from '../../../models/abstract/courseClass.model';
+import Course from '../../../models/abstract/course.model';
+import Lecture from '../../../models/abstract/lecture.model';
+import Term from '../../../models/abstract/term.model';
+import University from '../../../models/abstract/university.model';
 import MemoryCourseClass from '../../../models/implementations/memory/memoryCourseClass.model';
 import CourseClassDao from '../../abstract/courseClass.dao';
 import { v4 as uuidv4 } from 'uuid';
@@ -91,5 +93,26 @@ export default class MemoryCourseClassDao extends CourseClassDao {
             courseClass = new MemoryCourseClass(courseClass.id, courseClass.name);
 
         MEMORY_DATABASE.courseClasses.set(courseClass.id, courseClass);
+    }
+
+    public async delete(courseClassId: string): Promise<void> {
+        const courseClass = await this.getById(courseClassId);
+        const lectures: Lecture[] = await courseClass.getLectures();
+        const course: Course = await courseClass.getCourse();
+        const term: Term = await courseClass.getTerm();
+        const university: University = await course.getUniversity();
+
+        // Delete lectures and references to them
+        for(const l of lectures){
+            const building: Building = await l.getBuilding();
+            removeChildFromParent(MEMORY_DATABASE.lecturesOfCourseClass, courseClass.id, l.id);
+            removeChildFromParent(MEMORY_DATABASE.lecturesOfBuilding, building.id, l.id);
+            MEMORY_DATABASE.lectures.delete(l.id);
+        }
+
+        // Delete courseClass and references to it
+        removeChildFromParent(MEMORY_DATABASE.courseClassesOfCourse, course.id, courseClass.id);
+        removeChildFromParent(MEMORY_DATABASE.courseClassesOfTerm, term.id, courseClass.id);
+        MEMORY_DATABASE.courseClasses.delete(courseClassId);
     }
 }
