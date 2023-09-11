@@ -123,11 +123,14 @@ function ResetPasswordPage(props) {
                             <h4>{t('changePassword.title')}</h4>
                             <p className="mb-3">{t('changePassword.forUser', { email: user.email })}</p>
                             {badConnection && (<p className="form-error">{t('register.errors.badConnection')}</p>)}
+                            <input id="browser-warning-fix" type="text" autoComplete="username" ng-hide="true" className="invisible"></input>
 
                             <FormInputField
+                                id="new-password"
                                 type="password"
                                 label="register.password"
                                 name="password"
+                                autoComplete="new-password"
                                 placeholder="register.placeholders.password"
                                 value={values.password}
                                 error={errors.password}
@@ -137,9 +140,11 @@ function ResetPasswordPage(props) {
                             />
 
                             <FormInputField
+                                id="new-password-repeat"
                                 type="password"
                                 label="register.repeatPassword"
                                 name="repeat_password"
+                                autoComplete="new-password"
                                 placeholder="register.placeholders.password"
                                 value={values.repeat_password}
                                 error={errors.repeat_password}

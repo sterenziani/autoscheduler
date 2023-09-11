@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Button, Form, Spinner } from 'react-bootstrap';
+import { Row, Button, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -187,22 +187,22 @@ function EditCoursePage(props) {
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
+                        id="course-code"
                         label="forms.courseCode" name="courseCode"
                         placeholder="forms.placeholders.courseCode"
                         value={values.courseCode} error={errors.courseCode}
                         touched={touched.courseCode} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
+                        id="course-name"
                         label="forms.courseName" name="courseName"
                         placeholder="forms.placeholders.courseName"
                         value={values.courseName} error={errors.courseName}
                         touched={touched.courseName} onChange={handleChange} onBlur={handleBlur}
                     />
-                    <Form.Group controlId="requirements" className="row mx-auto form-row">
+                    <Row className="mx-auto form-row">
                         <div className="col-3 text-end my-3 text-break">
-                            <Form.Label className="my-0">
-                                <h5 className="my-0"><strong>{t('forms.requirements')}</strong></h5>
-                            </Form.Label>
+                            <h5 className="my-0"><strong>{t('forms.requirements')}</strong></h5>
                         </div>
                         <div className="col-9 my-2 align-items-start align-items-center">
                             <AsyncSelect
@@ -230,7 +230,7 @@ function EditCoursePage(props) {
                                 !selectedProgram && <div>{t('forms.selectProgram')}</div>
                             }
                         </div>
-                    </Form.Group>
+                    </Row>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

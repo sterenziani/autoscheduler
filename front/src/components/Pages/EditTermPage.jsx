@@ -128,12 +128,14 @@ function EditTermPage(props) {
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
+                        id="term-code"
                         label="forms.termCode" name="code"
                         placeholder="forms.placeholders.termCode"
                         value={values.code} error={errors.code}
                         touched={touched.code} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
+                        id="term-name"
                         label="forms.termName" name="termName"
                         placeholder="forms.placeholders.termName"
                         value={values.termName} error={errors.termName}
@@ -147,8 +149,8 @@ function EditTermPage(props) {
                         </div>
                         <div className="col-9 text-center">
                         {
-                            <input
-                                type="date" id='datepicker' className="w-auto timepicker"
+                            <Form.Control
+                                type="date" className="w-auto timepicker"
                                 value={startDate} onChange={onChangeStartDate}
                             />
                         }

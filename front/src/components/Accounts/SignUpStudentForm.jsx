@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
-import { Button, Form } from 'react-bootstrap';
+import { Row, Button, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
@@ -146,7 +146,9 @@ function SignUpStudentForm(props) {
                     <FormInputField
                         label="register.name"
                         name="name"
+                        id="student-name"
                         placeholder="register.placeholders.nameStudent"
+                        autoComplete="name"
                         value={values.name}
                         error={errors.name}
                         touched={touched.name}
@@ -157,7 +159,9 @@ function SignUpStudentForm(props) {
                     <FormInputField
                         label="register.email"
                         name="email"
+                        id="student-email"
                         placeholder="register.placeholders.emailStudent"
+                        autoComplete="email"
                         value={values.email}
                         error={errors.email}
                         touched={touched.email}
@@ -169,7 +173,9 @@ function SignUpStudentForm(props) {
                         type="password"
                         label="register.password"
                         name="password"
+                        id="student-password"
                         placeholder="register.placeholders.password"
+                        autoComplete="new-password"
                         value={values.password}
                         error={errors.password}
                         touched={touched.password}
@@ -181,7 +187,9 @@ function SignUpStudentForm(props) {
                         type="password"
                         label="register.repeatPassword"
                         name="repeat_password"
+                        id="student-repeat-pass"
                         placeholder="register.placeholders.repeatPassword"
+                        autoComplete="new-password"
                         value={values.repeat_password}
                         error={errors.repeat_password}
                         touched={touched.repeat_password}
@@ -191,13 +199,9 @@ function SignUpStudentForm(props) {
 
                     {!(error && error != EXISTING_USER_ERROR) && (
                         <>
-                            <Form.Group controlId="school" className="mb-0 row mx-auto form-row">
+                            <Row className="mb-0 mx-auto form-row">
                                 <div className="col-3 text-end my-auto text-break ">
-                                    <Form.Label className="my-0">
-                                        <h5 className="my-0">
-                                            <strong> {t('register.school')}</strong>
-                                        </h5>
-                                    </Form.Label>
+                                    <h5 className="my-0"><strong> {t('register.school')}</strong></h5>
                                 </div>
                                 <div className="col-9 text-center">
                                     <AsyncSelect
@@ -213,16 +217,12 @@ function SignUpStudentForm(props) {
                                         onChange={opt => onChangeSchools(opt.id)}
                                     />
                                 </div>
-                            </Form.Group>
+                            </Row>
                             {
                                 selectedSchool && (
-                                <Form.Group controlId="program" className="mb-0 row mx-auto form-row">
+                                <Row className="mb-0 mx-auto form-row">
                                     <div className="col-3 text-end my-auto text-break">
-                                        <Form.Label className="my-0">
-                                            <h5 className="my-0">
-                                                <strong>{t('register.program')}</strong>
-                                            </h5>
-                                        </Form.Label>
+                                        <h5 className="my-0"><strong>{t('register.program')}</strong></h5>
                                     </div>
                                     <div className="col-9 text-center">
                                         <AsyncSelect key={selectedSchool}
@@ -238,7 +238,7 @@ function SignUpStudentForm(props) {
                                             onChange={opt => onChangePrograms(opt.id)}
                                         />
                                     </div>
-                                </Form.Group>
+                                </Row>
                             )}
                             {!selectedProgram && programError && (
                                 <div className="my-0 row mx-auto form-row">

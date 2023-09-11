@@ -205,12 +205,14 @@ function EditProgramPage(props) {
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
+                        id="program-code"
                         label="forms.programCode" name="programCode"
                         placeholder="forms.placeholders.programCode"
                         value={values.programCode} error={errors.programCode}
                         touched={touched.programCode} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
+                        id="program-name"
                         label="forms.programName" name="programName"
                         placeholder="forms.placeholders.programName"
                         value={values.programName} error={errors.programName}
@@ -218,11 +220,9 @@ function EditProgramPage(props) {
                     />
                     <Row>
                     <Col>
-                        <Form.Group controlId="required-courses" className="row mx-auto form-row">
+                        <Row className="mx-auto form-row">
                             <div className="text-center my-3 text-break">
-                                <Form.Label className="my-0">
-                                    <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
-                                </Form.Label>
+                                <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
                             </div>
                             <div className="align-items-start align-items-center">
                                 <CourseListForm courses={courses}
@@ -230,14 +230,12 @@ function EditProgramPage(props) {
                                     onClickTrashCan={onClickReqTrashCan} addCourse={addRequiredCourse}
                                 />
                             </div>
-                        </Form.Group>
+                        </Row>
                     </Col>
                     <Col>
-                        <Form.Group controlId="required-courses" className="row mx-auto form-row">
+                        <Row className="mx-auto form-row">
                             <div className="text-center my-3 text-break">
-                                <Form.Label className="my-0">
-                                    <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
-                                </Form.Label>
+                                <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
                             </div>
                             <div className="align-items-start align-items-center">
                                 <CourseListForm courses={courses}
@@ -245,7 +243,7 @@ function EditProgramPage(props) {
                                     onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
                                 />
                             </div>
-                        </Form.Group>
+                        </Row>
                     </Col>
                     </Row>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>

@@ -105,7 +105,6 @@ function CoursePage(props) {
                                 noOptionsMessage={() => t('selectNoResults')}
                                 getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
-                                noOptionsMessage={() => t('selectNoResults')}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt)}
                             />

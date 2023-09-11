@@ -306,11 +306,9 @@ function EditCourseClassPage(props) {
                 <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
-                    <Form.Group controlId="course" className="row mx-auto form-row">
+                    <Row className="mx-auto form-row">
                         <div className="col-3 text-end my-auto text-break">
-                            <Form.Label className="my-0">
-                                <h5 className="my-0"><strong>{t('forms.course')}</strong></h5>
-                            </Form.Label>
+                            <h5 className="my-0"><strong>{t('forms.course')}</strong></h5>
                         </div>
                         <div className="col-9 text-start">
                         {
@@ -342,7 +340,7 @@ function EditCourseClassPage(props) {
                             />
                         }
                         </div>
-                    </Form.Group>
+                    </Row>
                     <Form.Group controlId="term" className="row mx-auto form-row">
                         <div className="col-3 text-end my-auto text-break">
                             <Form.Label className="my-0">
@@ -367,11 +365,9 @@ function EditCourseClassPage(props) {
                             touched={touched.className} onChange={handleChange} onBlur={handleBlur}
                         />
                     </Form.Group>
-                    <Form.Group controlId="schedule" className="row mx-auto form-row">
+                    <Form.Group className="row mx-auto form-row">
                         <div className="col-3 text-end text-break my-4">
-                            <Form.Label className="">
-                                <h5 className=""><strong>{t('forms.lectures')}</strong></h5>
-                            </Form.Label>
+                            <h5 className=""><strong>{t('forms.lectures')}</strong></h5>
                         </div>
                         <div className="col-9 align-items-start align-items-center">
                             {lectures.map((entry, index) => (

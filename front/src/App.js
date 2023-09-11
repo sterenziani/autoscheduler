@@ -11,7 +11,7 @@ import EditCourseClassPage from './components/Pages/EditCourseClassPage';
 import EditTermPage from './components/Pages/EditTermPage';
 import EditProgramPage from './components/Pages/EditProgramPage';
 import EditBuildingPage from './components/Pages/EditBuildingPage';
-import ResetPasswordPage from './components/Pages/ResetPasswordPage';
+import ResetPasswordPage from './components/Accounts/ResetPasswordPage';
 import ErrorMessage from './components/Common/ErrorMessage';
 import AuthService from './services/AuthService';
 import { NOT_FOUND } from './services/ApiConstants';

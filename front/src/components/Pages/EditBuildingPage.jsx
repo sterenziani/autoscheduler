@@ -150,43 +150,43 @@ function EditBuildingPage(props) {
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
+                        id="building-code"
                         label="forms.buildingCode" name="buildingCode"
                         placeholder="forms.placeholders.buildingCode"
                         value={values.buildingCode} error={errors.buildingCode}
                         touched={touched.buildingCode} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
+                        id="building-name"
                         label="forms.buildingName" name="buildingName"
                         placeholder="forms.placeholders.buildingName"
                         value={values.buildingName} error={errors.buildingName}
                         touched={touched.buildingName} onChange={handleChange} onBlur={handleBlur}
                     />
-                    <Form.Group controlId="distance" className="row mx-auto form-row">
+                    <div className="row mx-auto form-row">
                         <div className="col-3 text-break my-1 text-end">
-                            <Form.Label>
-                                <h5><strong>{t('forms.timeToDestination')}</strong></h5>
-                            </Form.Label>
+                            <h5><strong>{t('forms.timeToDestination')}</strong></h5>
                         </div>
                         <div className="col-9 text-center my-auto">
                         {
                             Object.keys(distances).length > 0? [
                                 Object.values(distances).map((entry, index) => (
-                                    <Row key={"time-input-"+index}>
-                                    <Col className="my-auto text-end text-break" xs={3} md={2}>
-                                        <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.code}</h6></Form.Label>
-                                    </Col>
-                                    <Col className="pe-0" xs={6} md={8}>
-                                        <Form.Control type="number" value={entry.time} onChange={(e) => onChangeTime(e, entry)}/>
-                                    </Col>
-                                    <Col className="my-auto text-start mx-0" xs={3} md={2}>
-                                        {t("forms.minutes")}
-                                    </Col>
-                                    </Row>
+                                    <Form.Group controlId={"distance-"+entry.building.id} key={"time-input-"+index} className={'row mx-auto form-row'}>
+                                        <Col className="my-auto text-end text-break" xs={3} md={2}>
+                                            <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.code}</h6></Form.Label>
+                                        </Col>
+                                        <Col className="pe-0" xs={6} md={8}>
+                                            <Form.Control type="number" value={entry.time} onChange={(e) => onChangeTime(e, entry)}/>
+                                        </Col>
+                                        <Col className="my-auto text-start mx-0" xs={3} md={2}>
+                                            {t("forms.minutes")}
+                                        </Col>
+                                    </Form.Group>
                                 ))
                             ] : [<div key="no-buildings-msg">{t("forms.onlyBuilding")}</div>]
                         }
                         </div>
-                    </Form.Group>
+                    </div>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

@@ -94,7 +94,9 @@ function SignInRecoverPasswordForm(props) {
                                               type="email"
                                               label="register.email"
                                               name="email"
+                                              id="email-reset-password"
                                               placeholder="register.placeholders.email"
+                                              autoComplete="email"
                                               color="black"
                                               value={values.email}
                                               error={errors.email}

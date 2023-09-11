@@ -91,7 +91,9 @@ function SignUpUniversityForm(props) {
                         type="text"
                         label="register.name"
                         name="name"
+                        id="university-name"
                         placeholder="register.placeholders.name"
+                        autoComplete="organization"
                         value={values.name}
                         error={errors.name}
                         touched={touched.name}
@@ -102,7 +104,9 @@ function SignUpUniversityForm(props) {
                     <FormInputField
                         label="register.email"
                         name="email"
+                        id="university-email"
                         placeholder="register.placeholders.emailUniversity"
+                        autoComplete="email"
                         value={values.email}
                         error={errors.email}
                         touched={touched.email}
@@ -114,7 +118,9 @@ function SignUpUniversityForm(props) {
                         type="password"
                         label="register.password"
                         name="password"
+                        id="university-password"
                         placeholder="register.placeholders.password"
+                        autoComplete="new-password"
                         value={values.password}
                         error={errors.password}
                         touched={touched.password}
@@ -126,7 +132,9 @@ function SignUpUniversityForm(props) {
                         type="password"
                         label="register.repeatPassword"
                         name="repeat_password"
+                        id="university-repeat-pass"
                         placeholder="register.placeholders.password"
+                        autoComplete="new-password"
                         value={values.repeat_password}
                         error={errors.repeat_password}
                         touched={touched.repeat_password}

@@ -4,10 +4,10 @@ import { Form } from 'react-bootstrap';
 
 const FormInputField = (props) => {
     const { t } = useTranslation();
-    const { type, label, placeholder, name, color, error, touched, ...other } = props;
+    const { type, label, placeholder, name, color, error, touched, id, ...other } = props;
     return (
         <React.Fragment>
-            <Form.Group className={'row mx-auto form-row text-'+color}>
+            <Form.Group controlId={"input-"+id} className={'row mx-auto form-row'}>
                 <div className="col-3 text-break text-end my-auto">
                     <Form.Label className="col text-end my-auto">
                         <h5 className="my-0"><strong>{t(`${label}`)}</strong></h5>
