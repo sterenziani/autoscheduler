@@ -86,6 +86,33 @@ export default class MemoryCourseClassDao extends CourseClassDao {
         return paginateCollection(courseCourseClasses, compareCourseClasses, limit, offset);
     }
 
+    public async findAllByTermId(
+        termId: string,
+        text?: string,
+    ): Promise<CourseClass[]> {
+        text = text ? text.toLowerCase() : text;
+        let termCourseClasses = getChildsFromParent(
+            MEMORY_DATABASE.courseClassesOfTerm,
+            MEMORY_DATABASE.courseClasses,
+            termId,
+        );
+
+        if (text) {
+            termCourseClasses = termCourseClasses.filter((cc) => cc.name.toLowerCase().includes(text!));
+        }
+
+        // sorting by name, then id
+        const compareCourseClasses = (c1: CourseClass, c2: CourseClass) => {
+            if (c1.name < c2.name) return -1;
+            if (c1.name > c2.name) return 1;
+
+            if (c1.id < c2.id) return -1;
+            if (c1.id > c2.id) return 1;
+            return 0;
+        };
+        return termCourseClasses.sort(compareCourseClasses);
+    }
+
     public async set(courseClass: CourseClass): Promise<void> {
         await this.getById(courseClass.id);
 

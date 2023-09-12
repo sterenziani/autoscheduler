@@ -2,6 +2,7 @@ import TermDao from '../persistence/abstract/term.dao';
 import TermDaoFactory from '../factories/termDao.factory';
 import Term from '../models/abstract/term.model';
 import UniversityService from './university.service';
+import CourseClassService from './courseClass.service';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
@@ -9,6 +10,7 @@ import { ERRORS } from '../constants/error.constants';
 export default class TermService {
     private static instance: TermService;
     private universityService!: UniversityService;
+    private courseClassService!: CourseClassService;
 
     private dao: TermDao;
 
@@ -25,6 +27,7 @@ export default class TermService {
 
     init() {
         this.universityService = UniversityService.getInstance();
+        this.courseClassService = CourseClassService.getInstance();
     }
 
     async getTerm(id: string): Promise<Term> {
@@ -60,6 +63,7 @@ export default class TermService {
         // validate permission
         if (maybeUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
+        await this.courseClassService.deleteCourseClassesForTerm(universityId, termId);
         await this.dao.deleteTerm(termId);
     }
 

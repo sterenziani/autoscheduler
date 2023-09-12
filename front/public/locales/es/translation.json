@@ -94,7 +94,7 @@
         "areYouSureProgram": "¿Seguro que desea eliminar la carrera '{{code}} - {{name}}'?",
         "areYouSureClass": "¿Seguro que desea eliminar la comisión {{class}} de la materia '{{code}} - {{name}}' del período {{term}}?",
         "areYouSureBuilding": "¿Seguro que desea eliminar la sede '{{code}} - {{name}}'?",
-        "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'?",
+        "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'? Todas las comisiones creadas para este período también serán eliminadas, sin importar su curso asociado.",
         "noRemainingCoursesProgram": "No quedan materias correspondientes a este plan.",
         "noRemainingCourses": "No quedan más materias.",
         "inputTextToSearch": "Escriba el nombre o código de un curso para buscarlo.",
