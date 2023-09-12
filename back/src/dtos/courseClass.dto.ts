@@ -18,7 +18,13 @@ export const courseClassToDto = (courseClass: CourseClass, courseId: string, ter
     };
 };
 
-export const lectureToDto = (lecture: Lecture, buildingId: string): ILectureDto => {
+export const lectureToDto = (lecture: Lecture, buildingId: string|undefined): ILectureDto => {
+    if(!buildingId)
+        return {
+            day: lecture.time.dayOfWeek,
+            startTime: lecture.time.startTime.toString(),
+            endTime: lecture.time.endTime.toString(),
+        };
     return {
         day: lecture.time.dayOfWeek,
         startTime: lecture.time.startTime.toString(),
@@ -51,6 +57,6 @@ interface ILectureDto {
     day: DAY;
     startTime: string;
     endTime: string;
-    buildingId: string;
-    buildingUrl: string;
+    buildingId?: string;
+    buildingUrl?: string;
 }

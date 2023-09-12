@@ -14,6 +14,6 @@ export default abstract class Lecture extends GenericModel {
     }
 
     // Methods
-    public abstract getBuilding(): Promise<Building>;
+    public abstract getBuilding(): Promise<Building | undefined>;
     public abstract getCourseClass(): Promise<CourseClass>;
 }

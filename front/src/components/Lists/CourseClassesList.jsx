@@ -132,7 +132,7 @@ function CourseClassesList(props) {
                                             entry.lectures.map((l, lidx) => (
                                                 <Row key={'row-' + index + '-' + lidx}>
                                                     <Col className="text-start">
-                                                        <b>{t('days.' + l.day)}:</b>{' '} {l.startTime} - {l.endTime} ({l.building.code})
+                                                        <b>{t('days.' + l.day)}:</b>{' '} {l.startTime} - {l.endTime} ({l.building && l.building.code})
                                                     </Col>
                                                 </Row>
                                             ))

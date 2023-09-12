@@ -54,7 +54,7 @@ export default class MemoryLectureDao extends LectureDao {
 
         // TODO add session logic for transactional operations
         removeChildFromParent(MEMORY_DATABASE.lecturesOfCourseClass, courseClass.id, lecture.id);
-        removeChildFromParent(MEMORY_DATABASE.lecturesOfBuilding, building.id, lecture.id);
+        if(building) removeChildFromParent(MEMORY_DATABASE.lecturesOfBuilding, building.id, lecture.id);
         MEMORY_DATABASE.lectures.delete(lecture.id);
     }
 }

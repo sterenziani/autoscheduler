@@ -54,20 +54,23 @@ function EditCourseClassPage(props) {
 
     useEffect( () => {
         async function execute() {
-            if(id && user && !courseClass)
-                await Promise.all([loadCourseClass()])
-            if(!id && !courseClass)
-                setCourseClass({name: t("forms.placeholders.className")})
+            // 1. Load terms and buildings
+            if(!terms && !buildings)
+                await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
+            if(terms && buildings) {
+                // 2. Load courseClass or set placeholder
+                if(!courseClass){
+                    if(id) await Promise.all([loadCourseClass()])
+                    else setCourseClass({name: t("forms.placeholders.className")})
+                }
 
-            if(user && courseClass) {
-                if(!terms && !buildings)
-                    await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
-                else if (terms && buildings) {
-                    if(!id && buildings.length > 0){
-                            setClassName("X")
-                            const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
-                            setLectures([{...firstLecture, buildingId: buildings[0].id}])
-                            await Promise.all([readCourseAndTerm()])
+                // 3. Initialize new class values and end loading
+                if(user && terms && buildings && courseClass) {
+                    if(!id && buildings.length > 0) {
+                        setClassName("X")
+                        const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
+                        setLectures([{...firstLecture, buildingId: buildings[0].id}])
+                        await Promise.all([readCourseAndTerm()])
                     }
                     else
                         setLoading(false)
@@ -93,7 +96,17 @@ function EditCourseClassPage(props) {
                 setSelectedCourse(resp.data.course)
                 setselectedTermId(resp.data.term.id)
                 setClassName(resp.data.courseClass)
-                setLectures(resp.data.lectures)
+
+                // If lecture's building is undefined, replace it with first option in list
+                let lecturesWithBuilding = []
+                for(const l of resp.data.lectures){
+                    if(!l.building && buildings && buildings.length > 0){
+                        l.building = buildings[0]
+                        l.buildingId = buildings[0].id
+                    }
+                    lecturesWithBuilding.push(l)
+                }
+                setLectures(lecturesWithBuilding)
             }
         });
     }

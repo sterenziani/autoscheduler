@@ -104,9 +104,9 @@ export default class MemoryCourseClassDao extends CourseClassDao {
 
         // Delete lectures and references to them
         for(const l of lectures){
-            const building: Building = await l.getBuilding();
+            const building: Building|undefined = await l.getBuilding();
             removeChildFromParent(MEMORY_DATABASE.lecturesOfCourseClass, courseClass.id, l.id);
-            removeChildFromParent(MEMORY_DATABASE.lecturesOfBuilding, building.id, l.id);
+            if(building) removeChildFromParent(MEMORY_DATABASE.lecturesOfBuilding, building.id, l.id);
             MEMORY_DATABASE.lectures.delete(l.id);
         }
 

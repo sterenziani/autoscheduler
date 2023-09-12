@@ -195,7 +195,7 @@ export default class ScheduleService {
                         // STEP 7c - No unavailable time between buildings
                         const b1 = await l1.getBuilding();
                         const b2 = await l2.getBuilding();
-                        if(b1.id != b2.id) {
+                        if(b1 && b2 && b1.id != b2.id) {
                             const distance = await b1.getDistanceInMinutesTo(b2.id);
                             if(gap < (distance?distance:0)) return false;
                         }

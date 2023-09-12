@@ -8,14 +8,17 @@ import Lecture from '../../abstract/lecture.model';
 
 export default class MemoryLecture extends Lecture {
     /////////////////// Abstract Methods Implementation ///////////////////
-    public async getBuilding(): Promise<Building> {
-        const maybeBuilding = getParentFromChild<Building>(
-            MEMORY_DATABASE.lecturesOfBuilding,
-            MEMORY_DATABASE.buildings,
-            this.id,
-        );
-        if (!maybeBuilding) throw new GenericException(ERRORS.NOT_FOUND.BUILDING);
-        return maybeBuilding;
+    public async getBuilding(): Promise<Building | undefined> {
+        try{
+            const maybeBuilding = getParentFromChild<Building>(
+                MEMORY_DATABASE.lecturesOfBuilding,
+                MEMORY_DATABASE.buildings,
+                this.id,
+            );
+            return maybeBuilding;
+        } catch(e) {
+            return undefined;
+        }
     }
 
     public async getCourseClass(): Promise<CourseClass> {

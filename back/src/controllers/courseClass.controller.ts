@@ -40,7 +40,7 @@ export class CourseClassController {
         try {
             const courseClass: CourseClass = await this.courseClassService.getCourseClass(courseClassId);
             const lectures: Lecture[] = await courseClass.getLectures();
-            const lecturesWithBuilding: { lecture: Lecture; building: Building }[] = await Promise.all(
+            const lecturesWithBuilding: { lecture: Lecture; building: Building|undefined }[] = await Promise.all(
                 lectures.map(async (l) => {
                     return {
                         lecture: l,
@@ -49,7 +49,7 @@ export class CourseClassController {
                 }),
             );
             res.status(HTTP_STATUS.OK).send(
-                lecturesWithBuilding.map((lwb) => CourseClassDto.lectureToDto(lwb.lecture, lwb.building.id)),
+                lecturesWithBuilding.map((lwb) => CourseClassDto.lectureToDto(lwb.lecture, lwb.building?lwb.building.id:undefined)),
             );
         } catch (e) {
             next(e);

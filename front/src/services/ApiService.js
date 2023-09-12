@@ -513,8 +513,10 @@ const getCourseClass = async (classId) => {
 
         const listOfLecturesResponse = await api.get(courseClass.lecturesUrl, AuthService.getRequestHeaders())
         for (const l of listOfLecturesResponse.data) {
-            const buildingDataResponse = await api.get(l.buildingUrl, AuthService.getRequestHeaders())
-            l.building = buildingDataResponse.data
+            if(l.buildingUrl){
+                const buildingDataResponse = await api.get(l.buildingUrl, AuthService.getRequestHeaders())
+                l.building = buildingDataResponse.data
+            }
 
             const startTime = l.startTime.split(':')
             const endTime = l.endTime.split(':')
