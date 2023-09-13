@@ -52,19 +52,17 @@ export class StudentController {
     public createStudent: RequestHandler = async (req, res, next) => {
         const email = req.body.email as string;
         const password = req.body.password as string;
-        const universityId = req.body.universityId as string;
         const programId = req.body.programId as string;
-        const internalId = req.body.internalId as string;
         const name = req.body.name as string;
         const locale = req.headers['accept-language'];
+
+        if (!email || !password || !name || !programId) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
 
         try {
             const student: Student = await this.studentService.createStudent(
                 email,
                 password,
-                universityId,
                 programId,
-                internalId,
                 name,
                 locale??"en"
             );

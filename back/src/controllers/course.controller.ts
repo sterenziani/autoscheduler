@@ -1,5 +1,7 @@
 import CourseService from '../services/course.service';
 import { RequestHandler } from 'express';
+import GenericException from '../exceptions/generic.exception';
+import { ERRORS } from '../constants/error.constants';
 import { HTTP_STATUS } from '../constants/http.constants';
 import Course from '../models/abstract/course.model';
 import University from '../models/abstract/university.model';
@@ -103,6 +105,7 @@ export class CourseController {
         const name = req.body.name as string;
         const internalId = req.body.internalId as string;
         const requirements = req.body.requirements as { [programId: string]: string[] };
+        if (!internalId || !name || !requirements) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
             const course: Course = await this.courseService.createCourse(userInfo.id, name, internalId, requirements);
@@ -119,12 +122,20 @@ export class CourseController {
         const name = req.body.name as string;
         const internalId = req.body.internalId as string;
         const requirements = req.body.requirements as { [p: string]: string[] };
+        if (!internalId || !name || !requirements) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
+            await this.verifyOwnership(courseId, userInfo.id);
             const course: Course = await this.courseService.updateCourse(courseId, name, internalId, requirements);
             res.status(HTTP_STATUS.OK).location(CourseDto.getCourseUrl(course.id)).send();
         } catch (e) {
             next(e);
         }
     };
+
+    private verifyOwnership = async (courseId: string, userId: string) => {
+        const course = await this.courseService.getCourse(courseId);
+        const courseUniversity = await course.getUniversity();
+        if (courseUniversity.id !== userId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+    }
 }

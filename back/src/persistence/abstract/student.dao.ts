@@ -11,9 +11,7 @@ export default abstract class StudentDao extends GenericDao<Student> {
     // Abstract Methods
     public abstract create(
         userId: string,
-        universityId: string,
         programId: string,
-        internalId: string,
         name: string,
     ): Promise<Student>;
 }

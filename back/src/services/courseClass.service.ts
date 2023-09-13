@@ -96,7 +96,6 @@ export default class CourseClassService {
 
     async modifyCourseClass(
         id: string,
-        universityId: string,
         courseId?: string,
         termId?: string,
         name?: string,
@@ -109,9 +108,6 @@ export default class CourseClassService {
         // Check university exists and same as user
         const courseClassCourse = await courseClass.getCourse();
         const courseClassUniversity = await courseClassCourse.getUniversity();
-        const userUniversity = await this.universityService.getUniversity(universityId);
-        if (!userUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
-        if (userUniversity.id !== courseClassUniversity.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
         // Check term and Course exist
         if(courseId) await this.courseService.getCourse(courseId);
@@ -156,21 +152,15 @@ export default class CourseClassService {
         return courseClass;
     }
 
-    async deleteCourseClass(universityId: string, id: string) {
-        const courseClass = await this.getCourseClass(id);
-        const course = await courseClass.getCourse();
-        const courseClassUniversity = await course.getUniversity();
-
-        // check if university owns courseClass
-        if (courseClassUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
-
+    async deleteCourseClass(id: string) {
+        // TODO: Lectures are deleted in DAO. See if that should be done here
         await this.dao.delete(id);
     }
 
-    async deleteCourseClassesForTerm(universityId: string, termId: string) {
+    async deleteCourseClassesForTerm(termId: string) {
         const courseClasses = await this.dao.findAllByTermId(termId);
         for(const cc of courseClasses){
-            await this.deleteCourseClass(universityId, cc.id);
+            await this.deleteCourseClass(cc.id);
         }
     }
 }

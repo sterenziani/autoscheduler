@@ -33,6 +33,7 @@ export class BuildingController {
         const distances = req.body.distances as { [buildingId: string]: number } | undefined;
 
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+        if(distances) await this.validateDistancesMap(distances);
 
         try {
             const building: Building = await this.buildingService.createBuilding(
@@ -56,8 +57,10 @@ export class BuildingController {
         const distances = req.body.distances as { [buildingId: string]: number } | undefined;
 
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+        if(distances) await this.validateDistancesMap(distances);
 
         try {
+            await this.verifyOwnership(buildingId, userInfo.id);
             const building: Building = await this.buildingService.updateBuilding(
                 buildingId,
                 internalId,
@@ -75,10 +78,27 @@ export class BuildingController {
         const buildingId = req.params.buildingId;
 
         try {
-            await this.buildingService.deleteBuilding(userInfo.id, buildingId);
+            await this.verifyOwnership(buildingId, userInfo.id);
+            await this.buildingService.deleteBuilding(buildingId);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }
     };
+
+    private verifyOwnership = async (buildingId: string, userId: string) => {
+        const building = await this.buildingService.getBuilding(buildingId);
+        const buildingUniversity = await building.getUniversity();
+        if (buildingUniversity.id !== userId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+    }
+
+    private validateDistancesMap = async (distances: { [buildingId: string]: number }) => {
+        const differentBuildingIds: Set<string> = new Set();
+        for (const buildingId of Object.keys(distances)) {
+            if (differentBuildingIds.has(buildingId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+            if (typeof distances[buildingId] !== 'number')
+                throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+            differentBuildingIds.add(buildingId);
+        }
+    }
 }

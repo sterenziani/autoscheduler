@@ -63,13 +63,7 @@ export default class BuildingService {
     ): Promise<Building> {
         // validate existence of university & buildings in distance
         await this.universityService.getUniversity(universityId);
-        const differentBuildingIds: Set<string> = new Set();
-        for (const buildingId of Object.keys(distances)) {
-            if (differentBuildingIds.has(buildingId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
-            if (typeof distances[buildingId] !== 'number')
-                throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
-            differentBuildingIds.add(buildingId);
-        }
+        
         // check if a building with internalId already exists
         if (await this.dao.findByInternalId(universityId, internalId))
             throw new GenericException(ERRORS.BAD_REQUEST.BUILDING_ALREADY_EXISTS);
@@ -102,11 +96,6 @@ export default class BuildingService {
         // validate existence of building and programIds
         const building: Building = await this.getBuilding(buildingId);
         const buildingUniversity = await building.getUniversity();
-        const differentBuildingIds: Set<string> = new Set();
-        for (const buildingId of Object.keys(distances)) {
-            if (differentBuildingIds.has(buildingId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
-            differentBuildingIds.add(buildingId);
-        }
 
         // check if a building with new internalId already exists
         if (internalId != building.internalId) {
@@ -128,13 +117,9 @@ export default class BuildingService {
         return building;
     }
 
-    async deleteBuilding(universityId: string, id: string) {
+    async deleteBuilding(id: string) {
         const building = await this.getBuilding(id);
         const buildingUniversity = await building.getUniversity();
-
-        // check if university owns building
-        if (buildingUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
-
         const universityBuildings = await this.dao.findByUniversityId(buildingUniversity.id);
 
         // TODO add session logic for transactional operations

@@ -44,11 +44,6 @@ export default class ProgramService {
         optionalCourses: string[] = [],
     ): Promise<Program> {
         // validate existence of university & courses
-        const differentCourseIds: Set<string> = new Set();
-        for (const courseId of mandatoryCourses.concat(optionalCourses)) {
-            if (differentCourseIds.has(courseId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
-            differentCourseIds.add(courseId);
-        }
         await this.universityService.getUniversity(universityId);
         await Promise.all(
             mandatoryCourses.concat(optionalCourses).map(async (cId) => {

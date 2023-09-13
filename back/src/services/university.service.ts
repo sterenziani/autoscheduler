@@ -40,7 +40,6 @@ export default class UniversityService {
 
     async createUniversity(email: string, password: string, name: string, locale: string): Promise<University> {
         // validate name
-        if (!name) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
         if (await this.dao.findByName(name)) throw new GenericException(ERRORS.BAD_REQUEST.UNIVERSITY_ALREADY_EXISTS);
 
         // create user

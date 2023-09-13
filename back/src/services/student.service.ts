@@ -70,22 +70,18 @@ export default class StudentService {
     async createStudent(
         email: string,
         password: string,
-        universityId: string,
         programId: string,
-        internalId: string,
         name: string,
         locale: string
     ): Promise<Student> {
         // validate params
-        if (!internalId || !name) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
         const program = await this.programService.getProgram(programId);
         const university = await program.getUniversity();
-        if (universityId != university.id) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
 
         // create user
         const user = await this.userService.createUser(email, password, ROLE.STUDENT, locale);
         // create student
-        return await this.dao.create(user.id, universityId, programId, internalId, name);
+        return await this.dao.create(user.id, programId, name);
     }
 
     async addStudentCompletedCourses(studentId: string, completedCourses: string[]): Promise<void> {

@@ -56,37 +56,21 @@ export default class TermService {
         return await this.dao.create(universityId, internalId, name, false, startDate);
     }
 
-    async deleteTerm(universityId: string, termId: string): Promise<void> {
-        const maybeUniversity = await this.universityService.getUniversity(universityId);
-        if (!maybeUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
-
-        // validate permission
-        if (maybeUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
-
-        await this.courseClassService.deleteCourseClassesForTerm(universityId, termId);
-        await this.dao.deleteTerm(termId);
-    }
-
     async modifyTerm(
         id: string,
-        universityId: string,
         internalId?: string,
         name?: string,
         published?: boolean,
         startDate?: Date,
     ): Promise<Term> {
         const term = await this.getTerm(id);
-        if (!term) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
+        if (!term) throw new GenericException(ERRORS.NOT_FOUND.TERM);
 
-        const maybeUniversity = await this.universityService.getUniversity(universityId);
-        if (!maybeUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
-
-        // validate permission
-        if (maybeUniversity.id !== universityId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+        const university = await term.getUniversity();
 
         // check if a term with new internalId already exists
         if (internalId && internalId != term.internalId) {
-            const termWithRequestedInternalId = await this.dao.findByInternalId(maybeUniversity.id, internalId);
+            const termWithRequestedInternalId = await this.dao.findByInternalId(university.id, internalId);
             if (termWithRequestedInternalId && termWithRequestedInternalId.id != term.id) {
                 throw new GenericException(ERRORS.BAD_REQUEST.TERM_ALREADY_EXISTS);
             }
@@ -99,5 +83,10 @@ export default class TermService {
 
         await this.dao.set(term);
         return term;
+    }
+
+    async deleteTerm(termId: string): Promise<void> {
+        await this.courseClassService.deleteCourseClassesForTerm(termId);
+        await this.dao.deleteTerm(termId);
     }
 }

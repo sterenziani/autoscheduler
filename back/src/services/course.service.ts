@@ -56,6 +56,9 @@ export default class CourseService {
                 const program = await this.programService.getProgram(pId);
                 const university = await program.getUniversity();
                 if (university.id != universityId) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
+                for(const cId of requiredCourses[pId]){
+                    const course = await this.getCourse(cId);
+                }
             }),
         );
         // check if a course with internalId already exists

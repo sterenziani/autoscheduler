@@ -88,10 +88,13 @@ export class CourseClassController {
         const name = req.body.name as string | undefined;
         const lectures = validateArray(req.body.lectures, validateLecture);
 
+        if (!courseId || !termId || !name || !lectures)
+            return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+
         try {
+            await this.verifyOwnership(courseClassId, userInfo.id);
             const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(
                 courseClassId,
-                userInfo.id,
                 courseId,
                 termId,
                 name,
@@ -108,10 +111,18 @@ export class CourseClassController {
         const courseClassId = req.params.courseClassId;
 
         try {
-            await this.courseClassService.deleteCourseClass(userInfo.id, courseClassId);
+            await this.verifyOwnership(courseClassId, userInfo.id);
+            await this.courseClassService.deleteCourseClass(courseClassId);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }
     };
+
+    private verifyOwnership = async (courseClassId: string, userId: string) => {
+        const courseClass = await this.courseClassService.getCourseClass(courseClassId);
+        const course = await courseClass.getCourse();
+        const courseUniversity = await course.getUniversity();
+        if (courseUniversity.id !== userId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+    }
 }

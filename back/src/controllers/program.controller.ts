@@ -2,6 +2,8 @@ import ProgramService from '../services/program.service';
 import { RequestHandler } from 'express';
 import Program from '../models/abstract/program.model';
 import University from '../models/abstract/university.model';
+import GenericException from '../exceptions/generic.exception';
+import { ERRORS } from '../constants/error.constants';
 import { HTTP_STATUS } from '../constants/http.constants';
 import * as ProgramDto from '../dtos/program.dto';
 import * as CourseDto from '../dtos/course.dto';
@@ -32,6 +34,9 @@ export class ProgramController {
         const mandatoryCourses = req.body.mandatoryCourses as string[] | undefined;
         const optionalCourses = req.body.optionalCourses as string[] | undefined;
 
+        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+        this.validateCoursesLists(mandatoryCourses, optionalCourses);
+
         try {
             const program: Program = await this.programService.createProgram(
                 userInfo.id,
@@ -55,7 +60,11 @@ export class ProgramController {
         const mandatoryCourses = req.body.mandatoryCourses as string[] | undefined;
         const optionalCourses = req.body.optionalCourses as string[] | undefined;
 
+        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+        this.validateCoursesLists(mandatoryCourses, optionalCourses);
+
         try {
+            await this.verifyOwnership(programId, userInfo.id);
             const program: Program = await this.programService.updateProgram(
                 programId,
                 internalId,
@@ -110,4 +119,18 @@ export class ProgramController {
             next(e);
         }
     };
+
+    private verifyOwnership = async (programId: string, userId: string) => {
+        const program = await this.programService.getProgram(programId);
+        const programUniversity = await program.getUniversity();
+        if (programUniversity.id !== userId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+    }
+
+    private validateCoursesLists = async (mandatoryCourses: string[] = [], optionalCourses: string[] = []) => {
+        const differentCourseIds: Set<string> = new Set();
+        for (const courseId of mandatoryCourses.concat(optionalCourses)) {
+            if (differentCourseIds.has(courseId)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+            differentCourseIds.add(courseId);
+        }
+    }
 }

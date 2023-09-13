@@ -59,9 +59,9 @@ export class TermController {
             return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
+            await this.verifyOwnership(termId, userInfo.id);
             const term: Term = await this.termService.modifyTerm(
                 termId,
-                userInfo.id,
                 internalId,
                 name,
                 published,
@@ -78,10 +78,17 @@ export class TermController {
         const termId = req.params.termId;
 
         try {
-            await this.termService.deleteTerm(userInfo.id, termId);
+            await this.verifyOwnership(termId, userInfo.id);
+            await this.termService.deleteTerm(termId);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }
     };
+
+    private verifyOwnership = async (termId: string, userId: string) => {
+        const term = await this.termService.getTerm(termId);
+        const termUniversity = await term.getUniversity();
+        if (termUniversity.id !== userId) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+    }
 }

@@ -108,9 +108,7 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
         const payload = {
             'email': email,
             'password': password,
-            "universityId": universityId,
             "programId": programId,
-            "internalId": "XXXX",
             "name": name
         }
         const response = await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
