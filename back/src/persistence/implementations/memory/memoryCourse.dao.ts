@@ -2,9 +2,14 @@ import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistenc
 import {
     addChildToParent,
     getChildsFromParent,
+    removeChildFromParent,
+    removeGrandchildFromParent,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
 import Course from '../../../models/abstract/course.model';
+import Program from '../../../models/abstract/program.model';
+import Student from '../../../models/abstract/student.model';
+import University from '../../../models/abstract/university.model';
 import MemoryCourse from '../../../models/implementations/memory/memoryCourse.model';
 import CourseDao from '../../abstract/course.dao';
 import MemoryUniversityDao from './memoryUniversity.dao';
@@ -74,5 +79,34 @@ export default class MemoryCourseDao extends CourseDao {
 
         const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
         return paginateCollection(courses, compareCourses, limit, offset);
+    }
+
+    public async delete(courseId: string): Promise<void> {
+        const course: Course = await this.getById(courseId);
+        const university: University = await course.getUniversity();
+        const programs: Program[] = await university.getPrograms();
+        const courses: Course[] = await university.getCourses();
+        const students: Student[] = await university.getStudents();
+
+        for(const p of programs) {
+            // Remove course from program
+            removeChildFromParent(MEMORY_DATABASE.mandatoryCoursesOfProgram, p.id, courseId);
+            removeChildFromParent(MEMORY_DATABASE.optionalCoursesOfProgram, p.id, courseId);
+
+            // Remove from course requirements under this program
+            for(const c of courses) {
+                if(c.id != courseId) removeGrandchildFromParent(MEMORY_DATABASE.requiredCoursesOfCourse, c.id, p.id, courseId);
+            }
+        }
+
+        // Remove from student logs
+        for(const student of students) {
+            MEMORY_DATABASE.completedCoursesOfStudent.get(student.id)?.delete(courseId);
+        }
+
+        // Remove references to course
+        removeChildFromParent(MEMORY_DATABASE.coursesOfUniversity, university.id, courseId);
+        MEMORY_DATABASE.requiredCoursesOfCourse.delete(courseId);
+        MEMORY_DATABASE.courses.delete(courseId);
     }
 }

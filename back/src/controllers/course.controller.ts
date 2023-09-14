@@ -133,6 +133,19 @@ export class CourseController {
         }
     };
 
+    public deleteCourse: RequestHandler = async (req, res, next) => {
+        const userInfo = req.user;
+        const courseId = req.params.courseId;
+
+        try {
+            await this.verifyOwnership(courseId, userInfo.id);
+            await this.courseService.deleteCourse(courseId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
     private verifyOwnership = async (courseId: string, userId: string) => {
         const course = await this.courseService.getCourse(courseId);
         const courseUniversity = await course.getUniversity();

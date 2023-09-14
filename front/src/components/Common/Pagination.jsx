@@ -3,7 +3,7 @@ import { Button, Row, Col, Form, Modal, OverlayTrigger, Tooltip } from 'react-bo
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
-const FormInputField = (props) => {
+const Pagination = (props) => {
     const { t } = useTranslation()
     const page = props.page
     const links = props.links? props.links : {}
@@ -70,7 +70,7 @@ const FormInputField = (props) => {
                 </Modal.Header>
                 <Modal.Body>
                 <Row>
-                    <Col><Form.Control type="number" className="text-end" min="1" max={lastPage} defaultValue={page} onChange={(e) => setSelectedPage(e.target.value)}/></Col>
+                    <Col><Form.Control id="page-text-selector" type="number" className="text-end" min="1" max={lastPage} defaultValue={page} onChange={(e) => setSelectedPage(e.target.value)}/></Col>
                     <Col xs={1} className="my-auto text-center">/</Col>
                     <Col className="my-auto text-start ml-5">{lastPage}</Col>
                 </Row>
@@ -85,4 +85,4 @@ const FormInputField = (props) => {
     );
 };
 
-export default FormInputField;
+export default Pagination;

@@ -18,6 +18,10 @@ export default abstract class CourseClassDao extends GenericDao<CourseClass> {
         limit?: number,
         offset?: number,
     ): Promise<PaginatedCollection<CourseClass>>;
+    public abstract findAllByCourseId(
+        courseId: string,
+        text?: string,
+    ): Promise<CourseClass[]>;
     public abstract findAllByTermId(
         termId: string,
         text?: string,

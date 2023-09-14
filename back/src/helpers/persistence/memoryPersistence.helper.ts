@@ -169,6 +169,17 @@ export const addGrandchildToParent = (
     addChildToParent(relationshipMap.get(parentId)!, childId, grandchildId);
 };
 
+// Removes grandchild from child and parent
+export const removeGrandchildFromParent = (
+    relationshipMap: Map<string, Map<string, Set<string>>>,
+    parentId: string,
+    childId: string,
+    grandchildId: string,
+): void => {
+    if (!relationshipMap.get(parentId)) return;
+    removeChildFromParent(relationshipMap.get(parentId)!, childId, grandchildId);
+};
+
 // Resets the map for a parentId
 export const clearParentsGrandchildren = (
     relationshipMap: Map<string, Map<string, Set<string>>>,

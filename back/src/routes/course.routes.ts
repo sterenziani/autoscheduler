@@ -30,6 +30,7 @@ export class CourseRoutes {
             universitiesOnlyMiddleware,
             this.controller.updateCourse,
         );
+        this.router.delete('/:courseId', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.deleteCourse);
         this.router.get('/:courseId/requirements/', this.controller.getProgramsWithCourseRequirements);
         this.router.get('/:courseId/requirements/:programId', this.controller.getCourseRequirementsForProgram);
         this.router.get('/:courseId/course-classes', this.controller.getCourseCourseClasses);

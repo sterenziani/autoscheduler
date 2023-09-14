@@ -163,4 +163,11 @@ export default class CourseClassService {
             await this.deleteCourseClass(cc.id);
         }
     }
+
+    async deleteCourseClassesForCourse(courseId: string) {
+        const courseClasses = await this.dao.findAllByCourseId(courseId);
+        for(const cc of courseClasses){
+            await this.deleteCourseClass(cc.id);
+        }
+    }
 }

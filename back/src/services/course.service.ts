@@ -4,12 +4,14 @@ import Course from '../models/abstract/course.model';
 import Program from '../models/abstract/program.model';
 import ProgramService from './program.service';
 import UniversityService from './university.service';
+import CourseClassService from './courseClass.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 
 export default class CourseService {
     private static instance: CourseService;
+    private courseClassService!: CourseClassService;
     private programService!: ProgramService;
     private universityService!: UniversityService;
 
@@ -27,6 +29,7 @@ export default class CourseService {
     }
 
     init() {
+        this.courseClassService = CourseClassService.getInstance();
         this.programService = ProgramService.getInstance();
         this.universityService = UniversityService.getInstance();
     }
@@ -100,6 +103,11 @@ export default class CourseService {
         await course.setRequiredCourses(requiredCourses);
         await this.dao.set(course);
         return course;
+    }
+
+    async deleteCourse(id: string) {
+        await this.courseClassService.deleteCourseClassesForCourse(id);
+        await this.dao.delete(id);
     }
 
     async getCoursesByText(

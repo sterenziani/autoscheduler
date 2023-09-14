@@ -101,16 +101,25 @@ export default class MemoryCourseClassDao extends CourseClassDao {
             termCourseClasses = termCourseClasses.filter((cc) => cc.name.toLowerCase().includes(text!));
         }
 
-        // sorting by name, then id
-        const compareCourseClasses = (c1: CourseClass, c2: CourseClass) => {
-            if (c1.name < c2.name) return -1;
-            if (c1.name > c2.name) return 1;
+        return termCourseClasses;
+    }
 
-            if (c1.id < c2.id) return -1;
-            if (c1.id > c2.id) return 1;
-            return 0;
-        };
-        return termCourseClasses.sort(compareCourseClasses);
+    public async findAllByCourseId(
+        courseId: string,
+        text?: string,
+    ): Promise<CourseClass[]> {
+        text = text ? text.toLowerCase() : text;
+        let courseClasses = getChildsFromParent(
+            MEMORY_DATABASE.courseClassesOfCourse,
+            MEMORY_DATABASE.courseClasses,
+            courseId,
+        );
+
+        if (text) {
+            courseClasses = courseClasses.filter((cc) => cc.name.toLowerCase().includes(text!));
+        }
+
+        return courseClasses;
     }
 
     public async set(courseClass: CourseClass): Promise<void> {

@@ -428,13 +428,10 @@ const saveCourse = async (id, name, internalId, requirements) => {
     return createOrUpdateObject("course/", payload, id)
 }
 
-// TODO: Implement me
-const deleteCourse = (course) =>
-    new Promise((resolve, reject) => {
-        const courses = SgaConstants.courses[9];
-        courses.splice(courses.indexOf(course), 1);
-        setTimeout(() => resolve(courses), RESOLVE_DELAY);
-    });
+const deleteCourse = async (courseId) => {
+    const endpoint = "course/"+courseId
+    return simpleApiDeleteRequest(endpoint)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// TERM FUNCTIONS ///////////////////////////////
@@ -599,7 +596,7 @@ const ApiService = {
     getRequiredCourses: getRequiredCourses,
     getRequiredCoursesForProgram: getRequiredCoursesForProgram,
     saveCourse: saveCourse,
-    deleteCourse: deleteCourse, // TODO
+    deleteCourse: deleteCourse,
 
     getTerms: getTerms,
     getTerm: getTerm,
