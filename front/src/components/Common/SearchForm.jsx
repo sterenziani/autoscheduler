@@ -19,7 +19,8 @@ function SearchForm(props) {
     const [timeError, setTimeError] = useState();
     const [terms, setTerms] = useState();
     const [params, setParams] = useState({
-        programId: student.program.id, termId: undefined, hours: 24,
+        programId: (student.program? student.program.id:undefined),
+        termId: undefined, hours: 24,
         reduceDays: true, prioritizeUnlocks: true,
         unavailableTimeSlots: [JSON.parse(JSON.stringify(INSTANT_DATE))]
     });
@@ -191,7 +192,7 @@ function SearchForm(props) {
                             placeholder={t('search.program')}
                             cacheOptions
                             defaultOptions
-                            defaultValue = {{value:student.program.id, code: student.program.code, name: student.program.name}}
+                            defaultValue = {student.program? {value:student.program.id, code: student.program.code, name: student.program.name}:undefined}
                             noOptionsMessage={() => t('selectNoResults')}
                             getOptionLabel={e => e.code+' - '+e.name}
                             getOptionValue={e => e.id}

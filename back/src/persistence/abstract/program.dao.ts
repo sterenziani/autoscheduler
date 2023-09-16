@@ -11,6 +11,7 @@ export default abstract class ProgramDao extends GenericDao<Program> {
 
     // Abstract Methods
     public abstract create(universityId: string, internalId: string, name: string): Promise<Program>;
+    public abstract delete(programId: string): Promise<void>;
     public abstract findByInternalId(universityId: string, internalId: string): Promise<Program | undefined>;
     public abstract findByText(
         universityId: string,

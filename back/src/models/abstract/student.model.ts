@@ -17,7 +17,7 @@ export default abstract class Student extends User {
 
     // Methods
     public abstract getUniversity(): Promise<University>;
-    public abstract getProgram(): Promise<Program>;
+    public abstract getProgram(): Promise<Program | undefined>;
     public abstract getCompletedCourses(): Promise<Course[]>;
     public abstract addCompletedCourse(courseId: string): Promise<void>;
     public abstract deleteCompletedCourse(courseId: string): Promise<void>;

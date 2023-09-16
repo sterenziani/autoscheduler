@@ -42,7 +42,7 @@ export class StudentController {
         try {
             const student: Student = await this.studentService.getStudent(userId);
             const university: University = await student.getUniversity();
-            const program: Program = await student.getProgram();
+            const program: Program | undefined = await student.getProgram();
             res.status(HTTP_STATUS.OK).send(StudentDto.studentToDto(student, university, program));
         } catch (e) {
             next(e);

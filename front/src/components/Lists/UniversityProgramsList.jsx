@@ -70,18 +70,19 @@ function UniversityProgramsList(props){
     }
 
     const redirectToEdit = (id) => {
-        navigate('/programs/' + id);
+        navigate('/programs/' + id)
     }
 
     const redirectToCreate = () => {
-        navigate('/programs/new');
+        navigate('/programs/new')
     }
 
-    const deleteProgram = () => {
+    const deleteProgram = async () => {
         if (!programToDelete)
-            return;
-        ApiService.deleteProgram(programToDelete);
+            return
+        await ApiService.deleteProgram(programToDelete.id)
         closeDeleteModal()
+        loadPrograms()
     }
 
     const closeDeleteModal = () => {

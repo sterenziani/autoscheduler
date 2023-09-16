@@ -198,11 +198,15 @@ const getStudent = async (studentId) => {
         }
         const universityResponse = await api.get(user.universityUrl, AuthService.getRequestHeaders())
         const programResponse = await api.get(user.programUrl, AuthService.getRequestHeaders())
-        return {
+
+        let resp = {
             ...user,
             university: universityResponse.data,
-            program: programResponse.data
         }
+        if(programResponse.data)
+            resp.program = programResponse.data
+        
+        return resp
     }
     catch(e) {
         if (e.response)
@@ -345,13 +349,10 @@ const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCours
     return createOrUpdateObject("program/", payload, id)
 }
 
-// TODO: Implement me
-const deleteProgram = (program) =>
-    new Promise((resolve, reject) => {
-        const programs = SgaConstants.programs[9];
-        programs.splice(programs.indexOf(program), 1);
-        setTimeout(() => resolve(programs), RESOLVE_DELAY);
-    });
+const deleteProgram = async (programId) => {
+    const endpoint = "program/"+programId
+    return simpleApiDeleteRequest(endpoint)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// COURSE FUNCTIONS //////////////////////////////
@@ -587,7 +588,7 @@ const ApiService = {
     getMandatoryCourses: getMandatoryCourses,
     getOptionalCourses: getOptionalCourses,
     saveProgram: saveProgram,
-    deleteProgram: deleteProgram, // TODO
+    deleteProgram: deleteProgram,
 
     getCourses: getCourses,
     getCoursesNotInList: getCoursesNotInList,

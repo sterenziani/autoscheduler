@@ -100,6 +100,10 @@ export default class ProgramService {
         return program;
     }
 
+    async deleteProgram(id: string) {
+        await this.dao.delete(id);
+    }
+
     async getProgramsByText(
         universityId: string,
         text?: string,

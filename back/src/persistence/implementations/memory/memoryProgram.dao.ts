@@ -2,9 +2,12 @@ import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistenc
 import {
     addChildToParent,
     getChildsFromParent,
+    removeChildFromParent,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
 import Program from '../../../models/abstract/program.model';
+import Course from '../../../models/abstract/course.model';
+import University from '../../../models/abstract/university.model';
 import MemoryProgram from '../../../models/implementations/memory/memoryProgram.model';
 import ProgramDao from '../../abstract/program.dao';
 import MemoryUniversityDao from './memoryUniversity.dao';
@@ -83,5 +86,24 @@ export default class MemoryProgramDao extends ProgramDao {
         };
 
         return paginateCollection(programs, comparePrograms, limit, offset);
+    }
+
+    public async delete(programId: string): Promise<void> {
+        const program: Program = await this.getById(programId);
+        const university: University = await program.getUniversity();
+        const courses: Course[] = await university.getCourses();
+
+        // Delete courses' requirements under this program
+        for(const c of courses){
+            MEMORY_DATABASE.requiredCoursesOfCourse.get(c.id)?.delete(programId);
+        }
+
+        removeChildFromParent(MEMORY_DATABASE.programsOfUniversity, university.id, programId);
+
+        // Delete key from DB maps
+        MEMORY_DATABASE.studentsOfProgram.delete(programId);
+        MEMORY_DATABASE.mandatoryCoursesOfProgram.delete(programId);
+        MEMORY_DATABASE.optionalCoursesOfProgram.delete(programId);
+        MEMORY_DATABASE.programs.delete(programId);
     }
 }

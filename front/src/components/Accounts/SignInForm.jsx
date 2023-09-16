@@ -69,7 +69,7 @@ function SignInForm(props) {
                             name="email"
                             id="email-login"
                             placeholder="register.placeholders.emailUniversity"
-                            autoComplete="username"
+                            autoComplete="email"
                             value={values.email}
                             error={errors.email}
                             touched={touched.email}

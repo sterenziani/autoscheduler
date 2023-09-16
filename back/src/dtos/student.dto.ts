@@ -6,17 +6,25 @@ import * as UserDto from './user.dto';
 import * as UniversityDto from './university.dto';
 import * as ProgramDto from './program.dto';
 
-export const studentToDto = (student: Student, university: University, program: Program): IStudentDto => {
+export const studentToDto = (student: Student, university: University, program: Program | undefined): IStudentDto => {
     const userDto: UserDto.IUserDto = UserDto.userToDto(student);
     const universityUrl: string = UniversityDto.getUniversityUrl(university.id);
-    const programUrl: string = ProgramDto.getProgramUrl(program.id);
+    if(program){
+        const programUrl: string = ProgramDto.getProgramUrl(program.id);
+        return {
+            ...userDto,
+            name: student.name,
+            approvedCoursesUrl: `${userDto.url}/completed-courses`,
+            universityUrl: universityUrl,
+            programUrl: programUrl,
+        };
+    }
 
     return {
         ...userDto,
         name: student.name,
         approvedCoursesUrl: `${userDto.url}/completed-courses`,
         universityUrl: universityUrl,
-        programUrl: programUrl,
     };
 };
 
@@ -38,6 +46,6 @@ export const getRemainingCoursesUrl = (
 type IStudentDto = UserDto.IUserDto & {
     approvedCoursesUrl: string;
     universityUrl: string;
-    programUrl: string;
+    programUrl?: string;
     name: string;
 };

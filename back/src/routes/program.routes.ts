@@ -30,6 +30,7 @@ export class ProgramRoutes {
             universitiesOnlyMiddleware,
             this.controller.updateProgram,
         );
+        this.router.delete('/:programId', authUsersOnlyMiddleware, universitiesOnlyMiddleware, this.controller.deleteProgram);
         this.router.get('/:programId', this.controller.getProgram);
         this.router.get('/:programId/courses/mandatory', pagingMiddleware, this.controller.getProgramMandatoryCourses);
         this.router.get('/:programId/courses/optional', pagingMiddleware, this.controller.getProgramOptionalCourses);

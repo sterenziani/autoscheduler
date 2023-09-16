@@ -24,14 +24,17 @@ export default class MemoryStudent extends Student {
         return maybeUniversity;
     }
 
-    public async getProgram(): Promise<Program> {
-        const maybeProgram = getParentFromChild<Program>(
-            MEMORY_DATABASE.studentsOfProgram,
-            MEMORY_DATABASE.programs,
-            this.id,
-        );
-        if (!maybeProgram) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
-        return maybeProgram;
+    public async getProgram(): Promise<Program | undefined> {
+        try{
+            const maybeProgram = getParentFromChild<Program>(
+                MEMORY_DATABASE.studentsOfProgram,
+                MEMORY_DATABASE.programs,
+                this.id,
+            );
+            return maybeProgram;
+        } catch(e) {
+            return undefined;
+        }
     }
 
     public async getCompletedCourses(): Promise<Course[]> {

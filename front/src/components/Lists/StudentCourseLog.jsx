@@ -25,7 +25,7 @@ function StudentCourseLog(props) {
     const search = useLocation().search;
 
     const [showAddModal,setShowAddModal] = useState(false);
-    const [selectedProgramId,setselectedProgramId] = useState(student.program.id);
+    const [selectedProgramId,setselectedProgramId] = useState(student.program? student.program.id:undefined);
     const [courseToAdd,setCourseToAdd] = useState();
 
     const readPageInSearchParams = () => {
@@ -171,26 +171,29 @@ function StudentCourseLog(props) {
                                 getOptionLabel={e => e.code+' - '+e.name}
                                 getOptionValue={e => e.id}
                                 noOptionsMessage={() => t('selectNoResults')}
-                                defaultValue = {{value:student.program.id, code: student.program.code, name: student.program.name}}
+                                defaultValue = {student.program? {value:student.program.id, code: student.program.code, name: student.program.name}:undefined}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}
                             />
-                            <AsyncSelect key={selectedProgramId}
-                                aria-label="course-select"
-                                className="text-black m-2"
-                                placeholder={t('forms.course')}
-                                cacheOptions
-                                defaultOptions
-                                noOptionsMessage={(inputValue) => {
-                                    if(inputValue.inputValue.length > 0)
-                                        return t('selectNoResults')
-                                    return t('modal.inputTextToSearch')
-                                }}
-                                getOptionLabel={e => e.code+' - '+e.name}
-                                getOptionValue={e => e.id}
-                                loadOptions={loadRemainingCoursesOptions}
-                                onChange={opt => onChangeCourseToAdd(opt.id)}
-                            />
+                            {
+                                selectedProgramId &&
+                                <AsyncSelect key={selectedProgramId}
+                                    aria-label="course-select"
+                                    className="text-black m-2"
+                                    placeholder={t('forms.course')}
+                                    cacheOptions
+                                    defaultOptions
+                                    noOptionsMessage={(inputValue) => {
+                                        if(inputValue.inputValue.length > 0)
+                                            return t('selectNoResults')
+                                        return t('modal.inputTextToSearch')
+                                    }}
+                                    getOptionLabel={e => e.code+' - '+e.name}
+                                    getOptionValue={e => e.id}
+                                    loadOptions={loadRemainingCoursesOptions}
+                                    onChange={opt => onChangeCourseToAdd(opt.id)}
+                                />
+                            }
                         </Modal.Body>
                         <Modal.Footer>
                         <Button variant="grey" onClick={() => {switchAddModal()}}>

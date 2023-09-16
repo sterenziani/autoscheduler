@@ -78,6 +78,19 @@ export class ProgramController {
         }
     };
 
+    public deleteProgram: RequestHandler = async (req, res, next) => {
+        const userInfo = req.user;
+        const programId = req.params.programId;
+
+        try {
+            await this.verifyOwnership(programId, userInfo.id);
+            await this.programService.deleteProgram(programId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
     public getProgramMandatoryCourses: RequestHandler = async (req, res, next) => {
         const programId = req.params.programId;
         const page = parseInt(req.query.page as string) ?? undefined;
