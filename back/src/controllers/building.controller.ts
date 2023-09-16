@@ -33,9 +33,9 @@ export class BuildingController {
         const distances = req.body.distances as { [buildingId: string]: number } | undefined;
 
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
-        if(distances) await this.validateDistancesMap(distances);
 
         try {
+            if(distances) await this.validateDistancesMap(distances);
             const building: Building = await this.buildingService.createBuilding(
                 userInfo.id,
                 internalId,
