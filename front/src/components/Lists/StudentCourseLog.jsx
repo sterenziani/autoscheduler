@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
-import { Button, Modal, Form, Spinner } from 'react-bootstrap';
+import { Button, Modal, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 import CourseList from './CourseList';
 import AsyncSelect from 'react-select/async'
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
+
 
 function StudentCourseLog(props) {
     const { t } = useTranslation();
@@ -31,19 +32,17 @@ function StudentCourseLog(props) {
     const readPageInSearchParams = () => {
         const params = new URLSearchParams(search)
         const requestedTab = params.get('tab')
-        let requestedPage = params.get('page')
-        if(!requestedTab || requestedTab != "finished_courses")
+        const requestedPage = Number(params.get('page'))
+        if(!requestedTab || requestedTab !== "finished_courses")
             return null
         if(!requestedPage)
-            requestedPage = 1
+            return 1
         return requestedPage
     }
 
     useEffect(() => {
-        let requestedPage = readPageInSearchParams()
-        if(!requestedPage)
-            requestedPage = 1
-        if(!courses || requestedPage != page){
+        const requestedPage = readPageInSearchParams()
+        if(!courses || requestedPage !== page){
             setPage(requestedPage)
             loadCourses(requestedPage)
         }
@@ -68,7 +67,7 @@ function StudentCourseLog(props) {
             }
             else{
                 setCourses(resp.data)
-                setPrevPage(page == 2)
+                setPrevPage(page === 2)
                 setNextPage(page < 2)
             }
             setLoading(false)

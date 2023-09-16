@@ -1,9 +1,7 @@
-import { CREATED, CONFLICT, TIMEOUT, NOT_FOUND, OK } from './ApiConstants';
+import { CREATED, TIMEOUT, OK } from './ApiConstants';
 import { DAYS } from './SystemConstants';
-import SgaConstants from '../resources/SgaConstants';
 import api from './api'
 import AuthService from './AuthService'
-const RESOLVE_DELAY = 250;
 const MULTI_PAGE_SEARCH_LIMIT = 20;
 
 //////////////////////////
@@ -26,7 +24,7 @@ const simpleApiMultiPageGetRequest = async (baseEndpoint, inputText, limit, idsT
             inputText = ""
         let page = 0
         let lastPage = 0
-        let finalResponse = {data: []}
+        const finalResponse = {data: []}
         while(page <= lastPage && (!limit || finalResponse.data.length < limit)) {
             const endpoint = baseEndpoint + "?filter="+inputText +"&page=" +page
             const response = await api.get(endpoint, AuthService.getRequestHeaders())
@@ -114,12 +112,12 @@ const createOrUpdateObject = async (baseEndpoint, body, id) => {
 
 const parsePagination = (response) => {
     let arrData = response.headers.link
-    let links = {}
+    const links = {}
 
     if(arrData){
         arrData = arrData.split(",")
         for (var d of arrData){
-            let linkInfo = /<([^>]+)>;\s+rel="([^"]+)"/ig.exec(d)
+            const linkInfo = /<([^>]+)>;\s+rel="([^"]+)"/ig.exec(d)
             links[linkInfo[2]] = api.defaults.baseURL + "/" + linkInfo[1]
         }
     }
@@ -191,7 +189,7 @@ const changePassword = async (userId, token, newPassword) => {
 const getStudent = async (studentId) => {
     try{
         let user = getActiveUser()
-        if(user.id != studentId){
+        if(user.id !== studentId){
             const endpoint = "student/"+studentId
             const resp = await api.get(endpoint, AuthService.getRequestHeaders())
             user = resp.data
@@ -199,13 +197,13 @@ const getStudent = async (studentId) => {
         const universityResponse = await api.get(user.universityUrl, AuthService.getRequestHeaders())
         const programResponse = await api.get(user.programUrl, AuthService.getRequestHeaders())
 
-        let resp = {
+        const resp = {
             ...user,
             university: universityResponse.data,
         }
         if(programResponse.data)
             resp.program = programResponse.data
-        
+
         return resp
     }
     catch(e) {
@@ -241,12 +239,12 @@ const getRemainingCoursesProgram = async (studentId, programId, inputText) => {
 const getSchedules = async (userId, params) => {
     const query = scheduleParamsToQuery(params)
     const scheduleResponse = await simpleApiGetRequest("student/"+userId+"/schedules"+query)
-    if(scheduleResponse.status != OK)
+    if(scheduleResponse.status !== OK)
         return scheduleResponse
     for(const schedule of scheduleResponse.data){
         for(let i=0; i < schedule.courseClasses.length; i++){
             const courseClassResponse = await getCourseClass(schedule.courseClasses[i].courseClassId)
-            if(courseClassResponse.status != OK)
+            if(courseClassResponse.status !== OK)
                 return {status: courseClassResponse.status}
             schedule.courseClasses[i] = courseClassResponse.data
         }
@@ -278,11 +276,11 @@ const getAllBuildings = async (universityId) => {
 const getBuildingDictionary = async (universityId) => {
     // Get all buildings
     const buildingsResp = await getAllBuildings(universityId)
-    if(buildingsResp.status != OK)
+    if(buildingsResp.status !== OK)
         return buildingsResp
 
     // Build dictionary
-    let finalResponse = { data: {} }
+    const finalResponse = { data: {} }
     buildingsResp.data.forEach(b => finalResponse.data[b.id] = b)
     finalResponse.status = buildingsResp.status
 
@@ -295,9 +293,9 @@ const getBuilding = async (buildingId) => {
 
 const saveBuilding = async (id, name, internalId, distances) => {
     const distanceIDs = {}
-    for (let [key, pair] of Object.entries(distances)){
+    for (const pair of Object.values(distances))
         distanceIDs[pair.building.id] = pair.time
-    }
+
     const payload = {
         'name': name,
         'internalId': internalId,
@@ -337,8 +335,8 @@ const getOptionalCourses = async (programId) => {
 }
 
 const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCourses) => {
-    let mandatoryCourseIDs = mandatoryCourses.map(a => a.id)
-    let optionalCourseIDs = optionalCourses.map(a => a.id)
+    const mandatoryCourseIDs = mandatoryCourses.map(a => a.id)
+    const optionalCourseIDs = optionalCourses.map(a => a.id)
     const payload = {
         'id': id,
         'name': name,
@@ -418,7 +416,7 @@ const getRequiredCoursesForProgram = async (courseId, programId) => {
 
 const saveCourse = async (id, name, internalId, requirements) => {
     const requirementIDs = {}
-    Object.keys(requirements).map(key => {
+    Object.keys(requirements).forEach(key => {
         requirementIDs[key] = requirements[key].map(a => a.id)
     })
     const payload = {
@@ -480,7 +478,7 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
         const listOfClassesResponse = await api.get(endpoint, AuthService.getRequestHeaders())
 
         // Load lecture data
-        let finalData = []
+        const finalData = []
         for (const c of listOfClassesResponse.data) {
             const courseClassResponse = await getCourseClass(c.id)
             if(courseClassResponse.status !== OK)
@@ -534,7 +532,7 @@ const getCourseClass = async (classId) => {
 }
 
 const saveCourseClass = async (id, courseId, termId, name, lectures) => {
-    let formattedLectures = []
+    const formattedLectures = []
     lectures.forEach((l) => formattedLectures.push(Object.assign({}, l)))
     formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
     const payload = {

@@ -35,8 +35,6 @@ function EditTermPage(props) {
     const [term, setTerm] = useState(null);
 
     const [startDate, setStartDate] = useState();
-    const [missingDataError, setMissingDataError] = useState();
-    const [badConnection, setBadConnection] = useState();
 
     useEffect(() => {
         if(!user)
@@ -101,7 +99,6 @@ function EditTermPage(props) {
             }
         }
         else {
-            setMissingDataError(true);
             setSubmitting(false);
         }
     };
@@ -114,7 +111,7 @@ function EditTermPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error != EXISTING_TERM_ERROR)
+    if (error && error !== EXISTING_TERM_ERROR)
         return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
@@ -155,6 +152,7 @@ function EditTermPage(props) {
                             />
                         }
                         </div>
+                        {!startDate && (<p className="form-error">{t('forms.errors.term.dateIsRequired')}</p>)}
                     </Form.Group>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>

@@ -29,7 +29,7 @@ const SignUpSchema = Yup.object().shape({
     repeat_password: Yup.string()
         .when('password', (password, schema) => {
             return schema.test({
-                test: (repeat_password) => !!password && repeat_password == password,
+                test: (repeat_password) => !!password && repeat_password === password[0],
                 message: 'register.errors.repeatPassword.passwordsMismatch',
             });
         })
@@ -45,7 +45,6 @@ function SignUpStudentForm(props) {
     const [selectedSchool, setSelectedSchool] = useState()
     const [selectedProgram, setSelectedProgram] = useState()
     const [error, setError] = useState(null)
-    const [status, setStatus] = useState(false)
     const [programError, setProgramError] = useState(false)
 
     const onChangeSchools = (schoolId) => {
@@ -77,7 +76,7 @@ function SignUpStudentForm(props) {
     }
 
     const authenticate = async (values) => {
-        const { status, data } = await ApiService.login(values.email, values.password)
+        const { status } = await ApiService.login(values.email, values.password)
         switch (status) {
             case OK:
                 navigate("/")
@@ -106,7 +105,6 @@ function SignUpStudentForm(props) {
                     findError = resp.status;
                 if (findError) {
                     setError(resp.status)
-                    setStatus(findError)
                     callback([])
                 } else {
                     callback(resp.data)
@@ -123,7 +121,6 @@ function SignUpStudentForm(props) {
                     findError = resp.status;
                 if (findError) {
                     setError(resp.status)
-                    setStatus(findError)
                     callback([])
                 } else {
                     callback(resp.data)
@@ -197,7 +194,7 @@ function SignUpStudentForm(props) {
                         onBlur={handleBlur}
                     />
 
-                    {!(error && error != EXISTING_USER_ERROR) && (
+                    {!(error && error !== EXISTING_USER_ERROR) && (
                         <>
                             <Row className="mb-0 mx-auto form-row">
                                 <div className="col-3 text-end my-auto text-break ">
@@ -252,7 +249,7 @@ function SignUpStudentForm(props) {
                             )}
                         </>
                     )}
-                    <Button className="mt-4 mb-2" variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting || (error && error != EXISTING_USER_ERROR)}>
+                    <Button className="mt-4 mb-2" variant="secondary" type="submit" aria-label="submit-button" disabled={isSubmitting || (error && error !== EXISTING_USER_ERROR)}>
                         {t('register.submit')}
                     </Button>
                 </Form>

@@ -190,7 +190,8 @@
                 "minLength":"The class must have a name.",
                 "maxLength":"The class name can't exceed 25 characters.",
                 "isRequired":"The class must have a name.",
-                "codeAlreadyTaken":"A class with that name already exists for this course and term."
+                "codeAlreadyTaken":"A class with that name already exists for this course and term.",
+                "noCourseSelected": "Please select a course for this class."
             },
             "term":{
                 "minLength":"The term's name must be at least 3 characters long.",
@@ -199,7 +200,8 @@
                 "minCodeLength":"The term must have a code you identify it with.",
                 "maxCodeLength":"The term's code can't exceed 25 characters.",
                 "codeIsRequired":"The term must have a code you identify it with.",
-                "codeAlreadyTaken":"A term with that code already exists."
+                "codeAlreadyTaken":"A term with that code already exists.",
+                "dateIsRequired":"The term must have a start date."
             },
             "course":{
                 "minCodeLength":"The course must have a code you identify it with.",

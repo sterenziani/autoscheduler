@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Spinner, Row, Col } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseRequirementsList(props) {
@@ -34,7 +34,7 @@ function CourseRequirementsList(props) {
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
         return <ErrorMessage status={status}/>
-    if(!requirements || requirements.length == 0)
+    if(!requirements || requirements.length === 0)
         return <div className="mt-3 mx-5 text-wrap">{t('noDefinedRequirements')}</div>
     return (
         <React.Fragment>

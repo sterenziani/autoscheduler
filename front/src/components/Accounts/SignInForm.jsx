@@ -25,7 +25,7 @@ function SignInForm(props) {
     const [badConnection, setBadConnection] = useState(false);
 
     const authenticate = async (values, setSubmitting) => {
-        const { status, code } = await ApiService.login(values.email, values.password);
+        const { status } = await ApiService.login(values.email, values.password);
         switch (status) {
             case OK:
                 navigate("/")

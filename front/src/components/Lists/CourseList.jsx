@@ -1,23 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Modal, Spinner, Row } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Button, Modal, Row } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 
 function CourseList(props){
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
     const user = ApiService.getActiveUser();
     const [showDeleteModal,setShowDeleteModal] = useState(false);
     const [courseToDelete,setCourseToDelete] = useState();
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.courses])
 
     const redirectToEdit = (id) => {
         navigate("/courses/"+id+"/edit")
@@ -26,9 +19,9 @@ function CourseList(props){
     const deleteCourse = async () => {
         if (!courseToDelete) return;
         if (user.role === Roles.STUDENT)
-            await ApiService.deleteFinishedCourse(user.id, courseToDelete.id);
+            await ApiService.deleteFinishedCourse(user.id, courseToDelete.id)
         else if (user.role === Roles.UNIVERSITY)
-            await ApiService.deleteCourse(courseToDelete.id);
+            await ApiService.deleteCourse(courseToDelete.id)
         closeDeleteModal()
         props.reloadCourses()
     }

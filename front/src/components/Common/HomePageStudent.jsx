@@ -21,7 +21,7 @@ function HomePageStudent(props) {
     const readTabInSearchParams = () => {
         const params = new URLSearchParams(search)
         const requestedTab = params.get('tab')
-        if (requestedTab == "finished_courses")
+        if (requestedTab === "finished_courses")
             return requestedTab
         return startingTab
     }
@@ -29,8 +29,8 @@ function HomePageStudent(props) {
     useEffect(() => {
         if(student){
             const requestedTab = readTabInSearchParams()
-            let tabs = document.getElementsByClassName("nav-item")
-            if (requestedTab == "finished_courses")
+            const tabs = document.getElementsByClassName("nav-item")
+            if (requestedTab === "finished_courses")
                 tabs[0].children[0].click()
             else
                 tabs[1].children[0].click()
@@ -53,7 +53,7 @@ function HomePageStudent(props) {
             }
             setLoading(false)
         });
-    }, [])
+    }, [props.user.id])
 
     if (loading === true || student === null)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>

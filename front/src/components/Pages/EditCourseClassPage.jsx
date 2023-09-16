@@ -39,12 +39,9 @@ function EditCourseClassPage(props) {
 
     const [selectedCourse, setSelectedCourse] = useState();
     const [selectedTermId, setselectedTermId] = useState();
-    const [className, setClassName] = useState();
     const [lectures, setLectures] = useState([]);
-
     const [selectionError, setSelectionError] = useState();
     const [timeError, setTimeError] = useState();
-    const [badConnection, setBadConnection] = useState();
 
     useEffect(() => {
         if(!user)
@@ -67,7 +64,6 @@ function EditCourseClassPage(props) {
                 // 3. Initialize new class values and end loading
                 if(user && terms && buildings && courseClass) {
                     if(!id && buildings.length > 0) {
-                        setClassName("X")
                         const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
                         setLectures([{...firstLecture, buildingId: buildings[0].id}])
                         await Promise.all([readCourseAndTerm()])
@@ -95,10 +91,9 @@ function EditCourseClassPage(props) {
                 setCourseClass(resp.data)
                 setSelectedCourse(resp.data.course)
                 setselectedTermId(resp.data.term.id)
-                setClassName(resp.data.courseClass)
 
                 // If lecture's building is undefined, replace it with first option in list
-                let lecturesWithBuilding = []
+                const lecturesWithBuilding = []
                 for(const l of resp.data.lectures){
                     if(!l.building && buildings && buildings.length > 0){
                         l.building = buildings[0]
@@ -291,7 +286,7 @@ function EditCourseClassPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error != EXISTING_CLASS_ERROR)
+    if (error && error !== EXISTING_CLASS_ERROR)
         return <ErrorMessage status={status}/>
 
     if(!terms || terms.length < 1 || !buildings || buildings.length < 1)
@@ -315,6 +310,7 @@ function EditCourseClassPage(props) {
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
                 {error && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
+                {selectionError && (<p className="form-error">{t('forms.errors.courseClass.noCourseSelected')}</p>)}
                 { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
                 <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (

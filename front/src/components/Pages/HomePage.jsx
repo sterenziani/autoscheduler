@@ -17,8 +17,7 @@ function HomePage(props)  {
         if(!user)
             navigate("/login")
         setLoading(false)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [navigate, user])
 
     if (loading === true)
         return (

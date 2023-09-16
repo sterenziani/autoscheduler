@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function UniversityBuildingsList(props) {
@@ -26,19 +26,15 @@ function UniversityBuildingsList(props) {
     const readPageInSearchParams = () => {
         const params = new URLSearchParams(search)
         const requestedTab = params.get('tab')
-        let requestedPage = params.get('page')
-        if(!requestedTab || requestedTab != "buildings")
-            return null
-        if(!requestedPage)
-            requestedPage = 1
+        const requestedPage = Number(params.get('page'))
+        if(!requestedTab || requestedTab !== "buildings" || !requestedPage)
+            return 1
         return requestedPage
     }
 
     useEffect(() => {
-        let requestedPage = readPageInSearchParams()
-        if(!requestedPage)
-            requestedPage = 1
-        if((!buildings && !buildingDictionary) || requestedPage != page){
+        const requestedPage = readPageInSearchParams()
+        if((!buildings && !buildingDictionary) || requestedPage !== page){
             setPage(requestedPage)
             loadBuildings(requestedPage)
             loadBuildingDictionary()
@@ -63,7 +59,7 @@ function UniversityBuildingsList(props) {
                 setStatus(findError)
             }
             else{
-                let links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp)
                 setPaginationLinks(links)
                 setBuildings(resp.data)
             }

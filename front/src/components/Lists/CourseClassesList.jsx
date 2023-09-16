@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 
@@ -14,6 +14,7 @@ function CourseClassesList(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
+
 
     const [showDeleteModal,setShowDeleteModal] = useState(false);
     const course = props.course;
@@ -27,14 +28,15 @@ function CourseClassesList(props) {
 
     const readPageInSearchParams = () => {
         const params = new URLSearchParams(search)
-        return params.get('page')
+        const requestedPage = Number(params.get('page'))
+        if(!requestedPage)
+            return 1
+        return requestedPage
     }
 
     useEffect(() => {
-        let requestedPage = readPageInSearchParams()
-        if(!requestedPage)
-            requestedPage = 1
-        if(!termClasses || requestedPage != page){
+        const requestedPage = readPageInSearchParams()
+        if(!termClasses || requestedPage !== page){
             setPage(requestedPage)
             loadClasses(requestedPage)
         }
@@ -58,7 +60,7 @@ function CourseClassesList(props) {
                 setStatus(findError)
             }
             else{
-                let links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp)
                 setPaginationLinks(links)
                 setTermClasses(resp.data)
             }

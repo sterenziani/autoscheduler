@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Spinner, Row } from 'react-bootstrap';
+import { Spinner } from 'react-bootstrap';
 import CourseList from './CourseList';
 import { useNavigate } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
@@ -23,19 +23,15 @@ function StudentCoursesList(props){
     const readPageInSearchParams = () => {
         const params = new URLSearchParams(search)
         const requestedTab = params.get('tab')
-        let requestedPage = params.get('page')
-        if(!requestedTab || requestedTab != "courses")
-            return null
-        if(!requestedPage)
-            requestedPage = 1
+        const requestedPage = Number(params.get('page'))
+        if(!requestedTab || requestedTab !== "courses" || !requestedPage)
+            return 1
         return requestedPage
     }
 
     useEffect(() => {
-        let requestedPage = readPageInSearchParams()
-        if(!requestedPage)
-            requestedPage = 1
-        if(!courses || requestedPage != page){
+        const requestedPage = readPageInSearchParams()
+        if(!courses || requestedPage !== page){
             setPage(requestedPage)
             loadCourses(requestedPage)
         }
@@ -63,7 +59,7 @@ function StudentCoursesList(props){
                 setStatus(findError)
             }
             else{
-                let links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp)
                 setPaginationLinks(links)
                 setCourses(resp.data)
             }

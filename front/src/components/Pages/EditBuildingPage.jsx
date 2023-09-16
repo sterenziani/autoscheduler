@@ -35,7 +35,6 @@ function EditBuildingPage(props) {
     const [building, setBuilding] = useState(null);
     const [buildings, setBuildings] = useState();
     const [distances, setDistances] = useState();
-    const [badConnection, setBadConnection] = useState();
 
     useEffect(() => {
         if(!user)
@@ -54,7 +53,7 @@ function EditBuildingPage(props) {
             else{
                 if(user && buildings && !building){
                     const emptyDist = {}
-                    for (let [bId, b] of Object.entries(buildings)){
+                    for (const [bId, b] of Object.entries(buildings)){
                         emptyDist[bId] = {building: b, time: 0}
                     }
                     setDistances(emptyDist)
@@ -136,7 +135,7 @@ function EditBuildingPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error != EXISTING_BUILDING_ERROR)
+    if (error && error !== EXISTING_BUILDING_ERROR)
         return <ErrorMessage status={status}/>
     return (
         <React.Fragment>
@@ -163,7 +162,7 @@ function EditBuildingPage(props) {
                         value={values.buildingName} error={errors.buildingName}
                         touched={touched.buildingName} onChange={handleChange} onBlur={handleBlur}
                     />
-                    <div className="row mx-auto form-row">
+                    <Row className="mx-auto form-row">
                         <div className="col-3 text-break my-1 text-end">
                             <h5><strong>{t('forms.timeToDestination')}</strong></h5>
                         </div>
@@ -186,7 +185,7 @@ function EditBuildingPage(props) {
                             ] : [<div key="no-buildings-msg">{t("forms.onlyBuilding")}</div>]
                         }
                         </div>
-                    </div>
+                    </Row>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

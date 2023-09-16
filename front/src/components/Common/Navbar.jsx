@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useState, useEffect} from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { Col, Navbar as BootstrapNavbar } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
@@ -8,7 +8,7 @@ import LinkButton from './LinkButton';
 import logo from '../../resources/logo.svg';
 
 function Navbar(props){
-    let user = AuthService.getUserStore()
+    const [user, setUser] = useState(AuthService.getUserStore())
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -22,8 +22,9 @@ function Navbar(props){
             if(expired)
                 navigate("/login")
         })
-        user = AuthService.getUserStore()
-    }, [location]);
+        setUser(AuthService.getUserStore())
+    }, [location, navigate]);
+
 
     return (
         <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight flex-wrap border-bottom border-secondary border-3">

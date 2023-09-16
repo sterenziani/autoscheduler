@@ -33,7 +33,6 @@ function EditProgramPage(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [badConnection, setBadConnection] = useState();
 
     const [program, setProgram] = useState(null);
     const [mandatoryCourses, setMandatoryCourses] = useState([]);
@@ -191,7 +190,7 @@ function EditProgramPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-        if (error && error != EXISTING_PROGRAM_ERROR)
+        if (error && error !== EXISTING_PROGRAM_ERROR)
             return <ErrorMessage status={status}/>
     return (
         <React.Fragment>

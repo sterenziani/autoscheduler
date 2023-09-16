@@ -34,11 +34,9 @@ function EditCoursePage(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const [selectionError, setSelectionError] = useState();
 
     const [course, setCourse] = useState(null);
     const [requirements, setRequirements] = useState();
-    const [availableCourses, setAvailableCourses] = useState();
     const [selectedProgram, setSelectedProgram] = useState();
 
     useEffect(() => {
@@ -135,7 +133,6 @@ function EditCoursePage(props) {
             }
         }
         else {
-            setSelectionError(true)
             setSubmitting(false)
         }
     };
@@ -173,7 +170,7 @@ function EditCoursePage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error != EXISTING_COURSE_ERROR)
+    if (error && error !== EXISTING_COURSE_ERROR)
         return <ErrorMessage status={status}/>
     return (
         <React.Fragment>

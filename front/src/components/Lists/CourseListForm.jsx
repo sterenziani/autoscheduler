@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Row, Modal } from 'react-bootstrap';
 import AsyncSelect from 'react-select/async'
 import ApiService from '../../services/ApiService';
+import ErrorMessage from '../Common/ErrorMessage';
 import { OK, CREATED } from '../../services/ApiConstants';
 
 function CourseListForm(props) {
@@ -55,6 +56,8 @@ function CourseListForm(props) {
         })
     }
 
+    if(error)
+        return <ErrorMessage status={status}/>
     return(
         <React.Fragment>
         {

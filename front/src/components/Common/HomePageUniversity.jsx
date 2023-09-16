@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
@@ -18,19 +18,19 @@ function HomePageUniversity(props) {
     const readTabInSearchParams = () => {
         const params = new URLSearchParams(search)
         const requestedTab = params.get('tab')
-        if (requestedTab == "buildings" || requestedTab == "courses" || requestedTab == "terms")
+        if (requestedTab === "buildings" || requestedTab === "courses" || requestedTab === "terms")
             return requestedTab
         return startingTab
     }
 
     useEffect(() => {
         const requestedTab = readTabInSearchParams()
-        let tabs = document.getElementsByClassName("nav-item")
-        if (requestedTab == "buildings")
+        const tabs = document.getElementsByClassName("nav-item")
+        if (requestedTab === "buildings")
             tabs[0].children[0].click()
-        else if (requestedTab == "courses")
+        else if (requestedTab === "courses")
             tabs[2].children[0].click()
-        else if (requestedTab == "terms")
+        else if (requestedTab === "terms")
             tabs[3].children[0].click()
         else
             tabs[1].children[0].click()

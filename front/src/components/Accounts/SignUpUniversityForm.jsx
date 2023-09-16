@@ -27,7 +27,7 @@ const SignUpSchema = Yup.object().shape({
     repeat_password: Yup.string()
         .when('password', (password, schema) => {
             return schema.test({
-                test: (repeat_password) => !!password && repeat_password == password ,
+                test: (repeat_password) => !!password && repeat_password === password[0],
                 message: 'register.errors.repeatPassword.passwordsMismatch',
             });
         })
@@ -61,7 +61,7 @@ function SignUpUniversityForm(props) {
     };
 
     const authenticate = async (values) => {
-        const { status, data } = await ApiService.login(values.email, values.password)
+        const { status } = await ApiService.login(values.email, values.password)
         switch (status) {
             case OK:
                 navigate("/")

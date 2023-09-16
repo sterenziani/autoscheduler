@@ -1,6 +1,6 @@
 import api from './api';
 import Roles from '../resources/RoleConstants';
-import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, CREATED } from './ApiConstants';
+import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT } from './ApiConstants';
 
 const logInEndpoint = '/';
 const signUpUniversityEndpoint = '/university';
@@ -75,12 +75,12 @@ const logIn = async (email, password) => {
             return { status: NOT_FOUND }
         TokenStore.setToken(token)
 
-        let expirationDate = new Date(0)
+        const expirationDate = new Date(0)
         expirationDate.setUTCSeconds(parseUserFromJwt(token).exp);
         ExpStore.setExp(expirationDate)
 
         const tokenUserData = parseUserFromJwt(token)
-        if(tokenUserData.role == Roles.ADMIN) {
+        if(tokenUserData.role === Roles.ADMIN) {
             UserStore.setUser({
                 id: tokenUserData.id,
                 name: Roles.ADMIN,
@@ -111,8 +111,7 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
             "programId": programId,
             "name": name
         }
-        const response = await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
-        return { status: CREATED }
+        return await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
     }
     catch(e) {
         if (e.response)
@@ -129,8 +128,7 @@ const signUpUniversity = async (email, password, name) => {
             'password': password,
             'name': name,
         }
-        const response = await api.post(signUpUniversityEndpoint, payload, getRequestHeaders())
-        return { status: CREATED }
+        return await api.post(signUpUniversityEndpoint, payload, getRequestHeaders())
     }
     catch(e) {
         if (e.response)
@@ -165,7 +163,7 @@ const logInWithStore = async () => {
         TokenStore.setToken(token)
         UserStore.setUser(response.data)
 
-        let expirationDate = new Date(0)
+        const expirationDate = new Date(0)
         expirationDate.setUTCSeconds(parseUserFromJwt(token).exp)
         ExpStore.setExp(expirationDate)
 
@@ -189,12 +187,12 @@ const logOut = async () => {
 }
 
 const logOutIfExpiredJwt = async () => {
-    let exp = getExp()
+    const exp = getExp()
     if(!exp)
         return false
-    let now = new Date().toISOString()
-    let nowEpoch = new Date(now).getTime()
-    let expEpoch = new Date(exp).getTime()
+    const now = new Date().toISOString()
+    const nowEpoch = new Date(now).getTime()
+    const expEpoch = new Date(exp).getTime()
     if (exp && expEpoch < nowEpoch){
         logOut()
         return true

@@ -12,14 +12,14 @@ function ErrorMessage(props){
     let icon = faCircleExclamation
     let title =  "ERROR "+props.status
     let message = props.message? t(props.message) : t("errors."+props.status)
-    if(message == "errors."+props.status)
+    if(message === "errors."+props.status)
         message = ""
 
-    if(props.status == UNAUTHORIZED || props.status == FORBIDDEN){
+    if(props.status === UNAUTHORIZED || props.status === FORBIDDEN){
         icon = faHand
         title = t("errors.accessDenied")
     }
-    if(props.status == NOT_FOUND){
+    if(props.status === NOT_FOUND){
         icon = faQuestionCircle
         title = t("errors.notFound")
     }

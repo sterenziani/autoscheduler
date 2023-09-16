@@ -8,6 +8,7 @@ import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
 import { DAYS, INSTANT_DATE } from "../../services/SystemConstants";
 
+
 function SearchForm(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -177,7 +178,7 @@ function SearchForm(props) {
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
         return <ErrorMessage status={status}/>
-    if(terms.length == 0)
+    if(terms.length === 0)
         return <React.Fragment><div className="bg-primary rounded-bottom mx-5 py-4"><p>{t('search.noTermsFromUniversity')}</p></div></React.Fragment>
     return (
         <React.Fragment>

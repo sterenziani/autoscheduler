@@ -190,7 +190,8 @@
                 "minLength":"La comisión debe tener un nombre.",
                 "maxLength":"El nombre de la comisión no puede superar los 25 characters.",
                 "isRequired":"La comisión debe tener un nombre.",
-                "codeAlreadyTaken":"Ya existe una comisión con ese nombre para este curso y período."
+                "codeAlreadyTaken":"Ya existe una comisión con ese nombre para este curso y período.",
+                "noCourseSelected": "Seleccione un curso para esta comisión."
             },
             "term":{
                 "minLength":"El nombre del período debe tener al menos 3 caracteres.",
@@ -199,7 +200,8 @@
                 "minCodeLength":"El período necesita un código con el cual lo identifique.",
                 "maxCodeLength":"El código del período no puede superar los 25 characters.",
                 "codeIsRequired":"El período necesita un código con el cual lo identifique.",
-                "codeAlreadyTaken":"Ya existe un período con ese código."
+                "codeAlreadyTaken":"Ya existe un período con ese código.",
+                "dateIsRequired":"El período debe tener una fecha de inicio."
             },
             "course":{
                 "minCodeLength":"La materia debe tener un código con el cual la identifique.",

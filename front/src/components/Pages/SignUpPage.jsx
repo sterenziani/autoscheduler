@@ -16,7 +16,7 @@ function SignUpPage(props) {
     useEffect(() => {
         if(user)
             navigate("/")
-    }, [user])
+    }, [user, navigate])
 
     return (
         <React.Fragment>

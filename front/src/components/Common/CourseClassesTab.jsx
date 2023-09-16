@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Spinner, Form } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 import CourseClassesList from '../Lists/CourseClassesList';
 import ErrorMessage from '../Common/ErrorMessage';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -35,7 +35,7 @@ function CourseClassesTab(props) {
             }
             else{
                 setTerms(resp.data)
-                const requestedTerm = resp.data.find(t => t.id == readTermInSearchParams())
+                const requestedTerm = resp.data.find(t => t.id === readTermInSearchParams())
                 setSelectedTerm(requestedTerm? requestedTerm:resp.data[0])
             }
             setLoading(false)
@@ -46,7 +46,7 @@ function CourseClassesTab(props) {
     const onChangeTerms = (e) => {
         // eslint-disable-next-line
         navigate("/courses/"+course.id+"?termId="+e.target.value)
-        setSelectedTerm(terms.filter((t) => t.id == e.target.value)[0])
+        setSelectedTerm(terms.filter((t) => t.id === e.target.value)[0])
     }
 
     if (loading === true)

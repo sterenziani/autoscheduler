@@ -5,7 +5,7 @@ import { Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
+import { OK, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import { DAYS } from "../../services/SystemConstants";
 import { useLocation } from 'react-router-dom';
 import LinkButton from '../Common/LinkButton';
@@ -185,7 +185,7 @@ function SearchResults(props) {
         return <ErrorMessage status={status}/>
     if (params == null)
         return <ErrorMessage message={"search.invalidParams"}/>
-    if(schedules.length === 0 || schedules[0].courseClasses.length == 0)
+    if(schedules.length === 0 || schedules[0].courseClasses.length === 0)
         return (
             <React.Fragment>
                 <HelmetProvider>
