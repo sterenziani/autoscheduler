@@ -35,9 +35,9 @@ export class ProgramController {
         const optionalCourses = req.body.optionalCourses as string[] | undefined;
 
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
-        this.validateCoursesLists(mandatoryCourses, optionalCourses);
 
         try {
+            this.validateCoursesLists(mandatoryCourses, optionalCourses);
             const program: Program = await this.programService.createProgram(
                 userInfo.id,
                 internalId,
