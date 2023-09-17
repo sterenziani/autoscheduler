@@ -23,7 +23,9 @@ export default class MemoryCourseClass extends CourseClass {
     }
 
     public async getLectures(): Promise<Lecture[]> {
-        return getChildsFromParent<Lecture>(MEMORY_DATABASE.lecturesOfCourseClass, MEMORY_DATABASE.lectures, this.id);
+        const lectures = getChildsFromParent<Lecture>(MEMORY_DATABASE.lecturesOfCourseClass, MEMORY_DATABASE.lectures, this.id);
+        lectures.sort((a,b) => a.time.compareTo(b.time));
+        return lectures;
     }
 
     public async getWeeklyClassTimeInMinutes(): Promise<number> {

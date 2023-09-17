@@ -52,6 +52,7 @@ export default class BuildingService {
             distances.push({ buildingId: b.id, time: time ? time : 0 });
         }
 
+        distances.sort((a,b) => a.time-b.time);
         return distances;
     }
 
@@ -63,7 +64,7 @@ export default class BuildingService {
     ): Promise<Building> {
         // validate existence of university & buildings in distance
         await this.universityService.getUniversity(universityId);
-        
+
         // check if a building with internalId already exists
         if (await this.dao.findByInternalId(universityId, internalId))
             throw new GenericException(ERRORS.BAD_REQUEST.BUILDING_ALREADY_EXISTS);
