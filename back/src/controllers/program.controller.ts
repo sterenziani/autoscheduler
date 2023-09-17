@@ -37,7 +37,7 @@ export class ProgramController {
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
-            this.validateCoursesLists(mandatoryCourses, optionalCourses);
+            await this.validateCoursesLists(mandatoryCourses, optionalCourses);
             const program: Program = await this.programService.createProgram(
                 userInfo.id,
                 internalId,
@@ -61,10 +61,11 @@ export class ProgramController {
         const optionalCourses = req.body.optionalCourses as string[] | undefined;
 
         if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
-        this.validateCoursesLists(mandatoryCourses, optionalCourses);
 
         try {
+            await this.validateCoursesLists(mandatoryCourses, optionalCourses);
             await this.verifyOwnership(programId, userInfo.id);
+
             const program: Program = await this.programService.updateProgram(
                 programId,
                 internalId,

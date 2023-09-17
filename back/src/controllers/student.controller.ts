@@ -37,7 +37,7 @@ export class StudentController {
         const userId = req.params.userId;
         const userInfo = req.user;
 
-        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
 
         try {
             const student: Student = await this.studentService.getStudent(userId);
@@ -56,7 +56,7 @@ export class StudentController {
         const name = req.body.name as string;
         const locale = req.headers['accept-language'];
 
-        if (!email || !password || !name || !programId) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+        if (!email || !password || !name || !programId) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
             const student: Student = await this.studentService.createStudent(
@@ -76,7 +76,7 @@ export class StudentController {
         const userId = req.params.userId;
         const userInfo = req.user;
 
-        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
 
         try {
             const approvedCourses: Course[] = await this.studentService.getStudentCompletedCourses(userId);
@@ -131,7 +131,7 @@ export class StudentController {
         const userInfo = req.user;
         const completedCourses = req.body.courseIds as string[];
 
-        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
 
         try {
             await this.studentService.addStudentCompletedCourses(userInfo.id, completedCourses);
@@ -146,7 +146,7 @@ export class StudentController {
         const userInfo = req.user;
         const completedCourses = req.body.courseIds as string[];
 
-        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
 
         try {
             await this.studentService.removeStudentCompletedCourses(userInfo.id, completedCourses);

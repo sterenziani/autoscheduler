@@ -60,7 +60,7 @@ export class UniversityController {
         const name = req.body.name as string;
         const locale = req.headers['accept-language'];
 
-        if (!email || !password || !name) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS);
+        if (!email || !password || !name) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
 
         try {
             const university: University = await this.universityService.createUniversity(email, password, name, locale??"en");
