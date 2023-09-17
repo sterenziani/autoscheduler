@@ -95,7 +95,7 @@ function UniversityTermsList(props) {
 
     const deleteTerm = () => {
         if (!termToDelete) return;
-        ApiService.deleteTerm(termToDelete);
+        ApiService.deleteTerm(termToDelete.id);
         closeDeleteModal()
         loadTerms(page)
     }

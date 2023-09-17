@@ -84,8 +84,6 @@ function UniversityBuildingsList(props) {
         });
     }
 
-
-
     const redirectToEdit = (id) => {
         navigate('/buildings/' + id)
     }
@@ -97,7 +95,7 @@ function UniversityBuildingsList(props) {
     const deleteBuilding = () => {
         if (!buildingToDelete)
             return;
-        ApiService.deleteBuilding(buildingToDelete);
+        ApiService.deleteBuilding(buildingToDelete.id);
         closeDeleteModal()
         loadBuildings()
     }

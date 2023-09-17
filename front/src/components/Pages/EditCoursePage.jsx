@@ -118,7 +118,12 @@ function EditCoursePage(props) {
         setSubmitting(true);
         if (values.courseCode && values.courseName)
         {
-            const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, requirements)
+            const requirementIDs = {}
+            Object.keys(requirements).forEach(key => {
+                requirementIDs[key] = requirements[key].map(a => a.id)
+            })
+            
+            const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, requirementIDs)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/courses/"+resp.id)
             }

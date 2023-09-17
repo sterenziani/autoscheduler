@@ -304,8 +304,8 @@ const saveBuilding = async (id, name, internalId, distances) => {
     return createOrUpdateObject("building/", payload, id)
 }
 
-const deleteBuilding = async (building) => {
-    const endpoint = "building/"+building.id
+const deleteBuilding = async (buildingId) => {
+    const endpoint = "building/"+buildingId
     return simpleApiDeleteRequest(endpoint)
 }
 
@@ -334,9 +334,7 @@ const getOptionalCourses = async (programId) => {
     return simpleApiMultiPageGetRequest("/program/"+programId+"/courses/optional")
 }
 
-const saveProgram = async (id, name, internalId, mandatoryCourses, optionalCourses) => {
-    const mandatoryCourseIDs = mandatoryCourses.map(a => a.id)
-    const optionalCourseIDs = optionalCourses.map(a => a.id)
+const saveProgram = async (id, name, internalId, mandatoryCourseIDs, optionalCourseIDs) => {
     const payload = {
         'id': id,
         'name': name,
@@ -414,11 +412,7 @@ const getRequiredCoursesForProgram = async (courseId, programId) => {
     return simpleApiMultiPageGetRequest("course/"+courseId+"/requirements/"+programId)
 }
 
-const saveCourse = async (id, name, internalId, requirements) => {
-    const requirementIDs = {}
-    Object.keys(requirements).forEach(key => {
-        requirementIDs[key] = requirements[key].map(a => a.id)
-    })
+const saveCourse = async (id, name, internalId, requirementIDs) => {
     const payload = {
         'name': name,
         'internalId': internalId,
@@ -463,8 +457,8 @@ const saveTerm = async (id, name, internalId, startDate, published) => {
     return createOrUpdateObject("term/", payload, id)
 }
 
-const deleteTerm = async (term) => {
-    return simpleApiDeleteRequest("term/"+term.id)
+const deleteTerm = async (termId) => {
+    return simpleApiDeleteRequest("term/"+termId)
 }
 
 
