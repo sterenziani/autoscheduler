@@ -153,31 +153,32 @@ export default class ScheduleService {
     // Receives matrix where each array contains classes belonging to a course, example:
     // arr = [ [c1A, c1B], [c2A, c2B], [c3A] ]
     // Returns all valid combinations of classes belonging to different courses.
+    // Empty combination is not part of the returned values
     private async getCourseClassCombinations(arr: CourseClass[][]): Promise<CourseClass[][]> {
-        if(arr.length === 0) return [[]];
+        if(arr.length === 0) return [];
 
         // We will focus on the first array. This will be our "current course" to work on.
-        // allCasesOfRest calls this function recursively on all arrays that come after the current course.
-        let allCasesOfRest = await this.getCourseClassCombinations(arr.slice(1));
-        let result: CourseClass[][] = [];
+        // otherValidCombos calls this function recursively on all arrays that come after the current course.
+        let otherValidCombos = await this.getCourseClassCombinations(arr.slice(1));
+        let validCombosOfArr: CourseClass[][] = [];
 
         // Consider the case where this course is the only one in the schedule
         for(const cc of arr[0])
-            result.push([cc]);
+            validCombosOfArr.push([cc]);
 
-        for (let c in allCasesOfRest) {
+        for (const combo of otherValidCombos) {
             // Consider the case where our current course is not used (not every course must be included in a schedule)
-            result.push([...allCasesOfRest[c]]);
+            validCombosOfArr.push([...combo]);
 
-            // Now consider all combinations between c and each courseClass of our current course
-            for (let i = 0; i < arr[0].length; i++) {
-                const combinationProposal = [arr[0][i], ...allCasesOfRest[c]];
-                // To avoid expanding upon an invalid combination, we only add a combination to the array if it's valid
+            // Now consider adding a class of our current course to current combo
+            for (const cc of arr[0]) {
+                const combinationProposal = [cc, ...combo];
+                // We only add a combination to the array if it's valid
                 if(await this.isClassCombinationValid(combinationProposal))
-                    result.push(combinationProposal);
+                    validCombosOfArr.push(combinationProposal);
             }
         }
-        return result;
+        return validCombosOfArr;
     }
 
     private async isClassCombinationValid(courseClasses: CourseClass[]): Promise<boolean> {
