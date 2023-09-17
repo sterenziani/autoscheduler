@@ -42,9 +42,15 @@ export default class StudentService {
         return await this.dao.getById(id);
     }
 
-    async getStudentCompletedCourses(studentId: string): Promise<Course[]> {
+    async getStudentCompletedCourses(
+        studentId: string,
+        limit?: number,
+        offset?: number,
+    ): Promise<PaginatedCollection<Course>> {
         const student = await this.dao.getById(studentId);
-        return await student.getCompletedCourses();
+        const completedCourses = await student.getCompletedCourses();
+        const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
+        return paginateCollection(completedCourses, compareCourses, limit, offset);
     }
 
     async getStudentRemainingCoursesForProgram(

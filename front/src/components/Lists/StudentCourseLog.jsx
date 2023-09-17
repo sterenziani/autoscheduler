@@ -12,22 +12,21 @@ import ErrorMessage from '../Common/ErrorMessage';
 
 
 function StudentCourseLog(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [courses, setCourses] = useState(null);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
+    const [loading, setLoading] = useState(false)
+    const [courses, setCourses] = useState(null)
+    const [error, setError] = useState(false)
+    const [status, setStatus] = useState(null)
     const student = props.student;
 
-    const [prevPage, setPrevPage] = useState(false);
-    const [page, setPage] = useState(1);
-    const [nextPage, setNextPage] = useState(false);
-    const search = useLocation().search;
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
+    const search = useLocation().search
 
-    const [showAddModal,setShowAddModal] = useState(false);
-    const [selectedProgramId,setselectedProgramId] = useState(student.program? student.program.id:undefined);
-    const [courseToAdd,setCourseToAdd] = useState();
+    const [showAddModal,setShowAddModal] = useState(false)
+    const [selectedProgramId,setselectedProgramId] = useState(student.program? student.program.id:undefined)
+    const [courseToAdd,setCourseToAdd] = useState()
 
     useEffect(() => {
         const readPageInSearchParams = () => {
@@ -64,9 +63,9 @@ function StudentCourseLog(props) {
                 setStatus(findError)
             }
             else{
+                const links = ApiService.parsePagination(resp)
+                setPaginationLinks(links)
                 setCourses(resp.data)
-                setPrevPage(page === 2)
-                setNextPage(page < 2)
             }
             setLoading(false)
         });
@@ -144,7 +143,7 @@ function StudentCourseLog(props) {
             {
                 <>
                     <CourseList key="course-list" reloadCourses={() => loadCourses(page)} courses={courses}/>
-                    <Pagination page={page} prevPage={prevPage} nextPage={nextPage} loadContent={changePage}/>
+                    <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
                 </>
             }
             {

@@ -43,6 +43,18 @@ export const getRemainingCoursesUrl = (
     return queryParamsStringBuilder(`student/${studentId}/remaining-courses/${programId}`, params);
 };
 
+export const getCompletedCoursesUrl = (
+    studentId: string,
+    page?: number,
+    perPage?: number,
+): string => {
+    const params = {
+        page: page ? page.toString() : undefined,
+        per_page: perPage ? perPage.toString() : undefined,
+    };
+    return queryParamsStringBuilder(`student/${studentId}/completed-courses`, params);
+};
+
 type IStudentDto = UserDto.IUserDto & {
     approvedCoursesUrl: string;
     universityUrl: string;

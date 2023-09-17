@@ -76,17 +76,25 @@ export class StudentController {
         const userId = req.params.userId;
         const userInfo = req.user;
 
+        const page = parseInt(req.query.page as string) ?? undefined;
+        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+
         if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
 
         try {
-            const approvedCourses: Course[] = await this.studentService.getStudentCompletedCourses(userId);
+            const completedCourses = await this.studentService.getStudentCompletedCourses(userId, per_page, page);
+            const links: Record<string, string> = {};
+            for (const [key, value] of Object.entries(completedCourses.pagingInfo)) {
+                links[key] = StudentDto.getCompletedCoursesUrl(userId, value, per_page);
+            }
+
             // getting courses with their respective universities, see if we can cache universities
             const coursesWithUniversity: { course: Course; university: University }[] = await Promise.all(
-                approvedCourses.map(async (course) => {
+                completedCourses.collection.map(async (course) => {
                     return { course, university: await course.getUniversity() };
                 }),
             );
-            res.status(HTTP_STATUS.OK).send(
+            res.status(HTTP_STATUS.OK).links(links).send(
                 coursesWithUniversity.map((cwu) => courseToDto(cwu.course, cwu.university.id)),
             );
         } catch (e) {
@@ -106,10 +114,10 @@ export class StudentController {
         if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
         try {
-            const remainingCourses = await this.studentService.getStudentRemainingCoursesForProgram(userId, programId, filter, page, per_page);
+            const remainingCourses = await this.studentService.getStudentRemainingCoursesForProgram(userId, programId, filter, per_page, page);
             const links: Record<string, string> = {};
             for (const [key, value] of Object.entries(remainingCourses.pagingInfo)) {
-                links[key] = StudentDto.getRemainingCoursesUrl(userId, programId, filter, value, per_page);
+                links[key] = StudentDto.getRemainingCoursesUrl(userId, programId, value, per_page);
             }
 
             // getting courses with their respective universities, see if we can cache universities
