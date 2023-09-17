@@ -5,6 +5,7 @@ import {
     removeChildFromParent,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
+import { removeSpecialCharacters } from '../../../helpers/string.helper';
 import Building from '../../../models/abstract/building.model';
 import University from '../../../models/abstract/university.model';
 import MemoryBuilding from '../../../models/implementations/memory/memoryBuilding.model';
@@ -71,7 +72,7 @@ export default class MemoryBuildingDao extends BuildingDao {
         let universityBuildings: Building[] = await this.findByUniversityId(universityId);
         if (text) {
             universityBuildings = universityBuildings.filter(
-                (b) => b.name.toLowerCase().includes(text!) || b.internalId.toLowerCase().includes(text!),
+                (b) => removeSpecialCharacters(b.name).toLowerCase().includes(removeSpecialCharacters(text)!) || b.internalId.toLowerCase().includes(text!),
             );
         }
 

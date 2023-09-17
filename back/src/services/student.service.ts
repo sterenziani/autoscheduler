@@ -9,6 +9,7 @@ import UserService from './user.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { removeSpecialCharacters } from '../helpers/string.helper';
 import { paginateCollection } from '../helpers/collection.helper';
 
 export default class StudentService {
@@ -68,7 +69,7 @@ export default class StudentService {
         const optionalCourses = await program.getOptionalCourses();
         let courses = [...mandatoryCourses, ...optionalCourses];
 
-        courses = courses.filter(c => !finishedCourses.includes(c) && (!text || c.name.toLowerCase().includes(text) || c.internalId.toLowerCase().includes(text)));
+        courses = courses.filter(c => !finishedCourses.includes(c) && (!text || removeSpecialCharacters(c.name).toLowerCase().includes(removeSpecialCharacters(text)) || c.internalId.toLowerCase().includes(text)));
         const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
         return paginateCollection(courses, compareCourses, limit, offset);
     }

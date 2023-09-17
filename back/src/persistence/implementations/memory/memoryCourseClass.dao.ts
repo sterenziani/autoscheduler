@@ -1,6 +1,7 @@
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
 import { addChildToParent, getChildsFromParent, removeChildFromParent } from '../../../helpers/persistence/memoryPersistence.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
+import { removeSpecialCharacters } from '../../../helpers/string.helper';
 import Building from '../../../models/abstract/building.model';
 import CourseClass from '../../../models/abstract/courseClass.model';
 import Course from '../../../models/abstract/course.model';
@@ -70,7 +71,7 @@ export default class MemoryCourseClassDao extends CourseClassDao {
                 .map((ccwt) => ccwt.courseClass);
         }
         if (text) {
-            courseCourseClasses = courseCourseClasses.filter((cc) => cc.name.toLowerCase().includes(text!));
+            courseCourseClasses = courseCourseClasses.filter((cc) => removeSpecialCharacters(cc.name).toLowerCase().includes(removeSpecialCharacters(text)!));
         }
 
         // sorting by name, then id
@@ -98,7 +99,7 @@ export default class MemoryCourseClassDao extends CourseClassDao {
         );
 
         if (text) {
-            termCourseClasses = termCourseClasses.filter((cc) => cc.name.toLowerCase().includes(text!));
+            termCourseClasses = termCourseClasses.filter((cc) => removeSpecialCharacters(cc.name).toLowerCase().includes(removeSpecialCharacters(text)!));
         }
 
         return termCourseClasses;
@@ -116,7 +117,7 @@ export default class MemoryCourseClassDao extends CourseClassDao {
         );
 
         if (text) {
-            courseClasses = courseClasses.filter((cc) => cc.name.toLowerCase().includes(text!));
+            courseClasses = courseClasses.filter((cc) => removeSpecialCharacters(cc.name).toLowerCase().includes(removeSpecialCharacters(text)!));
         }
 
         return courseClasses;

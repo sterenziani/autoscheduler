@@ -6,6 +6,7 @@ import {
     removeGrandchildFromParent,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
+import { removeSpecialCharacters } from '../../../helpers/string.helper';
 import Course from '../../../models/abstract/course.model';
 import Program from '../../../models/abstract/program.model';
 import Student from '../../../models/abstract/student.model';
@@ -73,7 +74,7 @@ export default class MemoryCourseDao extends CourseDao {
         );
         if (text) {
             courses = courses.filter(
-                (c) => c.name.toLowerCase().includes(text!) || c.internalId.toLowerCase().includes(text!),
+                (c) => removeSpecialCharacters(c.name).toLowerCase().includes(removeSpecialCharacters(text)!) || c.internalId.toLowerCase().includes(text!),
             );
         }
 

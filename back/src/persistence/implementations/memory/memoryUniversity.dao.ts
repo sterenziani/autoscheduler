@@ -4,6 +4,7 @@ import MemoryUniversity from '../../../models/implementations/memory/memoryUnive
 import UniversityDao from '../../abstract/university.dao';
 import MemoryUserDao from './memoryUser.dao';
 import { PaginatedCollection } from '../../../interfaces/paging.interface';
+import { removeSpecialCharacters } from '../../../helpers/string.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
 
 export default class MemoryUniversityDao extends UniversityDao {
@@ -57,7 +58,7 @@ export default class MemoryUniversityDao extends UniversityDao {
         const universities: University[] = [];
 
         for (const maybeUniversity of MEMORY_DATABASE.universities.values()) {
-            if(maybeUniversity.verified && (!text || maybeUniversity.name.toLowerCase().includes(text)))
+            if(maybeUniversity.verified && (!text || removeSpecialCharacters(maybeUniversity.name).toLowerCase().includes(removeSpecialCharacters(text))))
                 universities.push(maybeUniversity);
         }
 

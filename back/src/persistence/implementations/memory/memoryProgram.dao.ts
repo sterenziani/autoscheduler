@@ -5,6 +5,7 @@ import {
     removeChildFromParent,
 } from '../../../helpers/persistence/memoryPersistence.helper';
 import { paginateCollection } from '../../../helpers/collection.helper';
+import { removeSpecialCharacters } from '../../../helpers/string.helper';
 import Program from '../../../models/abstract/program.model';
 import Course from '../../../models/abstract/course.model';
 import University from '../../../models/abstract/university.model';
@@ -74,7 +75,7 @@ export default class MemoryProgramDao extends ProgramDao {
 
         if (text) {
             programs = programs.filter(
-                (p) => p.name.toLowerCase().includes(text!) || p.internalId.toLowerCase().includes(text!),
+                (p) => removeSpecialCharacters(p.name).toLowerCase().includes(removeSpecialCharacters(text)!) || p.internalId.toLowerCase().includes(text!),
             );
         }
 

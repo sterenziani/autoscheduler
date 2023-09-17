@@ -4,6 +4,7 @@ import MemoryTerm from '../../../models/implementations/memory/memoryTerm.model'
 import TermDao from '../../abstract/term.dao';
 import { v4 as uuidv4 } from 'uuid';
 import MemoryUniversityDao from './memoryUniversity.dao';
+import { removeSpecialCharacters } from '../../../helpers/string.helper';
 import {
     addChildToParent,
     getChildsFromParent,
@@ -79,7 +80,7 @@ export default class MemoryTermDao extends TermDao {
 
         if (text)
             universityTerms = universityTerms.filter(
-                (t) => t.name.toLowerCase().includes(text!) || t.internalId.toLowerCase().includes(text!),
+                (t) => removeSpecialCharacters(t.name).toLowerCase().includes(removeSpecialCharacters(text)!) || t.internalId.toLowerCase().includes(text!),
             );
 
         if (published !== undefined) universityTerms = universityTerms.filter((t) => t.published === published);
