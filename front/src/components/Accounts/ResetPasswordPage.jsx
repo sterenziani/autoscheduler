@@ -44,14 +44,13 @@ function ResetPasswordPage(props) {
             setLoading(false)
         }
         ApiService.getPasswordChangeToken(token).then((resp) => {
-            if (resp && resp.status && resp.status !== OK)
-                setInvalidToken(true)
-            else
+            if (resp && resp.status && resp.status === OK)
                 setUser(resp.data)
+            else
+                setInvalidToken(true)
             setLoading(false)
         })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [token])
 
     const changePassword = async (values, setSubmitting, setFieldError) => {
         const resp = await ApiService.changePassword(user.id, token, values.password)

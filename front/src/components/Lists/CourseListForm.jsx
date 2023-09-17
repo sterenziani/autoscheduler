@@ -27,7 +27,6 @@ function CourseListForm(props) {
         addCourseToParent(courseToAdd)
         setCourseToAdd(undefined)
         switchAddModal()
-        // eslint-disable-next-line
     }
 
     const onChangeCourseToAdd = (course) => {

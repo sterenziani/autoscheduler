@@ -30,7 +30,7 @@ function EditCoursePage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams();
-    const user = ApiService.getActiveUser();
+    const [user] = useState(ApiService.getActiveUser())
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -42,48 +42,44 @@ function EditCoursePage(props) {
     useEffect(() => {
         if(!user)
             navigate("/login")
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [user, navigate])
 
     useEffect( () => {
+        const loadCourse = async () => {
+            ApiService.getCourse(id).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                  setCourse(resp.data)
+                }
+            });
+        }
+
         async function execute() {
             if(id){
-                if(user && !course)
+                if(!course)
                     await Promise.all([loadCourse()]);
-                else if(user && course)
+                else if(!requirements)
                     await Promise.all([loadRequirements(course.id)]);
             }
-            else if(user && !course){
+            else if(!course && !requirements){
                 setCourse({"name": t("forms.placeholders.courseName"), "code": t("forms.placeholders.courseCode")})
                 setRequirements({})
                 setLoading(false)
             }
         }
-        execute();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[course])
+        if(user) execute()
+    },[course, requirements, id, t, user])
 
     useEffect( () => {
-        if(requirements)
-            setLoading(false)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if(requirements) setLoading(false)
     },[requirements])
-
-    const loadCourse = async () => {
-        ApiService.getCourse(id).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-              setCourse(resp.data)
-            }
-        });
-    }
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {

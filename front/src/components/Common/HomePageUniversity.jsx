@@ -15,15 +15,15 @@ function HomePageUniversity(props) {
     const startingTab = "programs";
     const search = useLocation().search
 
-    const readTabInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedTab = params.get('tab')
-        if (requestedTab === "buildings" || requestedTab === "courses" || requestedTab === "terms")
-            return requestedTab
-        return startingTab
-    }
-
     useEffect(() => {
+        const readTabInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            const requestedTab = params.get('tab')
+            if (requestedTab === "buildings" || requestedTab === "courses" || requestedTab === "terms")
+                return requestedTab
+            return startingTab
+        }
+
         const requestedTab = readTabInSearchParams()
         const tabs = document.getElementsByClassName("nav-item")
         if (requestedTab === "buildings")
@@ -34,8 +34,7 @@ function HomePageUniversity(props) {
             tabs[3].children[0].click()
         else
             tabs[1].children[0].click()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search])
+    }, [search])
 
     return (
         <React.Fragment>

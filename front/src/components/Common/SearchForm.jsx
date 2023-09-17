@@ -126,29 +126,27 @@ function SearchForm(props) {
     useEffect( () => {
         if(!student)
             navigate("/register")
-        loadTerms()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    const loadTerms = () => {
+        // Load terms
         ApiService.getTerms(student.university.id).then((respTerm) => {
-            let findError = null;
+            let findError = null
             if (respTerm && respTerm.status && respTerm.status !== OK)
-                findError = respTerm.status;
+                findError = respTerm.status
             if (findError) {
                 setError(true)
                 setStatus(findError)
             }
             else {
-                const paramsCopy = Object.assign({}, params)
-                if(respTerm.data.length > 0)
-                    paramsCopy.termId = respTerm.data[0].id;
-                setParams(paramsCopy)
+                if(params && !params.termId){
+                    const paramsCopy = Object.assign({}, params)
+                    if(respTerm.data.length > 0)
+                        paramsCopy.termId = respTerm.data[0].id
+                    setParams(paramsCopy)
+                }
                 setTerms(respTerm.data)
             }
             setLoading(false)
-        });
-    }
+        })
+    }, [navigate, params, student])
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {

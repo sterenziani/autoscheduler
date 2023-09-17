@@ -28,7 +28,7 @@ function EditBuildingPage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams()
-    const user = ApiService.getActiveUser();
+    const [user] = useState(ApiService.getActiveUser())
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -36,55 +36,11 @@ function EditBuildingPage(props) {
     const [buildings, setBuildings] = useState();
     const [distances, setDistances] = useState();
 
+
     useEffect(() => {
         if(!user)
             navigate("/login")
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    useEffect( () => {
-        async function execute() {
-            if(user && !buildings)
-                await Promise.all([loadBuildings(user.id)]);
-            if(id){
-                if(user && buildings && !building)
-                    await Promise.all([loadBuilding(id)]);
-            }
-            else{
-                if(user && buildings && !building){
-                    const emptyDist = {}
-                    for (const [bId, b] of Object.entries(buildings)){
-                        emptyDist[bId] = {building: b, time: 0}
-                    }
-                    setDistances(emptyDist)
-                    setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
-                }
-            }
-            if(user && building && buildings)
-                setLoading(false)
-        }
-        execute();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[building, buildings])
-
-    const loadBuilding = async () => {
-        ApiService.getBuilding(id).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setBuilding(resp.data)
-                const dist = {}
-                resp.data.distances.forEach((d) => dist[d.buildingId] = {building: buildings[d.buildingId], time: d.time})
-                setDistances(dist)
-            }
-        });
-    }
+    }, [user, navigate])
 
     const loadBuildings = async (universityId) => {
         ApiService.getBuildingDictionary(universityId).then((resp) => {
@@ -101,6 +57,49 @@ function EditBuildingPage(props) {
             }
         });
     }
+
+    useEffect( () => {
+        const loadBuilding = async () => {
+            ApiService.getBuilding(id).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                    setBuilding(resp.data)
+                    const dist = {}
+                    resp.data.distances.forEach((d) => dist[d.buildingId] = {building: buildings[d.buildingId], time: d.time})
+                    setDistances(dist)
+                }
+            });
+        }
+
+        async function execute() {
+            if(!buildings)
+                await Promise.all([loadBuildings(user.id)]);
+            if(id){
+                if(buildings && !building)
+                    await Promise.all([loadBuilding(id)]);
+            }
+            else{
+                if(buildings && !building){
+                    const emptyDist = {}
+                    for (const [bId, b] of Object.entries(buildings)){
+                        emptyDist[bId] = {building: b, time: 0}
+                    }
+                    setDistances(emptyDist)
+                    setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
+                }
+            }
+            if(building && buildings)
+                setLoading(false)
+        }
+        if(user) execute();
+    },[user, buildings, id, t, building])
 
     const onChangeTime = (e, entry) => {
         const distancesCopy = Object.assign([], distances)

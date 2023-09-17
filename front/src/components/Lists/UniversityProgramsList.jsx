@@ -22,23 +22,23 @@ function UniversityProgramsList(props){
     const [page, setPage] = useState(1);
     const search = useLocation().search
 
-    const readPageInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedTab = params.get('tab')
-        const requestedPage = Number(params.get('page'))
-        if(!requestedTab || requestedTab !== "programs" || !requestedPage)
-            return 1
-        return requestedPage
-    }
-
     useEffect(() => {
+        const readPageInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            const requestedTab = params.get('tab')
+            const requestedPage = Number(params.get('page'))
+            if(!requestedTab || requestedTab !== "programs" || !requestedPage)
+                return 1
+            return requestedPage
+        }
+
         const requestedPage = readPageInSearchParams()
         if(!programs || requestedPage !== page){
             setPage(requestedPage)
             loadPrograms(requestedPage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search])
+        // eslint-disable-next-line
+    }, [search, page, programs])
 
     const changePage = (newPage) => {
         setPage(newPage)

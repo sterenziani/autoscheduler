@@ -19,15 +19,14 @@ function CoursePage(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const user = ApiService.getActiveUser();
+    const [user] = useState(ApiService.getActiveUser())
     const [course, setCourse] = useState();
     const [selectedProgram, setSelectedProgram] = useState(null);
 
     useEffect(() => {
         if(!user)
             navigate("/login")
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [navigate, user])
 
     useEffect( () => {
         ApiService.getCourse(id).then((resp) => {
@@ -43,8 +42,7 @@ function CoursePage(props) {
                 setCourse(resp.data)
                 setLoading(false)
             }
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        })
     }, [id])
 
     const loadProgramOptions = (inputValue, callback) => {

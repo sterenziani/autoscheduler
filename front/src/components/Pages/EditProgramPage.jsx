@@ -29,63 +29,92 @@ function EditProgramPage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams()
-    const user = ApiService.getActiveUser();
+    const [user] = useState(ApiService.getActiveUser())
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
 
     const [program, setProgram] = useState(null);
-    const [mandatoryCourses, setMandatoryCourses] = useState([]);
-    const [optionalCourses, setOptionalCourses] = useState([]);
+    const [mandatoryCourses, setMandatoryCourses] = useState();
+    const [optionalCourses, setOptionalCourses] = useState();
 
     const [courses, setCourses] = useState(null);
 
     useEffect(() => {
         if(!user)
             navigate("/login")
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [user, navigate])
 
     useEffect( () => {
+        const loadProgram = async () => {
+            ApiService.getProgram(id).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else
+                  setProgram(resp.data)
+            });
+        }
+
+        const loadMandatoryCourses = async (programId) => {
+            ApiService.getMandatoryCourses(programId).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                    setMandatoryCourses(resp.data)
+                }
+            });
+        }
+
+        const loadOptionalCourses = async (programId) => {
+            ApiService.getOptionalCourses(programId).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                    setOptionalCourses(resp.data)
+                }
+            });
+        }
+
         async function execute() {
             if(id){
-                if(user && !program && !courses){
+                if(!program && !courses)
                     await Promise.all([loadProgram(), loadCourses(user.id)])
-                }
-                else if(user && program && courses){
+                else if(program && courses && !mandatoryCourses && !optionalCourses)
                     await Promise.all([loadMandatoryCourses(program.id), loadOptionalCourses(program.id)])
-                }
             }
             else{
-                if(user && !courses){
+                if(!courses)
                     await Promise.all([loadCourses(user.id)])
-                }
-                else if(user && !program && courses){
+                else if(!program && !mandatoryCourses && !optionalCourses){
+                    setMandatoryCourses([])
+                    setOptionalCourses([])
                     setProgram({"name": t("forms.placeholders.programName"), "code": t("forms.placeholders.programCode")})
                 }
             }
-            if(user && program && courses && mandatoryCourses && optionalCourses){
-                setLoading(false)
-            }
-        }
-        execute();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[program, courses])
 
-    const loadProgram = async () => {
-        ApiService.getProgram(id).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+            if(program && courses && mandatoryCourses && optionalCourses)
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else
-              setProgram(resp.data)
-        });
-    }
+        }
+        if(user) execute()
+    },[program, courses, mandatoryCourses, optionalCourses, id, t, user])
 
     const loadCourses = async (universityId) => {
         ApiService.getCourses(universityId).then((resp) => {
@@ -99,38 +128,6 @@ function EditProgramPage(props) {
             }
             else{
                 setCourses(resp.data)
-            }
-        });
-    }
-
-    const loadMandatoryCourses = async (programId) => {
-        ApiService.getMandatoryCourses(programId).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setMandatoryCourses(resp.data)
-            }
-        });
-    }
-
-    const loadOptionalCourses = async (programId) => {
-        ApiService.getOptionalCourses(programId).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setOptionalCourses(resp.data)
             }
         });
     }

@@ -29,25 +29,23 @@ function StudentCourseLog(props) {
     const [selectedProgramId,setselectedProgramId] = useState(student.program? student.program.id:undefined);
     const [courseToAdd,setCourseToAdd] = useState();
 
-    const readPageInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedTab = params.get('tab')
-        const requestedPage = Number(params.get('page'))
-        if(!requestedTab || requestedTab !== "finished_courses")
-            return null
-        if(!requestedPage)
-            return 1
-        return requestedPage
-    }
-
     useEffect(() => {
+        const readPageInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            const requestedTab = params.get('tab')
+            const requestedPage = Number(params.get('page'))
+            if(!requestedTab || requestedTab !== "finished_courses" || !requestedPage)
+                return 1
+            return requestedPage
+        }
+
         const requestedPage = readPageInSearchParams()
         if(!courses || requestedPage !== page){
             setPage(requestedPage)
             loadCourses(requestedPage)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search])
+    }, [search, courses, page])
 
     const changePage = (newPage) => {
         setPage(newPage)

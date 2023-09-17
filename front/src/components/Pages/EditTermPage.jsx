@@ -28,7 +28,7 @@ function EditTermPage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams()
-    const user = ApiService.getActiveUser();
+    const [user] = useState(ApiService.getActiveUser())
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -39,46 +39,44 @@ function EditTermPage(props) {
     useEffect(() => {
         if(!user)
             navigate("/login")
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [user, navigate])
 
     useEffect( () => {
+        const loadTerm = async () => {
+            ApiService.getTerm(id).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                    const date = new Date(resp.data.startDate)
+                    setStartDate(date.toISOString().split('T')[0])
+                    setTerm(resp.data)
+                }
+                setLoading(false)
+            });
+        }
+
         async function execute() {
             if(id){
-                if(user && !term)
+                if(!term)
                     await Promise.all([loadTerm()]);
-                if(user && term)
+                else
                     setLoading(false)
             }
             else{
-                if(user && !term){
+                if(!term){
                     setTerm({"name": t("forms.placeholders.termName"), "code": t("forms.placeholders.termCode")})
                     setStartDate(new Date().toISOString().slice(0, 10))
                     setLoading(false)
                 }
             }
         }
-        execute();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[term])
-
-    const loadTerm = async () => {
-        ApiService.getTerm(id).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                const date = new Date(resp.data.startDate)
-                setStartDate(date.toISOString().split('T')[0])
-                setTerm(resp.data)
-            }
-            setLoading(false)
-        });
-    }
+        if(user) execute()
+    },[user, term, id, t])
 
     const onChangeStartDate = (e) => {
         setStartDate(e.target.value)

@@ -19,11 +19,6 @@ function CourseClassesTab(props) {
     const course = props.course;
     const search = useLocation().search
 
-    const readTermInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        return params.get('termId')
-    }
-
     useEffect( () => {
         ApiService.getTerms(user.id).then((resp) => {
             let findError = null;
@@ -34,17 +29,16 @@ function CourseClassesTab(props) {
                 setStatus(findError)
             }
             else{
+                const params = new URLSearchParams(search)
+                const requestedTerm = resp.data.find(t => t.id === params.get('termId'))
                 setTerms(resp.data)
-                const requestedTerm = resp.data.find(t => t.id === readTermInSearchParams())
                 setSelectedTerm(requestedTerm? requestedTerm:resp.data[0])
             }
             setLoading(false)
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [search, user.id])
 
     const onChangeTerms = (e) => {
-        // eslint-disable-next-line
         navigate("/courses/"+course.id+"?termId="+e.target.value)
         setSelectedTerm(terms.filter((t) => t.id === e.target.value)[0])
     }

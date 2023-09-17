@@ -20,23 +20,23 @@ function StudentCoursesList(props){
     const [page, setPage] = useState(1);
     const search = useLocation().search
 
-    const readPageInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedTab = params.get('tab')
-        const requestedPage = Number(params.get('page'))
-        if(!requestedTab || requestedTab !== "courses" || !requestedPage)
-            return 1
-        return requestedPage
-    }
-
     useEffect(() => {
+        const readPageInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            const requestedTab = params.get('tab')
+            const requestedPage = Number(params.get('page'))
+            if(!requestedTab || requestedTab !== "courses" || !requestedPage)
+                return 1
+            return requestedPage
+        }
+
         const requestedPage = readPageInSearchParams()
         if(!courses || requestedPage !== page){
             setPage(requestedPage)
             loadCourses(requestedPage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search])
+        // eslint-disable-next-line
+    }, [search, courses, page])
 
     const changePage = (newPage) => {
         setPage(newPage)

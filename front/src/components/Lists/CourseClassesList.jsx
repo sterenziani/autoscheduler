@@ -26,22 +26,22 @@ function CourseClassesList(props) {
     const [page, setPage] = useState(1);
     const search = useLocation().search
 
-    const readPageInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedPage = Number(params.get('page'))
-        if(!requestedPage)
-            return 1
-        return requestedPage
-    }
-
     useEffect(() => {
+        const readPageInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            const requestedPage = Number(params.get('page'))
+            if(!requestedPage)
+                return 1
+            return requestedPage
+        }
+
         const requestedPage = readPageInSearchParams()
         if(!termClasses || requestedPage !== page){
             setPage(requestedPage)
             loadClasses(requestedPage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search])
+        // eslint-disable-next-line
+    }, [search, page, termClasses])
 
     const changePage = (newPage) => {
         setPage(newPage)

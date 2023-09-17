@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import Alert from 'react-bootstrap/Alert';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Spinner } from 'react-bootstrap';
@@ -15,15 +15,16 @@ import Roles from '../../resources/RoleConstants';
 function SearchResults(props) {
     const {t} = useTranslation();
     const navigate = useNavigate()
-    const query = new URLSearchParams(useLocation().search);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [schedules, setSchedules] = useState([]);
     const [scheduleIndex, setScheduleIndex] = useState(0);
     const [tables, setTables] = useState();
-    const user = ApiService.getActiveUser()
-
+    const [params, setParams] = useState();
+    const [user] = useState(ApiService.getActiveUser())
+    const search = useLocation().search
     const getTimeTable = (schedule) => {
         var timeTable = {};
         var classColors = {};
@@ -51,7 +52,7 @@ function SearchResults(props) {
         });
         return timeTable;
     }
-
+/*
     const drawTable = (timeTable, earliest, latest, id) => {
         return (
             <table key={'t-' + id} className="table table-bordered text-center">
@@ -110,53 +111,113 @@ function SearchResults(props) {
             </table>
         );
     }
-
-    const readParams = () => {
-        const params = {
-            programId: query.get('programId'),
-            termId: query.get('termId'),
-            hours: query.get('hours'),
-            reduceDays: query.get('reduceDays'),
-            prioritizeUnlocks: query.get('prioritizeUnlocks'),
-            unavailableTimeSlots: query.getAll('unavailable'),
-        };
-        if(!params.programId || !params.termId || !params.hours)
-            return null
-        return params;
-    }
-
-    const params = readParams();
+*/
+    const drawTable = useCallback((timeTable, earliest, latest, id) => {
+        return (
+            <table key={'t-' + id} className="table table-bordered text-center">
+                <thead>
+                    <tr className="bg-primary border-dark text-white">
+                        <th className="text-uppercase bg-primary text-white"></th>
+                        {DAYS.map((d) => {
+                            return (
+                                <th key={'t-' + id + '-d-' + d} className="text-uppercase bg-primary text-white">
+                                    {t('days.' + d)}
+                                </th>
+                            );
+                        })}
+                    </tr>
+                </thead>
+                <tbody>
+                    {Array.from({ length: 24 }, (v, k) => k).map((h) => {
+                        if (h >= earliest && h < latest) {
+                            var contents = {};
+                            DAYS.forEach((d) => {
+                                if (timeTable[d][h]) {
+                                    const c = timeTable[d][h];
+                                    if (timeTable[d][h].startHour === h)
+                                        contents[d] = (
+                                            <td
+                                                className={'day-column align-middle bg-color-' + c.color}
+                                                rowSpan={c.duration}
+                                            >
+                                                <div>
+                                                    <div className="col">
+                                                        <b> {c.courseClass.course.code} - {c.courseClass.course.name} </b>
+                                                        <i>&nbsp;({c.courseClass.name})</i>
+                                                    </div>
+                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} ( {c.lecture.building.code} ) </div>
+                                                </div>
+                                            </td>
+                                        );
+                                }
+                                else
+                                    contents[d] = <td className="day-column text-uppercase bg-black"></td>;
+                            });
+                            return (
+                                <tr key={'id-' + id + 'h' + h} className="border-dark">
+                                    <td className="text-uppercase bg-primary text-white">{h + ':00'}</td>
+                                    {DAYS.map((d) => (
+                                        <React.Fragment key={'id-' + id + 'd-' + d + 'h-' + h}>
+                                            {contents[d]}
+                                        </React.Fragment>
+                                    ))}
+                                </tr>
+                            );
+                        }
+                        return <tr className="border-dark" key={'id-' + id + 'h' + h}></tr>;
+                    })}
+                </tbody>
+            </table>
+        );
+    }, [t]);
 
     useEffect(() => {
         if(!user)
             navigate("/login")
-        if(params == null){
-            setLoading(false)
-            return
+    }, [navigate, user])
+
+    useEffect(() => {
+        const readParams = () => {
+            const query = new URLSearchParams(search);
+            const params = {
+                programId: query.get('programId'),
+                termId: query.get('termId'),
+                hours: query.get('hours'),
+                reduceDays: query.get('reduceDays'),
+                prioritizeUnlocks: query.get('prioritizeUnlocks'),
+                unavailableTimeSlots: query.getAll('unavailable'),
+            };
+            if(!params.programId || !params.termId || !params.hours)
+                setParams(null);
+            setParams(params);
         }
-        ApiService.getSchedules(user.id, params).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError) {
-                setError(true);
-                setStatus(findError);
-            }
-            else {
-                var tables = [];
-                resp.data.forEach((s, idx) => {
-                    const earliest = Number(resp.data[idx].stats.earliestLecture.split(':')[0])
-                    const latest = Number(resp.data[idx].stats.latestLecture.split(':')[0])
-                    tables.push(drawTable(getTimeTable(s), earliest-1, latest+1, idx));
-                });
-                setSchedules(resp.data)
-                setScheduleIndex(0)
-                setTables(tables)
-            }
-            setLoading(false);
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+
+        if(!params) readParams()
+        else if(params === null) setLoading(false)
+        else {
+            ApiService.getSchedules(user.id, params).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError) {
+                    setError(true);
+                    setStatus(findError);
+                }
+                else {
+                    var tables = [];
+                    resp.data.forEach((s, idx) => {
+                        const earliest = Number(resp.data[idx].stats.earliestLecture.split(':')[0])
+                        const latest = Number(resp.data[idx].stats.latestLecture.split(':')[0])
+                        tables.push(drawTable(getTimeTable(s), earliest-1, latest+1, idx));
+                    });
+                    setSchedules(resp.data)
+                    setScheduleIndex(0)
+                    setTables(tables)
+                }
+                setLoading(false);
+            })
+        }
+    }, [params, user, search, drawTable])
 
     const onClickLeftArrow = (e) => {
         setScheduleIndex(scheduleIndex-1)

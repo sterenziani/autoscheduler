@@ -28,7 +28,7 @@ function EditCourseClassPage(props) {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const {id} = useParams()
-    const user = ApiService.getActiveUser();
+    const [user] = useState(ApiService.getActiveUser())
     const search = useLocation().search
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -46,10 +46,81 @@ function EditCourseClassPage(props) {
     useEffect(() => {
         if(!user)
             navigate("/login")
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [user, navigate])
 
     useEffect( () => {
+        const readCourseAndTerm = async () => {
+            const params = new URLSearchParams(search)
+            const courseId = params.get('course')
+            const termId = params.get('term')
+            setLoading(true)
+
+            if(courseId) {
+                ApiService.getCourse(courseId).then((resp) => {
+                    let findError = null;
+                    if (resp && resp.status && resp.status !== OK)
+                        findError = resp.status;
+                    if (findError){
+                        setLoading(false)
+                        setError(true)
+                        setStatus(findError)
+                    }
+                    else{
+                      setSelectedCourse(resp.data)
+                    }
+                });
+            } else {
+                setSelectedCourse()
+            }
+            if(termId) {
+                ApiService.getTerm(termId).then((resp) => {
+                    let findError = null;
+                    if (resp && resp.status && resp.status !== OK)
+                        findError = resp.status;
+                    if (findError){
+                        setLoading(false)
+                        setError(true)
+                        setStatus(findError)
+                    }
+                    else{
+                      setselectedTermId(resp.data.id)
+                    }
+                })
+            } else {
+                setselectedTermId(terms[0].id)
+            }
+            setLoading(false)
+        }
+
+        const loadCourseClass = async () => {
+            ApiService.getCourseClass(id).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setLoading(false)
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                    setCourseClass(resp.data)
+                    setSelectedCourse(resp.data.course)
+                    setselectedTermId(resp.data.term.id)
+
+                    // If lecture's building is undefined, replace it with first option in list
+                    const lecturesWithBuilding = []
+                    for(const l of resp.data.lectures){
+                        if(!l.building && buildings && buildings.length > 0){
+                            l.building = buildings[0]
+                            l.buildingId = buildings[0].id
+                        }
+                        lecturesWithBuilding.push(l)
+                    }
+                    setLectures(lecturesWithBuilding)
+                }
+            });
+        }
+
         async function execute() {
             // 1. Load terms and buildings
             if(!terms && !buildings)
@@ -62,7 +133,7 @@ function EditCourseClassPage(props) {
                 }
 
                 // 3. Initialize new class values and end loading
-                if(user && terms && buildings && courseClass) {
+                else {
                     if(!id && buildings.length > 0) {
                         const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
                         setLectures([{...firstLecture, buildingId: buildings[0].id}])
@@ -73,81 +144,8 @@ function EditCourseClassPage(props) {
                 }
             }
         }
-        execute();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[courseClass, terms, buildings])
-
-    const loadCourseClass = async () => {
-        ApiService.getCourseClass(id).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setCourseClass(resp.data)
-                setSelectedCourse(resp.data.course)
-                setselectedTermId(resp.data.term.id)
-
-                // If lecture's building is undefined, replace it with first option in list
-                const lecturesWithBuilding = []
-                for(const l of resp.data.lectures){
-                    if(!l.building && buildings && buildings.length > 0){
-                        l.building = buildings[0]
-                        l.buildingId = buildings[0].id
-                    }
-                    lecturesWithBuilding.push(l)
-                }
-                setLectures(lecturesWithBuilding)
-            }
-        });
-    }
-
-    const readCourseAndTerm = async () => {
-        const params = new URLSearchParams(search)
-        const courseId = params.get('course')
-        const termId = params.get('term')
-        setLoading(true)
-
-        if(courseId) {
-            ApiService.getCourse(courseId).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
-                    setLoading(false)
-                    setError(true)
-                    setStatus(findError)
-                }
-                else{
-                  setSelectedCourse(resp.data)
-                }
-            });
-        } else {
-            setSelectedCourse()
-        }
-        if(termId) {
-            ApiService.getTerm(termId).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
-                    setLoading(false)
-                    setError(true)
-                    setStatus(findError)
-                }
-                else{
-                  setselectedTermId(resp.data.id)
-                }
-            })
-        } else {
-            setselectedTermId(terms[0].id)
-        }
-        setLoading(false)
-    }
+        if(user) execute();
+    },[courseClass, terms, buildings, id, t, user, search])
 
     const loadCourseOptions = (inputValue, callback) => {
         setTimeout(() => {

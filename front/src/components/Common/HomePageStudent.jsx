@@ -18,16 +18,16 @@ function HomePageStudent(props) {
     const [student, setStudent] = useState(null)
     const [error, setError] = useState(false)
 
-    const readTabInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedTab = params.get('tab')
-        if (requestedTab === "finished_courses")
-            return requestedTab
-        return startingTab
-    }
-
     useEffect(() => {
         if(student){
+            const readTabInSearchParams = () => {
+                const params = new URLSearchParams(search)
+                const requestedTab = params.get('tab')
+                if (requestedTab === "finished_courses")
+                    return requestedTab
+                return startingTab
+            }
+
             const requestedTab = readTabInSearchParams()
             const tabs = document.getElementsByClassName("nav-item")
             if (requestedTab === "finished_courses")
@@ -35,8 +35,7 @@ function HomePageStudent(props) {
             else
                 tabs[1].children[0].click()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search, student])
+    }, [search, student])
 
     useEffect(() => {
         setLoading(true)

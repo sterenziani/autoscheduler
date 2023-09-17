@@ -23,24 +23,41 @@ function UniversityBuildingsList(props) {
     const [page, setPage] = useState(1);
     const search = useLocation().search
 
-    const readPageInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedTab = params.get('tab')
-        const requestedPage = Number(params.get('page'))
-        if(!requestedTab || requestedTab !== "buildings" || !requestedPage)
-            return 1
-        return requestedPage
-    }
-
     useEffect(() => {
+        const readPageInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            const requestedTab = params.get('tab')
+            const requestedPage = Number(params.get('page'))
+            if(!requestedTab || requestedTab !== "buildings" || !requestedPage)
+                return 1
+            return requestedPage
+        }
+
+        const loadBuildingDictionary = () => {
+            setLoading(true)
+            ApiService.getBuildingDictionary(user.id).then((resp) => {
+                let findError = null;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
+                if (findError){
+                    setError(true)
+                    setStatus(findError)
+                }
+                else{
+                    setBuildingDictionary(resp.data)
+                }
+                setLoading(false)
+            });
+        }
+
         const requestedPage = readPageInSearchParams()
         if((!buildings && !buildingDictionary) || requestedPage !== page){
             setPage(requestedPage)
             loadBuildings(requestedPage)
             loadBuildingDictionary()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search])
+        // eslint-disable-next-line
+    }, [search, buildingDictionary, buildings, page, user.id])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -67,22 +84,7 @@ function UniversityBuildingsList(props) {
         });
     }
 
-    const loadBuildingDictionary = () => {
-        setLoading(true)
-        ApiService.getBuildingDictionary(user.id).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setBuildingDictionary(resp.data)
-            }
-            setLoading(false)
-        });
-    }
+
 
     const redirectToEdit = (id) => {
         navigate('/buildings/' + id)

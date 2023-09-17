@@ -23,23 +23,23 @@ function UniversityTermsList(props) {
     const [page, setPage] = useState(1);
     const search = useLocation().search
 
-    const readPageInSearchParams = () => {
-        const params = new URLSearchParams(search)
-        const requestedTab = params.get('tab')
-        const requestedPage = Number(params.get('page'))
-        if(!requestedTab || requestedTab !== "terms" || !requestedPage)
-            return 1
-        return requestedPage
-    }
-
     useEffect(() => {
+        const readPageInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            const requestedTab = params.get('tab')
+            const requestedPage = Number(params.get('page'))
+            if(!requestedTab || requestedTab !== "terms" || !requestedPage)
+                return 1
+            return requestedPage
+        }
+
         const requestedPage = readPageInSearchParams()
         if(!terms || requestedPage !== page){
             setPage(requestedPage)
             loadTerms(requestedPage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useLocation().search])
+        // eslint-disable-next-line
+    }, [search, page, terms])
 
     const changePage = (newPage) => {
         setPage(newPage)
