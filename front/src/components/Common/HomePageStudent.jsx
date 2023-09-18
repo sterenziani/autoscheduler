@@ -55,7 +55,7 @@ function HomePageStudent(props) {
     }, [props.user.id])
 
     if (loading === true || student === null)
-        return <div className="mx-auto py-3"><Spinner animation="border"/></div>
+        return <div className="text-center m-auto mt-5 color-secondary"><Spinner animation="border"/></div>
     if (error)
         return <ErrorMessage status={status}/>
     return (

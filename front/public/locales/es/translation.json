@@ -127,7 +127,7 @@
     },
     "results": {
         "loading": "Procesando...",
-        "pleaseWait": "¡Estamos buscando los cronogramas que mejor se ajusten a sus necesidades! Espere por favor.",
+        "pleaseWait": "¡Estamos buscando los cronogramas que mejor se ajusten a sus necesidades! Espere, por favor. Esto puede demorar unos minutos.",
         "results": "Resultados",
         "scheduleNumber": "Cronograma #{{value}}",
         "recap": "{{days}} días, {{hours}} horas en total",
@@ -251,7 +251,7 @@
         "401": "Autentíquese para ver esta página.",
         "403": "No cuenta con permisos para ver esta página.",
         "404": "El recurso solicitado no fue encontrado.",
-        "408": "No se recibió respuesta del servidor. Revise su conexión a internet.",
+        "408": "No se recibió respuesta del servidor.",
         "500": "El servidor de AutoScheduler tuvo un error interno.",
         "noTerms": "No se encontraron períodos. Cree al menos uno para crear comisiones.",
         "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones."

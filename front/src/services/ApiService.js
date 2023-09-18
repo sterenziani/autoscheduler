@@ -3,6 +3,7 @@ import { DAYS } from './SystemConstants';
 import api from './api'
 import AuthService from './AuthService'
 const MULTI_PAGE_SEARCH_LIMIT = 20;
+const MINUTE_IN_MS = 60000;
 
 //////////////////////////
 //// HELPER FUNCTIONS ////
@@ -11,6 +12,16 @@ const MULTI_PAGE_SEARCH_LIMIT = 20;
 const simpleApiGetRequest = async (endpoint) => {
     try {
         return await api.get(endpoint, AuthService.getRequestHeaders())
+    }
+    catch(e) {
+        if (e.response) return { status: e.response.status }
+        else return { status: TIMEOUT }
+    }
+}
+
+const longApiGetRequest = async (endpoint) => {
+    try {
+        return await api.get(endpoint, {...AuthService.getRequestHeaders(), timeout: 15*MINUTE_IN_MS})
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
@@ -238,7 +249,7 @@ const getRemainingCoursesProgram = async (studentId, programId, inputText) => {
 
 const getSchedules = async (userId, params) => {
     const query = scheduleParamsToQuery(params)
-    const scheduleResponse = await simpleApiGetRequest("student/"+userId+"/schedules"+query)
+    const scheduleResponse = await longApiGetRequest("student/"+userId+"/schedules"+query)
     if(scheduleResponse.status !== OK)
         return scheduleResponse
     for(const schedule of scheduleResponse.data){
