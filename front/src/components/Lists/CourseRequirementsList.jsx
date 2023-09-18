@@ -42,10 +42,10 @@ function CourseRequirementsList(props) {
             {
                 requirements.map((entry, index) => (
                     <Row key={'row-' + index} className="px-5 mx-5 py-3 justify-content-center">
-                        <Col className={'my-auto text-end'}>
+                        <Col className={'col-3 my-auto text-end'}>
                             {entry.code}
                         </Col>
-                        <Col className={'my-auto w-min-50 text-start'}>
+                        <Col className={'text-center my-auto w-min-50 text-start'}>
                             <a className="text-white" href={'/courses/' + entry.id}>{entry.name}</a>
                         </Col>
                     </Row>
