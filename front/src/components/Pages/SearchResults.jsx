@@ -25,16 +25,10 @@ function SearchResults(props) {
     const [params, setParams] = useState();
     const [user] = useState(ApiService.getActiveUser())
     const search = useLocation().search
-    const getTimeTable = (schedule) => {
-        var timeTable = {};
-        var classColors = {};
-        var colorIndex = 0;
-        DAYS.forEach((d) => {
-            timeTable[d] = Array.from({ length: 24 });
-        });
+    const getTimeTable = (schedule, palette) => {
+        var timeTable = {}
+        DAYS.forEach((d) => timeTable[d] = Array.from({ length: 24 }))
         schedule.courseClasses.forEach((c) => {
-            classColors[c.course] = colorIndex % 8;
-            colorIndex++;
             c.lectures.forEach((l) => {
                 const startTime = l.startTime.split(':');
                 const endTime = l.endTime.split(':');
@@ -46,72 +40,13 @@ function SearchResults(props) {
                         startHour: startHour,
                         duration: endHour - startHour,
                         courseClass: c,
-                        color: classColors[c.course],
+                        color: palette[c.course.id],
                     };
             });
         });
         return timeTable;
     }
-/*
-    const drawTable = (timeTable, earliest, latest, id) => {
-        return (
-            <table key={'t-' + id} className="table table-bordered text-center">
-                <thead>
-                    <tr className="bg-primary border-dark text-white">
-                        <th className="text-uppercase bg-primary text-white"></th>
-                        {DAYS.map((d) => {
-                            return (
-                                <th key={'t-' + id + '-d-' + d} className="text-uppercase bg-primary text-white">
-                                    {t('days.' + d)}
-                                </th>
-                            );
-                        })}
-                    </tr>
-                </thead>
-                <tbody>
-                    {Array.from({ length: 24 }, (v, k) => k).map((h) => {
-                        if (h >= earliest && h < latest) {
-                            var contents = {};
-                            DAYS.forEach((d) => {
-                                if (timeTable[d][h]) {
-                                    const c = timeTable[d][h];
-                                    if (timeTable[d][h].startHour === h)
-                                        contents[d] = (
-                                            <td
-                                                className={'day-column align-middle bg-color-' + c.color}
-                                                rowSpan={c.duration}
-                                            >
-                                                <div>
-                                                    <div className="col">
-                                                        <b> {c.courseClass.course.code} - {c.courseClass.course.name} </b>
-                                                        <i>&nbsp;({c.courseClass.name})</i>
-                                                    </div>
-                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} ( {c.lecture.building.code} ) </div>
-                                                </div>
-                                            </td>
-                                        );
-                                }
-                                else
-                                    contents[d] = <td className="day-column text-uppercase bg-black"></td>;
-                            });
-                            return (
-                                <tr key={'id-' + id + 'h' + h} className="border-dark">
-                                    <td className="text-uppercase bg-primary text-white">{h + ':00'}</td>
-                                    {DAYS.map((d) => (
-                                        <React.Fragment key={'id-' + id + 'd-' + d + 'h-' + h}>
-                                            {contents[d]}
-                                        </React.Fragment>
-                                    ))}
-                                </tr>
-                            );
-                        }
-                        return <tr className="border-dark" key={'id-' + id + 'h' + h}></tr>;
-                    })}
-                </tbody>
-            </table>
-        );
-    }
-*/
+
     const drawTable = useCallback((timeTable, earliest, latest, id) => {
         return (
             <table key={'t-' + id} className="table table-bordered text-center">
@@ -192,6 +127,22 @@ function SearchResults(props) {
             setParams(params);
         }
 
+        const createColorPalette = (schedules) => {
+            const courses = new Set()
+            for(const s of schedules){
+                for(const cc of s.courseClasses)
+                    courses.add(cc.course.id)
+            }
+            const palette = {}
+            let idx = 0
+            for(const c of courses){
+                palette[c] = idx%12
+                idx++
+            }
+            courses.forEach((c, idx) => {})
+            return palette
+        }
+
         if(!params) readParams()
         else if(params === null) setLoading(false)
         else {
@@ -204,11 +155,12 @@ function SearchResults(props) {
                     setStatus(findError);
                 }
                 else {
-                    var tables = [];
+                    var tables = []
+                    const palette = createColorPalette(resp.data)
                     resp.data.forEach((s, idx) => {
                         const earliest = Number(resp.data[idx].stats.earliestLecture.split(':')[0])
                         const latest = Number(resp.data[idx].stats.latestLecture.split(':')[0])
-                        tables.push(drawTable(getTimeTable(s), earliest-1, latest+1, idx));
+                        tables.push(drawTable(getTimeTable(s, palette), earliest-1, latest+1, idx));
                     });
                     setSchedules(resp.data)
                     setScheduleIndex(0)

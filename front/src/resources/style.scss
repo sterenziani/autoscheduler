@@ -9,14 +9,18 @@ $dark: #343a40;
 $disabled: #cad2c5;
 $background: #dcf1ec;
 
-$color0: #ffadad;
-$color1: #a0c4ff;
-$color2: #fdffb6;
-$color3: #caffbf;
-$color4: #ffd6a5;
-$color5: #9bf6ff;
-$color6: #ffc6ff;
-$color7: #bdb2ff;
+$color0: #ffadad; // red
+$color1: #a0c4ff; // blue
+$color2: #fdffb6; // yellow
+$color3: #caffbf; // green
+$color4: #ffd6a5; // orange
+$color5: #9bf6ff; // cyan
+$color6: #ffc6ff; // pink
+$color7: #bdb2ff; // purple
+$color8: #f1faee; // white
+$color9: #c9ada7; // brown
+$color10: #7ae582; // green
+$color11: #d397d3; // magenta
 
 // This is for tab styles
 $nav-link-padding-y: 0.5rem;
@@ -44,9 +48,9 @@ $theme-colors: (
     danger: $danger,
     light: $light,
     dark: $dark,
-    black: #000000,
-    grey: #cad2c5,
-    white: #ffffff,
+    "black": #000000,
+    "grey": #cad2c5,
+    "white": #ffffff,
 );
 
 .color-primary {
