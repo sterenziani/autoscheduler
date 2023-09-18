@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from 'react';
-import { Spinner } from 'react-bootstrap';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Common/Navbar';
 import SearchResults from './components/Pages/SearchResults';
@@ -13,7 +12,6 @@ import EditProgramPage from './components/Pages/EditProgramPage';
 import EditBuildingPage from './components/Pages/EditBuildingPage';
 import ResetPasswordPage from './components/Accounts/ResetPasswordPage';
 import ErrorMessage from './components/Common/ErrorMessage';
-import AuthService from './services/AuthService';
 import { NOT_FOUND } from './services/ApiConstants';
 import './resources/style.scss';
 
