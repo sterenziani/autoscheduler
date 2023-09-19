@@ -1,11 +1,11 @@
 import React, { useState, useEffect} from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
-import { Col, Navbar as BootstrapNavbar } from 'react-bootstrap';
+import { Col, Container, Navbar as BootstrapNavbar } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import AuthService from '../../services/AuthService';
 import { Link } from 'react-router-dom';
 import LinkButton from './LinkButton';
-import logo from '../../resources/logo.svg';
+import { ReactComponent as Logo } from '../../resources/logoBauhaus93.svg';
 
 function Navbar(props){
     const [user, setUser] = useState(AuthService.getUserStore())
@@ -30,8 +30,7 @@ function Navbar(props){
         <BootstrapNavbar bg="primary" sticky="top" className="d-flex no-lineheight flex-wrap border-bottom border-secondary border-3">
             <Col className="ms-5 my-2 justify-content-start">
                 <BootstrapNavbar.Brand as={Link} to="/">
-                    <b className="text-light">Auto</b>
-                    <b className="text-secondary">Scheduler</b>
+                    <Logo className="navbar-logo"/>
                 </BootstrapNavbar.Brand>
             </Col>
             {

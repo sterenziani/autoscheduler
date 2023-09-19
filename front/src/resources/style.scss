@@ -101,6 +101,11 @@ $theme-colors: (
     background-color: $color7 !important;
 }
 
+.navbar-logo {
+    max-height: 2em;
+    max-width: 10em;
+}
+
 .modal-content {
     background-color: $light !important;
 }
