@@ -2,6 +2,7 @@ import { PERSISTENCE } from '../constants/persistence/persistence.contants';
 import UserDao from '../persistence/abstract/user.dao';
 import MemoryUserDao from '../persistence/implementations/memory/memoryUser.dao';
 import GenericDaoFactory from './genericDao.factory';
+import DatabaseUserDao from "../persistence/implementations/database/databaseUser.dao";
 
 export default class UserDaoFactory extends GenericDaoFactory {
     // Static Getters
@@ -9,7 +10,7 @@ export default class UserDaoFactory extends GenericDaoFactory {
         const persistence = this.getPersistence();
         switch (persistence) {
             case PERSISTENCE.DATABASE:
-                throw new Error('Not implemented');
+                return DatabaseUserDao.getInstance();
             case PERSISTENCE.MEMORY:
                 return MemoryUserDao.getInstance();
         }

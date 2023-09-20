@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AuthService from './AuthService'
 
-const API_URL = "http://" + process.env.REACT_APP_BACK_HOST + ":" + process.env.REACT_APP_BACK_PORT + "/" + process.env.REACT_APP_BACK_API_PATH
+const API_URL = "http://" + process.env.REACT_APP_BACK_URL
 const api = axios.create({
     baseURL : API_URL,
     timeout : 10000
