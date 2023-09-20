@@ -11,7 +11,7 @@ export default abstract class UserDao extends GenericDao<User> {
     constructor() {
         super(ERRORS.NOT_FOUND.USER);
         // Initialize DB with admin user
-        this.create(process.env.ADMIN_EMAIL??"", hashPassword(process.env.ADMIN_PASS??""), ROLE.ADMIN, "en");
+        this.create(process.env.ADMIN_EMAIL??"", hashPassword(process.env.ADMIN_PASS??""), ROLE.ADMIN, "en").catch((_) => {});
     }
 
     // Abstract Methods

@@ -106,7 +106,7 @@ export default class EmailService {
         const emailLanguage = this.getAvailableLocale(user.locale);
         const subject = TRANSLATIONS.resources[emailLanguage].translation.resetYourPasswordSubject;
 
-        const context = { link: process.env.BASE_URL+"/"+internalResetPath, locale: emailLanguage };
+        const context = { link: process.env.FRONT_URL+"/"+internalResetPath, locale: emailLanguage };
         this.sendEmailTemplate(user.email, subject, template, context);
     }
 
