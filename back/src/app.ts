@@ -82,16 +82,16 @@ class App {
     }
 
     private setRoutes() {
-        this.app.use('/', new HomeRoutes().router);
-        this.app.use('/building', new BuildingRoutes().router);
-        this.app.use('/course', new CourseRoutes().router);
-        this.app.use('/course-class', new CourseClassRoutes().router);
-        this.app.use('/program', new ProgramRoutes().router);
-        this.app.use('/student', new StudentRoutes().router);
-        this.app.use('/term', new TermRoutes().router);
-        this.app.use('/university', new UniversityRoutes().router);
-        this.app.use('/universities', new UniversitiesRoutes().router);
-        this.app.use('/users', new UsersRoutes().router);
+        this.app.use('/api', new HomeRoutes().router);
+        this.app.use('/api/building', new BuildingRoutes().router);
+        this.app.use('/api/course', new CourseRoutes().router);
+        this.app.use('/api/course-class', new CourseClassRoutes().router);
+        this.app.use('/api/program', new ProgramRoutes().router);
+        this.app.use('/api/student', new StudentRoutes().router);
+        this.app.use('/api/term', new TermRoutes().router);
+        this.app.use('/api/university', new UniversityRoutes().router);
+        this.app.use('/api/universities', new UniversitiesRoutes().router);
+        this.app.use('/api/users', new UsersRoutes().router);
     }
 }
 
