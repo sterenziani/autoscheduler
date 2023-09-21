@@ -24,7 +24,7 @@ export default class UserAuthService {
     private constructor() {
         this.jwtKey = process.env.AUTH_TOKEN_KEY!;
         this.jwtPublicKey = process.env.AUTH_TOKEN_PUB_KEY!;
-        this.expireTime = process.env.AUTH_TOKEN_EXPIRE_TIME ?? DEFAULT_AUTH_TOKEN_EXPIRE_TIME;
+        this.expireTime = DEFAULT_AUTH_TOKEN_EXPIRE_TIME;
     }
 
     init() {

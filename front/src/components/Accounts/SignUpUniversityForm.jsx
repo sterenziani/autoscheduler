@@ -10,7 +10,7 @@ import ApiService from '../../services/ApiService';
 import { OK, CREATED, BAD_REQUEST } from '../../services/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 
-const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS;
+const CONTACT_EMAIL = process.env.REACT_APP_COMPANY_EMAIL;
 
 const SignUpSchema = Yup.object().shape({
     email: Yup.string()

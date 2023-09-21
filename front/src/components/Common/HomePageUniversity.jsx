@@ -8,7 +8,7 @@ import UniversityCoursesList from '../Lists/UniversityCoursesList';
 import UniversityBuildingsList from '../Lists/UniversityBuildingsList';
 import UniversityTermsList from '../Lists/UniversityTermsList';
 
-const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS;
+const CONTACT_EMAIL = process.env.REACT_APP_COMPANY_EMAIL;
 
 function HomePageUniversity(props) {
     const { t } = useTranslation()

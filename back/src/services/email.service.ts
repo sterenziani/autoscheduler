@@ -24,8 +24,8 @@ export default class EmailService {
             port: 465, // Port for SMTP (usually 465)
             secure: true, // Usually true if connecting to port 465
             auth: {
-                user: process.env.EMAIL_USER, // Your email address
-                pass: process.env.EMAIL_PASS, // Password (for gmail, your app password)
+                user: process.env.COMPANY_EMAIL, // Your email address
+                pass: process.env.COMPANY_EMAIL_PASS, // Password (for gmail, your app password)
                 //  For better security, use environment variables set on the server for these values when deploying
             },
         });
@@ -51,7 +51,7 @@ export default class EmailService {
     async sendEmail(destination: string, subject: string, html: string): Promise<void> {
         try {
             await this.transporter.sendMail({
-                from: process.env.EMAIL_USER,
+                from: process.env.COMPANY_EMAIL,
                 to: destination,
                 subject: subject,
                 html: html,
@@ -63,7 +63,7 @@ export default class EmailService {
 
     async sendEmailTemplate(destination: string, subject: string, template: string, context: any): Promise<void> {
         var mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: process.env.COMPANY_EMAIL,
             to: destination,
             subject: subject,
             template: template,
@@ -82,7 +82,7 @@ export default class EmailService {
         const subject = TRANSLATIONS.resources[emailLanguage].translation.welcome;
 
         const context = {
-            verificationEmail: process.env.EMAIL_VERIFICATION_ADDRESS,
+            verificationEmail: process.env.COMPANY_EMAIL,
             universityName: user.name,
             locale: emailLanguage
         };
