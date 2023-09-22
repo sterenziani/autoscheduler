@@ -14,7 +14,6 @@ function StudentCoursesList(props){
     const [courses,setCourses] = useState(props.course);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const user = props.user;
 
     const [paginationLinks, setPaginationLinks] = useState(null);
     const [page, setPage] = useState(1);

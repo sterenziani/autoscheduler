@@ -14,7 +14,6 @@ function UniversityTermsList(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const user = props.user;
     const [terms, setTerms] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [changingPublishStatus, setChangingPublishStatus] = useState([]);

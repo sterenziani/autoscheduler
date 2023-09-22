@@ -8,7 +8,6 @@ import { OK, CREATED } from '../../services/ApiConstants';
 
 function CourseListForm(props) {
     const { t } = useTranslation();
-    const user = ApiService.getActiveUser();
     const listedCourses = props.listedCourses
     const unavailableCourses = props.unavailableCourses
     const onClickTrashCan = props.onClickTrashCan

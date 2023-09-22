@@ -118,7 +118,7 @@ function EditCourseClassPage(props) {
                         lecturesWithBuilding.push(l)
                     }
                     setLectures(lecturesWithBuilding)
-                    setOldLectures(lecturesWithBuilding)
+                    setOldLectures(JSON.parse(JSON.stringify(lecturesWithBuilding)))
                 }
             });
         }
@@ -255,12 +255,12 @@ function EditCourseClassPage(props) {
         const categories = { post: [], put: [], delete: []}
         for(const oldL of oldLectures){
             const newL = newLectures.find(x => x.id === oldL.id)
-            if(!newL) categories.delete.push(oldL)  // removed from list
-            else if(oldL !== newL) categories.put.push(oldL) // values changed
+            if(!newL) categories.delete.push(oldL)  // removed from list, DELETE old
+            else if( JSON.stringify(oldL) !== JSON.stringify(newL) ) categories.put.push(newL) // values changed, PUT new
         }
         for(const newL of newLectures){
             const oldL = oldLectures.find(x => x.id === newL.id)
-            if(!oldL) categories.post.push(oldL)  // new in list
+            if(!oldL) categories.post.push(newL)  // new in list, POST new
         }
         return categories
     }

@@ -122,7 +122,7 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
         if(authenticateResponse.status !== OK) return authenticateResponse
 
         const endpoint = `${setProgramEndpoint}/${programId}`
-        await api.patch(endpoint, getRequestHeaders())
+        await api.put(endpoint, getRequestHeaders())
 
         return createResponse
     }
