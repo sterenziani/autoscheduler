@@ -8,7 +8,7 @@ import UniversityCoursesList from '../Lists/UniversityCoursesList';
 import UniversityBuildingsList from '../Lists/UniversityBuildingsList';
 import UniversityTermsList from '../Lists/UniversityTermsList';
 
-const CONTACT_EMAIL = const CONTACT_EMAIL = process.env.VERIFICATION_EMAIL?? 'auto.scheduler.contact@gmail.com';
+const CONTACT_EMAIL = process.env.VERIFICATION_EMAIL?? 'auto.scheduler.contact@gmail.com';
 
 function HomePageUniversity(props) {
     const { t } = useTranslation()
