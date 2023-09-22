@@ -146,7 +146,7 @@ function SearchResults(props) {
         if(!params) readParams()
         else if(params === null) setLoading(false)
         else {
-            ApiService.getSchedules(user.id, params).then((resp) => {
+            ApiService.getSchedules(params).then((resp) => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;

@@ -54,7 +54,7 @@ function StudentCourseLog(props) {
 
     const loadCourses = (page) => {
         setLoading(true)
-        ApiService.getFinishedCourses(student.id, page).then((resp) => {
+        ApiService.getFinishedCourses(page).then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
@@ -88,7 +88,7 @@ function StudentCourseLog(props) {
         if (!courseToAdd)
             return;
         setLoading(true)
-        ApiService.addFinishedCourse(student.id, courseToAdd).then((data) => {
+        ApiService.addFinishedCourse(courseToAdd).then((data) => {
             switchAddModal()
             setCourseToAdd()
             loadCourses(page)
@@ -98,7 +98,7 @@ function StudentCourseLog(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(student.university.id, inputValue).then((resp) => {
+            ApiService.getPrograms(inputValue).then((resp) => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;
@@ -118,7 +118,7 @@ function StudentCourseLog(props) {
             if(!inputValue){
                 callback([])
             } else {
-                ApiService.getRemainingCoursesProgram(student.id, selectedProgramId, inputValue).then((resp) => {
+                ApiService.getRemainingCoursesProgram(selectedProgramId, inputValue).then((resp) => {
                     let findError = null;
                     if (resp && resp.status && resp.status !== OK)
                         findError = resp.status;

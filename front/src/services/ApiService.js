@@ -6,6 +6,27 @@ const MULTI_PAGE_SEARCH_LIMIT = 20;
 const MINUTE_IN_MS = 60000;
 
 //////////////////////////
+/// ENDPOINT CONSTANTS ///
+//////////////////////////
+
+const passwordRecoveryTokensEndpoint = "auth/password-recovery-tokens"
+
+const studentsEndpoint = "students"
+const studentUniversityPrefix = "student/"
+const studentUniversityEndpoint = "student/university"
+const studentProgramEndpoint = "student/program"
+const studentCompletedCoursesEndpoint = "student/completed-courses"
+const studentRemainingCoursesEndpoint = "student/remaining-courses"
+const studentSchedulesEndpoint = "student/schedules"
+
+const universitiesEndpoint = "universities"
+const universityBuildingsEndpoint = "university/buildings"
+const universityProgramsEndpoint = "university/programs"
+const universityCoursesEndpoint = "university/courses"
+const universityTermsEndpoint = "university/terms"
+const universityClassesEndpoint = "university/course-classes"
+
+//////////////////////////
 //// HELPER FUNCTIONS ////
 //////////////////////////
 
@@ -29,15 +50,18 @@ const longApiGetRequest = async (endpoint) => {
     }
 }
 
-const simpleApiMultiPageGetRequest = async (baseEndpoint, inputText, limit, idsToFilter) => {
+const simpleApiMultiPageGetRequest = async (baseEndpoint, params, limit, idsToFilter) => {
     try {
-        if(!inputText)
-            inputText = ""
         let page = 0
         let lastPage = 0
         const finalResponse = {data: []}
+
+        let additionalQuery = ""
+        for (const [key, value] of Object.entries(params))
+            additionalQuery = `${additionalQuery}&${key}=${value}`
+
         while(page <= lastPage && (!limit || finalResponse.data.length < limit)) {
-            const endpoint = baseEndpoint + "?filter="+inputText +"&page=" +page
+            const endpoint = `${baseEndpoint}?page=${page}${additionalQuery}`
             const response = await api.get(endpoint, AuthService.getRequestHeaders())
 
             // Process page data (last is checked every time in case one has been added after first page was read)
@@ -87,11 +111,9 @@ const simpleApiPutRequest = async (endpoint, body) => {
     }
 }
 
-const simpleApiDeleteRequest = async (endpoint, body) => {
+const simpleApiDeleteRequest = async (endpoint) => {
     try {
         const config = AuthService.getRequestHeaders()
-        if(body)
-            config.data = body // config.data needed for DELETE syntax
         return await api.delete(endpoint, config)
     }
     catch(e) {
@@ -106,13 +128,13 @@ const createOrUpdateObject = async (baseEndpoint, body, id) => {
     let response
     try {
         if(id){
-            endpoint = baseEndpoint + id
+            endpoint = `${baseEndpoint}/${id}`
             successStatus = OK
             response = await api.put(endpoint, body, AuthService.getRequestHeaders())
         } else {
             response = await api.post(endpoint, body, AuthService.getRequestHeaders())
         }
-        const responseId = response.headers.location? response.headers.location.split('/')[1] : undefined
+        const responseId = response.headers.location? response.headers.location.split('/')[1] : id
         return { status: successStatus, id: responseId }
     }
     catch(e) {
@@ -138,9 +160,8 @@ const parsePagination = (response) => {
 const scheduleParamsToQuery = (params) => {
     let query = '';
     if (params) {
-        query += '?programId=' + params.programId;
-        query += '&termId=' + params.termId;
-        query += '&hours=' + params.hours;
+        query += '?termId=' + params.termId;
+        query += '&targetHours=' + params.hours;
         query += '&reduceDays=' + params.reduceDays;
         query += '&prioritizeUnlocks=' + params.prioritizeUnlocks;
         if (params.unavailableTimeSlots) {
@@ -151,6 +172,10 @@ const scheduleParamsToQuery = (params) => {
     }
     return query;
 };
+
+const getEndpointForActiveUser = (endpoint) => {
+    return (AuthService.isActiveUserStudent()? studentUniversityPrefix:"") + endpoint
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// USER FUNCTIONS ///////////////////////////////
@@ -177,19 +202,17 @@ const getActiveUser = () => {
 }
 
 const requestPasswordChangeToken = async (email) => {
-    const endpoint = "users/token"
     const payload = {'email': email}
-    return simpleApiPostRequest(endpoint, payload)
+    return simpleApiPostRequest(passwordRecoveryTokensEndpoint, payload)
 }
 
 const getPasswordChangeToken = async (token) => {
-    const endpoint = "users/token/"+token
-    return simpleApiGetRequest(endpoint)
+    return simpleApiGetRequest(passwordRecoveryTokensEndpoint)
 }
 
 const changePassword = async (userId, token, newPassword) => {
-    const endpoint = "users/"+userId+"/password"
-    const payload = {'token': token, 'password': newPassword}
+    const endpoint = passwordRecoveryTokensEndpoint + token
+    const payload = {'password': newPassword}
     return simpleApiPutRequest(endpoint, payload)
 }
 
@@ -201,12 +224,13 @@ const getStudent = async (studentId) => {
     try{
         let user = getActiveUser()
         if(user.id !== studentId){
-            const endpoint = "student/"+studentId
+            const endpoint = studentsEndpoint + studentId
             const resp = await api.get(endpoint, AuthService.getRequestHeaders())
             user = resp.data
         }
-        const universityResponse = await api.get(user.universityUrl, AuthService.getRequestHeaders())
-        const programResponse = await api.get(user.programUrl, AuthService.getRequestHeaders())
+
+        const universityResponse = await api.get(studentUniversityEndpoint, AuthService.getRequestHeaders())
+        const programResponse = await api.get(studentProgramEndpoint, AuthService.getRequestHeaders())
 
         const resp = {
             ...user,
@@ -225,31 +249,29 @@ const getStudent = async (studentId) => {
     }
 }
 
-const getFinishedCourses = async (studentId, page) => {
-    const endpoint = "student/" +studentId +"/completed-courses?page=" + (page-1)
+const getFinishedCourses = async (page) => {
+    const endpoint = studentCompletedCoursesEndpoint +`?page=${page-1}`
     return simpleApiGetRequest(endpoint)
 }
 
-const addFinishedCourse = async (studentId, courseId) => {
-    const endpoint = "student/" +studentId +"/completed-courses"
-    const body = {courseIds: [courseId]}
-    return simpleApiPostRequest(endpoint, body)
+const addFinishedCourse = async (courseId) => {
+    const body = { courseId: courseId }
+    return simpleApiPostRequest(studentCompletedCoursesEndpoint, body)
 }
 
-const deleteFinishedCourse = async (studentId, courseId) => {
-    const endpoint = "student/" +studentId +"/completed-courses"
-    const body = {courseIds: [courseId]}
-    return simpleApiDeleteRequest(endpoint, body)
+const deleteFinishedCourse = async (courseId) => {
+    const endpoint = `${studentCompletedCoursesEndpoint}/${courseId}`
+    return simpleApiDeleteRequest(endpoint)
 }
 
-const getRemainingCoursesProgram = async (studentId, programId, inputText) => {
-    const endpoint = "student/"+studentId+"/remaining-courses/"+programId+"?filter="+inputText;
+const getRemainingCoursesProgram = async (programId, inputText) => {
+    const endpoint = `${studentRemainingCoursesEndpoint}?programId=${programId}&filter=${inputText}`
     return simpleApiGetRequest(endpoint)
 }
 
-const getSchedules = async (userId, params) => {
+const getSchedules = async (params) => {
     const query = scheduleParamsToQuery(params)
-    const scheduleResponse = await longApiGetRequest("student/"+userId+"/schedules"+query)
+    const scheduleResponse = await longApiGetRequest(studentSchedulesEndpoint + query)
     if(scheduleResponse.status !== OK)
         return scheduleResponse
     for(const schedule of scheduleResponse.data){
@@ -268,25 +290,26 @@ const getSchedules = async (userId, params) => {
 //////////////////////////////////////////////////////////////////////////////
 
 const getUniversities = async (inputText) => {
-    return simpleApiMultiPageGetRequest("universities", inputText)
+    return simpleApiMultiPageGetRequest(universitiesEndpoint, {filter: inputText, verified: true})
 }
 
 //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// BUILDING FUNCTIONS /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-const getBuildings = async (universityId, page) => {
-    const endpoint = "university/" + universityId + "/buildings?page=" +(page-1)
+const getBuildingsPage = async (page) => {
+    const endpoint = getEndpointForActiveUser(`${universityBuildingsEndpoint}?page=${page-1}`)
     return simpleApiGetRequest(endpoint)
 }
 
-const getAllBuildings = async (universityId) => {
-    return simpleApiMultiPageGetRequest("university/"+universityId+"/buildings")
+const getBuildings = async () => {
+    const endpoint = getEndpointForActiveUser(universityBuildingsEndpoint)
+    return simpleApiMultiPageGetRequest(endpoint)
 }
 
-const getBuildingDictionary = async (universityId) => {
+const getBuildingDictionary = async () => {
     // Get all buildings
-    const buildingsResp = await getAllBuildings(universityId)
+    const buildingsResp = await getBuildings()
     if(buildingsResp.status !== OK)
         return buildingsResp
 
@@ -299,24 +322,34 @@ const getBuildingDictionary = async (universityId) => {
 }
 
 const getBuilding = async (buildingId) => {
-    return simpleApiGetRequest("building/"+buildingId)
+    const endpoint = getEndpointForActiveUser(`${universityBuildingsEndpoint}/${buildingId}`)
+    return simpleApiGetRequest(endpoint)
 }
 
 const saveBuilding = async (id, name, internalId, distances) => {
-    const distanceIDs = {}
-    for (const pair of Object.values(distances))
-        distanceIDs[pair.building.id] = pair.time
-
     const payload = {
         'name': name,
         'internalId': internalId,
-        "distances": distanceIDs,
     }
-    return createOrUpdateObject("building/", payload, id)
+    const response = await createOrUpdateObject(universityBuildingsEndpoint, payload, id)
+    if(response !== OK || response !== CREATED)
+        return response
+
+
+    // Once created/updated, define distances
+    const distanceEndpoint = `${universityBuildingsEndpoint}/${response.id}/distances-collection`
+    const distancePayload = { "distances": {} }
+    for (const pair of Object.values(distances))
+        distancePayload.distances[pair.building.id] = pair.time
+
+    const distanceResponse = await simpleApiPutRequest(distanceEndpoint, distancePayload)
+    if(distanceResponse !== OK || distanceResponse !== CREATED)
+        return distanceResponse
+    return response
 }
 
 const deleteBuilding = async (buildingId) => {
-    const endpoint = "building/"+buildingId
+    const endpoint = `${universityBuildingsEndpoint}/${buildingId}`
     return simpleApiDeleteRequest(endpoint)
 }
 
@@ -324,40 +357,57 @@ const deleteBuilding = async (buildingId) => {
 ////////////////////////////// PROGRAM FUNCTIONS /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-const getPrograms = async (universityId, inputText) => {
-    return simpleApiMultiPageGetRequest("/university/"+universityId+"/programs", inputText)
+const getProgramsOfUniversity = async (universityId, inputText) => {
+    return simpleApiMultiPageGetRequest(`${universitiesEndpoint}/${universityId}/programs`, {filter: inputText})
 }
 
-const getProgramsPage = async (universityId, page) => {
-    const endpoint = "university/" + universityId + "/programs?page=" +(page-1)
+const getPrograms = async (inputText) => {
+    const endpoint = getEndpointForActiveUser(universityProgramsEndpoint)
+    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText})
+}
+
+const getProgramsPage = async (page) => {
+    const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}?page=${page-1}`)
     return simpleApiGetRequest(endpoint)
 }
 
 const getProgram = async (programId) => {
-    return simpleApiGetRequest("program/"+programId)
+    const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}`)
+    return simpleApiGetRequest(endpoint)
 }
 
 const getMandatoryCourses = async (programId) => {
-    return simpleApiMultiPageGetRequest("/program/"+programId+"/courses/mandatory")
+    const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}/courses`)
+    return simpleApiMultiPageGetRequest(endpoint, {optional: false})
 }
 
 const getOptionalCourses = async (programId) => {
-    return simpleApiMultiPageGetRequest("/program/"+programId+"/courses/optional")
+    const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}/courses`)
+    return simpleApiMultiPageGetRequest(endpoint, {optional: true})
 }
 
 const saveProgram = async (id, name, internalId, mandatoryCourseIDs, optionalCourseIDs) => {
     const payload = {
-        'id': id,
         'name': name,
-        'internalId': internalId,
-        "mandatoryCourses": mandatoryCourseIDs,
-        "optionalCourses": optionalCourseIDs,
+        'internalId': internalId
     }
-    return createOrUpdateObject("program/", payload, id)
+    const response = await createOrUpdateObject(universityProgramsEndpoint, payload, id)
+    if(response !== OK || response !== CREATED)
+        return response
+
+
+    // Once created/updated, define courses
+    const coursesEndpoint = `${universityProgramsEndpoint}/${response.id}/courses-collection`
+    const coursesPayload = { "mandatoryCourses": mandatoryCourseIDs, "optionalCourses": optionalCourseIDs }
+    const coursesResponse = await simpleApiPutRequest(coursesEndpoint, coursesPayload)
+
+    if(coursesResponse !== OK || coursesResponse !== CREATED)
+        return coursesResponse
+    return response
 }
 
 const deleteProgram = async (programId) => {
-    const endpoint = "program/"+programId
+    const endpoint = `${universityProgramsEndpoint}/${programId}`
     return simpleApiDeleteRequest(endpoint)
 }
 
@@ -365,75 +415,53 @@ const deleteProgram = async (programId) => {
 ////////////////////////////// COURSE FUNCTIONS //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-const getCourses = async (universityId, inputText) => {
-    const endpoint = "university/" + universityId + "/courses?filter=" + inputText
+const getCourses = async (inputText) => {
+    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}?filter=${inputText}`)
+    return simpleApiMultiPageGetRequest(endpoint)
+}
+
+const getCoursesPage = async (page) => {
+    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}?page=${page-1}`)
     return simpleApiGetRequest(endpoint)
 }
 
-const getCoursesNotInList = async (universityId, inputText, courseIDsToFilter, limit) => {
-    return simpleApiMultiPageGetRequest("university/" + universityId + "/courses", inputText, MULTI_PAGE_SEARCH_LIMIT, courseIDsToFilter)
-}
-
-const getCoursesPage = async (universityId, page) => {
-    const endpoint = "university/" + universityId + "/courses?page=" + (page-1)
-    return simpleApiGetRequest(endpoint)
+const getCoursesNotInList = async (inputText, courseIDsToFilter) => {
+    const endpoint = getEndpointForActiveUser(universityCoursesEndpoint)
+    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText}, MULTI_PAGE_SEARCH_LIMIT, courseIDsToFilter)
 }
 
 const getCourse = async (courseId) => {
-    return simpleApiGetRequest("course/"+courseId)
-}
-
-const getRequiredCourses = async (courseId) => {
-    try {
-        // get Program IDs
-        let programIDs = []
-        let page = 0
-        let lastPage = 0
-        while(page <= lastPage){
-            const endpoint = "/course/"+courseId+"/requirements?page=" +page
-            const programsResponse = await api.get(endpoint, AuthService.getRequestHeaders())
-            const links = parsePagination(programsResponse)
-
-            page = page+1
-            if(links && links.last && links.last.includes("page=")){
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
-            }
-            programIDs = programIDs.concat(programsResponse.data.map(p => p.programId))
-        }
-
-        // Request courses for each program
-        const finalResponse = {data: {}}
-        programIDs.forEach(async (pId) => {
-            finalResponse.data[pId] = []
-            const coursesResponse = await getRequiredCoursesForProgram(courseId, pId)
-            finalResponse.data[pId] = finalResponse.data[pId].concat(coursesResponse.data)
-            finalResponse.status = coursesResponse.status
-        });
-        return finalResponse
-    }
-    catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: TIMEOUT }
-    }
+    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}/${courseId}`)
+    return simpleApiGetRequest(endpoint)
 }
 
 const getRequiredCoursesForProgram = async (courseId, programId) => {
-    return simpleApiMultiPageGetRequest("course/"+courseId+"/requirements/"+programId)
+    const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}/courses/${courseId}/required-courses`)
+    return simpleApiMultiPageGetRequest(endpoint)
 }
 
 const saveCourse = async (id, name, internalId, requirementIDs) => {
     const payload = {
         'name': name,
-        'internalId': internalId,
-        "requirements": requirementIDs,
+        'internalId': internalId
     }
-    return createOrUpdateObject("course/", payload, id)
+    const response = createOrUpdateObject(universityCoursesEndpoint, payload, id)
+    if(response !== OK || response !== CREATED)
+        return response
+
+    // Once created/updated, define requirements
+    for(const [programId, requirementsInProgram] of Object.entries(requirementIDs)) {
+        const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses/${response.id}/required-courses-collection`
+        const requirementsPayload = { "requirements": requirementsInProgram }
+        const requirementsResponse = await simpleApiPutRequest(requirementsEndpoint, requirementsPayload)
+        if(requirementsResponse !== OK || requirementsResponse !== CREATED)
+            return requirementsResponse
+    }
+    return response
 }
 
 const deleteCourse = async (courseId) => {
-    const endpoint = "course/"+courseId
+    const endpoint = `${universityCoursesEndpoint}/${courseId}`
     return simpleApiDeleteRequest(endpoint)
 }
 
@@ -441,13 +469,14 @@ const deleteCourse = async (courseId) => {
 /////////////////////////////// TERM FUNCTIONS ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-const getTerms = async (universityId, page) => {
-    const endpoint = "university/" + universityId + "/terms?page=" +(page-1)
+const getTerms = async (page=1) => {
+    const endpoint = getEndpointForActiveUser(`${universityTermsEndpoint}?page=${page-1}`)
     return simpleApiGetRequest(endpoint)
 }
 
 const getTerm = async (termId) => {
-    return simpleApiGetRequest("term/"+termId)
+    const endpoint = getEndpointForActiveUser(`${universityTermsEndpoint}/${termId}`)
+    return simpleApiGetRequest(endpoint)
 }
 
 const publishTerm = async (term) => {
@@ -465,11 +494,13 @@ const saveTerm = async (id, name, internalId, startDate, published) => {
         "startDate": startDate,
         "published": published
     }
-    return createOrUpdateObject("term/", payload, id)
+    const endpoint = universityTermsEndpoint
+    return createOrUpdateObject(endpoint, payload, id)
 }
 
 const deleteTerm = async (termId) => {
-    return simpleApiDeleteRequest("term/"+termId)
+    const endpoint = `${universityTermsEndpoint}/${termId}`
+    return simpleApiDeleteRequest(endpoint)
 }
 
 
@@ -479,7 +510,7 @@ const deleteTerm = async (termId) => {
 
 const getCourseClassesForTerm = async (courseId, termId, page) => {
     try {
-        const endpoint = "course/" + courseId + "/course-classes?termId=" +termId +"&page=" +(page-1)
+        const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}/${courseId}/course-classes?termId=${termId}&page=${page-1}`)
         const listOfClassesResponse = await api.get(endpoint, AuthService.getRequestHeaders())
 
         // Load lecture data
@@ -503,7 +534,8 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
 
 const getCourseClass = async (classId) => {
     try {
-        const courseClassResponse = await api.get("course-class/"+classId, AuthService.getRequestHeaders())
+        const courseClassEndpoint = getEndpointForActiveUser(`${universityClassesEndpoint}/${classId}`)
+        const courseClassResponse = await api.get(courseClassEndpoint, AuthService.getRequestHeaders())
         const courseClass = courseClassResponse.data
 
         const courseResponse = await api.get(courseClass.courseUrl, AuthService.getRequestHeaders())
@@ -536,21 +568,53 @@ const getCourseClass = async (classId) => {
     }
 }
 
-const saveCourseClass = async (id, courseId, termId, name, lectures) => {
-    const formattedLectures = []
-    lectures.forEach((l) => formattedLectures.push(Object.assign({}, l)))
-    formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
+const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lecturesToUpdate, lecturesToDelete) => {
     const payload = {
-        courseId: courseId,
         termId: termId,
-        name: name,
-        lectures: formattedLectures
+        name: name
     }
-    return createOrUpdateObject("course-class/", payload, id)
+    const endpoint = `${universityCoursesEndpoint}/${courseId}/course-classes`
+    const response = createOrUpdateObject(endpoint, payload, id)
+    if(response !== OK || response !== CREATED)
+        return response
+
+    // Once created/updated, define lectures
+    const lecturesEndpoint = `${universityClassesEndpoint}/${response.id}/lectures`
+
+    for(const l of lecturesToUpdate) {
+        const formattedLectures = []
+        lecturesToUpdate.forEach((l) => formattedLectures.push(Object.assign({}, l)))
+        formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
+
+        const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
+        const lectureResponse = await simpleApiPutRequest(`${lecturesEndpoint}/${l.id}`, lecturePayload)
+        if(lectureResponse !== OK || lectureResponse !== CREATED)
+            return lectureResponse
+    }
+
+    for(const l of lecturesToCreate) {
+        const formattedLectures = []
+        lecturesToCreate.forEach((l) => formattedLectures.push(Object.assign({}, l)))
+        formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
+
+        const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
+        const lectureResponse = await simpleApiPostRequest(lecturesEndpoint, lecturePayload)
+        if(lectureResponse !== OK || lectureResponse !== CREATED)
+            return lectureResponse
+    }
+
+    for(const l of lecturesToDelete) {
+        const lectureResponse = await simpleApiDeleteRequest(`${lecturesEndpoint}/${l.id}`)
+        if(lectureResponse !== OK || lectureResponse !== CREATED)
+            return lectureResponse
+    }
+
+    return response
 }
 
 const deleteCourseClass = async (courseClassId) => {
-    return simpleApiDeleteRequest("course-class/"+courseClassId)
+    const endpoint = `${universityClassesEndpoint}/${courseClassId}`
+    return simpleApiDeleteRequest(endpoint)
 }
 
 
@@ -579,13 +643,14 @@ const ApiService = {
     getUniversities: getUniversities,
 
     getBuildings: getBuildings,
-    getAllBuildings: getAllBuildings,
+    getBuildingsPage: getBuildingsPage,
     getBuildingDictionary: getBuildingDictionary,
     getBuilding: getBuilding,
     saveBuilding: saveBuilding,
     deleteBuilding: deleteBuilding,
 
     getPrograms: getPrograms,
+    getProgramsOfUniversity: getProgramsOfUniversity,
     getProgramsPage: getProgramsPage,
     getProgram: getProgram,
     getMandatoryCourses: getMandatoryCourses,
@@ -597,7 +662,6 @@ const ApiService = {
     getCoursesNotInList: getCoursesNotInList,
     getCoursesPage: getCoursesPage,
     getCourse: getCourse,
-    getRequiredCourses: getRequiredCourses,
     getRequiredCoursesForProgram: getRequiredCoursesForProgram,
     saveCourse: saveCourse,
     deleteCourse: deleteCourse,

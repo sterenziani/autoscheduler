@@ -117,7 +117,7 @@ function EditProgramPage(props) {
     },[program, courses, mandatoryCourses, optionalCourses, id, t, user])
 
     const loadCourses = async (universityId) => {
-        ApiService.getCourses(universityId).then((resp) => {
+        ApiService.getCourses().then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;

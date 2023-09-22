@@ -62,20 +62,17 @@ function EditCoursePage(props) {
         }
 
         async function execute() {
-            if(id){
-                if(!course)
-                    await Promise.all([loadCourse()]);
-                else if(!requirements)
-                    await Promise.all([loadRequirements(course.id)]);
-            }
-            else if(!course && !requirements){
-                setCourse({"name": t("forms.placeholders.courseName"), "code": t("forms.placeholders.courseCode")})
-                setRequirements({})
-                setLoading(false)
+            if(!course){
+                if(id) await Promise.all([loadCourse()]);
+                else {
+                    setCourse({"name": t("forms.placeholders.courseName"), "code": t("forms.placeholders.courseCode")})
+                    setRequirements({})
+                    setLoading(false)
+                }
             }
         }
         if(user) execute()
-    },[course, requirements, id, t, user])
+    },[course, id, t, user])
 
     useEffect( () => {
         if(requirements) setLoading(false)
@@ -98,8 +95,8 @@ function EditCoursePage(props) {
         })
     }
 
-    const loadRequirements = async(courseId) => {
-        ApiService.getRequiredCourses(courseId).then((resp) => {
+    const loadRequirements = async(courseId, programId) => {
+        ApiService.getRequiredCoursesForProgram(courseId, programId).then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
@@ -109,7 +106,9 @@ function EditCoursePage(props) {
                 setStatus(findError)
             }
             else{
-                setRequirements(resp.data)
+                const requirementsCopy = Object.assign([], requirements);
+                requirementsCopy[programId] = resp.data;
+                setRequirements(requirementsCopy)
             }
         });
     }
@@ -122,7 +121,7 @@ function EditCoursePage(props) {
             Object.keys(requirements).forEach(key => {
                 requirementIDs[key] = requirements[key].map(a => a.id)
             })
-            
+
             const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, requirementIDs)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/courses/"+resp.id)
@@ -155,10 +154,13 @@ function EditCoursePage(props) {
     }
 
     const onChangePrograms = (program) => {
-        if(!requirements[program.id]){
-            const requirementsCopy = Object.assign({}, requirements)
-            requirementsCopy[program.id] = []
-            setRequirements(requirementsCopy)
+        if(!requirements[program.id]) {
+            if(course.id) loadRequirements(course.id, program.id)
+            else {
+                const requirementsCopy = Object.assign({}, requirements)
+                requirementsCopy[program.id] = []
+                setRequirements(requirementsCopy)
+            }
         }
         setSelectedProgram(program)
     }

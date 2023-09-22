@@ -35,7 +35,7 @@ function UniversityBuildingsList(props) {
 
         const loadBuildingDictionary = () => {
             setLoading(true)
-            ApiService.getBuildingDictionary(user.id).then((resp) => {
+            ApiService.getBuildingDictionary().then((resp) => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;
@@ -67,7 +67,7 @@ function UniversityBuildingsList(props) {
 
     const loadBuildings = (page) => {
         setLoading(true)
-        ApiService.getBuildings(user.id, page).then((resp) => {
+        ApiService.getBuildingsPage(page).then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;

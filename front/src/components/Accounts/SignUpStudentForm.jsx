@@ -70,7 +70,7 @@ function SignUpStudentForm(props) {
                 break;
             default:
                 setSubmitting(false)
-                setError("TIMEOUT")
+                setError(data.code?? "TIMEOUT")
                 break;
         }
     }
@@ -115,7 +115,7 @@ function SignUpStudentForm(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(selectedSchool, inputValue).then(resp => {
+            ApiService.getProgramsOfUniversity(selectedSchool, inputValue).then(resp => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;
