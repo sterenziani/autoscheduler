@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AuthService from './AuthService'
 
-const API_URL = "http://auto-scheduler.xyz/api"
+const API_URL = process.env.REACT_APP_API_URL?? 'auto.scheduler.contact@gmail.com':
 const api = axios.create({
     baseURL : API_URL,
     timeout : 10000

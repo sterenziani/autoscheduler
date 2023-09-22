@@ -20,18 +20,18 @@ services:
         condition: service_healthy
 
   front:
-    build: ./front
-    environment:
-      BACK_HOST: back
-      BACK_PORT: 3000
-    env_file:
-      - ./front/.env
+    build:
+        context: ./front
+        args:
+            API_URL: 'http://auto-scheduler.xyz/api'
+            VERIFICATION_EMAIL: 'auto.scheduler.contact@gmail.com'
     ports:
       - '8080:3000'
     networks:
       - default
     depends_on:
       - back
+
 
   mongo:
     image: mongo:latest

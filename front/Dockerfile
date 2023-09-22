@@ -11,6 +11,13 @@ RUN mkdir -p /usr/app \
 WORKDIR /usr/app
 USER node
 
+# Create a .env for react app
+ARG API_URL
+ARG VERIFICATION_EMAIL
+RUN touch .env
+RUN echo REACT_APP_API_URL=${API_URL} | tee -a .env >/dev/null
+RUN echo REACT_APP_EMAIL_VERIFICATION_ADDRESS=${VERIFICATION_EMAIL} | tee -a .env >/dev/null
+
 # Copy package*.json and install dependencies from lock (To better use docker cache)
 COPY --chown=node:node package*.json ./
 RUN npm ci
