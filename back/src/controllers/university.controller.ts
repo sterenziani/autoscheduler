@@ -382,7 +382,7 @@ export class UniversityController {
 
         try {
             const course: Course = await this.courseService.createCourse(universityId, internalId, name);
-            res.status(HTTP_STATUS.OK)
+            res.status(HTTP_STATUS.CREATED)
                 .location(getResourceUrl(RESOURCES.COURSE, API_SCOPE.UNIVERSITY, course.id))
                 .send(CourseDto.courseToDto(course, API_SCOPE.UNIVERSITY));
         } catch (e) {
@@ -442,6 +442,7 @@ export class UniversityController {
         }
     };
 
+    // Duplicate
     public getUniversityCourseCourseClass: RequestHandler = async (req, res, next) => {
         const universityId = req.user.id;
         const courseId = req.params.courseId;
@@ -455,17 +456,74 @@ export class UniversityController {
         }
     };
 
-    public addUniversityProgramCourse: RequestHandler = async (req, res, next) => {
+    public createUniversityCourseCourseClass: RequestHandler = async (req, res, next) => {
         const universityId = req.user.id;
-        const programId = req.params.programId;
-        const courseId = validateString(req.body.courseId);
-        const optional = validateBoolean(req.body.optional);
+        const courseId = req.params.courseId;
+        const termId = validateString(req.body.termId);
+        const name = validateString(req.body.name);
 
-        if (!courseId || optional === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!termId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
         
         try {
-            await this.programService.addCourse(programId, universityId, courseId, optional);
+            // TODO: Should this be handled by courseService?
+            const courseClass: CourseClass = await this.courseClassService.createCourseClass(universityId, courseId, termId, name);
+            res.status(HTTP_STATUS.CREATED)
+                .location(getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.UNIVERSITY, courseClass.id))
+                .send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    // Duplicate
+    public modifyUniversityCourseCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+        const courseClassId = req.params.courseClassId;
+        const termId = validateString(req.body.termId);
+        const name = validateString(req.body.name);
+
+        if (!termId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        
+        try {
+            const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, courseId, termId, name);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.UNIVERSITY, courseClass.id))
+                .send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    // Duplicate
+    public deleteUniversityCourseCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+        const courseClassId = req.params.courseClassId;
+        
+        try {
+            await this.courseClassService.deleteCourseClass(courseClassId, universityId, courseId);
             res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityCourseRequiredCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const programId = validateString(req.query.programId);
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getRequiredCourses(page, limit, courseId, filter, programId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, undefined, programId))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.UNIVERSITY));
         } catch (e) {
             next(e);
         }
