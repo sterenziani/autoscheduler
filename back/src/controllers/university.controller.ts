@@ -3,6 +3,7 @@ import * as UniversityDto from '../dtos/university.dto';
 import * as ProgramDto from '../dtos/program.dto';
 import * as CourseDto from '../dtos/course.dto';
 import * as CourseClassDto from '../dtos/courseClass.dto';
+import * as BuildingDto from '../dtos/building.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
@@ -20,18 +21,22 @@ import CourseService from '../services/course.service';
 import { removeDuplicates, valuesIntersect } from '../helpers/collection.helper';
 import CourseClassService from '../services/courseClass.service';
 import CourseClass from '../models/abstract/courseClass.model';
+import BuildingService from '../services/building.service';
+import Building from '../models/abstract/building.model';
 
 export class UniversityController {
     private universityService: UniversityService;
     private programService: ProgramService;
     private courseService: CourseService;
     private courseClassService: CourseClassService;
+    private buildingService: BuildingService;
 
     constructor() {
         this.universityService = UniversityService.getInstance();
         this.programService = ProgramService.getInstance();
         this.courseService = CourseService.getInstance();
         this.courseClassService = CourseClassService.getInstance();
+        this.buildingService = BuildingService.getInstance();
     }
 
     public getUniversity: RequestHandler = async (req, res, next) => {
@@ -524,6 +529,85 @@ export class UniversityController {
             res.status(HTTP_STATUS.OK)
                 .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, undefined, programId))
                 .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityBuildings: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+
+        try {
+            const paginatedBuildings: PaginatedCollection<Building> = await this.buildingService.getBuildings(page, limit, filter, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(BuildingDto.paginatedBuildingsToLinks(paginatedBuildings, getReqPath(req), limit, filter))
+                .send(BuildingDto.paginatedBuildingsToDto(paginatedBuildings, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityBuilding: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+
+        try {
+            const building: Building = await this.buildingService.getBuilding(buildingId, universityId);
+            res.status(HTTP_STATUS.OK).send(BuildingDto.buildingToDto(building, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public createUniversityBuilding: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const internalId = validateString(req.body.internalId);
+        const name = validateString(req.body.name);
+        
+        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
+        if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+
+        try {
+            const building: Building = await this.buildingService.createBuilding(universityId, internalId, name);
+            res.status(HTTP_STATUS.CREATED)
+                .location(getResourceUrl(RESOURCES.BUILDING, API_SCOPE.UNIVERSITY, building.id))    
+                .send(BuildingDto.buildingToDto(building, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyUniversityBuilding: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const internalId = validateString(req.body.internalId);
+        const name = validateString(req.body.name);
+        
+        if (!internalId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
+        if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+
+        try {
+            const building: Building = await this.buildingService.modifyBuilding(buildingId, universityId, internalId, name);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.BUILDING, API_SCOPE.UNIVERSITY, building.id))    
+                .send(BuildingDto.buildingToDto(building, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public deleteUniversityBuilding: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+
+        try {
+            await this.buildingService.deleteBuilding(buildingId, universityId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }
