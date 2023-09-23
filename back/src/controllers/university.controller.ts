@@ -6,6 +6,7 @@ import * as CourseClassDto from '../dtos/courseClass.dto';
 import * as BuildingDto from '../dtos/building.dto';
 import * as LectureDto from '../dtos/lecture.dto';
 import * as TermDto from '../dtos/term.dto';
+import * as StudentDto from '../dtos/student.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
@@ -30,6 +31,8 @@ import Lecture from '../models/abstract/lecture.model';
 import { IBuildingDistance } from '../interfaces/building.interface';
 import Term from '../models/abstract/term.model';
 import TermService from '../services/term.service';
+import Student from '../models/abstract/student.model';
+import StudentService from '../services/student.service';
 
 export class UniversityController {
     private universityService: UniversityService;
@@ -39,6 +42,7 @@ export class UniversityController {
     private buildingService: BuildingService;
     private lectureService: LectureService;
     private termService: TermService;
+    private studentService: StudentService;
 
     constructor() {
         this.universityService = UniversityService.getInstance();
@@ -48,6 +52,7 @@ export class UniversityController {
         this.buildingService = BuildingService.getInstance();
         this.lectureService = LectureService.getInstance();
         this.termService = TermService.getInstance();
+        this.studentService = StudentService.getInstance();
     }
 
     public getUniversity: RequestHandler = async (req, res, next) => {
@@ -845,6 +850,34 @@ export class UniversityController {
             res.status(HTTP_STATUS.OK)
                 .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, undefined, courseId))
                 .send(CourseClassDto.paginatedCourseClassesToDto(paginatedCourseClasses, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityStudents: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+
+        try {
+            const paginatedStudents: PaginatedCollection<Student> = await this.studentService.getStudents(page, limit, filter, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(StudentDto.paginatedStudentsToLinks(paginatedStudents, getReqPath(req), limit, filter))
+                .send(StudentDto.paginatedStudentsToDto(paginatedStudents, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityStudent: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const studentId = req.params.studentId;
+
+        try {
+            const student: Student = await this.studentService.getStudent(studentId, universityId);
+            res.status(HTTP_STATUS.OK).send(StudentDto.studentToDto(student, API_SCOPE.UNIVERSITY));
         } catch (e) {
             next(e);
         }
