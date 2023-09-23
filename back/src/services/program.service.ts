@@ -64,6 +64,22 @@ export default class ProgramService {
         await this.dao.bulkReplaceCourses(id, universityIdFilter, mandatoryCoursesIds, optionalCoursesIds);
     }
 
+    async addCourseRequiredCourse(id: string, universityIdFilter: string, courseId: string, requiredCourseId: string): Promise<void> {
+        await this.dao.addCourseRequiredCourse(id, universityIdFilter, courseId, requiredCourseId);
+    }
+
+    async removeCourseRequiredCourse(id: string, universityIdFilter: string, courseId: string, requiredCourseId: string): Promise<void> {
+        await this.dao.removeCourseRequiredCourse(id, universityIdFilter, courseId, requiredCourseId);
+    }
+
+    async bulkAddCourseRequiredCourses(id: string, universityIdFilter: string, courseId: string, requirements: string[]): Promise<void> {
+        await this.dao.bulkAddCourseRequiredCourses(id, universityIdFilter, courseId, requirements);
+    }
+
+    async bulkReplaceCourseRequiredCourses(id: string, universityIdFilter: string, courseId: string, requirements: string[]): Promise<void> {
+        await this.dao.bulkReplaceCourseRequiredCourses(id, universityIdFilter, courseId, requirements);
+    }
+
     // async updateProgram(
     //     programId: string,
     //     internalId: string,

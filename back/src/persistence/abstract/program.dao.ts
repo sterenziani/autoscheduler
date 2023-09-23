@@ -24,6 +24,11 @@ export default abstract class ProgramDao extends GenericDao<Program> {
     public abstract bulkAddCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[]): Promise<void>;
     public abstract bulkReplaceCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[]): Promise<void>;
 
+    public abstract addCourseRequiredCourse(id: string, universityIdFilter: string, courseId: string, requiredCourseId: string): Promise<void>;
+    public abstract removeCourseRequiredCourse(id: string, universityIdFilter: string, courseId: string, requiredCourseId: string): Promise<void>;
+    public abstract bulkAddCourseRequiredCourses(id: string, universityIdFilter: string, courseId: string, requirements: string[]): Promise<void>;
+    public abstract bulkReplaceCourseRequiredCourses(id: string, universityIdFilter: string, courseId: string, requirements: string[]): Promise<void>;
+
     // Public Methods Override
     public override async getById(id: string, universityIdFilter?: string): Promise<Program> {
         return await super.getById(id, universityIdFilter);

@@ -17,17 +17,17 @@ export const paginatedCourseClassesToDto = (paginatedCourseClasses: PaginatedCol
     return paginatedCourseClasses.collection.map(c => courseClassToDto(c, scope));
 };
 
-export const paginatedCourseClassesToLinks = (paginatedCourseClasses: PaginatedCollection<CourseClass>, basePath: string, limit: number, filter?: string, courseId?: string, termId?: string): Record<string, string> => {
-    return getPaginatedLinks(paginatedCourseClasses, paginatedCourseClassesUrlBuilder, basePath, limit, filter, courseId, termId);
+export const paginatedCourseClassesToLinks = (paginatedCourseClasses: PaginatedCollection<CourseClass>, basePath: string, limit: number, filter?: string, termId?: string, courseId?: string): Record<string, string> => {
+    return getPaginatedLinks(paginatedCourseClasses, paginatedCourseClassesUrlBuilder, basePath, limit, filter, termId, courseId);
 };
 
-const paginatedCourseClassesUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, courseId?: string, termId?: string): string => {
+const paginatedCourseClassesUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, termId?: string, courseId?: string): string => {
     const params = {
         page,
         limit,
         filter,
+        termId,
         courseId,
-        termId
     };
     return queryParamsStringBuilder(basePath, params);
 };

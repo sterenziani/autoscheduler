@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import * as UniversityDto from '../dtos/university.dto';
 import * as ProgramDto from '../dtos/program.dto';
 import * as CourseDto from '../dtos/course.dto';
+import * as CourseClassDto from '../dtos/courseClass.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
@@ -17,16 +18,20 @@ import { getReqPath, getResourceUrl } from '../helpers/url.helper';
 import Course from '../models/abstract/course.model';
 import CourseService from '../services/course.service';
 import { removeDuplicates, valuesIntersect } from '../helpers/collection.helper';
+import CourseClassService from '../services/courseClass.service';
+import CourseClass from '../models/abstract/courseClass.model';
 
 export class UniversityController {
     private universityService: UniversityService;
     private programService: ProgramService;
     private courseService: CourseService;
+    private courseClassService: CourseClassService;
 
     constructor() {
         this.universityService = UniversityService.getInstance();
         this.programService = ProgramService.getInstance();
         this.courseService = CourseService.getInstance();
+        this.courseClassService = CourseClassService.getInstance();
     }
 
     public getUniversity: RequestHandler = async (req, res, next) => {
@@ -268,6 +273,199 @@ export class UniversityController {
             res.status(HTTP_STATUS.OK)
                 .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter))
                 .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public addUniversityProgramCourseRequiredCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const programId = req.params.programId;
+        const courseId = req.params.courseId;
+        const requiredCourseId = validateString(req.body.courseId);
+
+        if (!requiredCourseId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+
+        try {
+            await this.programService.addCourseRequiredCourse(programId, universityId, courseId, requiredCourseId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public removeUniversityProgramCourseRequiredCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const programId = req.params.programId;
+        const courseId = req.params.courseId;
+        const requiredCourseId = req.params.requiredCourseId;
+
+        try {
+            await this.programService.removeCourseRequiredCourse(programId, universityId, courseId, requiredCourseId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public bulkAddUniversityProgramCourseRequiredCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const programId = req.params.programId;
+        const courseId = req.params.courseId;
+        const requirements = removeDuplicates(validateArray(req.body.requirements, validateString) ?? []);
+
+        if (requirements.length === 0) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+
+        try {
+            await this.programService.bulkAddCourseRequiredCourses(programId, universityId, courseId, requirements);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public bulkReplaceUniversityProgramCourseRequiredCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const programId = req.params.programId;
+        const courseId = req.params.courseId;
+        const requirements = removeDuplicates(validateArray(req.body.requirements, validateString) ?? []);
+
+        try {
+            await this.programService.bulkReplaceCourseRequiredCourses(programId, universityId, courseId, requirements);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        let optional = validateBoolean(req.query.optional);
+        const programId = validateString(req.query.programId);
+
+        // Sanity check. If no programId provided, we have to ignore optional filter (or throw error)
+        if (!programId) optional = undefined;
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCourses(page, limit, filter, programId, optional, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, optional, programId))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+
+        try {
+            const course: Course = await this.courseService.getCourse(courseId, universityId);
+            res.status(HTTP_STATUS.OK).send(CourseDto.courseToDto(course, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public createUniversityCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const internalId = validateString(req.body.internalId);
+        const name = validateString(req.body.name);
+        
+        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
+        if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+
+        try {
+            const course: Course = await this.courseService.createCourse(universityId, internalId, name);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.COURSE, API_SCOPE.UNIVERSITY, course.id))
+                .send(CourseDto.courseToDto(course, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyUniversityCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+        const internalId = validateString(req.body.internalId);
+        const name = validateString(req.body.name);
+        
+        if (!internalId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
+        if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+
+        try {
+            const course: Course = await this.courseService.modifyCourse(courseId, universityId, internalId, name);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.COURSE, API_SCOPE.UNIVERSITY, course.id))
+                .send(CourseDto.courseToDto(course, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public deleteUniversityCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+
+        try {
+            await this.courseService.deleteCourse(courseId, universityId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityCourseCourseClasses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const termId = validateString(req.query.termId);
+
+        try {
+            // TODO: Should i use courseService when the return value is a CourseClass? I can understand using course service when adding relationships, cuz those return void
+            // TODO: but i feel like getters should still be handled by courseClassService
+            const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, termId))
+                .send(CourseClassDto.paginatedCourseClassesToDto(paginatedCourseClasses, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityCourseCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+        const courseClassId = req.params.courseClassId;
+
+        try {
+            const courseClass: CourseClass = await this.courseClassService.getCourseClass(courseClassId, universityId, courseId);
+            res.status(HTTP_STATUS.OK).send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public addUniversityProgramCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const programId = req.params.programId;
+        const courseId = validateString(req.body.courseId);
+        const optional = validateBoolean(req.body.optional);
+
+        if (!courseId || optional === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        
+        try {
+            await this.programService.addCourse(programId, universityId, courseId, optional);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }
