@@ -212,3 +212,17 @@ export const isValidName = (name: string): boolean => {
 export const isValidTimes = (time: string | string[]): boolean => {
     return true; // TODO: Validator
 }
+
+export const isValidDay = (day: number): boolean => {
+    const dayEnum = validateEnum<DAY>(day, DAY);
+    return dayEnum !== undefined;
+}
+
+export const isValidTimeOfDay = (timeOfDay: string): boolean => {
+    const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(timeOfDay);
+}
+
+export const isValidTimeRange = (startTime: Time, endTime: Time): boolean => {
+    return startTime.compareTo(endTime) < 0;
+}

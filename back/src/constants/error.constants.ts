@@ -59,6 +59,21 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_TIMES',
             message: 'Provided times are not valid times.',
         },
+        INVALID_DAY: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_DAY',
+            message: 'Day number is invalid. It should be a integer from 0 (Sun) to 6 (Sat).',
+        },
+        INVALID_TIME_OF_DAY: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_TIME_RANGE',
+            message: 'Given time of day is not valid. It should follow format hh:mm in 24hs',
+        },
+        INVALID_TIME_RANGE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_TIME_RANGE',
+            message: 'Format of the time is invalid. It should follow.',
+        },
         INVALID_BUILDING_DISTANCES: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_BUILDING_DISTANCES',

@@ -13,7 +13,7 @@ import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidInternalId, isValidName, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateString } from '../helpers/validation.helper';
+import { isValidDay, isValidInternalId, isValidName, isValidTimeOfDay, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateString } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -33,6 +33,9 @@ import Term from '../models/abstract/term.model';
 import TermService from '../services/term.service';
 import Student from '../models/abstract/student.model';
 import StudentService from '../services/student.service';
+import Time from '../helpers/classes/time.class';
+import TimeRange from '../helpers/classes/timeRange.class';
+import { DAY } from '../constants/time.constants';
 
 export class UniversityController {
     private universityService: UniversityService;
@@ -803,6 +806,7 @@ export class UniversityController {
         }
     };
 
+    // TODO: Maybe change startDate for from and to date
     public modifyUniversityTerm: RequestHandler = async (req, res, next) => {
         const universityId = req.user.id;
         const termId = req.params.termId;
@@ -883,128 +887,171 @@ export class UniversityController {
         }
     };
 
-    // public getUniversityCourses: RequestHandler = async (req, res, next) => {
-    //     const universityId = req.params.universityId;
-    //     const filter = req.query.filter as string | undefined;
-    //     const page = parseInt(req.query.page as string) ?? 1;
-    //     const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
+    public getUniversityCourseClasses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const courseId = validateString(req.query.courseId);
+        const termId = validateString(req.query.termId);
 
-    //     try {
-    //         const courses = await this.courseService.getCoursesByText(universityId, filter, per_page, page);
-    //         const links: Record<string, string> = {};
-    //         for (const [key, value] of Object.entries(courses.pagingInfo)) {
-    //             links[key] = UniversityDto.getUniversityCoursesUrl(universityId, filter, value, per_page);
-    //         }
-    //         res.status(HTTP_STATUS.OK)
-    //             .links(links)
-    //             .send(courses.collection.map((c) => CourseDto.courseToDto(c, universityId)));
-    //     } catch (e) {
-    //         next(e);
-    //     }
-    // };
+        try {
+            const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, termId, courseId))
+                .send(CourseClassDto.paginatedCourseClassesToDto(paginatedCourseClasses, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
 
-    // public getUniversityPrograms: RequestHandler = async (req, res, next) => {
-    //     const universityId = req.params.universityId;
-    //     const filter = req.query.filter as string | undefined;
-    //     const page = parseInt(req.query.page as string) ?? 1;
-    //     const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
+    public getUniversityCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
 
-    //     try {
-    //         const programs = await this.programService.getProgramsByText(universityId, filter, per_page, page);
-    //         const links: Record<string, string> = {};
-    //         for (const [key, value] of Object.entries(programs.pagingInfo)) {
-    //             links[key] = UniversityDto.getUniversityProgramsUrl(universityId, filter, value, per_page);
-    //         }
-    //         res.status(HTTP_STATUS.OK)
-    //             .links(links)
-    //             .send(programs.collection.map((p) => ProgramDto.programToDto(p, universityId)));
-    //     } catch (e) {
-    //         next(e);
-    //     }
-    // };
+        try {
+            const courseClass: CourseClass = await this.courseClassService.getCourseClass(courseClassId, universityId);
+            res.status(HTTP_STATUS.OK).send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
 
-    // public getUniversityBuildings: RequestHandler = async (req, res, next) => {
-    //     const universityId = req.params.universityId;
-    //     const filter = req.query.filter as string | undefined;
-    //     const page = parseInt(req.query.page as string) ?? 1;
-    //     const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
+    public modifyUniversityCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
+        const termId = validateString(req.body.termId);
+        const name = validateString(req.body.name);
 
-    //     try {
-    //         const buildings = await this.buildingService.getUniversityBuildingsByText(universityId, per_page, page, filter);
-    //         const links: Record<string, string> = {};
-    //         for (const [key, value] of Object.entries(buildings.pagingInfo)) {
-    //             links[key] = UniversityDto.getUniversityBuildingsUrl(universityId, filter, value, per_page);
-    //         }
-    //         const buildingsWithDistances: { building: Building; distances: IDistanceToBuilding[] }[] =
-    //             await Promise.all(
-    //                 buildings.collection.map(async (b) => {
-    //                     return { building: b, distances: await this.buildingService.getBuildingDistances(b.id) };
-    //                 }),
-    //             );
+        if (!termId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        
+        try {
+            const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, undefined, termId, name);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.UNIVERSITY, courseClass.id))
+                .send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
 
-    //         res.status(HTTP_STATUS.OK).links(links).send(
-    //             buildingsWithDistances.map((bwd) => BuildingDto.buildingToDto(bwd.building, bwd.distances)),
-    //         );
-    //     } catch (e) {
-    //         next(e);
-    //     }
-    // };
+    public deleteUniversityCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
+        
+        try {
+            await this.courseClassService.deleteCourseClass(courseClassId, universityId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
 
-    // public getUniversityTerms: RequestHandler = async (req, res, next) => {
-    //     const userInfo = req.user;
-    //     const universityId = req.params.universityId;
-    //     const filter = req.query.filter as string | undefined;
-    //     const published = req.query.published as boolean | undefined;
-    //     const from = req.query.from as string | undefined;
-    //     const to = req.query.to as string | undefined;
-    //     const page = parseInt(req.query.page as string) ?? 1;
-    //     const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
+    public getUniversityCourseClassLectures: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const time = validateElemOrElemArray(req.query.time, validateString);
+        const buildingId = validateString(req.query.buildingId);
 
-    //     if ((from && !isValidISODate(from)) || (to && !isValidISODate(to)))
-    //         return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+        if (time && !isValidTimes(time)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
 
-    //     try {
-    //         const realPublished = userInfo?.id === universityId ? published : true;
-    //         const fromDate = from ? getDateFromISO(from) : undefined;
-    //         const toDate = to ? getDateFromISO(to) : undefined;
-    //         const terms = await this.termService.getTerms(
-    //             universityId,
-    //             filter,
-    //             realPublished,
-    //             fromDate,
-    //             toDate,
-    //             per_page,
-    //             page,
-    //         );
-    //         const links: Record<string, string> = {};
-    //         for (const [key, value] of Object.entries(terms.pagingInfo)) {
-    //             links[key] = UniversityDto.getUniversityTermsUrl(
-    //                 universityId,
-    //                 filter,
-    //                 realPublished,
-    //                 fromDate,
-    //                 toDate,
-    //                 value,
-    //                 per_page,
-    //             );
-    //         }
-    //         res.status(HTTP_STATUS.OK)
-    //             .links(links)
-    //             .send(terms.collection.map((t) => TermDto.termToDto(t)));
-    //     } catch (e) {
-    //         next(e);
-    //     }
-    // };
+        try {
+            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, time, courseClassId, buildingId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, time, buildingId))
+                .send(LectureDto.paginatedLecturesToDto(paginatedLectures, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
 
-    // public editUniversityVerificationStatus: RequestHandler = async (req, res, next) => {
-    //     const universityId = req.params.universityId;
-    //     const newVerifiedStatus = (req.body.verified === 'true');
+    public getUniversityCourseClassLecture: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
+        const lectureId = req.params.lectureId;
 
-    //     try {
-    //         const university: University = await this.universityService.setUniversityVerificationStatus(universityId, newVerifiedStatus);
-    //         res.status(HTTP_STATUS.OK).send(UniversityDto.universityToDto(university));
-    //     } catch (e) {
-    //         next(e);
-    //     }
-    // };
+        try {
+            const lecture: Lecture = await this.lectureService.getLecture(lectureId, universityId, courseClassId);
+            res.status(HTTP_STATUS.OK).send(LectureDto.lectureToDto(lecture, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public createUniversityCourseClassLecture: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
+        const day = validateInt(req.body.day);
+        const startTime = validateString(req.body.startTime);
+        const endTime = validateString(req.body.endTime);
+        const buildingId = validateString(req.body.buildingId);
+
+        if (day === undefined || !startTime || !endTime || !buildingId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidDay(day)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_DAY));
+        if (!isValidTimeOfDay(startTime) || !isValidTimeOfDay(endTime)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_OF_DAY));
+        if (!isValidTimeRange(Time.fromString(startTime), Time.fromString(endTime))) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_RANGE));
+
+        try {
+            const timeRange: TimeRange = new TimeRange(day as DAY, Time.fromString(startTime), Time.fromString(endTime))
+            const lecture: Lecture = await this.lectureService.createLecture(universityId, courseClassId, timeRange, buildingId);
+            res.status(HTTP_STATUS.CREATED)
+                .location(getResourceUrl(RESOURCES.LECTURE, API_SCOPE.UNIVERSITY, lecture.id))
+                .send(LectureDto.lectureToDto(lecture, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyUniversityCourseClassLecture: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
+        const lectureId = req.params.lectureId;
+        const day = validateInt(req.body.day);
+        const startTime = validateString(req.body.startTime);
+        const endTime = validateString(req.body.endTime);
+        const buildingId = validateString(req.body.buildingId);
+
+        if ((day === undefined || !startTime || !endTime) && !buildingId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (day !== undefined && !isValidDay(day)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_DAY));
+        if (startTime && endTime && (!isValidTimeOfDay(startTime) || !isValidTimeOfDay(endTime))) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_OF_DAY));
+        if (startTime && endTime && !isValidTimeRange(Time.fromString(startTime), Time.fromString(endTime))) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_RANGE));
+
+        try {
+            const timeRange: TimeRange | undefined = (day !== undefined && startTime && endTime) ? new TimeRange(day as DAY, Time.fromString(startTime), Time.fromString(endTime)) : undefined;
+            const lecture: Lecture = await this.lectureService.modifyLecture(lectureId, universityId, courseClassId, timeRange, buildingId);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.LECTURE, API_SCOPE.UNIVERSITY, lecture.id))
+                .send(LectureDto.lectureToDto(lecture, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public deleteUniversityCourseClassLecture: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseClassId = req.params.courseClassId;
+        const lectureId = req.params.lectureId;
+        
+        try {
+            await this.lectureService.deleteLecture(lectureId, universityId, courseClassId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityLecture: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const lectureId = req.params.lectureId;
+
+        try {
+            const lecture: Lecture = await this.lectureService.getLecture(lectureId, universityId);
+            res.status(HTTP_STATUS.OK).send(LectureDto.lectureToDto(lecture, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
 }
