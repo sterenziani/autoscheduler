@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { urlencoded } from 'body-parser';
-import { StudentController } from '../controllers/student.controller';
+import { StudentsController } from '../controllers/students.controller';
 import cors from 'cors';
 import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import studentsOnlyMiddleware from '../middlewares/studentsOnly.middleware';
+import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
 
 export class StudentRoutes {
     public router: Router = Router({mergeParams: true});
-    public controller: StudentController = new StudentController();
+    public controller: StudentsController = new StudentsController();
 
     constructor() {
         this.init();
@@ -22,69 +23,28 @@ export class StudentRoutes {
 
         this.router.use(cors());
 
+        // /students routes
         this.router.get(
             '/',
             authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.getActiveStudent
-        );
-        this.router.post(
-            '/',
-            this.controller.createStudent
+            adminOnlyMiddleware,
+            this.controller.getStudents
         );
         this.router.get(
             '/:studentId',
             authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
+            adminOnlyMiddleware,
             this.controller.getStudent
         );
-        this.router.get(
-            '/:studentId/user',
+        this.router.put(
+            '/:studentId',
             authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.getStudentUser
-        );
-        this.router.get(
-            '/:studentId/university',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.getStudentUniversity
-        );
-        this.router.get(
-            '/:studentId/program',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.getStudentProgram
-        );
-        this.router.get(
-            '/:studentId/remaining-courses',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.getStudentRemainingCourses
-        );
-        this.router.get(
-            '/:studentId/schedules',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.getStudentSchedules
-        );
-        this.router.get(
-            '/:studentId/completed-courses',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.getStudentCompletedCourses,
+            adminOnlyMiddleware,
+            this.controller.modifyStudentForAdmin
         );
         this.router.post(
-            '/:studentId/completed-courses',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.addStudentCompletedCourses,
-        );
-        this.router.delete(
-            '/:studentId/completed-courses',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.removeStudentCompletedCourses,
+            '/',
+            this.controller.createStudent
         );
     }
 }
