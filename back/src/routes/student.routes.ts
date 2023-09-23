@@ -3,8 +3,10 @@ import { urlencoded } from 'body-parser';
 import { StudentController } from '../controllers/student.controller';
 import cors from 'cors';
 import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
+import newUsersOnlyMiddleware from '../middlewares/newUsersOnly.middleware';
 import studentsOnlyMiddleware from '../middlewares/studentsOnly.middleware';
 import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
+import pagingMiddleware from '../middlewares/paging.middleware';
 
 export class StudentRoutes {
     public router: Router = Router({mergeParams: true});
@@ -83,7 +85,7 @@ export class StudentRoutes {
             pagingMiddleware,
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
-            this.controller.getStudentUniversityProgramCourseRequirements
+            this.controller.getStudentUniversityProgramCourseRequiredCourses
         );
 
 
