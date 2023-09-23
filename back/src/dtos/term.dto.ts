@@ -1,5 +1,5 @@
 import Term from '../models/abstract/term.model';
-import { getDateISO } from '../helpers/time.helper';
+import { getDateISO, maybeDateToISO } from '../helpers/time.helper';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 import { applyPathToBase, getPaginatedLinks, getResourceUrl, queryParamsStringBuilder } from '../helpers/url.helper';
 import { PaginatedCollection } from '../interfaces/paging.interface';
@@ -22,16 +22,16 @@ export const paginatedTermsToDto = (paginatedTerms: PaginatedCollection<Term>, s
     return paginatedTerms.collection.map(t => termToDto(t, scope));
 };
 
-export const paginatedTermsToLinks = (paginatedTerms: PaginatedCollection<Term>, basePath: string, limit: number, filter?: string, startDate?: string, published?: boolean): Record<string, string> => {
+export const paginatedTermsToLinks = (paginatedTerms: PaginatedCollection<Term>, basePath: string, limit: number, filter?: string, startDate?: Date, published?: boolean): Record<string, string> => {
     return getPaginatedLinks(paginatedTerms, paginatedTermsUrlBuilder, basePath, limit, filter, startDate, published);
 };
 
-const paginatedTermsUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, startDate?: string, published?: boolean): string => {
+const paginatedTermsUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, startDate?: Date, published?: boolean): string => {
     const params = {
         page,
         limit,
         filter,
-        startDate,
+        startDate: maybeDateToISO(startDate),
         published: booleanToString(published)
     };
     return queryParamsStringBuilder(basePath, params);

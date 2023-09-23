@@ -5,18 +5,19 @@ import * as CourseDto from '../dtos/course.dto';
 import * as CourseClassDto from '../dtos/courseClass.dto';
 import * as BuildingDto from '../dtos/building.dto';
 import * as LectureDto from '../dtos/lecture.dto';
+import * as TermDto from '../dtos/term.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidInternalId, isValidName, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateElemOrElemArray, validateInt, validateString } from '../helpers/validation.helper';
+import { isValidInternalId, isValidName, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateString } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
 import ProgramService from '../services/program.service';
-import { applyPathToBase, getReqPath, getResourceUrl } from '../helpers/url.helper';
+import { getReqPath, getResourceUrl } from '../helpers/url.helper';
 import Course from '../models/abstract/course.model';
 import CourseService from '../services/course.service';
 import { removeDuplicates, valuesIntersect } from '../helpers/collection.helper';
@@ -26,7 +27,9 @@ import BuildingService from '../services/building.service';
 import Building from '../models/abstract/building.model';
 import LectureService from '../services/lecture.service';
 import Lecture from '../models/abstract/lecture.model';
-import { IBuildingDistance, IBuildingDistancesInput } from '../interfaces/building.interface';
+import { IBuildingDistance } from '../interfaces/building.interface';
+import Term from '../models/abstract/term.model';
+import TermService from '../services/term.service';
 
 export class UniversityController {
     private universityService: UniversityService;
@@ -35,6 +38,7 @@ export class UniversityController {
     private courseClassService: CourseClassService;
     private buildingService: BuildingService;
     private lectureService: LectureService;
+    private termService: TermService;
 
     constructor() {
         this.universityService = UniversityService.getInstance();
@@ -43,6 +47,7 @@ export class UniversityController {
         this.courseClassService = CourseClassService.getInstance();
         this.buildingService = BuildingService.getInstance();
         this.lectureService = LectureService.getInstance();
+        this.termService = TermService.getInstance();
     }
 
     public getUniversity: RequestHandler = async (req, res, next) => {
@@ -737,6 +742,109 @@ export class UniversityController {
         try {
             await this.buildingService.bulkReplaceDistances(buildingId, universityId, distances);
             res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityTerms: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const startDate = validateDate(req.query.startDate);
+        const published = validateBoolean(req.query.published);
+
+        try {
+            const paginatedTerms: PaginatedCollection<Term> = await this.termService.getTerms(page, limit, filter, startDate, published, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(TermDto.paginatedTermsToLinks(paginatedTerms, getReqPath(req), limit, filter, startDate, published))
+                .send(TermDto.paginatedTermsToDto(paginatedTerms, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityTerm: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const termId = req.params.termId;
+
+        try {
+            const term: Term = await this.termService.getTerm(termId, universityId);
+            res.status(HTTP_STATUS.OK).send(TermDto.termToDto(term, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public createUniversityTerm: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const internalId = validateString(req.body.internalId);
+        const name = validateString(req.body.name);
+        const startDate = validateDate(req.body.startDate);
+        const published = validateBoolean(req.body.published);
+
+        if (!internalId || !name || !startDate || published === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
+        if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+
+        try {
+            const term: Term = await this.termService.createTerm(universityId, internalId, name, startDate, published);
+            res.status(HTTP_STATUS.CREATED)
+                .location(getResourceUrl(RESOURCES.TERM, API_SCOPE.UNIVERSITY, term.id))
+                .send(TermDto.termToDto(term, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyUniversityTerm: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const termId = req.params.termId;
+        const internalId = validateString(req.body.internalId);
+        const name = validateString(req.body.name);
+        const startDate = validateDate(req.body.startDate);
+        const published = validateBoolean(req.body.published);
+
+        if (!internalId && !name && !startDate && published === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
+        if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+
+        try {
+            const term: Term = await this.termService.modifyTerm(termId, universityId, internalId, name, startDate, published);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.TERM, API_SCOPE.UNIVERSITY, term.id))
+                .send(TermDto.termToDto(term, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public deleteUniversityTerm: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const termId = req.params.termId;
+
+        try {
+            await this.termService.deleteTerm(termId, universityId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityTermCourseClasses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const termId = req.params.termId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const courseId = validateString(req.query.courseId);
+
+        try {
+            const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, undefined, courseId))
+                .send(CourseClassDto.paginatedCourseClassesToDto(paginatedCourseClasses, API_SCOPE.UNIVERSITY));
         } catch (e) {
             next(e);
         }

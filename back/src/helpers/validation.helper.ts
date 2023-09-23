@@ -3,6 +3,7 @@ import { DAY } from '../constants/time.constants';
 import Time from './classes/time.class';
 import { ILecture } from '../interfaces/courseClass.interface';
 import { IBuildingDistancesInput } from '../interfaces/building.interface';
+import { getDateFromISO, isValidISODate } from './time.helper';
 
 // Parsing validators
 
@@ -65,6 +66,12 @@ export const validateBoolean = (data: any): boolean | undefined => {
     }
 
     return undefined;
+};
+
+export const validateDate = (data: any): Date | undefined => {
+    const dateString = validateString(data);
+    if (dateString === undefined || !isValidISODate(dateString)) return undefined;
+    return getDateFromISO(dateString);
 };
 
 export const validateEnum = <T>(data: any, enumObject: any): T | undefined => {
