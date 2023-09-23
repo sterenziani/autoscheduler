@@ -15,7 +15,7 @@ import { getUserUrl } from '../dtos/user.dto';
 import { getUniversitiesUrl } from '../dtos/university.dto';
 import ProgramService from '../services/program.service';
 import BuildingService from '../services/building.service';
-import { IDistanceToBuilding } from '../interfaces/building.interface';
+import { IBuildingDistance } from '../interfaces/building.interface';
 import Building from '../models/abstract/building.model';
 import TermService from '../services/term.service';
 import { getDateFromISO, isValidISODate } from '../helpers/time.helper';
@@ -151,7 +151,7 @@ export class UniversitiesController {
             for (const [key, value] of Object.entries(buildings.pagingInfo)) {
                 links[key] = UniversityDto.getUniversityBuildingsUrl(universityId, filter, value, per_page);
             }
-            const buildingsWithDistances: { building: Building; distances: IDistanceToBuilding[] }[] =
+            const buildingsWithDistances: { building: Building; distances: IBuildingDistance[] }[] =
                 await Promise.all(
                     buildings.collection.map(async (b) => {
                         return { building: b, distances: await this.buildingService.getBuildingDistances(b.id) };

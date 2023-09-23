@@ -4,18 +4,19 @@ import * as ProgramDto from '../dtos/program.dto';
 import * as CourseDto from '../dtos/course.dto';
 import * as CourseClassDto from '../dtos/courseClass.dto';
 import * as BuildingDto from '../dtos/building.dto';
+import * as LectureDto from '../dtos/lecture.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidInternalId, isValidName, validateArray, validateBoolean, validateInt, validateString } from '../helpers/validation.helper';
+import { isValidInternalId, isValidName, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateElemOrElemArray, validateInt, validateString } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
 import ProgramService from '../services/program.service';
-import { getReqPath, getResourceUrl } from '../helpers/url.helper';
+import { applyPathToBase, getReqPath, getResourceUrl } from '../helpers/url.helper';
 import Course from '../models/abstract/course.model';
 import CourseService from '../services/course.service';
 import { removeDuplicates, valuesIntersect } from '../helpers/collection.helper';
@@ -23,6 +24,9 @@ import CourseClassService from '../services/courseClass.service';
 import CourseClass from '../models/abstract/courseClass.model';
 import BuildingService from '../services/building.service';
 import Building from '../models/abstract/building.model';
+import LectureService from '../services/lecture.service';
+import Lecture from '../models/abstract/lecture.model';
+import { IBuildingDistance, IBuildingDistancesInput } from '../interfaces/building.interface';
 
 export class UniversityController {
     private universityService: UniversityService;
@@ -30,6 +34,7 @@ export class UniversityController {
     private courseService: CourseService;
     private courseClassService: CourseClassService;
     private buildingService: BuildingService;
+    private lectureService: LectureService;
 
     constructor() {
         this.universityService = UniversityService.getInstance();
@@ -37,6 +42,7 @@ export class UniversityController {
         this.courseService = CourseService.getInstance();
         this.courseClassService = CourseClassService.getInstance();
         this.buildingService = BuildingService.getInstance();
+        this.lectureService = LectureService.getInstance();
     }
 
     public getUniversity: RequestHandler = async (req, res, next) => {
@@ -607,6 +613,129 @@ export class UniversityController {
 
         try {
             await this.buildingService.deleteBuilding(buildingId, universityId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityBuildingLectures: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const time = validateElemOrElemArray(req.query.time, validateString);
+        const courseClassId = validateString(req.query.courseClassId);
+
+        if (time && !isValidTimes(time)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
+
+        try {
+            // TODO: Analyze if lectureService is correct
+            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, time, courseClassId, buildingId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, time, undefined, courseClassId))
+                .send(LectureDto.paginatedLecturesToDto(paginatedLectures, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityBuildingDistances: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+
+        try {
+            const distances: IBuildingDistance[] = await this.buildingService.getDistances(buildingId, universityId);
+            res.status(HTTP_STATUS.OK).send(BuildingDto.distancesToDto(distances, API_SCOPE.UNIVERSITY, buildingId));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityBuildingDistance: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const distancedBuildingId = req.params.distancedBuildingId;
+
+        try {
+            const distance: IBuildingDistance = await this.buildingService.getDistance(buildingId, distancedBuildingId, universityId);
+            res.status(HTTP_STATUS.OK).send(BuildingDto.distanceToDto(distance, API_SCOPE.UNIVERSITY, buildingId));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public addUniversityBuildingDistance: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const distancedBuildingId = validateString(req.body.buildingId);
+        const distance = validateInt(req.body.distance);
+
+        if (!distancedBuildingId || distance === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+
+        try {
+            const distanceToBuilding: IBuildingDistance = await this.buildingService.addDistance(buildingId, universityId, distancedBuildingId, distance);
+            res.status(HTTP_STATUS.CREATED)
+                .location(BuildingDto.getBuildingDistanceResourceUrl(buildingId, distancedBuildingId, API_SCOPE.UNIVERSITY))
+                .send(BuildingDto.distanceToDto(distanceToBuilding, API_SCOPE.UNIVERSITY, buildingId));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyUniversityBuildingDistance: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const distancedBuildingId = req.params.distancedBuildingId;
+        const distance = validateInt(req.body.distance);
+
+        if (distance === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+
+        try {
+            const distanceToBuilding: IBuildingDistance = await this.buildingService.modifyDistance(buildingId, universityId, distancedBuildingId, distance);
+            res.status(HTTP_STATUS.OK)
+                .location(BuildingDto.getBuildingDistanceResourceUrl(buildingId, distancedBuildingId, API_SCOPE.UNIVERSITY))
+                .send(BuildingDto.distanceToDto(distanceToBuilding, API_SCOPE.UNIVERSITY, buildingId));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public removeUniversityBuildingDistance: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const distancedBuildingId = req.params.distancedBuildingId;
+
+        try {
+            await this.buildingService.removeDistance(buildingId, universityId, distancedBuildingId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public bulkAddUniversityBuildingDistances: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const distances = validateBuildingDistances(req.body.distances);
+
+        if (!distances || Object.keys(distances).length === 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_BUILDING_DISTANCES));
+
+        try {
+            await this.buildingService.bulkAddDistances(buildingId, universityId, distances);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public bulkReplaceUniversityBuildingDistances: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const buildingId = req.params.buildingId;
+        const distances = validateBuildingDistances(req.body.distances) ?? {};
+
+        try {
+            await this.buildingService.bulkReplaceDistances(buildingId, universityId, distances);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);

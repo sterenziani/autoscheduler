@@ -2,7 +2,7 @@ import BuildingService from '../services/building.service';
 import { RequestHandler } from 'express';
 import { HTTP_STATUS } from '../constants/http.constants';
 import * as BuildingDto from '../dtos/building.dto';
-import { IDistanceToBuilding } from '../interfaces/building.interface';
+import { IBuildingDistance } from '../interfaces/building.interface';
 import Building from '../models/abstract/building.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
@@ -19,7 +19,7 @@ export class BuildingController {
 
         try {
             const building: Building = await this.buildingService.getBuilding(buildingId);
-            const distances: IDistanceToBuilding[] = await this.buildingService.getBuildingDistances(building.id);
+            const distances: IBuildingDistance[] = await this.buildingService.getBuildingDistances(building.id);
             res.status(HTTP_STATUS.OK).send(BuildingDto.buildingToDto(building, distances));
         } catch (e) {
             next(e);

@@ -54,6 +54,16 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'COURSES_INTERSECT',
             message: 'There is a conflict between values in mandatory courses y values in optional courses.',
         },
+        INVALID_TIMES: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_TIMES',
+            message: 'Provided times are not valid times.',
+        },
+        INVALID_BUILDING_DISTANCES: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_BUILDING_DISTANCES',
+            message: 'Provided ditances are not valid. It should be an object where the keys are the target building ids and the value of each key is the integer distance in minutes.',
+        },
         INVALID_PARAMS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_PARAMS',

@@ -4,7 +4,7 @@ import Building from '../models/abstract/building.model';
 import UniversityService from './university.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { IDistanceToBuilding } from '../interfaces/building.interface';
+import { IBuildingDistance } from '../interfaces/building.interface';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 
 export default class BuildingService {
@@ -38,11 +38,11 @@ export default class BuildingService {
         return await this.dao.getUniversityBuildingsByText(universityId, limit, offset, text);
     }
 
-    async getBuildingDistances(id: string): Promise<IDistanceToBuilding[]> {
+    async getBuildingDistances(id: string): Promise<IBuildingDistance[]> {
         const building = await this.getBuilding(id);
         const buildingUniversity = await building.getUniversity();
         const universityBuildings = await buildingUniversity.getBuildings();
-        const distances: IDistanceToBuilding[] = [];
+        const distances: IBuildingDistance[] = [];
 
         for (const b of universityBuildings) {
             // skip if current building

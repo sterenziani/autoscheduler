@@ -2,6 +2,7 @@ import TimeRange from './classes/timeRange.class';
 import { DAY } from '../constants/time.constants';
 import Time from './classes/time.class';
 import { ILecture } from '../interfaces/courseClass.interface';
+import { IBuildingDistancesInput } from '../interfaces/building.interface';
 
 // Parsing validators
 
@@ -76,23 +77,29 @@ export const validateEnum = <T>(data: any, enumObject: any): T | undefined => {
     return undefined;
 };
 
-export const validateArray = <T>(data: any, memberValidator: (data: any) => T | undefined): T[] | undefined => {
+export const validateArray = <T>(data: any, memberValidator: (data: any, ...args: any[]) => T | undefined, ...memberValidatorArgs: any[]): T[] | undefined => {
     if (data == undefined) return undefined;
     let isValid = Array.isArray(data);
-    let validatedArray: T[] = []
     if (isValid) {
         for (const member of data) {
-            const maybeMember = memberValidator(member);
+            const maybeMember = memberValidator(member, ...memberValidatorArgs);
             if (maybeMember === undefined) {
                 isValid = false;
                 break;
-            } else {
-                validatedArray.push(maybeMember);
             }
         }
     }
-    if (isValid) return validatedArray;
+    if (isValid) return data as T[];
     return undefined;
+};
+
+export const validateElemOrElemArray = <T>(data: any, validator: (data: any, ...args: any[]) => T | undefined, ...validatorArgs: any[]): T | T[] | undefined => {
+    if (data == undefined) return undefined;
+    if (Array.isArray(data)) {
+        return validateArray<T>(data, validator, ...validatorArgs);
+    } else {
+        return validator(data, ...validatorArgs);
+    }
 };
 
 export const validateLecture = (maybeLecture: any): ILecture | undefined => {
@@ -142,6 +149,17 @@ export const validateUnavailableTime = (maybeTime: any): TimeRange | undefined =
     }
 };
 
+export const validateBuildingDistances = (maybeDistances: any): IBuildingDistancesInput | undefined => {
+    if (maybeDistances === undefined || typeof maybeDistances !== 'object') return undefined;
+    for (const key of Object.keys(maybeDistances)) {
+        const buildingId = validateString(key);
+        if (buildingId === undefined) return undefined;
+        const distance = validateInt(maybeDistances[key]);
+        if (distance === undefined) return undefined;
+    }
+    return maybeDistances as IBuildingDistancesInput;
+}
+
 // IsValid Validators
 
 export const isValidEmail = (email: string): boolean => {
@@ -182,4 +200,8 @@ export const isValidInternalId = (internalId: string): boolean => {
 
 export const isValidName = (name: string): boolean => {
     return name.length >= 3 && name.length <= 80;
+}
+
+export const isValidTimes = (time: string | string[]): boolean => {
+    return true; // TODO: Validator
 }
