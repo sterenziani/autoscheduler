@@ -367,11 +367,8 @@ export class UniversityController {
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
-        let optional = validateBoolean(req.query.optional);
+        const optional = validateBoolean(req.query.optional);
         const programId = validateString(req.query.programId);
-
-        // Sanity check. If no programId provided, we have to ignore optional filter (or throw error)
-        if (!programId) optional = undefined;
 
         try {
             const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCourses(page, limit, filter, programId, optional, universityId);

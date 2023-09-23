@@ -20,6 +20,7 @@ export default class ProgramService {
     }
 
     init() {
+        // Do nothing
     }
 
     // public methods
@@ -79,69 +80,4 @@ export default class ProgramService {
     async bulkReplaceCourseRequiredCourses(id: string, universityIdFilter: string, courseId: string, requirements: string[]): Promise<void> {
         await this.dao.bulkReplaceCourseRequiredCourses(id, universityIdFilter, courseId, requirements);
     }
-
-    // async updateProgram(
-    //     programId: string,
-    //     internalId: string,
-    //     name: string,
-    //     mandatoryCourses: string[] = [],
-    //     optionalCourses: string[] = [],
-    // ): Promise<Program> {
-    //     // validate existence of course and programIds
-    //     const program: Program = await this.getProgram(programId);
-    //     const programUniversity = await program.getUniversity();
-    //     await Promise.all(
-    //         mandatoryCourses.concat(optionalCourses).map(async (cId) => {
-    //             const course = await this.courseService.getCourse(cId);
-    //             const university = await course.getUniversity();
-    //             if (university.id != programUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
-    //         }),
-    //     );
-
-    //     // check if a program with new internalId already exists
-    //     if (internalId != program.internalId) {
-    //         const programWithRequestedInternalId = await this.dao.findByInternalId(programUniversity.id, internalId);
-    //         if (programWithRequestedInternalId && programWithRequestedInternalId.id != program.id) {
-    //             throw new GenericException(ERRORS.BAD_REQUEST.PROGRAM_ALREADY_EXISTS);
-    //         }
-    //     }
-
-    //     program.internalId = internalId;
-    //     program.name = name;
-    //     await program.setMandatoryCourses(mandatoryCourses);
-    //     await program.setOptionalCourses(optionalCourses);
-    //     await this.dao.set(program);
-    //     return program;
-    // }
-
-    // async getProgramsByText(
-    //     universityId: string,
-    //     text?: string,
-    //     limit?: number,
-    //     offset?: number,
-    // ): Promise<PaginatedCollection<Program>> {
-    //     return await this.dao.findByText(universityId, text, limit, offset);
-    // }
-
-    // async getProgramMandatoryCourses(
-    //     id: string,
-    //     limit?: number,
-    //     offset?: number,
-    // ): Promise<PaginatedCollection<Course>> {
-    //     const program = await this.dao.getById(id);
-    //     if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
-
-    //     const mandatoryCourses = await program.getMandatoryCourses();
-    //     const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
-    //     return paginateCollection(mandatoryCourses, compareCourses);
-    // }
-
-    // async getProgramOptionalCourses(id: string, limit?: number, offset?: number): Promise<PaginatedCollection<Course>> {
-    //     const program = await this.dao.getById(id);
-    //     if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
-
-    //     const optionalCourses = await program.getOptionalCourses();
-    //     const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
-    //     return paginateCollection(optionalCourses, compareCourses);
-    // }
 }
