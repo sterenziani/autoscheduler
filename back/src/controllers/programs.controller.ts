@@ -7,8 +7,9 @@ import { ERRORS } from '../constants/error.constants';
 import { HTTP_STATUS } from '../constants/http.constants';
 import * as ProgramDto from '../dtos/program.dto';
 import * as CourseDto from '../dtos/course.dto';
+import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 
-export class ProgramController {
+export class ProgramsController {
     private programService: ProgramService;
 
     constructor() {
@@ -94,8 +95,8 @@ export class ProgramController {
 
     public getProgramMandatoryCourses: RequestHandler = async (req, res, next) => {
         const programId = req.params.programId;
-        const page = parseInt(req.query.page as string) ?? undefined;
-        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+        const page = parseInt(req.query.page as string) ?? 1;
+        const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
 
         try {
             const program: Program = await this.programService.getProgram(programId);
@@ -115,8 +116,8 @@ export class ProgramController {
 
     public getProgramOptionalCourses: RequestHandler = async (req, res, next) => {
         const programId = req.params.programId;
-        const page = parseInt(req.query.page as string) ?? undefined;
-        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+        const page = parseInt(req.query.page as string) ?? 1;
+        const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
 
         try {
             const program: Program = await this.programService.getProgram(programId);

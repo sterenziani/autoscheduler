@@ -76,26 +76,26 @@ export default class EmailService {
         }
     }
 
-    async sendUniversityWelcomeEmail(user: University): Promise<void> {
+    async sendUniversityWelcomeEmail(userEmail: string, userLocale: string, university: University): Promise<void> {
         const template = "welcome";
-        const emailLanguage = this.getAvailableLocale(user.locale);
+        const emailLanguage = this.getAvailableLocale(userLocale);
         const subject = TRANSLATIONS.resources[emailLanguage].translation.welcome;
 
         const context = {
             verificationEmail: process.env.COMPANY_EMAIL,
-            universityName: user.name,
+            universityName: university.name,
             locale: emailLanguage
         };
-        this.sendEmailTemplate(user.email, subject, template, context);
+        this.sendEmailTemplate(userEmail, subject, template, context);
     }
 
-    async sendUniversityVerifiedEmail(user: University): Promise<void> {
+    async sendUniversityVerifiedEmail(user: User, university: University): Promise<void> {
         const template = "verified";
         const emailLanguage = this.getAvailableLocale(user.locale);
         const subject = TRANSLATIONS.resources[emailLanguage].translation.youAreVerified;
 
         const context = {
-            universityName: user.name,
+            universityName: university.name,
             locale: emailLanguage
         };
         this.sendEmailTemplate(user.email, subject, template, context);

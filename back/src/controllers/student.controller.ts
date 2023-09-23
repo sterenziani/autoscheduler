@@ -17,6 +17,7 @@ import { courseToDto } from '../dtos/course.dto';
 import { scheduleToDto } from '../dtos/schedule.dto';
 import { getUserUrl } from '../dtos/user.dto';
 import { validateArray, validateUnavailableTime } from '../helpers/validation.helper';
+import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 
 export class StudentController {
     private userService: UserService;
@@ -76,8 +77,8 @@ export class StudentController {
         const userId = req.params.userId;
         const userInfo = req.user;
 
-        const page = parseInt(req.query.page as string) ?? undefined;
-        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+        const page = parseInt(req.query.page as string) ?? 1;
+        const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
 
         if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
 
@@ -102,14 +103,14 @@ export class StudentController {
         }
     };
 
-    public getRemainingCourses: RequestHandler = async (req, res, next) => {
+    public getStudentRemainingCourses: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
         const programId = req.params.programId;
         const userInfo = req.user;
 
         const filter = req.query.filter as string | undefined;
-        const page = parseInt(req.query.page as string) ?? undefined;
-        const per_page = parseInt(req.query.per_page as string) ?? undefined;
+        const page = parseInt(req.query.page as string) ?? 1;
+        const per_page = parseInt(req.query.per_page as string) ?? DEFAULT_PAGE_SIZE;
 
         if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
 
@@ -164,7 +165,7 @@ export class StudentController {
         }
     };
 
-    public getSchedules: RequestHandler = async (req, res, next) => {
+    public getStudentSchedules: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
 
         const programId = req.query.programId as string;
@@ -173,19 +174,8 @@ export class StudentController {
         const reduceDays = (req.query.reduceDays === 'true');
         const prioritizeUnlocks = (req.query.prioritizeUnlocks === 'true');
 
-        let unavailableTimeSlots;
-        if(req.query.unavailable){
-            if(Array.isArray(req.query.unavailable)){
-                // Multiple items, pass as it is
-                unavailableTimeSlots = validateArray(req.query.unavailable, validateUnavailableTime);
-            } else{
-                // 1 item, must convert to array
-                unavailableTimeSlots = validateArray([req.query.unavailable], validateUnavailableTime);
-            }
-        } else {
-            // Empty array
-            unavailableTimeSlots = validateArray([], validateUnavailableTime);
-        }
+        const unavailableArray = req.query.unavailable ? (Array.isArray(req.query.unavailable) ? req.query.unavailable : [req.query.unavailable]) : [];
+        const unavailableTimeSlots = validateArray(unavailableArray, validateUnavailableTime);
 
         if (!programId || !termId || !targetHours || !unavailableTimeSlots)
             return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));

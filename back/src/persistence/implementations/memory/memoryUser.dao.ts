@@ -1,12 +1,10 @@
-import { ERRORS } from '../../../constants/error.constants';
 import { ROLE } from '../../../constants/general.constants';
 import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import GenericException from '../../../exceptions/generic.exception';
 import User from '../../../models/abstract/user.model';
 import MemoryUser from '../../../models/implementations/memory/memoryUser.model';
 import UserDao from '../../abstract/user.dao';
-import ResetToken from '../../../models/abstract/resetToken.model';
-import MemoryResetToken from '../../../models/implementations/memory/memoryResetToken.model';
+import PasswordRecoveryToken from '../../../models/abstract/passwordRecoveryToken.model';
+import MemoryPasswordRecoveryToken from '../../../models/implementations/memory/memoryPasswordRecoveryToken.model';
 import { v4 as uuidv4 } from 'uuid';
 
 export default class MemoryUserDao extends UserDao {
@@ -20,6 +18,10 @@ export default class MemoryUserDao extends UserDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+    
     public async create(email: string, password: string, role: ROLE, locale: string): Promise<User> {
         const newUser = new MemoryUser(uuidv4(), email, password, role, locale);
         MEMORY_DATABASE.users.set(newUser.id, newUser);
@@ -45,13 +47,13 @@ export default class MemoryUserDao extends UserDao {
         return undefined;
     }
 
-    public async createResetToken(userId: string, expirationDate: Date): Promise<ResetToken> {
-        const newToken = new MemoryResetToken(uuidv4(), expirationDate);
+    public async createResetToken(userId: string, expirationDate: Date): Promise<PasswordRecoveryToken> {
+        const newToken = new MemoryPasswordRecoveryToken(uuidv4(), expirationDate);
         MEMORY_DATABASE.resetTokens.set(userId, newToken);
         return newToken;
     }
 
-    public async getResetToken(token: string): Promise<ResetToken | undefined> {
+    public async getResetToken(token: string): Promise<PasswordRecoveryToken | undefined> {
         for (const [key, value] of MEMORY_DATABASE.resetTokens) {
             if (value.id == token && value.isCurrentlyValid())
                 return value;

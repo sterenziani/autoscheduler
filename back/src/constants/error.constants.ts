@@ -14,10 +14,45 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_OBJECT_ID',
             message: 'Given value does not match a valid mongo ObjectId.',
         },
+        MISSING_PARAMS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'MISSING_PARAMS',
+            message: 'Missing at least one required param.',
+        },
         INVALID_PASSWORD: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_PASSWORD',
             message: 'Provided password is invalid.',
+        },
+        INVALID_EMAIL: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_EMAIL',
+            message: 'Provided email is invalid.',
+        },
+        INVALID_LOCALE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_LOCALE',
+            message: 'Provided locale is invalid or unsupported.',
+        },
+        INVALID_ROLE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_ROLE',
+            message: 'Provided role is invalid.',
+        },
+        INVALID_NAME: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_NAME',
+            message: 'Provided name is invalid. It must have a length between 3 and 80 characters.',
+        },
+        INVALID_INTERNAL_ID: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_INTERNAL_ID',
+            message: 'Provided internalId is invalid. It must have a length between 1 and 100 characters.',
+        },
+        COURSES_INTERSECT: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSES_INTERSECT',
+            message: 'There is a conflict between values in mandatory courses y values in optional courses.',
         },
         INVALID_PARAMS: {
             status: HTTP_STATUS.BAD_REQUEST,
@@ -102,18 +137,19 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         PROGRAM: { status: HTTP_STATUS.NOT_FOUND, code: 'PROGRAM_NOT_FOUND', message: 'Program not found.' },
         LECTURE: { status: HTTP_STATUS.NOT_FOUND, code: 'LECTURE_NOT_FOUND', message: 'Lecture not found.' },
         SCHEDULE: { status: HTTP_STATUS.NOT_FOUND, code: 'SCHEDULE_NOT_FOUND', message: 'Schedule not found.' },
-        RESET_TOKEN: { status: HTTP_STATUS.NOT_FOUND, code: 'RESET_TOKEN_NOT_FOUND', message: 'Reset token not found.' },
+        PASSWORD_RECOVERY_TOKEN: { status: HTTP_STATUS.NOT_FOUND, code: 'PASSWORD_RECOVERY_TOKEN_NOT_FOUND', message: 'Password recovery token not found.' },
     },
     CONFLICT: {
         GENERAL: { status: HTTP_STATUS.CONFLICT, code: 'CONFLICT', message: 'Conflict.' },
-        USER_EXISTS: {
+        CANNOT_DELETE: {
             status: HTTP_STATUS.CONFLICT,
-            code: 'USER_EXISTS',
-            message: 'User with same email exists already.',
+            code: 'CANNOT_DELETE',
+            message: 'Cannot delete due to pre-existing constraints like relationships that need to be deleted first.',
         },
     },
     INTERNAL_SERVER_ERROR: {
         GENERAL: { status: HTTP_STATUS.SERVER_ERROR, code: 'INTERNAL_SERVER_ERROR', message: 'Internal Server Error.' },
+        DATABASE: { status: HTTP_STATUS.SERVER_ERROR, code: 'DATABASE_ERROR', message: 'Unknown database error.' },
         DATABASE_CONNECTION: {
             status: HTTP_STATUS.SERVER_ERROR,
             code: 'DATABASE_CONNECTION',

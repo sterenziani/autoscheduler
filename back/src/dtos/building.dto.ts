@@ -1,38 +1,40 @@
-import { IDistanceToBuilding } from '../interfaces/building.interface';
+import { API_SCOPE, RESOURCES } from '../constants/general.constants';
+import { applyPathToBase, getPaginatedLinks, getResourceUrl, queryParamsStringBuilder } from '../helpers/url.helper';
+import { PaginatedCollection } from '../interfaces/paging.interface';
 import Building from '../models/abstract/building.model';
 
-export const buildingToDto = (building: Building, distances: IDistanceToBuilding[]): IBuildingDto => {
-    const distanceDtos: IDistanceDto[] = distances.map((d) => {
-        return {
-            buildingId: d.buildingId,
-            buildingUrl: getBuildingUrl(d.buildingId),
-            time: d.time,
-        };
-    });
-
+export const buildingToDto = (building: Building, scope: API_SCOPE): IBuildingDto => {
+    const url = getResourceUrl(RESOURCES.BUILDING, scope, building.id);
     return {
         id: building.id,
-        url: getBuildingUrl(building.id),
+        internalId: building.internalId,
         name: building.name,
-        code: building.internalId,
-        distances: distanceDtos,
+        url,
+        distancesUrl: applyPathToBase(url, 'distances')
     };
 };
 
-export const getBuildingUrl = (buildingId: string): string => {
-    return `building/${buildingId}`;
+export const paginatedBuildingsToDto = (paginatedBuildings: PaginatedCollection<Building>, scope: API_SCOPE): IBuildingDto[] => {
+    return paginatedBuildings.collection.map(b => buildingToDto(b, scope));
+};
+
+export const paginatedBuildingsToLinks = (paginatedBuildings: PaginatedCollection<Building>, basePath: string, limit: number, filter?: string): Record<string, string> => {
+    return getPaginatedLinks(paginatedBuildings, paginatedBuildingsUrlBuilder, basePath, limit, filter);
+};
+
+const paginatedBuildingsUrlBuilder = (basePath: string, page: string, limit: string, filter?: string): string => {
+    const params = {
+        page,
+        limit,
+        filter
+    };
+    return queryParamsStringBuilder(basePath, params);
 };
 
 interface IBuildingDto {
     id: string;
-    url: string;
+    internalId: string;
     name: string;
-    code: string;
-    distances: IDistanceDto[];
-}
-
-interface IDistanceDto {
-    buildingId: string;
-    buildingUrl: string;
-    time: number;
+    url: string;
+    distancesUrl: string;
 }

@@ -1,62 +1,40 @@
 import CourseClass from '../models/abstract/courseClass.model';
-import * as BuildingDto from './building.dto';
-import * as CourseDto from './course.dto';
-import * as TermDto from './term.dto';
-import Lecture from '../models/abstract/lecture.model';
-import { DAY } from '../constants/time.constants';
+import { API_SCOPE, RESOURCES } from '../constants/general.constants';
+import { applyPathToBase, getPaginatedLinks, getResourceUrl, queryParamsStringBuilder } from '../helpers/url.helper';
+import { PaginatedCollection } from '../interfaces/paging.interface';
 
-export const courseClassToDto = (courseClass: CourseClass, courseId: string, termId: string): ICourseClassDto => {
+export const courseClassToDto = (courseClass: CourseClass, scope: API_SCOPE): ICourseClassDto => {
+    const url = getResourceUrl(RESOURCES.COURSE_CLASS, scope, courseClass.id);
     return {
         id: courseClass.id,
-        url: getCourseClassUrl(courseClass.id),
         name: courseClass.name,
-        courseId: courseId,
-        courseUrl: CourseDto.getCourseUrl(courseId),
-        termId: termId,
-        termUrl: TermDto.getTermUrl(termId),
-        lecturesUrl: getLecturesUrl(courseClass.id),
+        url,
+        lecturesUrl: applyPathToBase(url, 'lectures'),
     };
 };
 
-export const lectureToDto = (lecture: Lecture, buildingId: string|undefined): ILectureDto => {
-    if(!buildingId)
-        return {
-            day: lecture.time.dayOfWeek,
-            startTime: lecture.time.startTime.toString(),
-            endTime: lecture.time.endTime.toString(),
-        };
-    return {
-        day: lecture.time.dayOfWeek,
-        startTime: lecture.time.startTime.toString(),
-        endTime: lecture.time.endTime.toString(),
-        buildingId: buildingId,
-        buildingUrl: BuildingDto.getBuildingUrl(buildingId),
+export const paginatedCourseClassesToDto = (paginatedCourseClasses: PaginatedCollection<CourseClass>, scope: API_SCOPE): ICourseClassDto[] => {
+    return paginatedCourseClasses.collection.map(c => courseClassToDto(c, scope));
+};
+
+export const paginatedCourseClassesToLinks = (paginatedCourseClasses: PaginatedCollection<CourseClass>, basePath: string, limit: number, filter?: string, courseId?: string, termId?: string): Record<string, string> => {
+    return getPaginatedLinks(paginatedCourseClasses, paginatedCourseClassesUrlBuilder, basePath, limit, filter, courseId, termId);
+};
+
+const paginatedCourseClassesUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, courseId?: string, termId?: string): string => {
+    const params = {
+        page,
+        limit,
+        filter,
+        courseId,
+        termId
     };
-};
-
-export const getCourseClassUrl = (courseClassId: string): string => {
-    return `course-class/${courseClassId}`;
-};
-
-export const getLecturesUrl = (courseClassId: string): string => {
-    return `course-class/${courseClassId}/lectures`;
+    return queryParamsStringBuilder(basePath, params);
 };
 
 interface ICourseClassDto {
     id: string;
-    url: string;
     name: string;
-    courseId: string;
-    courseUrl: string;
-    termId: string;
-    termUrl: string;
+    url: string;
     lecturesUrl: string;
-}
-
-interface ILectureDto {
-    day: DAY;
-    startTime: string;
-    endTime: string;
-    buildingId?: string;
-    buildingUrl?: string;
 }

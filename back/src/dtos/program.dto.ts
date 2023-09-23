@@ -1,48 +1,41 @@
 import Program from '../models/abstract/program.model';
-import { getUserUrl } from './user.dto';
-import { ROLE } from '../constants/general.constants';
-import { queryParamsStringBuilder } from '../helpers/url.helper';
+import { API_SCOPE, RESOURCES } from '../constants/general.constants';
+import { applyPathToBase, getPaginatedLinks, getResourceUrl, queryParamsStringBuilder } from '../helpers/url.helper';
+import { PaginatedCollection } from '../interfaces/paging.interface';
 
-export const programToDto = (program: Program, universityId: string): IProgramDto => {
+export const programToDto = (program: Program, scope: API_SCOPE): IProgramDto => {
+    const url = getResourceUrl(RESOURCES.PROGRAM, scope, program.id);
     return {
         id: program.id,
-        url: getProgramUrl(program.id),
+        internalId: program.internalId,
         name: program.name,
-        code: program.internalId,
-        mandatoryCoursesUrl: getProgramMandatoryCoursesUrl(program.id),
-        optionalCoursesUrl: getProgramOptionalCoursesUrl(program.id),
-        universityId: universityId,
-        universityUrl: getUserUrl(universityId, ROLE.UNIVERSITY),
+        url,
+        coursesUrl: applyPathToBase(url, 'courses')
     };
 };
 
-export const getProgramUrl = (programId: string): string => {
-    return `program/${programId}`;
+export const paginatedProgramsToDto = (paginatedPrograms: PaginatedCollection<Program>, scope: API_SCOPE): IProgramDto[] => {
+    return paginatedPrograms.collection.map(p => programToDto(p, scope));
 };
 
-export const getProgramMandatoryCoursesUrl = (programId: string, page?: number, perPage?: number): string => {
+export const paginatedProgramsToLinks = (paginatedPrograms: PaginatedCollection<Program>, basePath: string, limit: number, filter?: string, universityId?: string): Record<string, string> => {
+    return getPaginatedLinks(paginatedPrograms, paginatedProgramsUrlBuilder, basePath, limit, filter, universityId);
+};
+
+const paginatedProgramsUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, universityId?: string): string => {
     const params = {
-        page: page !== undefined ? page.toString() : page,
-        per_page: perPage !== undefined ? perPage.toString() : perPage,
+        page,
+        limit,
+        filter,
+        universityId
     };
-    return queryParamsStringBuilder(`${getProgramUrl(programId)}/courses/mandatory`, params);
-};
-
-export const getProgramOptionalCoursesUrl = (programId: string, page?: number, perPage?: number): string => {
-    const params = {
-        page: page !== undefined ? page.toString() : page,
-        per_page: perPage !== undefined ? perPage.toString() : perPage,
-    };
-    return queryParamsStringBuilder(`${getProgramUrl(programId)}/courses/optional`, params);
+    return queryParamsStringBuilder(basePath, params);
 };
 
 interface IProgramDto {
     id: string;
-    url: string;
+    internalId: string;
     name: string;
-    code: string;
-    mandatoryCoursesUrl: string;
-    optionalCoursesUrl: string;
-    universityId: string;
-    universityUrl: string;
+    url: string;
+    coursesUrl: string;
 }

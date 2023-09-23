@@ -1,25 +1,25 @@
-import { ROLE } from '../../constants/general.constants';
 import Building from './building.model';
 import Course from './course.model';
+import GenericModel from './generic.model';
 import Program from './program.model';
 import Student from './student.model';
 import Term from './term.model';
 import User from './user.model';
 
-// University extends User and so it has all the properties of an User as well
-export default abstract class University extends User {
+export default abstract class University extends GenericModel {
     // Properties
     name: string;
     verified: boolean;
 
-    // Abstract class constructor. University and Student require an existing user, so they are the only ones that have required id in constructor
-    constructor(userId: string, email: string, password: string, locale: string, name: string, verified: boolean) {
-        super(userId, email, password, ROLE.UNIVERSITY, locale);
+    // Abstract class constructor.
+    constructor(id: string, name: string, verified: boolean) {
+        super(id);
         this.name = name;
         this.verified = verified;
     }
 
     // Methods
+    public abstract getUser(): Promise<User>;
     public abstract getPrograms(): Promise<Program[]>;
     public abstract getBuildings(): Promise<Building[]>;
     public abstract getCourses(): Promise<Course[]>;

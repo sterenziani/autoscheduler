@@ -34,8 +34,8 @@ export default class BuildingService {
         return await this.dao.getById(id);
     }
 
-    async getUniversityBuildingsByText(universityId: string, text?: string, limit?: number, offset?: number): Promise<PaginatedCollection<Building>> {
-        return await this.dao.getUniversityBuildingsByText(universityId, text, limit, offset);
+    async getUniversityBuildingsByText(universityId: string, limit: number, offset: number, text?: string): Promise<PaginatedCollection<Building>> {
+        return await this.dao.getUniversityBuildingsByText(universityId, limit, offset, text);
     }
 
     async getBuildingDistances(id: string): Promise<IDistanceToBuilding[]> {

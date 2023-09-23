@@ -26,6 +26,10 @@ export default class MemoryProgramDao extends ProgramDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+    
     public async create(universityId: string, internalId: string, name: string): Promise<Program> {
         // We get the university to check that it exists
         const university = await MemoryUniversityDao.getInstance().getById(universityId);
@@ -40,15 +44,6 @@ export default class MemoryProgramDao extends ProgramDao {
 
     public async findById(id: string): Promise<Program | undefined> {
         return MEMORY_DATABASE.programs.get(id);
-    }
-
-    public async findByInternalId(universityId: string, internalId: string): Promise<Program | undefined> {
-        const universityPrograms = getChildsFromParent(
-            MEMORY_DATABASE.programsOfUniversity,
-            MEMORY_DATABASE.programs,
-            universityId,
-        );
-        return universityPrograms.find((p) => p.internalId == internalId);
     }
 
     public async set(program: Program): Promise<void> {

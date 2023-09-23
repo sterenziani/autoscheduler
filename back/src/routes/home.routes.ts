@@ -4,7 +4,7 @@ import { HomeController } from '../controllers/home.controller';
 import cors from 'cors';
 
 export class HomeRoutes {
-    public router: Router = Router();
+    public router: Router = Router({mergeParams: true});
     public controller: HomeController = new HomeController();
 
     constructor() {

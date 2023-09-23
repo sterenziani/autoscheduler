@@ -7,8 +7,8 @@ import { HomeRoutes } from './routes/home.routes';
 import { BuildingRoutes } from './routes/building.routes';
 import { CourseRoutes } from './routes/course.routes';
 import { CourseClassRoutes } from './routes/courseClass.routes';
-import { ProgramRoutes } from './routes/program.routes';
-import { StudentRoutes } from './routes/student.routes';
+import { ProgramRoutes } from './routes/universityPrograms.routes';
+import { StudentRoutes } from './routes/students.routes';
 import { TermRoutes } from './routes/term.routes';
 import { UniversityRoutes } from './routes/university.routes';
 import { UniversitiesRoutes } from './routes/universities.routes';
@@ -25,6 +25,12 @@ import UniversityService from './services/university.service';
 import UserService from './services/user.service';
 import { initializeMongoConnection } from './helpers/persistence/mongoPersistence.helper';
 import { initializeGraphConnection } from './helpers/persistence/graphPersistence.helper';
+import UserDaoFactory from './factories/userDao.factory';
+import BuildingDaoFactory from './factories/buildingDao.factory';
+import ProgramDaoFactory from './factories/programDao.factory';
+import { LectureRoutes } from './routes/lecture.routes';
+import { UserRoutes } from './routes/user.routes';
+import { AuthRoutes } from './routes/auth.routes';
 
 class App {
     public app: Application;
@@ -83,15 +89,20 @@ class App {
 
     private setRoutes() {
         this.app.use('/api', new HomeRoutes().router);
-        this.app.use('/api/building', new BuildingRoutes().router);
-        this.app.use('/api/course', new CourseRoutes().router);
-        this.app.use('/api/course-class', new CourseClassRoutes().router);
-        this.app.use('/api/program', new ProgramRoutes().router);
-        this.app.use('/api/student', new StudentRoutes().router);
-        this.app.use('/api/term', new TermRoutes().router);
-        this.app.use('/api/university', new UniversityRoutes().router);
-        this.app.use('/api/universities', new UniversitiesRoutes().router);
-        this.app.use('/api/users', new UsersRoutes().router);
+        this.app.use('/api/auth/', new AuthRoutes().router);
+        this.app.use('/api/user/', new UserRoutes().router);
+        this.app.use('/api/users/', new UsersRoutes().router);
+        this.app.use('/api/university/', new UniversityRoutes().router);
+        this.app.use('/api/universities/', new UniversitiesRoutes().router);
+        this.app.use('/api/student/', new StudentRoutes().router);
+        this.app.use('/api/students/', new StudentsRoutes().router);
+    }
+
+    private initializeDaos() {
+        UserDaoFactory.get().init();
+        BuildingDaoFactory.get().init();
+        CourseClassDaoFactory.get().init();
+        ProgramDaoFactory.get().init();
     }
 }
 

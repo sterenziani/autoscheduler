@@ -6,7 +6,7 @@ import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import universitiesOnlyMiddleware from '../middlewares/universitiesOnly.middleware';
 
 export class TermRoutes {
-    public router: Router = Router();
+    public router: Router = Router({mergeParams: true});
     public controller: TermController = new TermController();
 
     constructor() {

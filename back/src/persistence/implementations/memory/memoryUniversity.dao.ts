@@ -18,6 +18,10 @@ export default class MemoryUniversityDao extends UniversityDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+    
     public async create(userId: string, name: string, verified: boolean): Promise<University> {
         // We get the user to check that it exists and to get the rest of the info
         const user = await MemoryUserDao.getInstance().getById(userId);
@@ -53,7 +57,7 @@ export default class MemoryUniversityDao extends UniversityDao {
         return undefined;
     }
 
-    public async findByText(text?: string, limit?: number, offset?: number): Promise<PaginatedCollection<University>> {
+    public async findByText(limit: number, offset: number, text?: string): Promise<PaginatedCollection<University>> {
         text = text ? text.toLowerCase() : text;
         const universities: University[] = [];
 

@@ -2,9 +2,11 @@ import { Router } from 'express';
 import { urlencoded } from 'body-parser';
 import { UsersController } from '../controllers/users.controller';
 import cors from 'cors';
+import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
+import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
 
 export class UsersRoutes {
-    public router: Router = Router();
+    public router: Router = Router({mergeParams: true});
     public controller: UsersController = new UsersController();
 
     constructor() {
@@ -19,8 +21,10 @@ export class UsersRoutes {
         );
 
         this.router.use(cors());
-        this.router.post('/token', this.controller.createResetToken);
-        this.router.get('/token/:token', this.controller.getUserWithResetToken);
-        this.router.put('/:userId/password', this.controller.changeUserPassword);
+        this.router.get('/', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.getUsers);
+        this.router.get('/:userId', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.getUser);
+        this.router.post('/', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.createUser);
+        this.router.put('/:userId', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.modifyUser);
+        this.router.delete('/:userId', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.deleteUser);
     }
 }

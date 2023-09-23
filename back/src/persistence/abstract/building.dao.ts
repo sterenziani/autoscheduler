@@ -13,6 +13,6 @@ export default abstract class BuildingDao extends GenericDao<Building> {
     public abstract create(universityId: string, internalId: string, name: string): Promise<Building>;
     public abstract findByUniversityId(universityId: string): Promise<Building[]>;
     public abstract findByInternalId(universityId: string, internalId: string): Promise<Building | undefined>;
-    public abstract getUniversityBuildingsByText(universityId: string, text?: string, limit?: number, offset?: number): Promise<PaginatedCollection<Building>>;
+    public abstract getUniversityBuildingsByText(universityId: string, limit: number, offset: number, text?: string): Promise<PaginatedCollection<Building>>;
     public abstract deleteBuilding(buildingId: string): Promise<void>;
 }

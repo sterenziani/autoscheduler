@@ -6,10 +6,20 @@ import { jwtSign, jwtVerify, validatePassword } from '../helpers/auth.helper';
 import httpException from '../exceptions/http.exception';
 import UserService from './user.service';
 import User from '../models/abstract/user.model';
+import PasswordRecoveryTokenDao from '../persistence/abstract/passwordRecoveryToken.dao';
+import PasswordRecoveryTokenDaoFactory from '../factories/passwordRecoveryTokenDao.factory';
+import EmailService from './email.service';
+import StudentService from './student.service';
+import UniversityService from './university.service';
+import { ROLE } from '../constants/general.constants';
 
 export default class UserAuthService {
     private static instance: UserAuthService;
     private userService!: UserService;
+    private universityService!: UniversityService;
+    private studentService!: StudentService;
+    private emailService!: EmailService;
+    private passwordRecoveryTokenDao: PasswordRecoveryTokenDao;
     private readonly jwtKey: string;
     private readonly jwtPublicKey: string;
     private readonly expireTime: string;
@@ -22,6 +32,7 @@ export default class UserAuthService {
     }
 
     private constructor() {
+        this.passwordRecoveryTokenDao = PasswordRecoveryTokenDaoFactory.get();
         this.jwtKey = process.env.AUTH_TOKEN_KEY!;
         this.jwtPublicKey = process.env.AUTH_TOKEN_PUB_KEY!;
         this.expireTime = DEFAULT_AUTH_TOKEN_EXPIRE_TIME;
@@ -29,6 +40,9 @@ export default class UserAuthService {
 
     init() {
         this.userService = UserService.getInstance();
+        this.universityService = UniversityService.getInstance();
+        this.studentService = StudentService.getInstance();
+        this.emailService = EmailService.getInstance();
     }
 
     // PUBLIC METHODS
@@ -51,15 +65,54 @@ export default class UserAuthService {
         if (!validatePassword(password, user.password)) throw new GenericException(ERRORS.BAD_REQUEST.INVALID_LOGIN);
 
         // generate token
-        const userInfo: IUserInfo = {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-        };
-        return jwtSign(this.jwtKey, this.expireTime, userInfo);
+        return await this.generateLoginInfo(user);
     }
 
     verifyToken(token: string): IUserInfo {
         return jwtVerify(this.jwtPublicKey, token);
+    }
+
+    async createPasswordRecoveryToken(email: string): Promise<void> {
+        const user = await this.userService.getUserByEmail(email);
+
+        var expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 2); // Valid for 2 days
+
+        const token = await this.passwordRecoveryTokenDao.create(user.id, expirationDate);
+
+        // TODO: Define base URL
+        const path = "reset/"+token.id;
+        this.emailService.sendPasswordResetEmail(user, path);
+    }
+
+    async getUserFromPasswordRecoveryToken(token: string): Promise<User> {
+        const recoveryToken = await this.passwordRecoveryTokenDao.getById(token);
+        return await recoveryToken.getUser();
+    }
+
+    async usePasswordRecoveryToken(token: string, newPassword: string): Promise<string> {
+        const user = await this.getUserFromPasswordRecoveryToken(token);
+        const updatedUser = await this.userService.modifyUser(user.id, newPassword);
+        this.passwordRecoveryTokenDao.delete(token).catch((_) => {});
+        return await this.generateLoginInfo(updatedUser);
+    }
+
+    private async generateLoginInfo(user: User): Promise<string> {
+        // generate token
+        const userInfo: IUserInfo = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            locale: user.locale
+        };
+        if (user.role == ROLE.STUDENT) {
+            const studentInfo = await this.studentService.getStudentInfo(user.id);
+            userInfo.universityId = studentInfo.universityId;
+            userInfo.studentId = user.id;
+            userInfo.programId = studentInfo.programId;
+        } else if (user.role == ROLE.UNIVERSITY) {
+            userInfo.universityId = user.id;
+        }
+        return jwtSign(this.jwtKey, this.expireTime, userInfo);
     }
 }

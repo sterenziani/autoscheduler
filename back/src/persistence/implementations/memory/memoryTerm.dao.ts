@@ -26,6 +26,10 @@ export default class MemoryTermDao extends TermDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+    
     public async create(
         universityId: string,
         internalId: string,

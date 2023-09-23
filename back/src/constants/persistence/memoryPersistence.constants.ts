@@ -7,7 +7,7 @@ import Student from '../../models/abstract/student.model';
 import Term from '../../models/abstract/term.model';
 import University from '../../models/abstract/university.model';
 import User from '../../models/abstract/user.model';
-import ResetToken from '../../models/abstract/resetToken.model';
+import PasswordRecoveryToken from '../../models/abstract/passwordRecoveryToken.model';
 
 // This is very insecure, but this is just for testing so it's fine. This constants will act as the "Memory database" we "query"
 interface IMemoryDatabase {
@@ -21,6 +21,7 @@ interface IMemoryDatabase {
     courseClasses: Map<string, CourseClass>;
     lectures: Map<string, Lecture>;
     students: Map<string, Student>;
+    passwordRecoveryTokens: Map<string, PasswordRecoveryToken>;
 
     // Belongs to relationships
     programsOfUniversity: Map<string, Set<string>>; // universityId -> Set<programId>
@@ -46,9 +47,6 @@ interface IMemoryDatabase {
 
     // Required courses of course relationship
     requiredCoursesOfCourse: Map<string, Map<string, Set<string>>>; // courseId -> programId -> Set<courseId>
-
-    // 1-to-1 relationship between user and resetToken
-    resetTokens: Map<string, ResetToken>; // userId -> token
 }
 
 export const MEMORY_DATABASE: IMemoryDatabase = {
@@ -61,6 +59,7 @@ export const MEMORY_DATABASE: IMemoryDatabase = {
     courseClasses: new Map(),
     lectures: new Map(),
     students: new Map(),
+    passwordRecoveryTokens: new Map(),
 
     programsOfUniversity: new Map(),
     buildingsOfUniversity: new Map(),
@@ -81,6 +80,4 @@ export const MEMORY_DATABASE: IMemoryDatabase = {
     distanceBetweenBuildings: new Map(),
 
     requiredCoursesOfCourse: new Map(),
-
-    resetTokens: new Map(),
 };

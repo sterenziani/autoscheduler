@@ -11,6 +11,8 @@ import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import { removeSpecialCharacters } from '../helpers/string.helper';
 import { paginateCollection } from '../helpers/collection.helper';
+import Program from '../models/abstract/program.model';
+import { IStudentInfo } from '../interfaces/student.interface';
 
 export default class StudentService {
     private static instance: StudentService;
@@ -41,6 +43,10 @@ export default class StudentService {
 
     async getStudent(id: string): Promise<Student> {
         return await this.dao.getById(id);
+    }
+
+    async getStudentInfo(id: string): Promise<IStudentInfo> {
+        return await this.dao.getStudentInfo(id);
     }
 
     async getStudentCompletedCourses(

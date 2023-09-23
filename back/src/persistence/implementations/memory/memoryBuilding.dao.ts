@@ -25,6 +25,10 @@ export default class MemoryBuildingDao extends BuildingDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+
     public async create(universityId: string, internalId: string, name: string): Promise<Building> {
         // We get the university to check that it exists
         const university = await MemoryUniversityDao.getInstance().getById(universityId);
@@ -64,9 +68,9 @@ export default class MemoryBuildingDao extends BuildingDao {
 
     public async getUniversityBuildingsByText(
         universityId: string,
+        limit: number,
+        offset: number,
         text?: string,
-        limit?: number,
-        offset?: number
     ): Promise<PaginatedCollection<Building>> {
         text = text ? text.toLowerCase() : text;
         let universityBuildings: Building[] = await this.findByUniversityId(universityId);

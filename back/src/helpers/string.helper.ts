@@ -16,3 +16,12 @@ export const removeSpecialCharacters = (text: string | undefined): string => {
 
     return finalText;
 };
+
+export const cleanText = (text: string): string => {
+    return removeSpecialCharacters(text.toLowerCase());
+}
+
+export const booleanToString = (maybeBoolean?: boolean): string | undefined => {
+    if (maybeBoolean === undefined || maybeBoolean === null) return undefined;
+    return maybeBoolean ? 'true' : 'false';
+}

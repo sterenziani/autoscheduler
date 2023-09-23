@@ -28,6 +28,10 @@ export default class MemoryCourseDao extends CourseDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+    
     public async create(universityId: string, internalId: string, name: string): Promise<Course> {
         // We get the university to check that it exists
         const university = await MemoryUniversityDao.getInstance().getById(universityId);

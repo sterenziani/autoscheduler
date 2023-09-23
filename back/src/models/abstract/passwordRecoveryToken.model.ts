@@ -1,15 +1,15 @@
-import { ROLE } from '../../constants/general.constants';
-import { validatePassword } from '../../helpers/auth.helper';
 import GenericModel from './generic.model';
 import User from './user.model';
 
-export default abstract class ResetToken extends GenericModel {
+export default abstract class PasswordRecoveryToken extends GenericModel {
     // Properties
+    userId: string;
     expirationDate: Date;
 
     // Abstract class constructor
-    constructor(id: string, expirationDate: Date) {
+    constructor(id: string, userId: string, expirationDate: Date) {
         super(id);
+        this.userId = userId;
         this.expirationDate = expirationDate;
     }
 

@@ -10,7 +10,7 @@ import {
 import User from '../../../models/abstract/user.model';
 import DatabaseUser, { UserDocument, UserModel } from '../../../models/implementations/database/databaseUser.model';
 import UserDao from '../../abstract/user.dao';
-import ResetToken from '../../../models/abstract/resetToken.model';
+import PasswordRecoveryToken from '../../../models/abstract/passwordRecoveryToken.model';
 
 // TODO: see if transactions matter
 export default class DatabaseUserDao extends UserDao {
@@ -24,6 +24,10 @@ export default class DatabaseUserDao extends UserDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+    
     public async create(email: string, password: string, role: ROLE): Promise<User> {
         const newUser = await createDocument<UserDocument>(UserModel, { email, password, role });
         return this.documentToModel(newUser);
@@ -49,12 +53,12 @@ export default class DatabaseUserDao extends UserDao {
     }
 
     // TODO: Implement
-    public async createResetToken(userId: string, expirationDate: Date): Promise<ResetToken> {
+    public async createResetToken(userId: string, expirationDate: Date): Promise<PasswordRecoveryToken> {
         return {id: "", expirationDate: expirationDate, isCurrentlyValid:() => true, getUser: () => {throw new GenericException(ERRORS.NOT_FOUND.USER)}};
     }
 
     // TODO: Implement
-    public async getResetToken(token: string): Promise<ResetToken | undefined> {
+    public async getResetToken(token: string): Promise<PasswordRecoveryToken | undefined> {
         return undefined;
     }
 

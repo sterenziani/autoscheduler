@@ -9,12 +9,9 @@ export default abstract class UniversityDao extends GenericDao<University> {
         super(ERRORS.NOT_FOUND.UNIVERSITY);
     }
 
-    // Abstract Methods
-    public abstract create(userId: string, name: string, verified: boolean): Promise<University>;
-    public abstract findByName(name: string): Promise<University | undefined>;
-    public abstract findByText(
-        text?: string,
-        limit?: number,
-        offset?: number,
-    ): Promise<PaginatedCollection<University>>;
+    // Abstract Methods Signature Override
+    public abstract create(id: string, name: string, verified: boolean): Promise<University>;
+    public abstract modify(id: string, name?: string, verified?: boolean): Promise<University>;
+    
+    public abstract findPaginated(page: number, limit: number, textSearch?: string, verified?: boolean): Promise<PaginatedCollection<University>>;
 }

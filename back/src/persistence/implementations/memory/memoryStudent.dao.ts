@@ -18,6 +18,10 @@ export default class MemoryStudentDao extends StudentDao {
     };
 
     // Abstract Methods Implementations
+    public async init(): Promise<void> {
+        return;
+    }
+    
     public async create(
         userId: string,
         programId: string,

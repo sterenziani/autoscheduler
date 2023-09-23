@@ -3,11 +3,67 @@ import { DAY } from '../constants/time.constants';
 import Time from './classes/time.class';
 import { ILecture } from '../interfaces/courseClass.interface';
 
+// Parsing validators
+
 export const validateString = (data: any, maxLength?: number): string | undefined => {
     const maybeString = data === undefined || typeof data !== 'string' || data === '' ? undefined : (data as string);
     if (maybeString === undefined) return undefined;
 
     return maxLength ? (maybeString.length <= maxLength ? maybeString : undefined) : maybeString;
+};
+
+export const validateNumber = (data: any): number | undefined => {
+    if (data === undefined) return undefined;
+    let maybeNumber: number | undefined = undefined;
+    
+    // For when type is number
+    if (typeof data === 'number')
+        maybeNumber = data as number;
+    
+    // For when type is string
+    if (typeof data === 'string' && data !== '')
+        maybeNumber = Number(data);
+    
+    // We make final check against NaN
+    const num = (isNaN(maybeNumber ?? NaN)) ? undefined : maybeNumber as number;
+    if (num && num < 0) return undefined;
+    if (num === undefined) return undefined;
+    
+    return num;
+};
+
+
+export const validateNumberString = (data: any): string | undefined => {
+    const maybeNumber = validateNumber(data);
+    return maybeNumber?.toString();
+};
+
+
+export const validateInt = (data: any): number | undefined => {
+    const maybeNumber = validateNumber(data);
+    return (Number.isInteger(maybeNumber)) ? maybeNumber : undefined;
+};
+
+
+export const validateIntString = (data: any): string | undefined => {
+    const maybeInt = validateInt(data);
+    return maybeInt?.toString();
+};
+
+export const validateBoolean = (data: any): boolean | undefined => {
+    if (data === undefined) return undefined;
+    // For when type is boolean
+    if (typeof data === 'boolean') return data as boolean;
+    // For when type is string
+    if (typeof data === 'string') {
+        // For this we are going to make only 2 scenarios, one for "true" and "TRUE", then another for "false" and "FALSE"
+        // Anything else is not considered a valid boolean and should return undefined
+        const trimmedString: string = (data as string).toLowerCase().trim();
+        if (trimmedString === 'true') return true;
+        if (trimmedString === 'false') return false;
+    }
+
+    return undefined;
 };
 
 export const validateEnum = <T>(data: any, enumObject: any): T | undefined => {
@@ -85,3 +141,45 @@ export const validateUnavailableTime = (maybeTime: any): TimeRange | undefined =
         return undefined;
     }
 };
+
+// IsValid Validators
+
+export const isValidEmail = (email: string): boolean => {
+    // simple regex check
+    const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
+export const isValidPassword = (password: string): boolean => {
+    // password length check
+    if (password.length < 8) return false;
+
+    // at least one uppercase check
+    if (!/[A-Z]/.test(password)) return false;
+
+    // at least one lowercase check
+    if (!/[a-z]/.test(password)) return false;
+
+    // at least one number check
+    if (!/[0-9]/.test(password)) return false;
+
+    // passed all checks
+    return true;
+};
+
+export const isValidLocale = (locale: string): boolean => {
+    return true;    // TODO: Make the validator
+}
+
+export const isValidEnum = <T>(data: any, enumObject: any): boolean => {
+    const maybeEnum = validateEnum<T>(data, enumObject);
+    return maybeEnum !== undefined;
+}
+
+export const isValidInternalId = (internalId: string): boolean => {
+    return internalId.length >= 1 && internalId.length <= 100;
+}
+
+export const isValidName = (name: string): boolean => {
+    return name.length >= 3 && name.length <= 80;
+}
