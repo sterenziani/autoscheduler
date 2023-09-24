@@ -17,6 +17,43 @@ export default class Time {
         this.minute = minute;
     }
 
+    // Static constructors
+    /**
+     * Creates a new Time object from a string in hh:mm format.
+     * If string does not match format it returns undefined
+     * @param timeString
+     */
+    static parseString(timeString: string): Time | undefined {
+        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (!timeRegex.test(timeString)) return undefined;
+        const [hour, minute]: number[] = timeString.split(':', 2).map((n) => parseInt(n));
+        return new Time(hour, minute);
+    }
+
+    /**
+     * Creates a new Time object from a string in hh:mm format
+     * @param timeString
+     */
+    static fromString(timeString: string): Time {
+        const maybeTime = Time.parseString(timeString);
+        if (maybeTime === undefined) throw new Error('Invalid time format, timeString should have hh:mm format.');
+        return maybeTime;
+    }
+
+    /**
+     * Returns Time with max allowed value
+     */
+    static minValue(): Time {
+        return new Time(0, 0);
+    }
+
+    /**
+     * Returns Time with max allowed value
+     */
+    static maxValue(): Time {
+        return new Time(23, 59);
+    }
+
     // Methods
     /**
      * Returns positive number if this is greater than other
@@ -41,30 +78,5 @@ export default class Time {
      */
     getValueInMinutes(): number {
         return this.hour*60 + this.minute;
-    }
-
-    /**
-     * Creates a new Time object from a string in hh:mm format
-     * @param timeString
-     */
-    static fromString(timeString: string): Time {
-        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!timeRegex.test(timeString)) throw new Error('Invalid time format, timeString should have hh:mm format.');
-        const [hour, minute]: number[] = timeString.split(':', 2).map((n) => parseInt(n));
-        return new Time(hour, minute);
-    }
-
-    /**
-     * Returns Time with max allowed value
-     */
-    static minValue(): Time {
-        return new Time(0, 0);
-    }
-
-    /**
-     * Returns Time with max allowed value
-     */
-    static maxValue(): Time {
-        return new Time(23, 59);
     }
 }

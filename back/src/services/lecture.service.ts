@@ -1,17 +1,8 @@
-import CourseClassDao from '../persistence/abstract/courseClass.dao';
-import CourseClassDaoFactory from '../factories/courseClassDao.factory';
-import BuildingService from './building.service';
 import LectureDao from '../persistence/abstract/lecture.dao';
 import LectureDaoFactory from '../factories/lectureDao.factory';
-import { ILecture } from '../interfaces/courseClass.interface';
-import CourseClass from '../models/abstract/courseClass.model';
-import UniversityService from './university.service';
-import TermService from './term.service';
-import CourseService from './course.service';
-import GenericException from '../exceptions/generic.exception';
-import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Lecture from '../models/abstract/lecture.model';
+import TimeRange from '../helpers/classes/timeRange.class';
 
 export default class LectureService {
     private static instance: LectureService;
@@ -30,11 +21,28 @@ export default class LectureService {
     }
 
     init() {
+        // Do Nothing
     }
 
     // public methods
 
-    async getLectures(limit: number, offset: number): Promise<PaginatedCollection<Lecture>> {
-        return await this.dao.findById(limit, offset);
+    async getLecture(id: string, universityIdFilter?: string, courseClassIdFilter?: string): Promise<Lecture> {
+        return await this.dao.getById(id, universityIdFilter, courseClassIdFilter);
+    }
+
+    async getLectures(page: number, limit: number, times?: TimeRange[], courseClassId?: string, buildingId?: string, universityId?: string): Promise<PaginatedCollection<Lecture>> {
+        return await this.dao.findPaginated(page, limit, times, courseClassId, buildingId, universityId);
+    }
+
+    async createLecture(universityId: string, courseClassId: string, timeRange: TimeRange, buildingId: string): Promise<Lecture> {
+        return await this.dao.create(universityId, courseClassId, timeRange, buildingId);
+    }
+
+    async modifyLecture(id: string, universityIdFilter: string, courseClassIdFilter?: string, timeRange?: TimeRange, buildingId?: string): Promise<Lecture> {
+        return await this.dao.modify(id, universityIdFilter, courseClassIdFilter, timeRange, buildingId);
+    }
+
+    async deleteLecture(id: string, universityIdFilter: string, courseClassIdFilter?: string): Promise<void> {
+        return await this.dao.delete(id, universityIdFilter, courseClassIdFilter);
     }
 }

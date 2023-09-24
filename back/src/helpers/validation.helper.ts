@@ -100,14 +100,28 @@ export const validateArray = <T>(data: any, memberValidator: (data: any, ...args
     return undefined;
 };
 
-export const validateElemOrElemArray = <T>(data: any, validator: (data: any, ...args: any[]) => T | undefined, ...validatorArgs: any[]): T | T[] | undefined => {
+export const validateElemOrElemArray = <T>(data: any, validator: (data: any, ...args: any[]) => T | undefined, ...validatorArgs: any[]): T[] | undefined => {
     if (data == undefined) return undefined;
     if (Array.isArray(data)) {
         return validateArray<T>(data, validator, ...validatorArgs);
     } else {
-        return validator(data, ...validatorArgs);
+        const maybeValue = validator(data, ...validatorArgs);
+        if (maybeValue === undefined) return undefined;
+        return [maybeValue];
     }
 };
+
+export const validateTimes = (data: any): TimeRange[] | undefined => {
+    const timeStrings = validateElemOrElemArray(data, validateString);
+    if (timeStrings === undefined) return undefined;
+    const times: TimeRange[] = [];
+    for (const timeString of timeStrings) {
+        const maybeTimeRange = TimeRange.parseString(timeString);
+        if (maybeTimeRange === undefined) return undefined;
+        times.push(maybeTimeRange);
+    }
+    return times.sort((a, b) => a.compareTo(b));
+}
 
 export const validateLecture = (maybeLecture: any): ILecture | undefined => {
     try {
@@ -209,8 +223,20 @@ export const isValidName = (name: string): boolean => {
     return name.length >= 3 && name.length <= 80;
 }
 
-export const isValidTimes = (time: string | string[]): boolean => {
-    return true; // TODO: Validator
+/**
+ * Checks there is at least one time range and time ranges are not overlapping (things like ["0-10:00-20:00", "0-11:00-19:00"] or ["0-10:00-15:00", "0-14:00-18:00"])
+ * Expects times to be sorted already
+ * @param sortedTimes  sorted TimeRange array
+ */
+export const isValidTimes = (sortedTimes: TimeRange[]): boolean => {
+    if (sortedTimes.length === 0) return false;
+    if (sortedTimes.length === 1) return true;
+    for (let i = 0; i < sortedTimes.length - 1; i++) {
+        const current = sortedTimes[i];
+        const next = sortedTimes[i + 1];
+        if (current.overlaps(next)) return false;
+    }
+    return true;
 }
 
 export const isValidDay = (day: number): boolean => {
@@ -218,9 +244,8 @@ export const isValidDay = (day: number): boolean => {
     return dayEnum !== undefined;
 }
 
-export const isValidTimeOfDay = (timeOfDay: string): boolean => {
-    const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-    return timeRegex.test(timeOfDay);
+export const isValidTime = (timeString: string): boolean => {
+    return Time.parseString(timeString) !== undefined;
 }
 
 export const isValidTimeRange = (startTime: Time, endTime: Time): boolean => {

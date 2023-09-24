@@ -13,7 +13,7 @@ import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidDay, isValidInternalId, isValidName, isValidTimeOfDay, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateString } from '../helpers/validation.helper';
+import { isValidDay, isValidInternalId, isValidName, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateString, validateTimes } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -634,16 +634,16 @@ export class UniversityController {
         const buildingId = req.params.buildingId;
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
-        const time = validateElemOrElemArray(req.query.time, validateString);
+        const timesStrings = validateElemOrElemArray(req.query.times, validateString);
+        const times = validateTimes(timesStrings);
         const courseClassId = validateString(req.query.courseClassId);
 
-        if (time && !isValidTimes(time)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
+        if ((times && !isValidTimes(times)) || (timesStrings && !times)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
 
         try {
-            // TODO: Analyze if lectureService is correct
-            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, time, courseClassId, buildingId, universityId);
+            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, times, courseClassId, buildingId, universityId);
             res.status(HTTP_STATUS.OK)
-                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, time, undefined, courseClassId))
+                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, timesStrings, undefined, courseClassId))
                 .send(LectureDto.paginatedLecturesToDto(paginatedLectures, API_SCOPE.UNIVERSITY));
         } catch (e) {
             next(e);
@@ -950,15 +950,16 @@ export class UniversityController {
         const courseClassId = req.params.courseClassId;
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
-        const time = validateElemOrElemArray(req.query.time, validateString);
+        const timesStrings = validateElemOrElemArray(req.query.times, validateString);
+        const times = validateTimes(timesStrings);
         const buildingId = validateString(req.query.buildingId);
 
-        if (time && !isValidTimes(time)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
+        if ((times && !isValidTimes(times)) || (timesStrings && !times)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
 
         try {
-            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, time, courseClassId, buildingId, universityId);
+            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, times, courseClassId, buildingId, universityId);
             res.status(HTTP_STATUS.OK)
-                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, time, buildingId))
+                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, timesStrings, buildingId))
                 .send(LectureDto.paginatedLecturesToDto(paginatedLectures, API_SCOPE.UNIVERSITY));
         } catch (e) {
             next(e);
@@ -988,7 +989,7 @@ export class UniversityController {
 
         if (day === undefined || !startTime || !endTime || !buildingId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidDay(day)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_DAY));
-        if (!isValidTimeOfDay(startTime) || !isValidTimeOfDay(endTime)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_OF_DAY));
+        if (!isValidTime(startTime) || !isValidTime(endTime)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_OF_DAY));
         if (!isValidTimeRange(Time.fromString(startTime), Time.fromString(endTime))) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_RANGE));
 
         try {
@@ -1013,7 +1014,7 @@ export class UniversityController {
 
         if ((day === undefined || !startTime || !endTime) && !buildingId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (day !== undefined && !isValidDay(day)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_DAY));
-        if (startTime && endTime && (!isValidTimeOfDay(startTime) || !isValidTimeOfDay(endTime))) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_OF_DAY));
+        if (startTime && endTime && (!isValidTime(startTime) || !isValidTime(endTime))) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_OF_DAY));
         if (startTime && endTime && !isValidTimeRange(Time.fromString(startTime), Time.fromString(endTime))) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIME_RANGE));
 
         try {

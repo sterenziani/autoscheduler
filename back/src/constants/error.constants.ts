@@ -57,7 +57,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         INVALID_TIMES: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_TIMES',
-            message: 'Provided times are not valid times.',
+            message: 'Provided times are not valid times. It needs to follow d-hh:mm-hh:mm format, with start before end. And entries in array cannot overlap.',
         },
         INVALID_DAY: {
             status: HTTP_STATUS.BAD_REQUEST,
