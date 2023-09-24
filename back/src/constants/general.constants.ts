@@ -13,6 +13,7 @@ export enum API_SCOPE {
 }
 
 export enum RESOURCES {
+    PASSWORD_RECOVERY_TOKEN,
     USER,
     UNIVERSITY,
     PROGRAM,

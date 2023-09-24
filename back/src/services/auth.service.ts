@@ -11,6 +11,7 @@ import PasswordRecoveryTokenDaoFactory from '../factories/passwordRecoveryTokenD
 import EmailService from './email.service';
 import StudentService from './student.service';
 import { ROLE } from '../constants/general.constants';
+import PasswordRecoveryToken from '../models/abstract/passwordRecoveryToken.model';
 
 export default class UserAuthService {
     private static instance: UserAuthService;
@@ -87,8 +88,12 @@ export default class UserAuthService {
         await this.emailService.sendPasswordResetEmail(user, path);
     }
 
+    async getPasswordRecoveryToken(tokenId: string): Promise<PasswordRecoveryToken> {
+        return await this.passwordRecoveryTokenDao.getById(tokenId);
+    }
+
     async usePasswordRecoveryToken(tokenId: string, newPassword: string): Promise<string> {
-        const token = await this.passwordRecoveryTokenDao.getById(tokenId);
+        const token = await this.getPasswordRecoveryToken(tokenId);
         const updatedUser = await this.userService.modifyUser(token.userId, newPassword);
         this.passwordRecoveryTokenDao.delete(token.id).catch((_) => {});
         return await this.generateLoginInfo(updatedUser);

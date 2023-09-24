@@ -1,9 +1,11 @@
 import { RequestHandler } from 'express';
+import * as PasswordRecoveryTokenDto from '../dtos/passwordRecoveryToken.dto';
 import UserAuthService from '../services/auth.service';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
 import { HTTP_STATUS } from '../constants/http.constants';
 import { isValidEmail, isValidPassword, validateString } from '../helpers/validation.helper';
+import PasswordRecoveryToken from '../models/abstract/passwordRecoveryToken.model';
 
 export class AuthController {
     private authService: UserAuthService;
@@ -21,6 +23,17 @@ export class AuthController {
         try {
             await this.authService.createPasswordRecoveryToken(email);
             res.status(HTTP_STATUS.CREATED).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getPasswordRecoveryToken: RequestHandler = async (req, res, next) => {
+        const token = req.params.token;
+
+        try {
+            const passwordRecoveryToken: PasswordRecoveryToken = await this.authService.getPasswordRecoveryToken(token);
+            res.status(HTTP_STATUS.OK).send(PasswordRecoveryTokenDto.passwordRecoveryTokenToDto(passwordRecoveryToken));
         } catch (e) {
             next(e);
         }

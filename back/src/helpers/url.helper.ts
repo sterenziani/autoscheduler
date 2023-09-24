@@ -37,6 +37,8 @@ export const applyPathToBase = (basePath: string, path?: string): string => {
 export const getResourceUrl = (resource: RESOURCES, scope: API_SCOPE, resourceId: string): string => {
     const basePath = BASE_PATH;
     switch (resource) {
+        case RESOURCES.PASSWORD_RECOVERY_TOKEN:
+            return `${basePath}auth/password-recovery-tokens/${resourceId}`;
         case RESOURCES.USER:
             return scope === API_SCOPE.ROOT ? `${basePath}users/${resourceId}` : `${basePath}user`;
         case RESOURCES.UNIVERSITY:
