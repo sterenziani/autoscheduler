@@ -74,6 +74,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_TIME_RANGE',
             message: 'Format of the time is invalid. It should follow.',
         },
+        INVALID_FROM_AND_TO: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_FROM_AND_TO',
+            message: 'Privded from and to dates are invalid. to date needs to be after from date.',
+        },
         INVALID_BUILDING_DISTANCES: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_BUILDING_DISTANCES',

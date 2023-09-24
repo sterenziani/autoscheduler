@@ -1,16 +1,10 @@
 import TermDao from '../persistence/abstract/term.dao';
 import TermDaoFactory from '../factories/termDao.factory';
 import Term from '../models/abstract/term.model';
-import UniversityService from './university.service';
-import CourseClassService from './courseClass.service';
 import { PaginatedCollection } from '../interfaces/paging.interface';
-import GenericException from '../exceptions/generic.exception';
-import { ERRORS } from '../constants/error.constants';
 
 export default class TermService {
     private static instance: TermService;
-    private universityService!: UniversityService;
-    private courseClassService!: CourseClassService;
 
     private dao: TermDao;
 
@@ -26,67 +20,28 @@ export default class TermService {
     }
 
     init() {
-        this.universityService = UniversityService.getInstance();
-        this.courseClassService = CourseClassService.getInstance();
+        // Do nothing
     }
 
-    async getTerm(id: string): Promise<Term> {
-        return await this.dao.getById(id);
+    // public methods
+
+    async getTerm(id: string, universityIdFilter?: string): Promise<Term> {
+        return await this.dao.getById(id, universityIdFilter);
     }
 
-    async getTerms(
-        universityId: string,
-        text?: string,
-        published?: boolean,
-        from?: Date,
-        to?: Date,
-        limit?: number,
-        offset?: number,
-    ): Promise<PaginatedCollection<Term>> {
-        return await this.dao.getByText(universityId, text, published, from, to, limit, offset);
+    async getTerms(page: number, limit: number, textSearch?: string, from?: Date, to?: Date, published?: boolean, universityId?: string): Promise<PaginatedCollection<Term>> {
+        return await this.dao.findPaginated(page, limit, textSearch, from, to, published, universityId);
     }
 
-    async createTerm(universityId: string, internalId: string, name: string, startDate: Date): Promise<Term> {
-        const maybeUniversity = await this.universityService.getUniversity(universityId);
-        if (!maybeUniversity) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
-
-        if (await this.dao.findByInternalId(universityId, internalId))
-            throw new GenericException(ERRORS.BAD_REQUEST.TERM_ALREADY_EXISTS);
-
-        return await this.dao.create(universityId, internalId, name, false, startDate);
+    async createTerm(universityId: string, internalId: string, name: string, startDate: Date, published: boolean): Promise<Term> {
+        return await this.dao.create(universityId, internalId, name, startDate, published);
     }
 
-    async modifyTerm(
-        id: string,
-        internalId?: string,
-        name?: string,
-        published?: boolean,
-        startDate?: Date,
-    ): Promise<Term> {
-        const term = await this.getTerm(id);
-        if (!term) throw new GenericException(ERRORS.NOT_FOUND.TERM);
-
-        const university = await term.getUniversity();
-
-        // check if a term with new internalId already exists
-        if (internalId && internalId != term.internalId) {
-            const termWithRequestedInternalId = await this.dao.findByInternalId(university.id, internalId);
-            if (termWithRequestedInternalId && termWithRequestedInternalId.id != term.id) {
-                throw new GenericException(ERRORS.BAD_REQUEST.TERM_ALREADY_EXISTS);
-            }
-        }
-
-        if (internalId) term.internalId = internalId;
-        if (name) term.name = name;
-        if (published !== undefined) term.published = published;
-        if (startDate) term.startDate = startDate;
-
-        await this.dao.set(term);
-        return term;
+    async modifyTerm(id: string, universityIdFilter: string, internalId?: string, name?: string, startDate?: Date, published?: boolean): Promise<Term> {
+        return await this.dao.modify(id, universityIdFilter, internalId, name, startDate, published);
     }
 
-    async deleteTerm(termId: string): Promise<void> {
-        await this.courseClassService.deleteCourseClassesForTerm(termId);
-        await this.dao.deleteTerm(termId);
+    async deleteTerm(id: string, universityIdFilter: string): Promise<void> {
+        return await this.dao.delete(id, universityIdFilter);
     }
 }

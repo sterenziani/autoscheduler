@@ -757,13 +757,16 @@ export class UniversityController {
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
-        const startDate = validateDate(req.query.startDate);
+        const from = validateDate(req.query.from);
+        const to = validateDate(req.query.to);
         const published = validateBoolean(req.query.published);
 
+        if (from && to && to < from) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FROM_AND_TO));
+
         try {
-            const paginatedTerms: PaginatedCollection<Term> = await this.termService.getTerms(page, limit, filter, startDate, published, universityId);
+            const paginatedTerms: PaginatedCollection<Term> = await this.termService.getTerms(page, limit, filter, from, to, published, universityId);
             res.status(HTTP_STATUS.OK)
-                .links(TermDto.paginatedTermsToLinks(paginatedTerms, getReqPath(req), limit, filter, startDate, published))
+                .links(TermDto.paginatedTermsToLinks(paginatedTerms, getReqPath(req), limit, filter, from, to, published))
                 .send(TermDto.paginatedTermsToDto(paginatedTerms, API_SCOPE.UNIVERSITY));
         } catch (e) {
             next(e);

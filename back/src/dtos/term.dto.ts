@@ -22,16 +22,17 @@ export const paginatedTermsToDto = (paginatedTerms: PaginatedCollection<Term>, s
     return paginatedTerms.collection.map(t => termToDto(t, scope));
 };
 
-export const paginatedTermsToLinks = (paginatedTerms: PaginatedCollection<Term>, basePath: string, limit: number, filter?: string, startDate?: Date, published?: boolean): Record<string, string> => {
-    return getPaginatedLinks(paginatedTerms, paginatedTermsUrlBuilder, basePath, limit, filter, startDate, published);
+export const paginatedTermsToLinks = (paginatedTerms: PaginatedCollection<Term>, basePath: string, limit: number, filter?: string, from?: Date, to?: Date, published?: boolean): Record<string, string> => {
+    return getPaginatedLinks(paginatedTerms, paginatedTermsUrlBuilder, basePath, limit, filter, from, to, published);
 };
 
-const paginatedTermsUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, startDate?: Date, published?: boolean): string => {
+const paginatedTermsUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, from?: Date, to?: Date, published?: boolean): string => {
     const params = {
         page,
         limit,
         filter,
-        startDate: maybeDateToISO(startDate),
+        from: maybeDateToISO(from),
+        to: maybeDateToISO(to),
         published: booleanToString(published)
     };
     return queryParamsStringBuilder(basePath, params);
