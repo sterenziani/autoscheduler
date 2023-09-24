@@ -19,9 +19,14 @@ export const removeSpecialCharacters = (text: string | undefined): string => {
 
 export const cleanText = (text: string): string => {
     return removeSpecialCharacters(text.toLowerCase());
+};
+
+export const cleanMaybeText = (text?: string): string | undefined => {
+    if (text === undefined) return undefined;
+    return cleanText(text);
 }
 
 export const booleanToString = (maybeBoolean?: boolean): string | undefined => {
     if (maybeBoolean === undefined || maybeBoolean === null) return undefined;
     return maybeBoolean ? 'true' : 'false';
-}
+};

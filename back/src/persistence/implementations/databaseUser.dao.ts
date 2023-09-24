@@ -1,6 +1,6 @@
 import { ROLE } from '../../../constants/general.constants';
 import GenericException from '../../../exceptions/generic.exception';
-import { getLastPageFromTotalEntries, simplePaginateCollection } from '../../../helpers/collection.helper';
+import { getLastPageFromCount, simplePaginateCollection } from '../../../helpers/collection.helper';
 import {
     countDocumentsByQuery,
     createDocument,
@@ -69,7 +69,7 @@ export default class DatabaseUserDao extends UserDao {
         const count = await countDocumentsByQuery<UserDocument>(UserModel, query);
 
         // Calculate last page
-        const lastPage = getLastPageFromTotalEntries(count, limit);
+        const lastPage = getLastPageFromCount(count, limit);
 
         // Get paginated array of documents
         const documents = page <= lastPage ? await getPaginatedDocumentsByQuery<UserDocument>(UserModel, query, page, limit, 'email') : [];

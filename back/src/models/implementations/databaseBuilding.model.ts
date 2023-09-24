@@ -1,8 +1,8 @@
-import { ERRORS } from '../../../constants/error.constants';
-import GenericException from '../../../exceptions/generic.exception';
-import { graphDriver, logErrors, parseErrors } from '../../../helpers/persistence/graphPersistence.helper';
-import Building from '../../abstract/building.model';
-import University from '../../abstract/university.model';
+import { ERRORS } from '../../constants/error.constants';
+import GenericException from '../../exceptions/generic.exception';
+import { graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import Building from '../abstract/building.model';
+import University from '../abstract/university.model';
 import DatabaseUniversity from './databaseUniversity.model';
 
 export default class DatabaseBuilding extends Building {

@@ -1,5 +1,4 @@
 import GenericModel from './generic.model';
-import User from './user.model';
 
 export default abstract class PasswordRecoveryToken extends GenericModel {
     // Properties
@@ -18,6 +17,4 @@ export default abstract class PasswordRecoveryToken extends GenericModel {
         const now = new Date();
         return now < this.expirationDate;
     }
-
-    public abstract getUser(): Promise<User>;
 }

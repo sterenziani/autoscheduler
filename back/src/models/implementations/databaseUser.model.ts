@@ -1,7 +1,7 @@
-import User from '../../abstract/user.model';
+import User from '../abstract/user.model';
 import mongoose, { Document, Schema } from 'mongoose';
 import mongooseLeanVirtuals from 'mongoose-lean-virtuals';
-import { ROLE } from '../../../constants/general.constants';
+import { ROLE } from '../../constants/general.constants';
 
 export default class DatabaseUser extends User {
     // For user there really is nothing much to do, user is just a simple get that is dealt with by the persistence service with a unified method verify that is implemented in abstract class

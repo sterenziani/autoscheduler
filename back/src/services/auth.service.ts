@@ -87,15 +87,10 @@ export default class UserAuthService {
         await this.emailService.sendPasswordResetEmail(user, path);
     }
 
-    async getUserFromPasswordRecoveryToken(token: string): Promise<User> {
-        const recoveryToken = await this.passwordRecoveryTokenDao.getById(token);
-        return await recoveryToken.getUser();
-    }
-
-    async usePasswordRecoveryToken(token: string, newPassword: string): Promise<string> {
-        const user = await this.getUserFromPasswordRecoveryToken(token);
-        const updatedUser = await this.userService.modifyUser(user.id, newPassword);
-        this.passwordRecoveryTokenDao.delete(token).catch((_) => {});
+    async usePasswordRecoveryToken(tokenId: string, newPassword: string): Promise<string> {
+        const token = await this.passwordRecoveryTokenDao.getById(tokenId);
+        const updatedUser = await this.userService.modifyUser(token.userId, newPassword);
+        this.passwordRecoveryTokenDao.delete(token.id).catch((_) => {});
         return await this.generateLoginInfo(updatedUser);
     }
 

@@ -48,7 +48,6 @@ class App {
     }
 
     private initializeDatabases() {
-        if (process.env.PERSISTENCE === 'MEMORY') return;
         // Mongo connection
         initializeMongoConnection()
             .then(() => console.log(`[Initialization] Connected to MongoDB`))

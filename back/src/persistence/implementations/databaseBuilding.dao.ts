@@ -1,18 +1,18 @@
-import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
+import { MEMORY_DATABASE } from '../../constants/persistence/memoryPersistence.constants';
 import {
     removeChildFromParent,
-} from '../../../helpers/persistence/memoryPersistence.helper';
-import { paginateCollection, simplePaginateCollection } from '../../../helpers/collection.helper';
-import { cleanText, removeSpecialCharacters } from '../../../helpers/string.helper';
-import Building from '../../../models/abstract/building.model';
-import University from '../../../models/abstract/university.model';
-import BuildingDao from '../../abstract/building.dao';
+} from '../../helpers/persistence/memoryPersistence.helper';
+import { paginateCollection, simplePaginateCollection } from '../../helpers/collection.helper';
+import { cleanText, removeSpecialCharacters } from '../../helpers/string.helper';
+import Building from '../../models/abstract/building.model';
+import University from '../../models/abstract/university.model';
+import BuildingDao from '../abstract/building.dao';
 import { v4 as uuidv4 } from 'uuid';
-import { PaginatedCollection } from '../../../interfaces/paging.interface';
-import DatabaseBuilding from '../../../models/implementations/database/databaseBuilding.model';
-import { graphDriver, parseErrors } from '../../../helpers/persistence/graphPersistence.helper';
-import GenericException from '../../../exceptions/generic.exception';
-import { ERRORS } from '../../../constants/error.constants';
+import { PaginatedCollection } from '../../interfaces/paging.interface';
+import DatabaseBuilding from '../../models/implementations/databaseBuilding.model';
+import { graphDriver, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import GenericException from '../../exceptions/generic.exception';
+import { ERRORS } from '../../constants/error.constants';
 
 export default class DatabaseBuildingDao extends BuildingDao {
     private static instance: BuildingDao;

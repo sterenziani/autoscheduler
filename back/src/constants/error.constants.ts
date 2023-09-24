@@ -181,6 +181,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
     INTERNAL_SERVER_ERROR: {
         GENERAL: { status: HTTP_STATUS.SERVER_ERROR, code: 'INTERNAL_SERVER_ERROR', message: 'Internal Server Error.' },
         DATABASE: { status: HTTP_STATUS.SERVER_ERROR, code: 'DATABASE_ERROR', message: 'Unknown database error.' },
+        EMPTY_NODE: { status: HTTP_STATUS.SERVER_ERROR, code: 'EMPTY_NODE', message: 'Graph database returned an unexpected empty node.'},
         DATABASE_CONNECTION: {
             status: HTTP_STATUS.SERVER_ERROR,
             code: 'DATABASE_CONNECTION',

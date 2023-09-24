@@ -5,9 +5,13 @@ export const stringInEnum = <E extends Object>(enumObject: E, value?: string) =>
     return Object.values(enumObject).includes(value);
 };
 
-export const getLastPageFromTotalEntries = (totalEntries: number, limit: number): number => {
-    return Math.max(1, Math.ceil(totalEntries / limit));
+export const getSkipFromPageLimit = (page: number, limit: number): number => {
+    return limit * (page - 1);
 }
+
+export const getLastPageFromCount = (count: number, limit: number): number => {
+    return Math.max(1, Math.ceil(count / limit));
+};
 
 // Simpler version of paginateCollection for database daos
 export const simplePaginateCollection = <T>(
@@ -22,7 +26,7 @@ export const simplePaginateCollection = <T>(
         last: lastPage
     }
     return {collection, pagingInfo};
-}
+};
 
 // Sorts collection and applies limit & offset
 export const paginateCollection = <T>(
@@ -53,9 +57,9 @@ export const paginateCollection = <T>(
 // Removes duplicated from a collection
 export const removeDuplicates = <T>(collection: T[]): T[] => {
     return collection.filter((value, index) => collection.indexOf(value) === index);
-}
+};
 
 export const valuesIntersect = <T>(c1: T[], c2: T[]): boolean => {
     const intersected = c1.find((value) => c2.includes(value));
     return intersected !== undefined;
-}
+};
