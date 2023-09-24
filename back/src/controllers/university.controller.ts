@@ -195,8 +195,6 @@ export class UniversityController {
         const optional = validateBoolean(req.query.optional);
 
         try {
-            // TODO: Should i use programService when the return value is a Course? I can understand using program service when adding relationships, cuz those return void
-            // TODO: but i feel like getters should still be handled by courseService
             const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCourses(page, limit, filter, programId, optional, universityId);
             res.status(HTTP_STATUS.OK)
                 .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, optional))
@@ -452,8 +450,6 @@ export class UniversityController {
         const termId = validateString(req.query.termId);
 
         try {
-            // TODO: Should i use courseService when the return value is a CourseClass? I can understand using course service when adding relationships, cuz those return void
-            // TODO: but i feel like getters should still be handled by courseClassService
             const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
             res.status(HTTP_STATUS.OK)
                 .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, termId))
@@ -806,7 +802,6 @@ export class UniversityController {
         }
     };
 
-    // TODO: Maybe change startDate for from and to date
     public modifyUniversityTerm: RequestHandler = async (req, res, next) => {
         const universityId = req.user.id;
         const termId = req.params.termId;

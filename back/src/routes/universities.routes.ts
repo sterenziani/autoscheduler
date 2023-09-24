@@ -7,7 +7,7 @@ import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
 
 export class UniversitiesRoutes {
-    public router: Router = Router();
+    public router: Router = Router({mergeParams: true});
     public controller: UniversitiesController = new UniversitiesController();
 
     constructor() {

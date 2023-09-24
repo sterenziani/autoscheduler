@@ -9,7 +9,7 @@ import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Course from '../models/abstract/course.model';
 import CourseClass from '../models/abstract/courseClass.model';
-import {ISchedule} from '../interfaces/schedule.interface';
+import {ISchedule, IScheduleWithScore} from '../interfaces/schedule.interface';
 import Lecture from '../models/abstract/lecture.model';
 import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
@@ -42,13 +42,14 @@ export default class ScheduleService {
 
     async getSchedules(
         studentId: string,
+        universityId: string,
         programId: string,
         termId: string,
         targetHours: number,
         reduceDays: boolean,
         prioritizeUnlocks: boolean,
         unavailableTimeSlots: TimeRange[]
-    ): Promise<{schedule:ISchedule, score:number}[]> {
+    ): Promise<IScheduleWithScore[]> {
         const student = await this.studentService.getStudent(studentId);
         const program = await this.programService.getProgram(programId);
         const term = await this.termService.getTerm(termId);

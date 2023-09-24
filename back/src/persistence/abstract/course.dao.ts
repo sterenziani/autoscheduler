@@ -19,6 +19,8 @@ export default abstract class CourseDao extends GenericDao<Course> {
 
     // Abstract Methods
     public abstract findPaginatedRequiredCourses(page: number, limit: number, id: string, textSearch?: string, programId?: string, universityId?: string): Promise<PaginatedCollection<Course>>;
+    public abstract findPaginatedRemainingCourses(page: number, limit: number, studentId: string, programId: string, universityId: string, textSearch?: string, optional?: boolean): Promise<PaginatedCollection<Course>>;
+    public abstract findPaginatedCompletedCourses(page: number, limit: number, studentId: string, textSearch?: string, optional?: boolean, programId?: string, universityId?: string): Promise<PaginatedCollection<Course>>;
 
     // Public Methods Override
     public override async getById(id: string, universityIdFilter?: string): Promise<Course> {

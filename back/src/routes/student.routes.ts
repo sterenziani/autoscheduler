@@ -67,6 +67,15 @@ export class StudentRoutes {
             this.controller.getStudentUniversityProgram
         );
 
+        // /student/university/programs/:programId/remaining-courses routes
+        this.router.get(
+            '/university/programs/:programId/remaining-courses',
+            pagingMiddleware,
+            authUsersOnlyMiddleware,
+            studentsOnlyMiddleware,
+            this.controller.getStudentUniversityProgramRemainingCourses
+        );
+
         // /student/university/programs/:programId/courses routes
         this.router.get(
             '/university/programs/:programId/courses',
@@ -238,13 +247,13 @@ export class StudentRoutes {
             this.controller.modifyStudentProgram
         );
 
-        // /student/remaining-courses routes
+        // /student/program/remaining-courses routes
         this.router.get(
-            '/remaining-courses',
+            '/program/remaining-courses',
             pagingMiddleware,
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
-            this.controller.getStudentRemainingCourses
+            this.controller.getStudentProgramRemainingCourses
         );
 
         // /student/completed-courses routes

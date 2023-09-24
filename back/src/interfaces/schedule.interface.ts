@@ -10,3 +10,8 @@ export interface ISchedule {
     earliestLecture: Time;
     latestLecture: Time;
 }
+
+export interface IScheduleWithScore {
+    schedule: ISchedule,
+    score: number
+}

@@ -6,7 +6,7 @@ import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import studentsOnlyMiddleware from '../middlewares/studentsOnly.middleware';
 import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
 
-export class StudentRoutes {
+export class StudentsRoutes {
     public router: Router = Router({mergeParams: true});
     public controller: StudentsController = new StudentsController();
 

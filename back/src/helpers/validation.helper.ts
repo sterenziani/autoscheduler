@@ -224,12 +224,13 @@ export const isValidName = (name: string): boolean => {
 }
 
 /**
- * Checks there is at least one time range and time ranges are not overlapping (things like ["0-10:00-20:00", "0-11:00-19:00"] or ["0-10:00-15:00", "0-14:00-18:00"])
+ * Checks time ranges are not overlapping (things like ["0-10:00-20:00", "0-11:00-19:00"] or ["0-10:00-15:00", "0-14:00-18:00"])
  * Expects times to be sorted already
- * @param sortedTimes  sorted TimeRange array
+ * @param sortedTimes   sorted TimeRange array
+ * @param allowEmpty    (Default: false) What it returns if array is empty
  */
-export const isValidTimes = (sortedTimes: TimeRange[]): boolean => {
-    if (sortedTimes.length === 0) return false;
+export const isValidTimes = (sortedTimes: TimeRange[], allowEmpty = false): boolean => {
+    if (sortedTimes.length === 0) return allowEmpty;
     if (sortedTimes.length === 1) return true;
     for (let i = 0; i < sortedTimes.length - 1; i++) {
         const current = sortedTimes[i];

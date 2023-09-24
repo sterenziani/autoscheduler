@@ -1,4 +1,5 @@
 import { TRANSLATIONS } from '../constants/email.constants';
+import Student from '../models/abstract/student.model';
 import University from '../models/abstract/university.model';
 import User from '../models/abstract/user.model';
 import nodemailer from 'nodemailer';
@@ -76,6 +77,18 @@ export default class EmailService {
         }
     }
 
+    async sendStudentWelcomeEmail(userEmail: string, userLocale: string, student: Student): Promise<void> {
+        const template = "welcomeStudent";
+        const emailLanguage = this.getAvailableLocale(userLocale);
+        const subject = TRANSLATIONS.resources[emailLanguage].translation.welcome;
+
+        const context = {
+            studentName: student.name,
+            locale: emailLanguage
+        };
+        await this.sendEmailTemplate(userEmail, subject, template, context);
+    }
+
     async sendUniversityWelcomeEmail(userEmail: string, userLocale: string, university: University): Promise<void> {
         const template = "welcome";
         const emailLanguage = this.getAvailableLocale(userLocale);
@@ -86,7 +99,7 @@ export default class EmailService {
             universityName: university.name,
             locale: emailLanguage
         };
-        this.sendEmailTemplate(userEmail, subject, template, context);
+        await this.sendEmailTemplate(userEmail, subject, template, context);
     }
 
     async sendUniversityVerifiedEmail(user: User, university: University): Promise<void> {
@@ -98,7 +111,7 @@ export default class EmailService {
             universityName: university.name,
             locale: emailLanguage
         };
-        this.sendEmailTemplate(user.email, subject, template, context);
+        await this.sendEmailTemplate(user.email, subject, template, context);
     }
 
     async sendPasswordResetEmail(user: User, internalResetPath: string): Promise<void> {
@@ -107,10 +120,10 @@ export default class EmailService {
         const subject = TRANSLATIONS.resources[emailLanguage].translation.resetYourPasswordSubject;
 
         const context = { link: process.env.FRONT_URL+"/"+internalResetPath, locale: emailLanguage };
-        this.sendEmailTemplate(user.email, subject, template, context);
+        await this.sendEmailTemplate(user.email, subject, template, context);
     }
 
-    private getAvailableLocale(locale: string|undefined){
-        return (locale && TRANSLATIONS.resources[locale])? locale:TRANSLATIONS.lng
+    private getAvailableLocale(locale?: string): string {
+        return (locale && TRANSLATIONS.resources[locale]) ? locale : TRANSLATIONS.lng as string;
     }
 }

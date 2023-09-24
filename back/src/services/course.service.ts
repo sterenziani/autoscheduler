@@ -50,4 +50,12 @@ export default class CourseService {
     async getRequiredCourses(page: number, limit: number, id: string, textSearch?: string, programId?: string, universityId?: string): Promise<PaginatedCollection<Course>> {
         return await this.dao.findPaginatedRequiredCourses(page, limit, id, textSearch, programId, universityId);
     }
+
+    async getRemainingCourses(page: number, limit: number, studentId: string, programId: string, universityId: string, textSearch?: string, optional?: boolean): Promise<PaginatedCollection<Course>> {
+        return await this.dao.findPaginatedRemainingCourses(page, limit, studentId, programId, universityId, textSearch, optional);
+    }
+
+    async getCompletedCourses(page: number, limit: number, studentId: string, textSearch?: string, optional?: boolean, programId?: string, universityId?: string): Promise<PaginatedCollection<Course>> {
+        return await this.dao.findPaginatedCompletedCourses(page, limit, studentId, textSearch, optional, programId, universityId);
+    }
 }

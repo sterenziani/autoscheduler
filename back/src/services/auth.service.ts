@@ -82,7 +82,7 @@ export default class UserAuthService {
 
         // TODO: Define base URL
         const path = "reset/"+token.id;
-        this.emailService.sendPasswordResetEmail(user, path);
+        await this.emailService.sendPasswordResetEmail(user, path);
     }
 
     async getUserFromPasswordRecoveryToken(token: string): Promise<User> {
