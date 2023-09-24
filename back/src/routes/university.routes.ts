@@ -8,7 +8,7 @@ import newUsersOnlyMiddleware from '../middlewares/newUsersOnly.middleware';
 import pagingMiddleware from '../middlewares/paging.middleware';
 
 export class UniversityRoutes {
-    public router: Router = Router();
+    public router: Router = Router({mergeParams: true});
     public controller: UniversityController = new UniversityController();
 
     constructor() {

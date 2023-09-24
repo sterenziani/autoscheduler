@@ -30,15 +30,15 @@ export class StudentRoutes {
             '/',
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
-            this.controller.getActiveStudent
+            this.controller.getStudent
         );
-        this.router.get(
+        this.router.post(
             '/',
             authUsersOnlyMiddleware,
             newUsersOnlyMiddleware,
             this.controller.createStudentForExistingUser
         );
-        this.router.get(
+        this.router.put(
             '/',
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
@@ -52,8 +52,6 @@ export class StudentRoutes {
             studentsOnlyMiddleware,
             this.controller.getStudentUniversity
         );
-
-
 
         // /student/university/programs routes
         this.router.get(
@@ -88,8 +86,6 @@ export class StudentRoutes {
             this.controller.getStudentUniversityProgramCourseRequiredCourses
         );
 
-
-
         // /student/university/courses routes
         this.router.get(
             '/university/courses',
@@ -114,7 +110,7 @@ export class StudentRoutes {
             this.controller.getStudentUniversityCourseCourseClasses
         );
         this.router.get(
-            '/university/courses/:courseId/course-class',
+            '/university/courses/:courseId/course-classes/:courseClassId',  // Duplicate
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.getStudentUniversityCourseCourseClass
@@ -128,8 +124,6 @@ export class StudentRoutes {
             studentsOnlyMiddleware,
             this.controller.getStudentUniversityCourseRequiredCourses
         );
-
-
 
         // /student/university/buildings routes
         this.router.get(
@@ -158,7 +152,6 @@ export class StudentRoutes {
         // /student/university/buildings/:buildingId/distances routes
         this.router.get(
             '/university/buildings/:buildingId/distances',
-            pagingMiddleware,
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.getStudentUniversityBuildingDistances
@@ -170,8 +163,6 @@ export class StudentRoutes {
             this.controller.getStudentUniversityBuildingDistance
         );
 
-
-
         // /student/university/terms routes
         this.router.get(
             '/university/terms',
@@ -181,7 +172,7 @@ export class StudentRoutes {
             this.controller.getStudentUniversityTerms
         );
         this.router.get(
-            '/university/terms:termId',
+            '/university/terms/:termId',
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.getStudentUniversityTerm
@@ -195,8 +186,6 @@ export class StudentRoutes {
             studentsOnlyMiddleware,
             this.controller.getStudentUniversityTermCourseClasses
         );
-
-
 
         // /student/university/course-classes routes (Analyze)
         this.router.get(
@@ -222,26 +211,19 @@ export class StudentRoutes {
             this.controller.getStudentUniversityCourseClassLectures
         );
         this.router.get(
-            '/university/course-classes/:courseClassId/lecture/:lectureId',
+            '/university/course-classes/:courseClassId/lectures/:lectureId',
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.getStudentUniversityCourseClassLecture
         );
 
-
-
         // /student/university/lectures routes (Analyze)
         this.router.get(
-            '/university/lectures/:lectureId',
+            '/university/lectures/:lectureId',                          // Duplicate
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
-            this.controller.getStudentUniversityLecture     // Duplicate
+            this.controller.getStudentUniversityLecture
         );
-
-
-
-
-
 
         // /student/program routes
         this.router.get(
@@ -251,18 +233,13 @@ export class StudentRoutes {
             this.controller.getStudentProgram
         );
         this.router.put(
-            '/program/:programId',
+            '/program',
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
             this.controller.modifyStudentProgram
         );
 
-
-
-
-
-
-        // /student/courses routes
+        // /student/remaining-courses routes
         this.router.get(
             '/remaining-courses',
             pagingMiddleware,
@@ -270,6 +247,8 @@ export class StudentRoutes {
             studentsOnlyMiddleware,
             this.controller.getStudentRemainingCourses
         );
+
+        // /student/completed-courses routes
         this.router.get(
             '/completed-courses',
             pagingMiddleware,
@@ -283,6 +262,14 @@ export class StudentRoutes {
             studentsOnlyMiddleware,
             this.controller.addStudentCompletedCourse
         );
+        this.router.delete(
+            '/completed-courses/:courseId',
+            authUsersOnlyMiddleware,
+            studentsOnlyMiddleware,
+            this.controller.removeStudentCompletedCourse
+        );
+
+        // /student/completed-courses-collection routes
         this.router.post(
             '/completed-courses-collection',
             authUsersOnlyMiddleware,
@@ -295,24 +282,13 @@ export class StudentRoutes {
             studentsOnlyMiddleware,
             this.controller.bulkReplaceStudentCompletedCourses
         );
-        this.router.delete(
-            '/completed-courses/:courseId',
-            authUsersOnlyMiddleware,
-            studentsOnlyMiddleware,
-            this.controller.addStudentCompletedCourse
-        );
-
-
-
-
-
 
         // /student/schedules routes
         this.router.get(
             '/schedules',
             authUsersOnlyMiddleware,
             studentsOnlyMiddleware,
-            this.controller.getSchedules
+            this.controller.getStudentSchedules
         );
     }
 }

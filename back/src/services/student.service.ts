@@ -16,9 +16,9 @@ import { IStudentInfo } from '../interfaces/student.interface';
 
 export default class StudentService {
     private static instance: StudentService;
-    private courseService!: CourseService;
-    private programService!: ProgramService;
-    private userService!: UserService;
+    // private courseService!: CourseService;
+    // private programService!: ProgramService;
+    // private userService!: UserService;
 
     private dao: StudentDao;
 
@@ -34,15 +34,15 @@ export default class StudentService {
     }
 
     init() {
-        this.programService = ProgramService.getInstance();
-        this.userService = UserService.getInstance();
-        this.courseService = CourseService.getInstance();
+        // this.programService = ProgramService.getInstance();
+        // this.userService = UserService.getInstance();
+        // this.courseService = CourseService.getInstance();
     }
 
     // public methods
 
-    async getStudent(id: string): Promise<Student> {
-        return await this.dao.getById(id);
+    async getStudent(id: string, universityIdFilter?: string): Promise<Student> {
+        return await this.dao.getById(id, universityIdFilter);
     }
 
     async getStudentInfo(id: string): Promise<IStudentInfo> {
