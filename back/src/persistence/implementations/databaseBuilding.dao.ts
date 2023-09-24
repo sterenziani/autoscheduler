@@ -1,11 +1,6 @@
-import { MEMORY_DATABASE } from '../../constants/persistence/memoryPersistence.constants';
-import {
-    removeChildFromParent,
-} from '../../helpers/persistence/memoryPersistence.helper';
-import { paginateCollection, simplePaginateCollection } from '../../helpers/collection.helper';
+import { simplePaginateCollection } from '../../helpers/collection.helper';
 import { cleanText, removeSpecialCharacters } from '../../helpers/string.helper';
 import Building from '../../models/abstract/building.model';
-import University from '../../models/abstract/university.model';
 import BuildingDao from '../abstract/building.dao';
 import { v4 as uuidv4 } from 'uuid';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
@@ -25,7 +20,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
     };
 
     // Abstract Methods Implementations
-    public async init(): Promise<void> {
+    async init(): Promise<void> {
         const session = graphDriver.session();
         try {
             const constraintPromises: Promise<any>[] = [];
@@ -33,7 +28,10 @@ export default class DatabaseBuildingDao extends BuildingDao {
                 'CREATE CONSTRAINT building_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.id IS UNIQUE'
             ));
             constraintPromises.push(session.run(
-                'CREATE CONSTRAINT distance_to_unique_constraint IF NOT EXISTS FOR ()-[r:DISTANCE_TO]-() REQUIRE r.id IS REL UNIQUE'
+                'CREATE CONSTRAINT building_internal_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.relId IS UNIQUE'
+            ));
+            constraintPromises.push(session.run(
+                'CREATE CONSTRAINT distance_to_unique_constraint IF NOT EXISTS FOR ()-[r:DISTANCE_TO]-() REQUIRE r.relId IS REL UNIQUE'
             ));
             await Promise.allSettled(constraintPromises);
         } catch (err) {
@@ -43,23 +41,29 @@ export default class DatabaseBuildingDao extends BuildingDao {
         }
     }
     
-    public async create(universityId: string, internalId: string, name: string): Promise<Building> {
-        const cleanName = removeSpecialCharacters(name);
+    async create(universityId: string, internalId: string, name: string): Promise<Building> {
+        // Generate a new id
         const id = uuidv4();
 
         const session = graphDriver.session();
         try {
+            const relId = `BU${universityId}${internalId}`;
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (b: Building {id: $id, internalId: $internalId, name: $name})-[:BELONGS_TO {id: $relId}]->(u) RETURN b',
-                {universityId, id, internalId, name: cleanName, relId: `BU${universityId}${internalId}`}
+                'MATCH (u: University {id: $universityId}) CREATE (b: Building {id: $id, internalId: $internalId, name: $name, relId: $relId})-[:BELONGS_TO {relId: $relId}]->(u) RETURN b',
+                {universityId, id, internalId, name, relId}
             );
-            if (result.summary.counters.updates().nodesCreated == 0) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
+            const node = result.records[0]?.get(0)?.properties;
+            if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
+            return this.nodeToBuilding(node);
         } catch (err) {
-            parseErrors(err, '[BuildingDao:create]', ERRORS.BAD_REQUEST.BUILDING_ALREADY_EXISTS);
+            throw parseErrors(err, '[BuildingDao:create]', ERRORS.BAD_REQUEST.BUILDING_ALREADY_EXISTS);
         } finally {
             await session.close();
         }
-        return new DatabaseBuilding(id, internalId, cleanName);
+    }
+
+    async modify(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Building> {
+        
     }
 
     public async findById(id: string): Promise<Building | undefined> {
@@ -189,5 +193,9 @@ export default class DatabaseBuildingDao extends BuildingDao {
         } finally {
             await session.close();
         }
+    }
+
+    private nodeToBuilding(node: any): DatabaseBuilding {
+        return new DatabaseBuilding(node.id, node.internalId, node.name);
     }
 }

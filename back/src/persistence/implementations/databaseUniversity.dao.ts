@@ -1,11 +1,11 @@
-import University from '../../../models/abstract/university.model';
-import DatabaseUniversity from '../../../models/implementations/database/databaseUniversity.model';
-import UniversityDao from '../../abstract/university.dao';
-import { PaginatedCollection } from '../../../interfaces/paging.interface';
-import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../../helpers/collection.helper';
-import { buildQuery, getRegex, graphDriver, logErrors, parseErrors } from '../../../helpers/persistence/graphPersistence.helper';
-import GenericException from '../../../exceptions/generic.exception';
-import { ERRORS } from '../../../constants/error.constants';
+import University from '../../models/abstract/university.model';
+import DatabaseUniversity from '../../models/implementations/databaseUniversity.model';
+import UniversityDao from '../abstract/university.dao';
+import { PaginatedCollection } from '../../interfaces/paging.interface';
+import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
+import { buildQuery, getRegex, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import GenericException from '../../exceptions/generic.exception';
+import { ERRORS } from '../../constants/error.constants';
 
 export default class DatabaseUniversityDao extends UniversityDao {
     private static instance: UniversityDao;
@@ -82,7 +82,7 @@ export default class DatabaseUniversityDao extends UniversityDao {
         throw new Error('Not implemented');
     }
 
-    public async findById(id: string): Promise<University | undefined> {
+    async findById(id: string): Promise<University | undefined> {
         const session = graphDriver.session();
         try {
             const result = await session.run(
@@ -100,7 +100,7 @@ export default class DatabaseUniversityDao extends UniversityDao {
         }
     }
 
-    public async findPaginated(page: number, limit: number, textSearch?: string, verified?: boolean): Promise<PaginatedCollection<University>> {
+    async findPaginated(page: number, limit: number, textSearch?: string, verified?: boolean): Promise<PaginatedCollection<University>> {
         // Initialize useful variables
         const collection: University[] = [];
         let lastPage = 1;

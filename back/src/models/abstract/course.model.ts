@@ -1,7 +1,5 @@
 import CourseClass from './courseClass.model';
 import GenericModel from './generic.model';
-import University from './university.model';
-import Program from './program.model';
 
 export default abstract class Course extends GenericModel {
     // Properties
@@ -16,11 +14,7 @@ export default abstract class Course extends GenericModel {
     }
 
     // Methods
-    public abstract setRequiredCourse(programId: string, courseId: string): Promise<void>;
-    public abstract setRequiredCourses(requiredCourses: { [programId: string]: string[] }): Promise<void>;
-    public abstract getProgramsWithRequiredCourses(): Promise<Program[]>;
     public abstract getRequiredCoursesForProgram(programId: string): Promise<Course[]>;
     public abstract getIndirectCorrelatives(programId: string): Promise<Course[]>;
     public abstract getCourseClasses(termId: string): Promise<CourseClass[]>;
-    public abstract getUniversity(): Promise<University>;
 }

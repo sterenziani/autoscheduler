@@ -1,6 +1,6 @@
-import { ROLE } from '../../../constants/general.constants';
-import GenericException from '../../../exceptions/generic.exception';
-import { getLastPageFromCount, simplePaginateCollection } from '../../../helpers/collection.helper';
+import { ROLE } from '../../constants/general.constants';
+import GenericException from '../../exceptions/generic.exception';
+import { getLastPageFromCount, simplePaginateCollection } from '../../helpers/collection.helper';
 import {
     countDocumentsByQuery,
     createDocument,
@@ -9,11 +9,11 @@ import {
     getDocumentByQuery,
     getPaginatedDocumentsByQuery,
     updateDocument,
-} from '../../../helpers/persistence/mongoPersistence.helper';
-import { PaginatedCollection } from '../../../interfaces/paging.interface';
-import User from '../../../models/abstract/user.model';
-import DatabaseUser, { UserDocument, UserModel } from '../../../models/implementations/database/databaseUser.model';
-import UserDao from '../../abstract/user.dao';
+} from '../../helpers/persistence/mongoPersistence.helper';
+import { PaginatedCollection } from '../../interfaces/paging.interface';
+import User from '../../models/abstract/user.model';
+import DatabaseUser, { UserDocument, UserModel } from '../../models/implementations/databaseUser.model';
+import UserDao from '../abstract/user.dao';
 import { FilterQuery, UpdateQuery } from 'mongoose';
 
 // TODO: see if transactions matter

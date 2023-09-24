@@ -1,8 +1,8 @@
-import { createDocument, deleteDocuments, getDocument } from '../../../helpers/persistence/mongoPersistence.helper';
-import { PaginatedCollection } from '../../../interfaces/paging.interface';
-import PasswordRecoveryToken from '../../../models/abstract/passwordRecoveryToken.model';
-import DatabasePasswordRecoveryToken, { PasswordRecoveryTokenDocument, PasswordRecoveryTokenModel } from '../../../models/implementations/database/databasePasswordRecoveryToken.model';
-import PasswordRecoveryTokenDao from '../../abstract/passwordRecoveryToken.dao';
+import { createDocument, deleteDocuments, getDocument } from '../../helpers/persistence/mongoPersistence.helper';
+import { PaginatedCollection } from '../../interfaces/paging.interface';
+import PasswordRecoveryToken from '../../models/abstract/passwordRecoveryToken.model';
+import DatabasePasswordRecoveryToken, { PasswordRecoveryTokenDocument, PasswordRecoveryTokenModel } from '../../models/implementations/databasePasswordRecoveryToken.model';
+import PasswordRecoveryTokenDao from '../abstract/passwordRecoveryToken.dao';
 
 export default class DatabasePasswordRecoveryTokenDao extends PasswordRecoveryTokenDao {
     private static instance: PasswordRecoveryTokenDao;

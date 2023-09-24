@@ -271,7 +271,7 @@ export default class ScheduleService {
                         const b1 = await l1.getBuilding();
                         const b2 = await l2.getBuilding();
                         if(b1 && b2 && b1.id != b2.id) {
-                            const distance = await b1.getDistanceInMinutesTo(b2.id);
+                            const distance = await b1.getDistanceInMinutesTo(b2);
                             if(gap < (distance?distance:0)) return false;
                         }
                     }
