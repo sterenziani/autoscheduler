@@ -154,6 +154,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         TERM: { status: HTTP_STATUS.NOT_FOUND, code: 'TERM_NOT_FOUND', message: 'Term not found.' },
         COURSE: { status: HTTP_STATUS.NOT_FOUND, code: 'COURSE_NOT_FOUND', message: 'Course not found.' },
         BUILDING: { status: HTTP_STATUS.NOT_FOUND, code: 'BUILDING_NOT_FOUND', message: 'Building not found.' },
+        BUILDING_DISTANCE: { status: HTTP_STATUS.NOT_FOUND, code: 'BUILDING_DISTANCE_NOT_FOUND', message: 'Building distance not found.' },
         COURSE_CLASS: {
             status: HTTP_STATUS.NOT_FOUND,
             code: 'COURSE_CLASS_NOT_FOUND',
