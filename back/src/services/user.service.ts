@@ -38,14 +38,14 @@ export default class UserService {
         return await this.dao.getByEmail(email);
     }
 
-    async createUser(email: string, password: string, role: ROLE, locale: string): Promise<User> {
+    async createUser(email: string, password: string, locale: string, role: ROLE): Promise<User> {
         const hashedPassword = hashPassword(password);
-        return await this.dao.create(email, hashedPassword, role, locale);
+        return await this.dao.create(email, hashedPassword, locale, role);
     }
 
-    async modifyUser(userId: string, password?: string, locale?: string, email?: string, role?: ROLE): Promise<User> {
+    async modifyUser(userId: string, email?: string, password?: string, locale?: string, role?: ROLE): Promise<User> {
         const hashedPassword = password ? hashPassword(password) : undefined;
-        return await this.dao.modify(userId, hashedPassword, locale, email, role);
+        return await this.dao.modify(userId, email, hashedPassword, locale, role);
     }
 
     async deleteUser(userId: string): Promise<void> {

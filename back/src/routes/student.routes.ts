@@ -3,7 +3,6 @@ import { urlencoded } from 'body-parser';
 import { StudentController } from '../controllers/student.controller';
 import cors from 'cors';
 import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
-import newUsersOnlyMiddleware from '../middlewares/newUsersOnly.middleware';
 import studentsOnlyMiddleware from '../middlewares/studentsOnly.middleware';
 import pagingMiddleware from '../middlewares/paging.middleware';
 
@@ -33,9 +32,7 @@ export class StudentRoutes {
         );
         this.router.post(
             '/',
-            authUsersOnlyMiddleware,
-            newUsersOnlyMiddleware,
-            this.controller.createStudentForExistingUser
+            this.controller.createStudent
         );
         this.router.put(
             '/',

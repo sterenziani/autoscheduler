@@ -4,7 +4,6 @@ import { UniversityController } from '../controllers/university.controller';
 import cors from 'cors';
 import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
 import universitiesOnlyMiddleware from '../middlewares/universitiesOnly.middleware';
-import newUsersOnlyMiddleware from '../middlewares/newUsersOnly.middleware';
 import pagingMiddleware from '../middlewares/paging.middleware';
 
 export class UniversityRoutes {
@@ -33,9 +32,7 @@ export class UniversityRoutes {
         );
         this.router.post(
             '/',
-            authUsersOnlyMiddleware,
-            newUsersOnlyMiddleware,
-            this.controller.createUniversityForExistingUser
+            this.controller.createUniversity
         );
         this.router.put(
             '/',

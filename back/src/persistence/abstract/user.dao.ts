@@ -12,8 +12,8 @@ export default abstract class UserDao extends GenericDao<User> {
     }
 
     // Abstract Methods Signature Override
-    public abstract create(email: string, password: string, role: ROLE, locale: string): Promise<User>;
-    public abstract modify(userId: string, password?: string, locale?: string, email?: string, role?: ROLE): Promise<User>;
+    public abstract create(email: string, password: string, locale: string, role: ROLE): Promise<User>;
+    public abstract modify(userId: string, email?: string, password?: string, locale?: string, role?: ROLE): Promise<User>;
     
     public abstract findPaginated(page: number, limit: number, textSearch?: string, role?: ROLE): Promise<PaginatedCollection<User>>;
 

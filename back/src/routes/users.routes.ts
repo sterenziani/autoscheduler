@@ -23,7 +23,7 @@ export class UsersRoutes {
         this.router.use(cors());
         this.router.get('/', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.getUsers);
         this.router.get('/:userId', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.getUser);
-        this.router.post('/', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.createUser);
+        this.router.post('/', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.createAdminUser);
         this.router.put('/:userId', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.modifyUser);
         this.router.delete('/:userId', authUsersOnlyMiddleware, adminOnlyMiddleware, this.controller.deleteUser);
     }

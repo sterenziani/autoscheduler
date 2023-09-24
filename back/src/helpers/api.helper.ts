@@ -5,6 +5,6 @@ export const getScope = (user: User): API_SCOPE => {
     switch (user.role) {
         case ROLE.STUDENT: return API_SCOPE.STUDENT;
         case ROLE.UNIVERSITY: return API_SCOPE.UNIVERSITY;
-        default: return API_SCOPE.ADMIN;
+        default: return API_SCOPE.ROOT;
     }
 }

@@ -2,7 +2,7 @@ import { DEFAULT_AUTH_TOKEN_EXPIRE_TIME } from '../constants/auth.constants';
 import { IUserInfo } from '../interfaces/auth.interface';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
-import { jwtSign, jwtVerify, validatePassword } from '../helpers/auth.helper';
+import { clearMappedStudentProgram, getMappedStudentProgram, jwtSign, jwtVerify, validatePassword } from '../helpers/auth.helper';
 import httpException from '../exceptions/http.exception';
 import UserService from './user.service';
 import User from '../models/abstract/user.model';
@@ -10,13 +10,11 @@ import PasswordRecoveryTokenDao from '../persistence/abstract/passwordRecoveryTo
 import PasswordRecoveryTokenDaoFactory from '../factories/passwordRecoveryTokenDao.factory';
 import EmailService from './email.service';
 import StudentService from './student.service';
-import UniversityService from './university.service';
 import { ROLE } from '../constants/general.constants';
 
 export default class UserAuthService {
     private static instance: UserAuthService;
     private userService!: UserService;
-    private universityService!: UniversityService;
     private studentService!: StudentService;
     private emailService!: EmailService;
     private passwordRecoveryTokenDao: PasswordRecoveryTokenDao;
@@ -40,7 +38,6 @@ export default class UserAuthService {
 
     init() {
         this.userService = UserService.getInstance();
-        this.universityService = UniversityService.getInstance();
         this.studentService = StudentService.getInstance();
         this.emailService = EmailService.getInstance();
     }
@@ -69,7 +66,12 @@ export default class UserAuthService {
     }
 
     verifyToken(token: string): IUserInfo {
-        return jwtVerify(this.jwtPublicKey, token);
+        const userInfo = jwtVerify(this.jwtPublicKey, token);
+        if (userInfo.role === ROLE.STUDENT) {
+            const maybeMappedProgramId = getMappedStudentProgram(userInfo.id);
+            if (maybeMappedProgramId !== undefined) userInfo.programId = maybeMappedProgramId;
+        }
+        return userInfo;
     }
 
     async createPasswordRecoveryToken(email: string): Promise<void> {
@@ -110,6 +112,7 @@ export default class UserAuthService {
             userInfo.universityId = studentInfo.universityId;
             userInfo.studentId = user.id;
             userInfo.programId = studentInfo.programId;
+            clearMappedStudentProgram(user.id);
         } else if (user.role == ROLE.UNIVERSITY) {
             userInfo.universityId = user.id;
         }

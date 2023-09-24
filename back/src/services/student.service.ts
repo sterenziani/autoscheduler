@@ -6,6 +6,7 @@ import UserService from './user.service';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import { IStudentInfo } from '../interfaces/student.interface';
 import EmailService from './email.service';
+import { mapStudentProgram } from '../helpers/auth.helper';
 
 export default class StudentService {
     private static instance: StudentService;
@@ -40,28 +41,21 @@ export default class StudentService {
         return await this.dao.findPaginated(page, limit, textSearch, universityId);
     }
 
-    async createStudentExistingUser(userId: string, userEmail: string, userLocale: string, universityId: string, programId: string, name: string, updateRole = true): Promise<Student> {
+    async createStudent(email: string, password: string, locale: string, universityId: string, programId: string, name: string): Promise<Student> {
+        // create user
+        const user = await this.userService.createUser(email, password, locale, ROLE.STUDENT);
         // create student
-        const student = await this.dao.create(userId, universityId, programId, name);
-        // update user role (if neccesary)
-        if (updateRole) {
-            await this.userService.modifyUser(userId, undefined, undefined, undefined, ROLE.STUDENT);
-        }
+        const student = await this.dao.create(user.id, universityId, programId, name);
         // send welcome email
-        this.emailService.sendStudentWelcomeEmail(userEmail, userLocale, student)
+        this.emailService.sendStudentWelcomeEmail(user.email, user.locale, student)
             .catch((err) => console.log(`[StudentService:createStudent] Failed to send student welcome email. ${JSON.stringify(err)}`));
         return student;
     }
 
-    async createStudent(email: string, password: string, locale: string, universityId: string, programId: string, name: string): Promise<Student> {
-        // create user
-        const user = await this.userService.createUser(email, password, ROLE.STUDENT, locale);
-        // create student
-        return await this.createStudentExistingUser(user.id, user.email, user.locale, universityId, programId, name, false);
-    }
-
     async modifyStudent(id: string, programId?: string, name?: string): Promise<Student> {
-        return await this.dao.modify(id, programId, name);
+        const student = await this.dao.modify(id, programId, name);
+        if (programId !== undefined) mapStudentProgram(id, programId);
+        return student;
     }
 
     async getStudentInfo(id: string): Promise<IStudentInfo> {

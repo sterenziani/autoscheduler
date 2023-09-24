@@ -10,11 +10,11 @@ import * as TermDto from '../dtos/term.dto';
 import * as ScheduleDto from '../dtos/schedule.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
-import { API_SCOPE, RESOURCES } from '../constants/general.constants';
+import { API_SCOPE, DEFAULT_LOCALE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidName, isValidTimes, validateArray, validateBoolean, validateDate, validateElemOrElemArray, validateInt, validateString, validateTimes } from '../helpers/validation.helper';
+import { isValidEmail, isValidName, isValidPassword, isValidTimes, validateArray, validateBoolean, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -72,19 +72,21 @@ export class StudentController {
         }
     };
 
-    public createStudentForExistingUser: RequestHandler = async (req, res, next) => {
-        const userId = req.user.id;
-        const userEmail = req.user.email;
-        const userLocale = req.user.locale;
-        const name = validateString(req.body.name);
+    public createStudent: RequestHandler = async (req, res, next) => {
+        const email = validateString(req.body.email);
+        const password = validateString(req.body.password);
+        const locale = validateLocale(req.headers['accept-language']) ?? DEFAULT_LOCALE;
         const universityId = validateString(req.body.universityId);
         const programId = validateString(req.body.programId);
+        const name = validateString(req.body.name);
 
-        if (!name || !universityId || !programId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!email || !password || !universityId || !programId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidEmail(email)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_EMAIL));
+        if (!isValidPassword(password)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PASSWORD));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
 
         try {
-            const student: Student = await this.studentService.createStudentExistingUser(userId, userEmail, userLocale, name, universityId, programId);
+            const student: Student = await this.studentService.createStudent(email, password, locale, universityId, programId, name);
             res.status(HTTP_STATUS.CREATED)
                 .location(getResourceUrl(RESOURCES.STUDENT, API_SCOPE.STUDENT, student.id))
                 .send(StudentDto.studentToDto(student, API_SCOPE.STUDENT));
@@ -508,7 +510,6 @@ export class StudentController {
             // If it's the same program we just pretend we did what was asked
             if (programId != oldProgramId)
                 await this.studentService.modifyStudent(studentId, programId);
-            // TODO: Create a temporary map between current authorization and new programId so we don't require student to login again
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);

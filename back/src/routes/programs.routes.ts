@@ -2,11 +2,8 @@ import { Router } from 'express';
 import { urlencoded } from 'body-parser';
 import { ProgramsController } from '../controllers/programs.controller';
 import cors from 'cors';
-import pagingMiddleware from '../middlewares/paging.middleware';
-import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
-import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
 
-export class UniversitiesRoutes {
+export class ProgramsRoutes {
     public router: Router = Router({mergeParams: true});
     public controller: ProgramsController = new ProgramsController();
 
@@ -24,10 +21,6 @@ export class UniversitiesRoutes {
         this.router.use(cors());
 
         // /programs routes
-        this.router.get(
-            '/:programId',
-            pagingMiddleware,
-            this.controller.getProgram
-        );
+        this.router.get('/:programId', this.controller.getProgram);
     }
 }

@@ -111,6 +111,12 @@ export const validateElemOrElemArray = <T>(data: any, validator: (data: any, ...
     }
 };
 
+export const validateLocale = (data: any): string | undefined => {
+    const maybeLocale = validateString(data);
+    if (maybeLocale === undefined || !isValidLocale(maybeLocale)) return undefined;
+    return maybeLocale;
+}
+
 export const validateTimes = (data: any): TimeRange[] | undefined => {
     const timeStrings = validateElemOrElemArray(data, validateString);
     if (timeStrings === undefined) return undefined;
@@ -122,53 +128,6 @@ export const validateTimes = (data: any): TimeRange[] | undefined => {
     }
     return times.sort((a, b) => a.compareTo(b));
 }
-
-export const validateLecture = (maybeLecture: any): ILecture | undefined => {
-    try {
-        const buildingId = validateString(maybeLecture?.buildingId);
-        if (buildingId === undefined) return undefined;
-
-        const day = validateEnum<DAY>(maybeLecture?.day, DAY);
-        if (day === undefined) return undefined;
-
-        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-        const startTime = validateString(maybeLecture?.startTime);
-        if (!timeRegex.test(startTime ?? '')) return undefined;
-        const endTime = validateString(maybeLecture?.endTime);
-        if (!timeRegex.test(endTime ?? '')) return undefined;
-
-        const time = new TimeRange(day, Time.fromString(startTime!), Time.fromString(endTime!));
-        return { buildingId, time };
-    } catch (e) {
-        return undefined;
-    }
-};
-
-export const validateUnavailableTime = (maybeTime: any): TimeRange | undefined => {
-    try {
-        let time = validateString(maybeTime);
-        if (time === undefined) return undefined;
-
-        const splitTime = time.split('-');
-        if(splitTime.length != 3) return undefined;
-        const maybeDay = splitTime[0];
-        const maybeStartTime = splitTime[1];
-        const maybeEndTime = splitTime[2];
-
-        const day = validateEnum<DAY>(Number(maybeDay), DAY);
-        if (day === undefined) return undefined;
-
-        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
-        const startTime = validateString(maybeStartTime);
-        if (!timeRegex.test(startTime ?? '')) return undefined;
-        const endTime = validateString(maybeEndTime);
-        if (!timeRegex.test(endTime ?? '')) return undefined;
-
-        return new TimeRange(day, Time.fromString(startTime!), Time.fromString(endTime!));
-    } catch (e) {
-        return undefined;
-    }
-};
 
 export const validateBuildingDistances = (maybeDistances: any): IBuildingDistancesInput | undefined => {
     if (maybeDistances === undefined || typeof maybeDistances !== 'object') return undefined;

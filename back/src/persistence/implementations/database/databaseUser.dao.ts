@@ -1,16 +1,17 @@
 import { ROLE } from '../../../constants/general.constants';
-import { ERRORS } from '../../../constants/error.constants';
 import GenericException from '../../../exceptions/generic.exception';
 import {
     createDocument,
+    deleteDocuments,
     getDocument,
     getDocumentByQuery,
     updateDocument,
 } from '../../../helpers/persistence/mongoPersistence.helper';
+import { PaginatedCollection } from '../../../interfaces/paging.interface';
 import User from '../../../models/abstract/user.model';
 import DatabaseUser, { UserDocument, UserModel } from '../../../models/implementations/database/databaseUser.model';
 import UserDao from '../../abstract/user.dao';
-import PasswordRecoveryToken from '../../../models/abstract/passwordRecoveryToken.model';
+import { UpdateQuery } from 'mongoose';
 
 // TODO: see if transactions matter
 export default class DatabaseUserDao extends UserDao {
@@ -28,9 +29,26 @@ export default class DatabaseUserDao extends UserDao {
         return;
     }
     
-    public async create(email: string, password: string, role: ROLE): Promise<User> {
-        const newUser = await createDocument<UserDocument>(UserModel, { email, password, role });
+    public async create(email: string, password: string, locale: string, role: ROLE): Promise<User> {
+        const newUser = await createDocument<UserDocument>(UserModel, { email, password, locale, role });
         return this.documentToModel(newUser);
+    }
+
+    public async modify(userId: string, email?: string, password?: string, locale?: string, role?: ROLE): Promise<User> {
+        const updateQuery: UpdateQuery<UserDocument> = {};
+        if (email !== undefined) updateQuery.email = email;
+        if (password !== undefined) updateQuery.password = password;
+        if (locale !== undefined) updateQuery.locale = locale;
+        if (role !== undefined) updateQuery.role = role;
+
+        const maybeUpdatedUser = await updateDocument<UserDocument>(UserModel, { _id: userId }, updateQuery);
+        
+        if (!maybeUpdatedUser) throw new GenericException(this.notFoundError);
+        return this.documentToModel(maybeUpdatedUser);
+    }
+
+    public async delete(userId: string): Promise<void> {
+        await deleteDocuments<UserDocument>(UserModel, {_id: userId});
     }
 
     public async findById(id: string): Promise<User | undefined> {
@@ -38,37 +56,14 @@ export default class DatabaseUserDao extends UserDao {
         return maybeUser ? this.documentToModel(maybeUser) : undefined;
     }
 
-    public async set(user: User): Promise<void> {
-        const maybeUpdatedUser = await updateDocument<UserDocument>(
-            UserModel,
-            { _id: user.id },
-            { email: user.email, password: user.password, role: user.role },
-        );
-        if (!maybeUpdatedUser) throw new GenericException(this.notFoundError);
+    // TODO: implement
+    public async findPaginated(page: number, limit: number, textSearch?: string | undefined, role?: ROLE | undefined): Promise<PaginatedCollection<User>> {
+        throw new Error('Not implemented');
     }
 
     public async findByEmail(email: string): Promise<User | undefined> {
         const maybeUser = await getDocumentByQuery<UserDocument>(UserModel, { email: email }, true);
         return maybeUser ? this.documentToModel(maybeUser) : undefined;
-    }
-
-    // TODO: Implement
-    public async createResetToken(userId: string, expirationDate: Date): Promise<PasswordRecoveryToken> {
-        return {id: "", expirationDate: expirationDate, isCurrentlyValid:() => true, getUser: () => {throw new GenericException(ERRORS.NOT_FOUND.USER)}};
-    }
-
-    // TODO: Implement
-    public async getResetToken(token: string): Promise<PasswordRecoveryToken | undefined> {
-        return undefined;
-    }
-
-    // TODO: Implement
-    public async findByResetToken(tokenId: string): Promise<User | undefined> {
-        return undefined;
-    }
-
-    // TODO: Implement
-    public async deleteResetToken(userId: string): Promise<void> {
     }
 
     // Private helper methods

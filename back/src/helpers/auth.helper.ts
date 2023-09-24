@@ -2,7 +2,9 @@ import * as jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { IUserInfo } from '../interfaces/auth.interface';
 
-export const jwtSign = (key: string, expireTime: string, payload: IUserInfo) => {
+const STUDENT_PROGRAM_MAP: {[studentId: string]: string} = {};
+
+export const jwtSign = (key: string, expireTime: string, payload: IUserInfo): string => {
     return jwt.sign(payload, key, { issuer: 'AutoSchedulerApi', expiresIn: expireTime, algorithm: 'RS256' });
 };
 
@@ -18,3 +20,15 @@ export const hashPassword = (password: string, rounds = 10): string => {
 export const validatePassword = (password: string, hashedPassword: string): boolean => {
     return bcrypt.compareSync(password, hashedPassword);
 };
+
+export const mapStudentProgram = (studentId: string, programId: string): void => {
+    STUDENT_PROGRAM_MAP[studentId] = programId;
+};
+
+export const getMappedStudentProgram = (studentId: string): string | undefined => {
+    return STUDENT_PROGRAM_MAP[studentId]
+};
+
+export const clearMappedStudentProgram = (studentId: string): void => {
+    delete STUDENT_PROGRAM_MAP[studentId];
+}

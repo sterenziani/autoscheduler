@@ -1,10 +1,8 @@
-import { MEMORY_DATABASE } from '../../../constants/persistence/memoryPersistence.constants';
-import { createDocument, deleteDocuments } from '../../../helpers/persistence/mongoPersistence.helper';
+import { createDocument, deleteDocuments, getDocument } from '../../../helpers/persistence/mongoPersistence.helper';
+import { PaginatedCollection } from '../../../interfaces/paging.interface';
 import PasswordRecoveryToken from '../../../models/abstract/passwordRecoveryToken.model';
 import DatabasePasswordRecoveryToken, { PasswordRecoveryTokenDocument, PasswordRecoveryTokenModel } from '../../../models/implementations/database/databasePasswordRecoveryToken.model';
-import MemoryPasswordRecoveryToken from '../../../models/implementations/memory/memoryPasswordRecoveryToken.model';
 import PasswordRecoveryTokenDao from '../../abstract/passwordRecoveryToken.dao';
-import {v4 as uuidv4} from 'uuid';
 
 export default class DatabasePasswordRecoveryTokenDao extends PasswordRecoveryTokenDao {
     private static instance: PasswordRecoveryTokenDao;
@@ -26,19 +24,22 @@ export default class DatabasePasswordRecoveryTokenDao extends PasswordRecoveryTo
         return this.documentToModel(doc);
     }
 
+    public async modify(id: string): Promise<PasswordRecoveryToken> {
+        return await this.getById(id);
+    }
+
     public async delete(id: string): Promise<void> {
         await deleteDocuments<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, {_id: id});
     }
 
     public async findById(id: string): Promise<PasswordRecoveryToken | undefined> {
-        return MEMORY_DATABASE.passwordRecoveryTokens.get(id);
+        const maybeDoc = await getDocument<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, id, true);
+        return maybeDoc ? this.documentToModel(maybeDoc) : undefined;
     }
 
-    public async set(token: PasswordRecoveryToken): Promise<void> {
-        const existingToken = await this.getById(token.id);
-        existingToken.userId = token.userId;
-        existingToken.expirationDate = token.expirationDate;
-        MEMORY_DATABASE.passwordRecoveryTokens.set(existingToken.id, existingToken);
+    // This is never used
+    public findPaginated(page: number, limit: number, ...args: any[]): Promise<PaginatedCollection<PasswordRecoveryToken>> {
+        throw Error('Not implemented');
     }
 
     // Private helper methods

@@ -21,7 +21,6 @@ export class UserRoutes {
 
         this.router.use(cors());
         this.router.get('/', authUsersOnlyMiddleware, this.controller.getUser);
-        //this.router.post('/', this.controller.registerUser);
         this.router.put('/', authUsersOnlyMiddleware, this.controller.modifyUser);
     }
 }

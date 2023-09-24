@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { urlencoded } from 'body-parser';
-import { StudentsController } from '../controllers/students.controller';
 import cors from 'cors';
 import authUsersOnlyMiddleware from '../middlewares/authUsersOnly.middleware';
-import studentsOnlyMiddleware from '../middlewares/studentsOnly.middleware';
 import adminOnlyMiddleware from '../middlewares/adminOnly.middleware';
+import { StudentsController } from '../controllers/students.controller';
 
 export class StudentsRoutes {
     public router: Router = Router({mergeParams: true});
@@ -28,23 +27,19 @@ export class StudentsRoutes {
             '/',
             authUsersOnlyMiddleware,
             adminOnlyMiddleware,
-            this.controller.getStudents
+            this.controller.getStudentsForAdmin
         );
         this.router.get(
             '/:studentId',
             authUsersOnlyMiddleware,
             adminOnlyMiddleware,
-            this.controller.getStudent
+            this.controller.getStudentForAdmin
         );
         this.router.put(
             '/:studentId',
             authUsersOnlyMiddleware,
             adminOnlyMiddleware,
             this.controller.modifyStudentForAdmin
-        );
-        this.router.post(
-            '/',
-            this.controller.createStudent
         );
     }
 }

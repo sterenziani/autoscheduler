@@ -9,7 +9,7 @@ export enum ROLE {
 export enum API_SCOPE {
     STUDENT,
     UNIVERSITY,
-    ADMIN
+    ROOT
 }
 
 export enum RESOURCES {

@@ -9,11 +9,11 @@ import * as TermDto from '../dtos/term.dto';
 import * as StudentDto from '../dtos/student.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
 import UniversityService from '../services/university.service';
-import { API_SCOPE, RESOURCES } from '../constants/general.constants';
+import { API_SCOPE, DEFAULT_LOCALE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidDay, isValidInternalId, isValidName, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateString, validateTimes } from '../helpers/validation.helper';
+import { isValidDay, isValidEmail, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -69,17 +69,19 @@ export class UniversityController {
         }
     };
 
-    public createUniversityForExistingUser: RequestHandler = async (req, res, next) => {
-        const userId = req.user.id;
-        const userEmail = req.user.email;
-        const userLocale = req.user.locale;
+    public createUniversity: RequestHandler = async (req, res, next) => {
+        const email = validateString(req.body.email);
+        const password = validateString(req.body.password);
+        const locale = validateLocale(req.headers['accept-language']) ?? DEFAULT_LOCALE;
         const name = validateString(req.body.name);
 
-        if (!name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!email || !password || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidEmail(email)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_EMAIL));
+        if (!isValidPassword(password)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PASSWORD));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
 
         try {
-            const university: University = await this.universityService.createUniversityExistingUser(userId, userEmail, userLocale, name);
+            const university: University = await this.universityService.createUniversity(email, password, locale, name);
             res.status(HTTP_STATUS.CREATED)
                 .location(getResourceUrl(RESOURCES.UNIVERSITY, API_SCOPE.UNIVERSITY, university.id))
                 .send(UniversityDto.universityToDto(university, API_SCOPE.UNIVERSITY));

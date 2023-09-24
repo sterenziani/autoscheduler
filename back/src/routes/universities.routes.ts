@@ -40,21 +40,16 @@ export class UniversitiesRoutes {
             adminOnlyMiddleware,
             this.controller.modifyUniversityForAdmin
         );
-        this.router.post(
-            '/',
-            this.controller.createUniversityRegister
-        );
 
         // /universities/:universityId/programs routes
         this.router.get(
             '/:universityId/programs',
             pagingMiddleware,
-            this.controller.getUniversitiesPrograms
+            this.controller.getUniversityPrograms
         );
         this.router.get(
             '/:universityId/programs/:programId',
-            pagingMiddleware,
-            this.controller.getUniversitiesPrograms
+            this.controller.getUniversityProgram
         );
     }
 }

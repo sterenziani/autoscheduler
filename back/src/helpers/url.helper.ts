@@ -38,54 +38,54 @@ export const getResourceUrl = (resource: RESOURCES, scope: API_SCOPE, resourceId
     const basePath = BASE_PATH;
     switch (resource) {
         case RESOURCES.USER:
-            return scope === API_SCOPE.ADMIN ? `${basePath}users/${resourceId}` : `${basePath}user`;
+            return scope === API_SCOPE.ROOT ? `${basePath}users/${resourceId}` : `${basePath}user`;
         case RESOURCES.UNIVERSITY:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university`;
-                case API_SCOPE.ADMIN: return `${basePath}universities/${resourceId}`;
+                case API_SCOPE.ROOT: return `${basePath}universities/${resourceId}`;
             }
         case RESOURCES.PROGRAM:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university/programs/${resourceId}`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university/programs/${resourceId}`;
-                case API_SCOPE.ADMIN: return `${basePath}programs/${resourceId}`;
+                case API_SCOPE.ROOT: return `${basePath}programs/${resourceId}`;
             }
         case RESOURCES.COURSE:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university/courses/${resourceId}`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university/courses/${resourceId}`;
-                case API_SCOPE.ADMIN: return `${basePath}courses/${resourceId}`
+                case API_SCOPE.ROOT: return `${basePath}courses/${resourceId}`
             }
         case RESOURCES.COURSE_CLASS:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university/course-class/${resourceId}`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university/courses/course-class${resourceId}`;
-                case API_SCOPE.ADMIN: return `${basePath}course-class/${resourceId}`
+                case API_SCOPE.ROOT: return `${basePath}course-class/${resourceId}`
             }
         case RESOURCES.LECTURE:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university/lectures/${resourceId}`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university/lectures/${resourceId}`;
-                case API_SCOPE.ADMIN: return `${basePath}lectures/${resourceId}`
+                case API_SCOPE.ROOT: return `${basePath}lectures/${resourceId}`
             }
         case RESOURCES.TERM:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university/terms/${resourceId}`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university/terms/${resourceId}`;
-                case API_SCOPE.ADMIN: return `${basePath}terms/${resourceId}`
+                case API_SCOPE.ROOT: return `${basePath}terms/${resourceId}`
             }
         case RESOURCES.BUILDING:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university/buildings/${resourceId}`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university/buildings/${resourceId}`;
-                case API_SCOPE.ADMIN: return `${basePath}buildings/${resourceId}`
+                case API_SCOPE.ROOT: return `${basePath}buildings/${resourceId}`
             }
         case RESOURCES.STUDENT:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student`;
                 case API_SCOPE.UNIVERSITY: return `${basePath}university/students/${resourceId}`;
-                case API_SCOPE.ADMIN: return `${basePath}students/${resourceId}`
+                case API_SCOPE.ROOT: return `${basePath}students/${resourceId}`
             }
     }
 }
