@@ -54,12 +54,9 @@ const executePaginatedQuery = async (
     page: number,
     limit: number,
     lean: boolean,
-    sort: boolean,
     session: ClientSession | null = null,
 ) => {
     let query = docQuery.limit(limit).skip((page - 1) * limit);
-
-    if (sort) query = query.sort('-creationTime');
 
     return await executeQuery(query, lean, session);
 };
@@ -131,11 +128,11 @@ export const getPaginatedDocumentsByQuery = async <T extends Document>(
     query: FilterQuery<T>,
     page: number,
     limit: number,
-    lean = false,
-    sort = false,
+    sortBy: string,
+    ascending = true,
     session: ClientSession | null = null,
 ): Promise<T[]> => {
-    return await executePaginatedQuery(model.find(query), page, limit, lean, sort, session);
+    return await executePaginatedQuery(model.find(query).sort((ascending ? '' : '-') + sortBy), page, limit, true, session);
 };
 
 export const updateDocument = async <T extends Document>(

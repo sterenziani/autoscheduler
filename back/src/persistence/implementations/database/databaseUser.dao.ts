@@ -1,17 +1,20 @@
 import { ROLE } from '../../../constants/general.constants';
 import GenericException from '../../../exceptions/generic.exception';
+import { getLastPageFromTotalEntries, simplePaginateCollection } from '../../../helpers/collection.helper';
 import {
+    countDocumentsByQuery,
     createDocument,
     deleteDocuments,
     getDocument,
     getDocumentByQuery,
+    getPaginatedDocumentsByQuery,
     updateDocument,
 } from '../../../helpers/persistence/mongoPersistence.helper';
 import { PaginatedCollection } from '../../../interfaces/paging.interface';
 import User from '../../../models/abstract/user.model';
 import DatabaseUser, { UserDocument, UserModel } from '../../../models/implementations/database/databaseUser.model';
 import UserDao from '../../abstract/user.dao';
-import { UpdateQuery } from 'mongoose';
+import { FilterQuery, UpdateQuery } from 'mongoose';
 
 // TODO: see if transactions matter
 export default class DatabaseUserDao extends UserDao {
@@ -56,9 +59,26 @@ export default class DatabaseUserDao extends UserDao {
         return maybeUser ? this.documentToModel(maybeUser) : undefined;
     }
 
-    // TODO: implement
     public async findPaginated(page: number, limit: number, textSearch?: string | undefined, role?: ROLE | undefined): Promise<PaginatedCollection<User>> {
-        throw new Error('Not implemented');
+        // Build the query
+        const query: FilterQuery<UserDocument> = {};
+        if (textSearch !== undefined) query.email = {$regex: textSearch, $options: 'i'};
+        if (role !== undefined) query.role = role;
+
+        // Count all documents that match the query
+        const count = await countDocumentsByQuery<UserDocument>(UserModel, query);
+
+        // Calculate last page
+        const lastPage = getLastPageFromTotalEntries(count, limit);
+
+        // Get paginated array of documents
+        const documents = page <= lastPage ? await getPaginatedDocumentsByQuery<UserDocument>(UserModel, query, page, limit, 'email') : [];
+
+        // Map document to model
+        const users = documents.map(d => this.documentToModel(d));
+
+        // Create paginated collection
+        return simplePaginateCollection(users, page, lastPage);
     }
 
     public async findByEmail(email: string): Promise<User | undefined> {

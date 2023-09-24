@@ -5,18 +5,20 @@ export const stringInEnum = <E extends Object>(enumObject: E, value?: string) =>
     return Object.values(enumObject).includes(value);
 };
 
+export const getLastPageFromTotalEntries = (totalEntries: number, limit: number): number => {
+    return Math.max(1, Math.ceil(totalEntries / limit));
+}
+
 // Simpler version of paginateCollection for database daos
 export const simplePaginateCollection = <T>(
     collection: T[],
-    limit: number,
-    offset: number,
-    totalEntries: number
+    page: number,
+    lastPage: number
 ): PaginatedCollection<T> => {
-    const lastPage = Math.max(0, Math.ceil(totalEntries / limit) - 1);
     const pagingInfo: PagingInfo = {
         first: 1,
-        prev: Math.max(offset - 1, 1),
-        next: Math.min(offset + 1, lastPage),
+        prev: Math.max(page - 1, 1),
+        next: Math.min(page + 1, lastPage),
         last: lastPage
     }
     return {collection, pagingInfo};
