@@ -4,23 +4,21 @@ import BuildingDao from '../abstract/building.dao';
 import { v4 as uuidv4 } from 'uuid';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import DatabaseBuilding from '../../models/implementations/databaseBuilding.model';
-import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRegex, getRelId, getStats, getToIdFromRelId, getValue, globalizeField, graphDriver, logErrors, parseErrors, toGraphInt } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, getNode, getNodes, getRegex, getRelId, getStats, getToIdFromRelId, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
 import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
 import { IBuildingDistance, IBuildingDistancesInput } from '../../interfaces/building.interface';
-import { Integer } from 'neo4j-driver';
+import ProgramDao from '../abstract/program.dao';
+import DatabaseProgram from '../../models/implementations/databaseProgram.model';
 
-const BELONGS_TO_PREFIX = 'BU';
-const DISTANCE_TO_PREFIX = 'BB';
-
-export default class DatabaseBuildingDao extends BuildingDao {
-    private static instance: BuildingDao;
+export default class DatabaseProgramDao extends ProgramDao {
+    private static instance: ProgramDao;
 
     static getInstance = () => {
-        if (!DatabaseBuildingDao.instance) {
-            DatabaseBuildingDao.instance = new DatabaseBuildingDao();
+        if (!DatabaseProgramDao.instance) {
+            DatabaseProgramDao.instance = new DatabaseProgramDao();
         }
-        return DatabaseBuildingDao.instance;
+        return DatabaseProgramDao.instance;
     };
 
     // Abstract Methods Implementations
@@ -29,13 +27,10 @@ export default class DatabaseBuildingDao extends BuildingDao {
         try {
             const constraintPromises: Promise<any>[] = [];
             constraintPromises.push(session.run(
-                'CREATE CONSTRAINT building_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.id IS UNIQUE'
+                'CREATE CONSTRAINT program_id_unique_constraint IF NOT EXISTS FOR (p: Program) REQUIRE p.id IS UNIQUE'
             ));
             constraintPromises.push(session.run(
-                'CREATE CONSTRAINT building_internal_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.internalId IS UNIQUE'
-            ));
-            constraintPromises.push(session.run(
-                'CREATE CONSTRAINT distance_to_unique_constraint IF NOT EXISTS FOR ()-[r:DISTANCE_TO]-() REQUIRE r.relId IS REL UNIQUE'
+                'CREATE CONSTRAINT program_internal_id_unique_constraint IF NOT EXISTS FOR (p: Program) REQUIRE p.internalId IS UNIQUE'
             ));
             await Promise.allSettled(constraintPromises);
         } catch (err) {
@@ -51,10 +46,9 @@ export default class DatabaseBuildingDao extends BuildingDao {
 
         const session = graphDriver.session();
         try {
-            internalId = globalizeField(universityId, internalId);
-            const relId = getRelId(BELONGS_TO_PREFIX, universityId, id);
+            const relId = getRelId('BU', internalId, universityId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (b: Building {id: $id, internalId: $internalId, name: $name})-[:BELONGS_TO {relId: $relId}]->(u) RETURN b',
+                'MATCH (u: University {id: $universityId}) CREATE (b: Building {id: $id, internalId: $internalId, name: $name, relId: $relId})-[:BELONGS_TO {relId: $relId}]->(u) RETURN b',
                 {universityId, id, internalId, name, relId}
             );
             const node = getNode(result);
@@ -70,14 +64,14 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async modify(id: string, universityId: string, internalId?: string, name?: string): Promise<Building> {
         const session = graphDriver.session();
         try {
-            internalId = internalId ? globalizeField(universityId, internalId) : internalId;
+            const relId = getRelId('BU', internalId, universityId);
             const baseQuery = buildQuery('MATCH (u: University {id: $universityId})<-[r:BELONGS_TO]-(b: Building {id: $id})', 'SET', ',', [
-                {entry: 'b.internalId = $internalId', value: internalId},
+                {entry: 'b.internalId = $internalId, b.relId = $relId, r.relId = $relId', value: internalId},
                 {entry: 'b.name = $name', value: name}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN b`,
-                {id, universityId, internalId, name}
+                {id, universityId, internalId, name, relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -132,19 +126,18 @@ export default class DatabaseBuildingDao extends BuildingDao {
         const collection: Building[] = [];
         let lastPage = 1;
         const regex = getRegex(textSearch);
-        const globalRegex = getGlobalRegex(textSearch);
 
         const session = graphDriver.session();
         try {
             // Build query
             const baseQuery = buildQuery('MATCH (u: University)<-[:BELONGS_TO]-(b: Building)', 'WHERE', 'AND', [
-                {entry: '(b.name =~ $regex OR b.internalId =~ $globalRegex)', value: textSearch},
+                {entry: '(b.name =~ $regex OR b.internalId =~ $regex)', value: textSearch},
                 {entry: 'u.id = $universityId', value: universityId},
             ]);
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(b) as count`,
-                {regex, globalRegex, universityId}
+                {regex, universityId}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
@@ -153,7 +146,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN b ORDER BY b.name SKIP $skip LIMIT $limit`,
-                    {regex, globalRegex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {regex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -170,7 +163,6 @@ export default class DatabaseBuildingDao extends BuildingDao {
     }
 
     async findDistance(id: string, universityId: string, distancedBuildingId: string): Promise<IBuildingDistance | undefined> {
-        if (id === distancedBuildingId) return {buildingId: id, distance: 0};
         const session = graphDriver.session();
         try {
             const baseQuery = buildQuery('MATCH (b: Building {id: $id})-[r: DISTANCE_TO]->(: Building {id: $distancedBuildingId})', 'WHERE', 'AND', [
@@ -193,7 +185,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
 
     async findDistances(id: string, universityId: string): Promise<IBuildingDistance[]> {
         // Initialize useful variables
-        const collection: IBuildingDistance[] = [{buildingId: id, distance: 0}];
+        const collection: IBuildingDistance[] = [];
 
         const session = graphDriver.session();
         try {
@@ -220,8 +212,8 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async addDistance(id: string, universityId: string, distancedBuildingId: string, distance: number): Promise<IBuildingDistance> {
         const session = graphDriver.session();
         try {
-            const relId = getRelId(DISTANCE_TO_PREFIX, id, distancedBuildingId);
-            const counterRelId = getRelId(DISTANCE_TO_PREFIX, distancedBuildingId, id);
+            const relId = getRelId('BB', id, distancedBuildingId);
+            const counterRelId = getRelId('BB', distancedBuildingId, id);
             const result = await session.run(
                 'MATCH (b: Building {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(db: Building {id: $distancedBuildingId}) ' +
                 'CREATE (b)-[r:DISTANCE_TO {relId: $relId, distance: $distance}]->(db)-[:DISTANCE_TO {relId: $counterRelId, distance: $distance}]->(b) ' +
@@ -241,8 +233,8 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async modifyDistance(id: string, universityId: string, distancedBuildingId: string, distance: number): Promise<IBuildingDistance> {
         const session = graphDriver.session();
         try {
-            const relId = getRelId(DISTANCE_TO_PREFIX, id, distancedBuildingId);
-            const counterRelId = getRelId(DISTANCE_TO_PREFIX, distancedBuildingId, id);
+            const relId = getRelId('BB', id, distancedBuildingId);
+            const counterRelId = getRelId('BB', distancedBuildingId, id);
             const result = await session.run(
                 'MATCH ()-[i: DISTANCE_TO {relId: $counterRelId}]->(b: Building)-[o:DISTANCE_TO {relId: $relId}]->() ' +
                 'WHERE (b)-[:BELONGS_TO]->(: University {id: $universityId}) ' +
@@ -263,8 +255,8 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async removeDistance(id: string, universityId: string, distancedBuildingId: string): Promise<void> {
         const session = graphDriver.session();
         try {
-            const relId = getRelId(DISTANCE_TO_PREFIX, id, distancedBuildingId);
-            const counterRelId = getRelId(DISTANCE_TO_PREFIX, distancedBuildingId, id);
+            const relId = getRelId('BB', id, distancedBuildingId);
+            const counterRelId = getRelId('BB', distancedBuildingId, id);
             const result = await session.run(
                 'MATCH ()-[i: DISTANCE_TO {relId: $counterRelId}]->(b: Building)-[o:DISTANCE_TO {relId: $relId}]->() ' +
                 'WHERE (b)-[:BELONGS_TO]->(: University {id: $universityId}) ' +
@@ -319,7 +311,6 @@ export default class DatabaseBuildingDao extends BuildingDao {
                 await transaction.commit();
                 return;
             }
-            // TODO: I can match b just once
             await transaction.run(
                 'UNWIND $parsedDistances as distance ' +
                 'MATCH (b:Building {id: $id}), (t:Building {id: distance.distancedBuildingId}) ' +
@@ -336,8 +327,8 @@ export default class DatabaseBuildingDao extends BuildingDao {
         }
     }
 
-    private nodeToBuilding(node: any): DatabaseBuilding {
-        return new DatabaseBuilding(node.id, deglobalizeField(node.internalId), node.name);
+    private nodeToProgram(node: any): DatabaseProgram {
+        return new DatabaseProgram(node.id, node.internalId, node.name);
     }
 
     private nodeToBuildingDistance(node: any): IBuildingDistance {
@@ -348,14 +339,13 @@ export default class DatabaseBuildingDao extends BuildingDao {
     }
 
     private parseBuildingDistancesInput(distances: IBuildingDistancesInput, buildingId: string) {
-        const parsed: {distancedBuildingId: string, distance: Integer, relId: string, counterRelId: string}[] = [];
+        const parsed: {distancedBuildingId: string, distance: number, relId: string, counterRelId: string}[] = [];
         for (const distancedBuildingId of Object.keys(distances)) {
-            if (distancedBuildingId === buildingId) continue;
             parsed.push({
                 distancedBuildingId,
-                distance: toGraphInt(distances[distancedBuildingId]),
-                relId: getRelId(DISTANCE_TO_PREFIX, buildingId, distancedBuildingId),
-                counterRelId: getRelId(DISTANCE_TO_PREFIX, distancedBuildingId, buildingId)
+                distance: distances[distancedBuildingId],
+                relId: getRelId('BB', buildingId, distancedBuildingId),
+                counterRelId: getRelId('BB', distancedBuildingId, buildingId)
             });
         }
         return parsed;

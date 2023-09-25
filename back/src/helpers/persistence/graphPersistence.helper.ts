@@ -1,4 +1,4 @@
-import neo4j, { Driver, Neo4jError, QueryResult, RecordShape } from 'neo4j-driver';
+import neo4j, { Driver, Integer, Neo4jError, QueryResult, RecordShape } from 'neo4j-driver';
 import { GRAPH_CONSTRAINT_ERROR_CODE } from '../../constants/persistence/graphPersistence.constants';
 import { IErrorData } from '../../interfaces/error.interface';
 import GenericException from '../../exceptions/generic.exception';
@@ -65,7 +65,12 @@ export const getRegex = (textSearch?: string): string => {
     return `(?i).*${textSearch}.*`;
 };
 
-export const getRelId = (prefix: string, fromId?: string, toId?: string): string => {
+export const getGlobalRegex = (textSearch?: string): string => {
+    return `(?i).+--.*${textSearch}.*`;
+};
+
+// relId is for relationships, for them to be unique and also makes some particular queries easier
+export const getRelId = (prefix: string, fromId: string, toId: string): string => {
     return `${prefix}--${fromId}--${toId}`;
 };
 
@@ -77,4 +82,20 @@ export const getToIdFromRelId = (relId: string): string => {
 export const getFromIdFromRelId = (relId: string): string => {
     const splitRelId = relId.split('--');
     return splitRelId[1] as string;
+};
+
+// these helpers globalizes and deglobalizes properties that should be unique only within the scope of a university (basically just internalId)
+export const globalizeField = (parentId: string, field: string): string => {
+    return `${parentId}--${field}`;
+};
+
+export const deglobalizeField = (globalizedField: string): string => {
+    const splitted = globalizedField.split('--');
+    const cleaned = splitted.splice(1);
+    return cleaned.join('');
+};
+
+// Neo4j doesnt work well with integers, so we have to transform them somtimes
+export const toGraphInt = (value: number): Integer => {
+    return neo4j.int(value);
 };

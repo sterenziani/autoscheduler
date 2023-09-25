@@ -1,29 +1,23 @@
 import Program from '../models/abstract/program.model';
-import CourseService from './course.service';
 import StudentService from './student.service';
 import ProgramService from './program.service';
 import TermService from './term.service';
-import UniversityService from './university.service';
-import GenericException from '../exceptions/generic.exception';
-import { ERRORS } from '../constants/error.constants';
-import { PaginatedCollection } from '../interfaces/paging.interface';
 import Course from '../models/abstract/course.model';
 import CourseClass from '../models/abstract/courseClass.model';
 import {ISchedule, IScheduleWithScore} from '../interfaces/schedule.interface';
 import Lecture from '../models/abstract/lecture.model';
 import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
+import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
 
 const MINUTE_IN_MS = 60000;
 const TARGET_HOUR_EXCEED_RATE_LIMIT = 1.25;
 
 export default class ScheduleService {
     private static instance: ScheduleService;
-    private courseService!: CourseService;
     private studentService!: StudentService;
     private programService!: ProgramService;
     private termService!: TermService;
-    private universityService!: UniversityService;
 
     static getInstance(): ScheduleService {
         if (!ScheduleService.instance) {
@@ -33,13 +27,12 @@ export default class ScheduleService {
     }
 
     init() {
-        this.courseService = CourseService.getInstance();
         this.studentService = StudentService.getInstance();
         this.termService = TermService.getInstance();
         this.programService = ProgramService.getInstance();
-        this.universityService = UniversityService.getInstance();
     }
 
+    // TODO: Maybe add functions to services like getStudentWithEnabledCourses that populates that query already in that instance of that student, idk
     async getSchedules(
         studentId: string,
         universityId: string,
@@ -53,21 +46,18 @@ export default class ScheduleService {
         const student = await this.studentService.getStudent(studentId);
         const program = await this.programService.getProgram(programId);
         const term = await this.termService.getTerm(termId);
-        if (!student) throw new GenericException(ERRORS.NOT_FOUND.STUDENT);
-        if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
-        if (!term) throw new GenericException(ERRORS.NOT_FOUND.TERM);
-        unavailableTimeSlots = unavailableTimeSlots.filter(t => t.startTime < t.endTime);
+        unavailableTimeSlots = unavailableTimeSlots.filter(t => t.startTime < t.endTime);   // TODO: We already checked for overlaps in controller and sorted it
 
         // STEP 1 - Get mandatory and optional courses in program
-        const mandatoryCourses = await program.getMandatoryCourses();
-        const optionalCourses = await program.getOptionalCourses();
-        const courses = [...mandatoryCourses, ...optionalCourses];
+        const courses = await program.getCourses();
+        const mandatoryCourses = courses.mandatoryCourses;
+        const optionalCourses = courses.optionalCourses;
 
         // STEP 2 - Filter already completed courses and courses the student is not yet enabled to sign up for
         const enabledCourses = await student.getEnabledCourses(program.id);
 
         // STEP 3 - Calculate "importance" of each course (direct + indirect unlockables)
-        const correlatives = await this.getIndirectCorrelatives(programId, enabledCourses);
+        const correlatives = await this.getIndirectCorrelatives(program, mandatoryCourses, optionalCourses, enabledCourses);
         const importance: { [courseId: string]: number } = {};
         for(const c of enabledCourses) importance[c.id] = correlatives[c.id].size;
 
@@ -84,7 +74,7 @@ export default class ScheduleService {
         // STEP 9 - Calculate score for each schedule
         const schedules = [];
         for(const combo of courseClassCombinations){
-            const schedule = await this.createSchedule(combo, program, importance);
+            const schedule = await this.createSchedule(combo, program, importance, mandatoryCourses);
             const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks);
             schedules.push({schedule: schedule, score: score});
         }
@@ -95,17 +85,14 @@ export default class ScheduleService {
 
     // This is also implemented in course model, but being able to access the created map is much more efficient than starting from scratch for each course.
     // If coursesToAnalyze is defined, we recursively expand only those courses for efficiency.
-    private async getIndirectCorrelatives(programId: string, coursesToAnalyze?: Course[]): Promise<{ [courseId: string]: Set<Course> }> {
-        const program = await this.programService.getProgram(programId);
-        const mandatoryCourses = await program.getMandatoryCourses();
-        const optionalCourses = await program.getOptionalCourses();
+    private async getIndirectCorrelatives(program: Program, mandatoryCourses: Course[], optionalCourses: Course[], coursesToAnalyze?: Course[]): Promise<{ [courseId: string]: Set<Course> }> {
         const programCourses = [...mandatoryCourses, ...optionalCourses];
 
         // Create map where key is a course ID and values are the courses enabled immediately after completing the key.
         const unlocks: { [courseId: string]: Set<Course> } = {};
         for(const c of programCourses) unlocks[c.id] = new Set();
         for(const c of programCourses) {
-            const requirements = await c.getRequiredCoursesForProgram(programId);
+            const requirements = await c.getRequiredCoursesForProgram(program.id);
             requirements.forEach( r => unlocks[r.id].add(c) );
         };
 
@@ -145,7 +132,8 @@ export default class ScheduleService {
         const viableCourseClassesMap: Map<string, CourseClass[]> = new Map<string, CourseClass[]>();
         for(const c of courses) {
             viableCourseClassesMap.set(c.id, []);
-            for(const cc of await c.getCourseClasses(termId)) {
+            const ccs = await c.getCourseClasses(termId);
+            for(const cc of ccs) {
                 const ccLectures: Lecture[] = await cc.getLectures();
                 if(this.areTimeRangesCompatible(ccLectures.map(l => l.time), unavailableTimeSlots))
                     viableCourseClassesMap.get(c.id)?.push(cc);
@@ -238,7 +226,7 @@ export default class ScheduleService {
 
                     const combinationProposal = [cc, ...combo];
                     let weeklyMinutes = 0;
-                    for(const courseClass of combinationProposal) weeklyMinutes += await courseClass.getWeeklyClassTimeInMinutes();
+                    for(const courseClass of combinationProposal) weeklyMinutes += await courseClass.getWeeklyClassTimeInMinutes();     // TODO: Cache inside model, check no duplicates, otherwise this call inside a gazillion loops is gonna kill performance
                     const weeklyHours = weeklyMinutes/60;
 
                     if(weeklyHours <= targetHours*1.25 && await this.isClassCombinationValid(combinationProposal))
@@ -258,8 +246,8 @@ export default class ScheduleService {
     private async isClassCombinationValid(courseClasses: CourseClass[]): Promise<boolean> {
         for(let i=0; i < courseClasses.length-1; i++){
             for(let j=i+1; j < courseClasses.length; j++){
-                const lectures1 = await courseClasses[i].getLectures();
-                const lectures2 = await courseClasses[j].getLectures();
+                const lectures1 = await courseClasses[i].getLectures();     // TODO: Cache inside model, check no duplicate models
+                const lectures2 = await courseClasses[j].getLectures();     // TODO: Cache inside model, check no duplicate models
                 for(const l1 of lectures1) {
                     for(const l2 of lectures2) {
                         // STEP 7a - Only one courseClass per Course (Guaranteed in steps 5-6)
@@ -268,11 +256,11 @@ export default class ScheduleService {
                         if(gap < 0) return false;
 
                         // STEP 7c - No unavailable time between buildings
-                        const b1 = await l1.getBuilding();
-                        const b2 = await l2.getBuilding();
+                        const b1 = await l1.getBuilding();                  // TODO: Cache inside model, check no duplicate models
+                        const b2 = await l2.getBuilding();                  // TODO: Cache inside model, check no duplicate models
                         if(b1 && b2 && b1.id != b2.id) {
-                            const distance = await b1.getDistanceInMinutesTo(b2);
-                            if(gap < (distance?distance:0)) return false;
+                            const distance = await b1.getDistanceInMinutesTo(b2);   // TODO: Cache inside model, check no duplicate models (Maybe static map?)
+                            if(gap < (distance ?? DEFAULT_DISTANCE)) return false;
                         }
                     }
                 }
@@ -281,8 +269,7 @@ export default class ScheduleService {
         return true;
     }
 
-    private async createSchedule(courseClasses: CourseClass[], program: Program, importanceMap: { [courseId: string]: number }): Promise<ISchedule> {
-        const mandatoryCoursesInProgram = await program.getMandatoryCourses();
+    private async createSchedule(courseClasses: CourseClass[], program: Program, importanceMap: { [courseId: string]: number }, mandatoryCourses: Course[]): Promise<ISchedule> {
 
         let totalMinutes = 0;
         let totalDays = new Set();
@@ -292,11 +279,11 @@ export default class ScheduleService {
         let latestLecture = Time.minValue();
 
         for(const cc of courseClasses) {
-            const course = await cc.getCourse();
-            const lectures = await cc.getLectures();
+            const course = await cc.getCourse();            // TODO: Analyze
+            const lectures = await cc.getLectures();        // TODO: Analyze
 
             totalImportance += importanceMap[course.id];
-            if(mandatoryCoursesInProgram.includes(course))
+            if(mandatoryCourses.includes(course))
                 amountOfMandatoryCourses++;
 
             for(const l of lectures){

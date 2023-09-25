@@ -1,6 +1,5 @@
-import Course from './course.model';
+import { IProgramCourses } from '../../interfaces/program.interfaces';
 import GenericModel from './generic.model';
-import University from './university.model';
 
 export default abstract class Program extends GenericModel {
     // Properties
@@ -15,10 +14,5 @@ export default abstract class Program extends GenericModel {
     }
 
     // Methods
-    public abstract addCourse(courseId: string, optional: boolean): Promise<void>;
-    public abstract setMandatoryCourses(mandatoryCourseIds: string[]): Promise<void>;
-    public abstract setOptionalCourses(mandatoryCourseIds: string[]): Promise<void>;
-    public abstract getMandatoryCourses(limit?: number, offset?: number): Promise<Course[]>;
-    public abstract getOptionalCourses(limit?: number, offset?: number): Promise<Course[]>;
-    public abstract getUniversity(): Promise<University>;
+    public abstract getCourses(): Promise<IProgramCourses>;
 }
