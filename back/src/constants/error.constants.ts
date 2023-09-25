@@ -102,7 +102,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         BUILDING_DISTANCE_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'BUILDING_DISTANCE_ALREADY_EXISTS',
-            message: 'A distance between given buildings already exist. Use the modify endpoint to update the distance.',
+            message: 'A distance between given buildings already exist. Use the modify or bulk replace endpoint to update the distance.',
         },
         COURSE_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,

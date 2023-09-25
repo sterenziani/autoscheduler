@@ -7,7 +7,7 @@ import DatabaseBuilding from '../../models/implementations/databaseBuilding.mode
 import { buildQuery, getNode, getNodes, getRegex, getRelId, getStats, getToIdFromRelId, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
 import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
-import { IBuildingDistance } from '../../interfaces/building.interface';
+import { IBuildingDistance, IBuildingDistancesInput } from '../../interfaces/building.interface';
 
 export default class DatabaseBuildingDao extends BuildingDao {
     private static instance: BuildingDao;
@@ -273,6 +273,61 @@ export default class DatabaseBuildingDao extends BuildingDao {
         }
     }
 
+    async bulkAddDistances(id: string, universityId: string, distances: IBuildingDistancesInput): Promise<void> {
+        const parsedDistances = this.parseBuildingDistancesInput(distances, id);
+
+        const session = graphDriver.session();
+        try {
+            const result = await session.run(
+                'UNWIND $parsedDistances as distance ' +
+                'MATCH (b:Building {id: $id})-[:BELONGS_TO]->(:University {id: $universityId})<-[:BELONGS_TO]-(t:Building {id: distance.distancedBuildingId}) ' +
+                'CREATE (b)-[:DISTANCE_TO {relId: distance.relId, distance: distance.distance}]->(t)-[:DISTANCE_TO {relId: distance.counterRelId, distance: distance.distance}]->(b)',
+                {id, universityId, parsedDistances}
+            );
+            const stats = getStats(result);
+            if (stats.relationshipsCreated === 0) throw new GenericException(this.notFoundError);
+        } catch (err) {
+            throw parseErrors(err, '[BuildingDao:bulkAddDistances]', ERRORS.BAD_REQUEST.BUILDING_DISTANCE_ALREADY_EXISTS);
+        } finally {
+            await session.close();
+        }
+    }
+
+    // This is kind of heavy on the db, but whatever
+    async bulkReplaceDistances(id: string, universityId: string, distances: IBuildingDistancesInput): Promise<void> {
+        const parsedDistances = this.parseBuildingDistancesInput(distances, id);
+
+        const session = graphDriver.session();
+        const transaction = session.beginTransaction();
+        try {
+            // We delete first since we are going to replace all the existing distances with the new distances
+            const deleteResult = await transaction.run(
+                'MATCH (b:Building {id: $id})-[:BELONGS_TO]->(:University {id: $universityId}) OPTIONAL MATCH ()-[r:DISTANCE_TO]-(b) DELETE r RETURN b.id as id',
+                {id, universityId}
+            );
+            const maybeId = getValue<string | undefined>(deleteResult, 'id');
+            if (!maybeId) throw new GenericException(this.notFoundError);
+            // If no new distances provided we commit transaction and return, there is no point in caling db again
+            if (parsedDistances.length === 0) {
+                await transaction.commit();
+                return;
+            }
+            await transaction.run(
+                'UNWIND $parsedDistances as distance ' +
+                'MATCH (b:Building {id: $id}), (t:Building {id: distance.distancedBuildingId}) ' +
+                'CREATE (b)-[:DISTANCE_TO {relId: distance.relId, distance: distance.distance}]->(t)-[:DISTANCE_TO {relId: distance.counterRelId, distance: distance.distance}]->(b)',
+                {id, parsedDistances}
+            );
+            await transaction.commit();
+        } catch (err) {
+            await transaction.rollback();
+            throw parseErrors(err, '[BuildingDao:bulkReplaceDistances]', ERRORS.BAD_REQUEST.BUILDING_DISTANCE_ALREADY_EXISTS);
+        } finally {
+            await transaction.close();
+            await session.close();
+        }
+    }
+
     private nodeToBuilding(node: any): DatabaseBuilding {
         return new DatabaseBuilding(node.id, node.internalId, node.name);
     }
@@ -282,5 +337,18 @@ export default class DatabaseBuildingDao extends BuildingDao {
             buildingId: getToIdFromRelId(node.relId),
             distance: node.distance
         }
+    }
+
+    private parseBuildingDistancesInput(distances: IBuildingDistancesInput, buildingId: string) {
+        const parsed: {distancedBuildingId: string, distance: number, relId: string, counterRelId: string}[] = [];
+        for (const distancedBuildingId of Object.keys(distances)) {
+            parsed.push({
+                distancedBuildingId,
+                distance: distances[distancedBuildingId],
+                relId: getRelId('BB', buildingId, distancedBuildingId),
+                counterRelId: getRelId('BB', distancedBuildingId, buildingId)
+            });
+        }
+        return parsed;
     }
 }
