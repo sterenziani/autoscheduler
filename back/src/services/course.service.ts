@@ -2,6 +2,7 @@ import CourseDaoFactory from '../factories/courseDao.factory';
 import CourseDao from '../persistence/abstract/course.dao';
 import Course from '../models/abstract/course.model';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { cleanMaybeText, cleanText } from '../helpers/string.helper';
 
 export default class CourseService {
     private static instance: CourseService;
@@ -32,15 +33,15 @@ export default class CourseService {
     async getCourses(page: number, limit: number, textSearch?: string, programId?: string, optional?: boolean, universityId?: string): Promise<PaginatedCollection<Course>> {
         // Optional only makes sense if programId is provided
         if (programId === undefined) optional = undefined;
-        return await this.dao.findPaginated(page, limit, textSearch, programId, optional, universityId);
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), programId, optional, universityId);
     }
 
     async createCourse(universityId: string, internalId: string, name: string): Promise<Course> {
-        return await this.dao.create(universityId, internalId, name);
+        return await this.dao.create(universityId, cleanText(internalId), cleanText(name));
     }
 
     async modifyCourse(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Course> {
-        return await this.dao.modify(id, universityIdFilter, internalId, name);
+        return await this.dao.modify(id, universityIdFilter, cleanMaybeText(internalId), cleanMaybeText(name));
     }
 
     async deleteCourse(id: string, universityIdFilter: string): Promise<void> {
@@ -48,14 +49,14 @@ export default class CourseService {
     }
 
     async getRequiredCourses(page: number, limit: number, id: string, textSearch?: string, programId?: string, universityId?: string): Promise<PaginatedCollection<Course>> {
-        return await this.dao.findPaginatedRequiredCourses(page, limit, id, textSearch, programId, universityId);
+        return await this.dao.findPaginatedRequiredCourses(page, limit, id, cleanMaybeText(textSearch), programId, universityId);
     }
 
     async getRemainingCourses(page: number, limit: number, studentId: string, programId: string, universityId: string, textSearch?: string, optional?: boolean): Promise<PaginatedCollection<Course>> {
-        return await this.dao.findPaginatedRemainingCourses(page, limit, studentId, programId, universityId, textSearch, optional);
+        return await this.dao.findPaginatedRemainingCourses(page, limit, studentId, programId, universityId, cleanMaybeText(textSearch), optional);
     }
 
     async getCompletedCourses(page: number, limit: number, studentId: string, textSearch?: string, optional?: boolean, programId?: string, universityId?: string): Promise<PaginatedCollection<Course>> {
-        return await this.dao.findPaginatedCompletedCourses(page, limit, studentId, textSearch, optional, programId, universityId);
+        return await this.dao.findPaginatedCompletedCourses(page, limit, studentId, cleanMaybeText(textSearch), optional, programId, universityId);
     }
 }

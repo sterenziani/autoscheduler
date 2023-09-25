@@ -470,12 +470,12 @@ export class UniversityController {
         const name = validateString(req.body.name);
         const internalId = validateString(req.body.internalId);
 
-        if (!termId || !name || !internalId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!termId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
-        if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
+        if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         
         try {
-            const courseClass: CourseClass = await this.courseClassService.createCourseClass(universityId, courseId, termId, internalId, name);
+            const courseClass: CourseClass = await this.courseClassService.createCourseClass(universityId, courseId, termId, name, internalId);
             res.status(HTTP_STATUS.CREATED)
                 .location(getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.UNIVERSITY, courseClass.id))
                 .send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));
@@ -491,12 +491,14 @@ export class UniversityController {
         const courseClassId = req.params.courseClassId;
         const termId = validateString(req.body.termId);
         const name = validateString(req.body.name);
+        const internalId = validateString(req.body.internalId);
 
-        if (!termId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!termId && !name && !internalId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         
         try {
-            const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, courseId, termId, name);
+            const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, courseId, termId, name, internalId);
             res.status(HTTP_STATUS.OK)
                 .location(getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.UNIVERSITY, courseClass.id))
                 .send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));
@@ -908,12 +910,14 @@ export class UniversityController {
         const courseClassId = req.params.courseClassId;
         const termId = validateString(req.body.termId);
         const name = validateString(req.body.name);
+        const internalId = validateString(req.body.internalId);
 
-        if (!termId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!termId && !name && !internalId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         
         try {
-            const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, undefined, termId, name);
+            const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, undefined, termId, name, internalId);
             res.status(HTTP_STATUS.OK)
                 .location(getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.UNIVERSITY, courseClass.id))
                 .send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));

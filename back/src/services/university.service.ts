@@ -49,7 +49,7 @@ export default class UniversityService {
         // send welcome email
         this.emailService.sendUniversityWelcomeEmail(user.email, user.locale, university)
             .catch((err) => console.log(`[UniversityService:createUniversity] Failed to send university welcome email. ${JSON.stringify(err)}`));
-        return university;;
+        return university;
     }
 
     async modifyUniversity(id: string, name?: string, verified?: boolean): Promise<University> {

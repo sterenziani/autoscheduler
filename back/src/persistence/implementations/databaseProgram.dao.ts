@@ -173,6 +173,25 @@ export default class DatabaseProgramDao extends ProgramDao {
         }
     }
 
+    async modifyCourse(id: string, universityId: string, courseId: string, optional: boolean): Promise<void> {
+        const session = graphDriver.session();
+        try {
+            const relId = getRelId(IN_PREFIX, courseId, id);
+            const result = await session.run(
+                'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
+                'MATCH (c)-[r:IN]->(p) ' +
+                'SET r.optional = $optional',
+                {id, universityId, courseId, optional, relId}
+            );
+            const stats = getStats(result);
+            if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or program was not found
+        } catch (err) {
+            throw parseErrors(err, '[ProgramDao:addCourse]', ERRORS.BAD_REQUEST.COURSE_ALREADY_IN_PROGRAM);
+        } finally {
+            await session.close();
+        }
+    }
+
     private nodeToProgram(node: any): DatabaseProgram {
         return new DatabaseProgram(node.id, deglobalizeField(node.internalId), node.name);
     }

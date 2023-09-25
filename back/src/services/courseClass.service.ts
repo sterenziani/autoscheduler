@@ -2,6 +2,7 @@ import CourseClassDao from '../persistence/abstract/courseClass.dao';
 import CourseClassDaoFactory from '../factories/courseClassDao.factory';
 import CourseClass from '../models/abstract/courseClass.model';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { cleanMaybeText, cleanText } from '../helpers/string.helper';
 
 export default class CourseClassService {
     private static instance: CourseClassService;
@@ -30,15 +31,15 @@ export default class CourseClassService {
     }
 
     async getCourseClasses(page: number, limit: number, textSearch?: string, courseId?: string, termId?: string, universityId?: string): Promise<PaginatedCollection<CourseClass>> {
-        return await this.dao.findPaginated(page, limit, textSearch, courseId, termId, universityId);
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), courseId, termId, universityId);
     }
 
-    async createCourseClass(universityId: string, courseId: string, termId: string, internalId: string, name: string): Promise<CourseClass> {
-        return await this.dao.create(universityId, courseId, termId, internalId, name);
+    async createCourseClass(universityId: string, courseId: string, termId: string, name: string, internalId?: string): Promise<CourseClass> {
+        return await this.dao.create(universityId, courseId, termId, cleanText(internalId ?? `${courseId}-${termId}-${name.toLowerCase()}`), cleanText(name));
     }
 
-    async modifyCourseClass(id: string, universityIdFilter: string, courseIdFilter?: string, termId?: string, name?: string): Promise<CourseClass> {
-        return await this.dao.modify(id, universityIdFilter, courseIdFilter, termId, name);
+    async modifyCourseClass(id: string, universityIdFilter: string, courseIdFilter?: string, termId?: string, name?: string, internalId?: string): Promise<CourseClass> {
+        return await this.dao.modify(id, universityIdFilter, courseIdFilter, termId, cleanMaybeText(internalId), cleanMaybeText(name));
     }
 
     async deleteCourseClass(id: string, universityIdFilter: string, courseIdFilter?: string): Promise<void> {

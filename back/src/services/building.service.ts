@@ -3,6 +3,7 @@ import BuildingDaoFactory from '../factories/buildingDao.factory';
 import Building from '../models/abstract/building.model';
 import { IBuildingDistance, IBuildingDistancesInput } from '../interfaces/building.interface';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { cleanMaybeText, cleanText } from '../helpers/string.helper';
 
 export default class BuildingService {
     private static instance: BuildingService;
@@ -31,15 +32,15 @@ export default class BuildingService {
     }
 
     async getBuildings(page: number, limit: number, textSearch?: string, universityId?: string): Promise<PaginatedCollection<Building>> {
-        return await this.dao.findPaginated(page, limit, textSearch, universityId);
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), universityId);
     }
 
     async createBuilding(universityId: string, internalId: string, name: string): Promise<Building> {
-        return await this.dao.create(universityId, internalId, name);
+        return await this.dao.create(universityId, cleanText(internalId), cleanText(name));
     }
 
     async modifyBuilding(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Building> {
-        return await this.dao.modify(id, universityIdFilter, internalId, name);
+        return await this.dao.modify(id, universityIdFilter, cleanMaybeText(internalId), cleanMaybeText(name));
     }
 
     async deleteBuilding(id: string, universityIdFilter: string): Promise<void> {

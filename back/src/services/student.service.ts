@@ -7,6 +7,7 @@ import { PaginatedCollection } from '../interfaces/paging.interface';
 import { IStudentInfo } from '../interfaces/student.interface';
 import EmailService from './email.service';
 import { mapStudentProgram } from '../helpers/auth.helper';
+import { cleanMaybeText, cleanText } from '../helpers/string.helper';
 
 export default class StudentService {
     private static instance: StudentService;
@@ -38,14 +39,14 @@ export default class StudentService {
     }
 
     async getStudents(page: number, limit: number, textSearch?: string, universityId?: string): Promise<PaginatedCollection<Student>> {
-        return await this.dao.findPaginated(page, limit, textSearch, universityId);
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), universityId);
     }
 
     async createStudent(email: string, password: string, locale: string, universityId: string, programId: string, name: string): Promise<Student> {
         // create user
         const user = await this.userService.createUser(email, password, locale, ROLE.STUDENT);
         // create student
-        const student = await this.dao.create(user.id, universityId, programId, name);
+        const student = await this.dao.create(user.id, universityId, programId, cleanText(name));
         // send welcome email
         this.emailService.sendStudentWelcomeEmail(user.email, user.locale, student)
             .catch((err) => console.log(`[StudentService:createStudent] Failed to send student welcome email. ${JSON.stringify(err)}`));
@@ -53,7 +54,7 @@ export default class StudentService {
     }
 
     async modifyStudent(id: string, programId?: string, name?: string): Promise<Student> {
-        const student = await this.dao.modify(id, programId, name);
+        const student = await this.dao.modify(id, programId, cleanMaybeText(name));
         if (programId !== undefined) mapStudentProgram(id, programId);
         return student;
     }

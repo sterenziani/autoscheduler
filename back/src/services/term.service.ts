@@ -2,6 +2,7 @@ import TermDao from '../persistence/abstract/term.dao';
 import TermDaoFactory from '../factories/termDao.factory';
 import Term from '../models/abstract/term.model';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { cleanMaybeText, cleanText } from '../helpers/string.helper';
 
 export default class TermService {
     private static instance: TermService;
@@ -30,15 +31,15 @@ export default class TermService {
     }
 
     async getTerms(page: number, limit: number, textSearch?: string, from?: Date, to?: Date, published?: boolean, universityId?: string): Promise<PaginatedCollection<Term>> {
-        return await this.dao.findPaginated(page, limit, textSearch, from, to, published, universityId);
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), from, to, published, universityId);
     }
 
     async createTerm(universityId: string, internalId: string, name: string, startDate: Date, published: boolean): Promise<Term> {
-        return await this.dao.create(universityId, internalId, name, startDate, published);
+        return await this.dao.create(universityId, cleanText(internalId), cleanText(name), startDate, published);
     }
 
     async modifyTerm(id: string, universityIdFilter: string, internalId?: string, name?: string, startDate?: Date, published?: boolean): Promise<Term> {
-        return await this.dao.modify(id, universityIdFilter, internalId, name, startDate, published);
+        return await this.dao.modify(id, universityIdFilter, cleanMaybeText(internalId), cleanMaybeText(name), startDate, published);
     }
 
     async deleteTerm(id: string, universityIdFilter: string): Promise<void> {

@@ -2,6 +2,7 @@ import ProgramDao from '../persistence/abstract/program.dao';
 import ProgramDaoFactory from '../factories/programDao.factory';
 import Program from '../models/abstract/program.model';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { cleanMaybeText, cleanText } from '../helpers/string.helper';
 
 export default class ProgramService {
     private static instance: ProgramService;
@@ -30,15 +31,15 @@ export default class ProgramService {
     }
 
     async getPrograms(page: number, limit: number, textSearch?: string, universityId?: string): Promise<PaginatedCollection<Program>> {
-        return await this.dao.findPaginated(page, limit, textSearch, universityId);
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), universityId);
     }
 
     async createProgram(universityId: string, internalId: string, name: string): Promise<Program> {
-        return await this.dao.create(universityId, internalId, name);
+        return await this.dao.create(universityId, cleanText(internalId), cleanText(name));
     }
 
     async modifyProgram(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Program> {
-        return await this.dao.modify(id, universityIdFilter, internalId, name);
+        return await this.dao.modify(id, universityIdFilter, cleanMaybeText(internalId), cleanMaybeText(name));
     }
 
     async addCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean): Promise<void> {
