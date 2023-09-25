@@ -1,9 +1,13 @@
 import { ERRORS } from "../../constants/error.constants";
 import GenericException from "../../exceptions/generic.exception";
-import { getNode, graphDriver, parseErrors } from "../../helpers/persistence/graphPersistence.helper";
+import { getNode, getRelId, graphDriver, parseErrors } from "../../helpers/persistence/graphPersistence.helper";
 import Student from "../../models/abstract/student.model";
 import DatabaseStudent from "../../models/implementations/databaseStudent.model";
 import StudentDao from "../abstract/student.dao";
+
+const FOLLOWS_PREFIX = 'SP';
+const ENROLLED_IN_PREFIX = 'SU';
+const COMPLETED_PREFIX = 'SC';
 
 export default class DatabaseStudentDao extends StudentDao {
     private static instance: StudentDao;
@@ -43,10 +47,12 @@ export default class DatabaseStudentDao extends StudentDao {
     async create(id: string, universityId: string, programId: string, name: string): Promise<Student> {
         const session = graphDriver.session();
         try {
+            const enrolledInRelId = getRelId(ENROLLED_IN_PREFIX, id, universityId);
+            const followsRelId = getRelId(FOLLOWS_PREFIX, id, programId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) OPTIONAL MATCH (p: Program)-[:BELONGS_TO]->(u) ' +
-                'CREATE (u: University {id: $id, name: $name, verified: $verified}) RETURN u',
-                {universityId, programId, id, name}
+                'MATCH (p: Program {id: $programId})-[:BELONGS_TO]->(u: University {id: $universityId}) ' +
+                'CREATE (u)<-[:ENROLLED_IN {relId: $enrolledInRelId}]-(s: Student {id: $id, name: $name})-[:FOLLOWS {relId: $followsRelId}]->(p) RETURN s',
+                {universityId, programId, id, name, enrolledInRelId, followsRelId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY); // TODO: Actually i can be either university or program
