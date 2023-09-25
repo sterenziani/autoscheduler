@@ -139,6 +139,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'STUDENT_ALREADY_EXISTS',
             message: 'A student with provided params already exists.',
         },
+        COURSE_ALREADY_IN_PROGRAM: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_IN_PROGRAM',
+            message: 'Course is already in the program.',
+        }
     },
     UNAUTHORIZED: {
         GENERAL: { status: HTTP_STATUS.UNAUTHORIZED, code: 'UNAUTHORIZED', message: 'Unauthorized.' },

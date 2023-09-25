@@ -97,8 +97,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
                 {id, universityId}
             );
             const stats = getStats(result);
-            if (stats.nodesDeleted === 0) throw new GenericException(this.notFoundError);
-            
+            if (stats.nodesDeleted === 0) throw new GenericException(this.notFoundError);    
         } catch (err) {
             throw parseErrors(err, '[BuildingDao:delete]', ERRORS.CONFLICT.CANNOT_DELETE);
         } finally {
@@ -129,7 +128,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
 
     async findPaginated(page: number, limit: number, textSearch?: string, universityId?: string): Promise<PaginatedCollection<Building>> {
         // Initialize useful variables
-        const collection: Building[] = [];
+        const collection: DatabaseBuilding[] = [];
         let lastPage = 1;
         const regex = getRegex(textSearch);
         const globalRegex = getGlobalRegex(textSearch);
@@ -218,6 +217,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
     }
 
     async addDistance(id: string, universityId: string, distancedBuildingId: string, distance: number): Promise<IBuildingDistance> {
+        if (id === distancedBuildingId) return {buildingId: id, distance: 0};
         const session = graphDriver.session();
         try {
             const relId = getRelId(DISTANCE_TO_PREFIX, id, distancedBuildingId);
@@ -239,6 +239,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
     }
 
     async modifyDistance(id: string, universityId: string, distancedBuildingId: string, distance: number): Promise<IBuildingDistance> {
+        if (id === distancedBuildingId) return {buildingId: id, distance: 0};
         const session = graphDriver.session();
         try {
             const relId = getRelId(DISTANCE_TO_PREFIX, id, distancedBuildingId);
@@ -261,6 +262,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
     }
 
     async removeDistance(id: string, universityId: string, distancedBuildingId: string): Promise<void> {
+        if (id === distancedBuildingId) return;
         const session = graphDriver.session();
         try {
             const relId = getRelId(DISTANCE_TO_PREFIX, id, distancedBuildingId);
@@ -282,6 +284,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
 
     async bulkAddDistances(id: string, universityId: string, distances: IBuildingDistancesInput): Promise<void> {
         const parsedDistances = this.parseBuildingDistancesInput(distances, id);
+        if (parsedDistances.length === 0) return;
 
         const session = graphDriver.session();
         try {

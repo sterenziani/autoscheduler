@@ -33,9 +33,6 @@ export default class DatabaseCourseDao extends CourseDao {
                 'CREATE CONSTRAINT requires_unique_constraint IF NOT EXISTS FOR ()-[r:REQUIRES]-() REQUIRE r.relId IS REL UNIQUE'
             ));
             constraintPromises.push(session.run(
-                'CREATE CONSTRAINT in_unique_constraint IF NOT EXISTS FOR ()-[r:IN]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
-            constraintPromises.push(session.run(
                 'CREATE CONSTRAINT of_unique_constraint IF NOT EXISTS FOR ()-[r:OF]-() REQUIRE r.relId IS REL UNIQUE'
             ));
             await Promise.allSettled(constraintPromises);

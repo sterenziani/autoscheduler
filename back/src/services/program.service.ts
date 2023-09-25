@@ -41,10 +41,6 @@ export default class ProgramService {
         return await this.dao.modify(id, universityIdFilter, internalId, name);
     }
 
-    async deleteProgram(id: string, universityIdFilter: string): Promise<void> {
-        await this.dao.delete(id, universityIdFilter);
-    }
-
     async addCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean): Promise<void> {
         await this.dao.addCourse(id, universityIdFilter, courseId, optional);
     }
