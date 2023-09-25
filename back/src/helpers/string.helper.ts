@@ -18,7 +18,7 @@ export const removeSpecialCharacters = (text: string | undefined): string => {
 };
 
 export const cleanText = (text: string): string => {
-    return removeSpecialCharacters(text.toLowerCase());
+    return removeSpecialCharacters(text);
 };
 
 export const cleanMaybeText = (text?: string): string | undefined => {

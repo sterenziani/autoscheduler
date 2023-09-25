@@ -1,4 +1,4 @@
-import neo4j, { Driver, Neo4jError } from 'neo4j-driver';
+import neo4j, { Driver, Neo4jError, QueryResult, RecordShape } from 'neo4j-driver';
 import { GRAPH_CONSTRAINT_ERROR_CODE } from '../../constants/persistence/graphPersistence.constants';
 import { IErrorData } from '../../interfaces/error.interface';
 import GenericException from '../../exceptions/generic.exception';
@@ -27,17 +27,54 @@ export const logErrors = (err: unknown, logPrefix: string): void => {
     console.log(`${logPrefix}. Unknown error: ${JSON.stringify(err)}`);
 };
 
-export const buildQuery = (entries: IQueryEntry[], command: string): string => {
-    let base: string | undefined = undefined;
+export const getStats = (result: QueryResult<RecordShape>) => {
+    return result.summary.counters.updates();
+};
+
+export const getNode = (result: QueryResult<RecordShape>): any => {
+    return result.records[0]?.get(0)?.properties;
+};
+
+export const getNodes = (result: QueryResult<RecordShape>): any[] => {
+    const nodes: any[] = [];
+    for (const record of result.records) {
+        const node = record.get(0)?.properties;
+        if (!node) continue;
+        nodes.push(node);
+    }
+    return nodes;
+};
+
+export const getValue = <T>(result: QueryResult<RecordShape>, key: string): T => {
+    return result.records[0]?.get(key) as T;
+};
+
+export const buildQuery = (base: string, command: string, connector: string, entries: IQueryEntry[]): string => {
+    let filter: string | undefined = undefined;
     for (const entry of entries) {
         if (entry.value === undefined) continue;
-        if (base === undefined) base = command;
-        base = base + ` ${entry.entry},`
+        if (filter === undefined) filter = command;
+        filter = filter + ` ${entry.entry}${connector}`
     }
-    if (base === undefined) return '';
-    return base.slice(0, -1);
+    if (filter === undefined) return base;
+    const trimmedFilter = filter.slice(0, -1 * connector.length);
+    return `${base} ${trimmedFilter}`
 };
 
 export const getRegex = (textSearch?: string): string => {
-    return `.*${textSearch}.*`;
+    return `(?i).*${textSearch}.*`;
+};
+
+export const getRelId = (prefix: string, fromId?: string, toId?: string): string => {
+    return `${prefix}--${fromId}--${toId}`;
+};
+
+export const getToIdFromRelId = (relId: string): string => {
+    const splitRelId = relId.split('--');
+    return splitRelId[2] as string;
+};
+
+export const getFromIdFromRelId = (relId: string): string => {
+    const splitRelId = relId.split('--');
+    return splitRelId[1] as string;
 };

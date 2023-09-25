@@ -3,7 +3,7 @@ import DatabaseUniversity from '../../models/implementations/databaseUniversity.
 import UniversityDao from '../abstract/university.dao';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, getRegex, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, getNode, getNodes, getRegex, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
 import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
 
@@ -26,10 +26,10 @@ export default class DatabaseUniversityDao extends UniversityDao {
                 'CREATE CONSTRAINT university_id_unique_constraint IF NOT EXISTS FOR (u: University) REQUIRE u.id IS UNIQUE'
             ));
             constraintPromises.push(session.run(
-                'CREATE CONSTRAINT university_unique_name_constraint IF NOT EXISTS FOR (u: University) REQUIRE u.name IS UNIQUE'
+                'CREATE CONSTRAINT university_name_unique_constraint IF NOT EXISTS FOR (u: University) REQUIRE u.name IS UNIQUE'
             ));
             constraintPromises.push(session.run(
-                'CREATE CONSTRAINT belongs_to_unique_constraint IF NOT EXISTS FOR ()-[r:BELONGS_TO]-() REQUIRE r.id IS REL UNIQUE'
+                'CREATE CONSTRAINT belongs_to_unique_constraint IF NOT EXISTS FOR ()-[r:BELONGS_TO]-() REQUIRE r.relId IS REL UNIQUE'
             ));
             await Promise.allSettled(constraintPromises);
         } catch (err) {
@@ -46,7 +46,7 @@ export default class DatabaseUniversityDao extends UniversityDao {
                 'CREATE (u: University {id: $id, name: $name, verified: $verified}) RETURN u',
                 {id, name, verified}
             );
-            const node = result.records[0]?.get(0)?.properties;
+            const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.EMPTY_NODE);
             return this.nodeToUniversity(node);
         } catch (err) {
@@ -59,15 +59,15 @@ export default class DatabaseUniversityDao extends UniversityDao {
     async modify(id: string, name?: string, verified?: boolean): Promise<University> {
         const session = graphDriver.session();
         try {
-            const setQuery = buildQuery([
+            const baseQuery = buildQuery('MATCH (u: University {id: $id})', 'SET', ',', [
                 {entry: 'u.name = $name', value: name},
                 {entry: 'u.verified = $verified', value: verified}
-            ], 'SET');
+            ]);
             const result = await session.run(
-                `MATCH (u: University {id: $id}) ${setQuery} RETURN u`,
+                `${baseQuery} RETURN u`,
                 {id, name, verified}
             );
-            const node = result.records[0]?.get(0)?.properties;
+            const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
             return this.nodeToUniversity(node);
         } catch (err) {
@@ -89,7 +89,7 @@ export default class DatabaseUniversityDao extends UniversityDao {
                 'MATCH (u: University {id: $id}) RETURN u',
                 {id}
             );
-            const node = result.records[0]?.get(0)?.properties;
+            const node = getNode(result);
             if (!node) return undefined;
             return this.nodeToUniversity(node);
         } catch (err) {
@@ -108,27 +108,27 @@ export default class DatabaseUniversityDao extends UniversityDao {
 
         const session = graphDriver.session();
         try {
-            // Count
-            const whereQuery = buildQuery([
+            // Build query
+            const baseQuery = buildQuery('MATCH (u: University)', 'WHERE', 'AND', [
                 {entry: 'u.name =~ $regex', value: textSearch},
                 {entry: 'u.verified = $verified', value: verified}
-            ], 'WHERE');
+            ]);
+            // Count
             const countResult = await session.run(
-                `MATCH (u: University) ${whereQuery} RETURN count(u) as count`,
+                `${baseQuery} RETURN count(u) as count`,
                 {regex, verified}
             );
-            const count = countResult.records[0].get('count') as number;
+            const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
             
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
-                    `MATCH (u: University) ${whereQuery} RETURN u ORDER BY u.name SKIP $skip LIMIT $limit`,
+                    `${baseQuery} RETURN u ORDER BY u.name SKIP $skip LIMIT $limit`,
                     {regex, verified, skip: getSkipFromPageLimit(page, limit), limit}
                 );
-                for (const record of result.records) {
-                    const node = record.get(0)?.properties;
-                    if (!node) continue;                            // TODO: Analyze this case, it's impossible, right?
+                const nodes = getNodes(result);
+                for (const node of nodes) {
                     collection.push(this.nodeToUniversity(node));
                 }
             }
