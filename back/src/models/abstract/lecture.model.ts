@@ -1,6 +1,5 @@
 import TimeRange from '../../helpers/classes/timeRange.class';
 import Building from './building.model';
-import CourseClass from './courseClass.model';
 import GenericModel from './generic.model';
 
 export default abstract class Lecture extends GenericModel {
@@ -15,5 +14,4 @@ export default abstract class Lecture extends GenericModel {
 
     // Methods
     public abstract getBuilding(): Promise<Building | undefined>;
-    public abstract getCourseClass(): Promise<CourseClass>;
 }

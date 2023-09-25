@@ -1,5 +1,12 @@
-import { graphDriver } from '../../helpers/persistence/graphPersistence.helper';
+import { ERRORS } from '../../constants/error.constants';
+import GenericException from '../../exceptions/generic.exception';
+import { deglobalizeField, getNode, getRelId, globalizeField, graphDriver, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import Course from '../../models/abstract/course.model';
+import DatabaseCourse from '../../models/implementations/databaseCourse.model';
 import CourseDao from '../abstract/course.dao';
+import {v4 as uuidv4} from 'uuid';
+
+const BELONGS_TO_PREFIX = 'CU';
 
 export default class DatabaseCourseDao extends CourseDao {
     private static instance: CourseDao;
@@ -37,5 +44,31 @@ export default class DatabaseCourseDao extends CourseDao {
         } finally {
             await session.close();
         }
+    }
+
+    async create(universityId: string, internalId: string, name: string): Promise<Course> {
+        // Generate a new id
+        const id = uuidv4();
+
+        const session = graphDriver.session();
+        try {
+            internalId = globalizeField(universityId, internalId);
+            const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
+            const result = await session.run(
+                'MATCH (u: University {id: $universityId}) CREATE (c: Course {id: $id, internalId: $internalId, name: $name})-[:BELONGS_TO {relId: $relId}]->(u) RETURN c',
+                {universityId, id, internalId, name, relId}
+            );
+            const node = getNode(result);
+            if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
+            return this.nodeToCourse(node);
+        } catch (err) {
+            throw parseErrors(err, '[CourseDao:create]', ERRORS.BAD_REQUEST.COURSE_ALREADY_EXISTS);
+        } finally {
+            await session.close();
+        }
+    }
+
+    private nodeToCourse(node: any): DatabaseCourse {
+        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), node.name);
     }
 }

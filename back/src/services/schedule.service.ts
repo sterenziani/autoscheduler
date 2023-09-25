@@ -134,7 +134,7 @@ export default class ScheduleService {
             viableCourseClassesMap.set(c.id, []);
             const ccs = await c.getCourseClasses(termId);
             for(const cc of ccs) {
-                const ccLectures: Lecture[] = await cc.getLectures();
+                const ccLectures: Lecture[] = await cc.getLectures();   // TODO: Analyze
                 if(this.areTimeRangesCompatible(ccLectures.map(l => l.time), unavailableTimeSlots))
                     viableCourseClassesMap.get(c.id)?.push(cc);
             }
@@ -189,7 +189,7 @@ export default class ScheduleService {
 
                 const combinationProposal = [cc, ...combo];
                 let weeklyMinutes = 0;
-                for(const c of combinationProposal) weeklyMinutes += await c.getWeeklyClassTimeInMinutes();
+                for(const c of combinationProposal) weeklyMinutes += await c.getWeeklyClassTimeInMinutes(); // TODO: Analyze
                 const weeklyHours = weeklyMinutes/60;
 
                 // If this combination is much longer than the desired week, discard it. It would only grow longer in following recursions

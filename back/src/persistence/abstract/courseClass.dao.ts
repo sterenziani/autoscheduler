@@ -10,7 +10,7 @@ export default abstract class CourseClassDao extends GenericDao<CourseClass> {
     }
 
     // Abstract Methods Signature Override
-    public abstract create(universityId: string, courseId: string, termId: string, name: string): Promise<CourseClass>;
+    public abstract create(universityId: string, courseId: string, termId: string, internalId: string, name: string): Promise<CourseClass>;
     public abstract modify(id: string, universityIdFilter: string, courseIdFilter?: string, termId?: string, name?: string): Promise<CourseClass>;
     public abstract delete(id: string, universityIdFilter: string, courseIdFilter?: string): Promise<void>;
 

@@ -1,5 +1,12 @@
-import { graphDriver } from '../../helpers/persistence/graphPersistence.helper';
+import { ERRORS } from '../../constants/error.constants';
+import GenericException from '../../exceptions/generic.exception';
+import { deglobalizeField, getNode, getRelId, globalizeField, graphDriver, parseErrors, parseGraphDate, toGraphDate } from '../../helpers/persistence/graphPersistence.helper';
+import Term from '../../models/abstract/term.model';
+import DatabaseTerm from '../../models/implementations/databaseTerm.model';
 import TermDao from '../abstract/term.dao';
+import {v4 as uuidv4} from 'uuid';
+
+const BELONGS_TO_PREFIX = 'TU';
 
 export default class DatabaseTermDao extends TermDao {
     private static instance: TermDao;
@@ -28,5 +35,31 @@ export default class DatabaseTermDao extends TermDao {
         } finally {
             await session.close();
         }
+    }
+
+    async create(universityId: string, internalId: string, name: string, startDate: Date, published: boolean): Promise<Term> {
+        // Generate a new id
+        const id = uuidv4();
+
+        const session = graphDriver.session();
+        try {
+            internalId = globalizeField(universityId, internalId);
+            const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
+            const result = await session.run(
+                'MATCH (u: University {id: $universityId}) CREATE (t: Term {id: $id, internalId: $internalId, name: $name, startDate: $startDate, published: $published})-[:BELONGS_TO {relId: $relId}]->(u) RETURN t',
+                {universityId, id, internalId, name, startDate: toGraphDate(startDate), published, relId}
+            );
+            const node = getNode(result);
+            if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
+            return this.nodeToTerm(node);
+        } catch (err) {
+            throw parseErrors(err, '[TermDao:create]', ERRORS.BAD_REQUEST.TERM_ALREADY_EXISTS);
+        } finally {
+            await session.close();
+        }
+    }
+
+    private nodeToTerm(node: any): DatabaseTerm {
+        return new DatabaseTerm(node.id, deglobalizeField(node.internalId), node.name, node.published, parseGraphDate(node.startDate));
     }
 }

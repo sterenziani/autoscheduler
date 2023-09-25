@@ -480,13 +480,14 @@ export class UniversityController {
         const courseId = req.params.courseId;
         const termId = validateString(req.body.termId);
         const name = validateString(req.body.name);
+        const internalId = validateString(req.body.internalId);
 
-        if (!termId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!termId || !name || !internalId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         
         try {
-            // TODO: Should this be handled by courseService?
-            const courseClass: CourseClass = await this.courseClassService.createCourseClass(universityId, courseId, termId, name);
+            const courseClass: CourseClass = await this.courseClassService.createCourseClass(universityId, courseId, termId, internalId, name);
             res.status(HTTP_STATUS.CREATED)
                 .location(getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.UNIVERSITY, courseClass.id))
                 .send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.UNIVERSITY));

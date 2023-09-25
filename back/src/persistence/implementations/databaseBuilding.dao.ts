@@ -52,7 +52,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
         const session = graphDriver.session();
         try {
             internalId = globalizeField(universityId, internalId);
-            const relId = getRelId(BELONGS_TO_PREFIX, universityId, id);
+            const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
                 'MATCH (u: University {id: $universityId}) CREATE (b: Building {id: $id, internalId: $internalId, name: $name})-[:BELONGS_TO {relId: $relId}]->(u) RETURN b',
                 {universityId, id, internalId, name, relId}
@@ -93,7 +93,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
         const session = graphDriver.session();
         try {
             const result = await session.run(
-                `MATCH (:CourseClass)<-[lr:OF]-(l: Lecture)-[:TAKES_PLACES_IN]->(b: Building {id: $id})-[r]-() WHERE (b)-[:BELONGS_TO]->(: University {id: $universityId}) DELETE lr, r, l, b`,
+                `MATCH (:CourseClass)<-[lr:OF]-(l: Lecture)-[:TAKES_PLACE_IN]->(b: Building {id: $id})-[r]-() WHERE (b)-[:BELONGS_TO]->(: University {id: $universityId}) DELETE lr, r, l, b`,
                 {id, universityId}
             );
             const stats = getStats(result);

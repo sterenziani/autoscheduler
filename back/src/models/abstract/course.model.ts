@@ -15,6 +15,5 @@ export default abstract class Course extends GenericModel {
 
     // Methods
     public abstract getRequiredCoursesForProgram(programId: string): Promise<Course[]>;
-    public abstract getIndirectCorrelatives(programId: string): Promise<Course[]>;
     public abstract getCourseClasses(termId: string): Promise<CourseClass[]>;
 }

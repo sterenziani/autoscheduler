@@ -74,10 +74,10 @@ export default class TimeRange {
 
     /**
      * returns timeRange in string format
-     * d hh:mm
+     * d-hh:mm-hh:mm
      */
     toString(): string {
-        return `${this.dayOfWeek} ${this.startTime}-${this.endTime}`;
+        return `${this.dayOfWeek}-${this.startTime.toString()}-${this.endTime.toString()}`;
     }
 
     /**
