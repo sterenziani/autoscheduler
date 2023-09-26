@@ -6,7 +6,7 @@ import DatabaseCourse from '../../models/implementations/databaseCourse.model';
 import CourseDao from '../abstract/course.dao';
 import {v4 as uuidv4} from 'uuid';
 
-const BELONGS_TO_PREFIX = 'CU';
+const BELONGS_TO_PREFIX = 'C-U';
 
 export default class DatabaseCourseDao extends CourseDao {
     private static instance: CourseDao;

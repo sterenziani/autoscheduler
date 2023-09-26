@@ -6,8 +6,8 @@ import DatabaseCourseClass from '../../models/implementations/databaseCourseClas
 import CourseClassDao from '../abstract/courseClass.dao';
 import {v4 as uuidv4} from 'uuid';
 
-const OF_PREFIX = 'CC';
-const HAPPENS_IN_PREFIX = 'CT';
+const OF_PREFIX = 'CC-C';
+const HAPPENS_IN_PREFIX = 'CC-T';
 
 export default class DatabaseCourseClassDao extends CourseClassDao {
     private static instance: CourseClassDao;

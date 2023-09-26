@@ -5,9 +5,9 @@ import Student from "../../models/abstract/student.model";
 import DatabaseStudent from "../../models/implementations/databaseStudent.model";
 import StudentDao from "../abstract/student.dao";
 
-const FOLLOWS_PREFIX = 'SP';
-const ENROLLED_IN_PREFIX = 'SU';
-const COMPLETED_PREFIX = 'SC';
+const FOLLOWS_PREFIX = 'S-P';
+const ENROLLED_IN_PREFIX = 'S-U';
+const COMPLETED_PREFIX = 'S-C';
 
 export default class DatabaseStudentDao extends StudentDao {
     private static instance: StudentDao;

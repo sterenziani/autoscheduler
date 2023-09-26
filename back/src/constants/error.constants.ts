@@ -143,6 +143,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'COURSE_ALREADY_IN_PROGRAM',
             message: 'Course is already in the program.',
+        },
+        COURSE_ALREADY_REQUIRED_IN_PROGRAM: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_REQUIRED_IN_PROGRAM',
+            message: 'Required course is already set as required in the program.',
         }
     },
     UNAUTHORIZED: {

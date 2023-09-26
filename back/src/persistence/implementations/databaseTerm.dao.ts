@@ -6,7 +6,7 @@ import DatabaseTerm from '../../models/implementations/databaseTerm.model';
 import TermDao from '../abstract/term.dao';
 import {v4 as uuidv4} from 'uuid';
 
-const BELONGS_TO_PREFIX = 'TU';
+const BELONGS_TO_PREFIX = 'T-U';
 
 export default class DatabaseTermDao extends TermDao {
     private static instance: TermDao;

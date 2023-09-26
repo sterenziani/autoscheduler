@@ -7,8 +7,8 @@ import DatabaseLecture from '../../models/implementations/databaseLecture.model'
 import LectureDao from '../abstract/lecture.dao';
 import {v4 as uuidv4} from 'uuid';
 
-const OF_PREFIX = 'LC';
-const TAKES_PLACE_IN_PREFIX = 'LB';
+const OF_PREFIX = 'L-CC';
+const TAKES_PLACE_IN_PREFIX = 'L-B';
 
 export default class DatabaseLectureDao extends LectureDao {
     private static instance: LectureDao;

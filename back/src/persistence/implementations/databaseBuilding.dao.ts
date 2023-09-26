@@ -10,8 +10,8 @@ import { ERRORS } from '../../constants/error.constants';
 import { IBuildingDistance, IBuildingDistancesInput } from '../../interfaces/building.interface';
 import { Integer } from 'neo4j-driver';
 
-const BELONGS_TO_PREFIX = 'BU';
-const DISTANCE_TO_PREFIX = 'BB';
+const BELONGS_TO_PREFIX = 'B-U';
+const DISTANCE_TO_PREFIX = 'B-B';
 
 export default class DatabaseBuildingDao extends BuildingDao {
     private static instance: BuildingDao;
@@ -289,8 +289,9 @@ export default class DatabaseBuildingDao extends BuildingDao {
         const session = graphDriver.session();
         try {
             const result = await session.run(
+                'MATCH (b:Building {id: $id})-[:BELONGS_TO]->(u:University {id: $universityId}) ' +
                 'UNWIND $parsedDistances as distance ' +
-                'MATCH (b:Building {id: $id})-[:BELONGS_TO]->(:University {id: $universityId})<-[:BELONGS_TO]-(t:Building {id: distance.distancedBuildingId}) ' +
+                'MATCH (t:Building {id: distance.distancedBuildingId})-[:BELONGS_TO]->(u) ' +
                 'CREATE (b)-[:DISTANCE_TO {relId: distance.relId, distance: distance.distance}]->(t)-[:DISTANCE_TO {relId: distance.counterRelId, distance: distance.distance}]->(b)',
                 {id, universityId, parsedDistances}
             );
@@ -322,10 +323,10 @@ export default class DatabaseBuildingDao extends BuildingDao {
                 await transaction.commit();
                 return;
             }
-            // TODO: I can match b just once
             await transaction.run(
+                'MATCH (b:Building {id: $id}) ' +
                 'UNWIND $parsedDistances as distance ' +
-                'MATCH (b:Building {id: $id}), (t:Building {id: distance.distancedBuildingId}) ' +
+                'MATCH (t:Building {id: distance.distancedBuildingId}) ' +
                 'CREATE (b)-[:DISTANCE_TO {relId: distance.relId, distance: distance.distance}]->(t)-[:DISTANCE_TO {relId: distance.counterRelId, distance: distance.distance}]->(b)',
                 {id, parsedDistances}
             );
