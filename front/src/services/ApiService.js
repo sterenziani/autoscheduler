@@ -206,6 +206,7 @@ const requestPasswordChangeToken = async (email) => {
     return simpleApiPostRequest(passwordRecoveryTokensEndpoint, payload)
 }
 
+// TODO: Add an endpoint to check if token is valid
 const getPasswordChangeToken = async (token) => {
     return simpleApiGetRequest(passwordRecoveryTokensEndpoint)
 }

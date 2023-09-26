@@ -109,10 +109,10 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
         const payload = {
             'email': email,
             'password': password,
-            "locale": navigator.language,
-            "internalId": "XXX",
             "name": name,
-            "universityId": universityId
+            "universityId": universityId,
+            "programId": programId,
+            "locale": navigator.language
         }
 
         const createResponse = await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
@@ -121,8 +121,8 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
         const authenticateResponse = await logIn(email, password)
         if(authenticateResponse.status !== OK) return authenticateResponse
 
-        const endpoint = `${setProgramEndpoint}/${programId}`
-        await api.put(endpoint, getRequestHeaders())
+        const endpoint = `${setProgramEndpoint}`
+        await api.put(endpoint, {"programId": programId}, getRequestHeaders())
 
         return createResponse
     }
