@@ -64,6 +64,10 @@ export default class DatabaseStudentDao extends StudentDao {
         }
     }
 
+    async modify(id: string, programId?: string | undefined, name?: string | undefined): Promise<Student> {
+        
+    }
+
     private nodeToStudent(node: any): DatabaseStudent {
         return new DatabaseStudent(node.id, node.name);
     }

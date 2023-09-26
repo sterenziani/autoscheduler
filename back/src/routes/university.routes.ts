@@ -67,6 +67,12 @@ export class UniversityRoutes {
             universitiesOnlyMiddleware,
             this.controller.modifyUniversityProgram
         );
+        this.router.delete(
+            '/programs/:programId',
+            authUsersOnlyMiddleware,
+            universitiesOnlyMiddleware,
+            this.controller.deleteUniversityProgram
+        );
 
         // /university/programs/:programId/courses routes
         this.router.get(

@@ -90,7 +90,21 @@ export default class DatabaseProgramDao extends ProgramDao {
 
     // Never used
     async delete(id: string, universityId: string): Promise<void> {
-        throw new Error('Not implemented');
+        const session = graphDriver.session();
+        try {
+            const result = await session.run(
+                'MATCH (p:Program {id: $id})-[b:BELONGS_TO]->(:University {id: $universityId}) ' +
+                'OPTIONAL MATCH ()-[i:IN]->(p), ()-[r:REQUIRES {programId: $id}]->() ' +
+                'DELETE b, i, r, p',
+                {id, universityId}
+            );
+            const stats = getStats(result);
+            if (stats.nodesDeleted === 0) throw new GenericException(this.notFoundError);
+        } catch (err) {
+            throw parseErrors(err, '[ProgramDao:delete]', ERRORS.CONFLICT.CANNOT_DELETE);
+        } finally {
+            await session.close();
+        }
     }
 
     async findById(id: string, universityId?: string): Promise<Program | undefined> {

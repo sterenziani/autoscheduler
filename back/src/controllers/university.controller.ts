@@ -176,6 +176,19 @@ export class UniversityController {
         }
     };
 
+    public deleteUniversityProgram: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const programId = req.params.programId;
+
+        try {
+            await this.programService.deleteProgram(programId, universityId);
+
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
     public getUniversityProgramCourses: RequestHandler = async (req, res, next) => {
         const universityId = req.user.id;
         const programId = req.params.programId;
