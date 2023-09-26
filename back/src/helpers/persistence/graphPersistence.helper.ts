@@ -70,8 +70,8 @@ export const getGlobalRegex = (textSearch?: string): string => {
 };
 
 // relId is for relationships, for them to be unique and also makes some particular queries easier
-export const getRelId = (prefix: string, fromId: string, toId: string): string => {
-    return `${prefix}--${fromId}--${toId}`;
+export const getRelId = (prefix: string, fromId: string, toId: string, underId?: string): string => {
+    return `${prefix}--${fromId}--${toId}${underId ? `--${underId}` : ''}`;
 };
 
 export const getToIdFromRelId = (relId: string): string => {
@@ -82,6 +82,12 @@ export const getToIdFromRelId = (relId: string): string => {
 export const getFromIdFromRelId = (relId: string): string => {
     const splitRelId = relId.split('--');
     return splitRelId[1] as string;
+};
+
+export const getunderIdFromRelId = (relId: string): string | undefined => {
+    const splitRelId = relId.split('--');
+    if (splitRelId.length !== 4) return undefined;
+    return splitRelId[3] as string;
 };
 
 // these helpers globalizes and deglobalizes properties that should be unique only within the scope of a university (basically just internalId)

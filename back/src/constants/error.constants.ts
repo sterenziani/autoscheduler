@@ -186,6 +186,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             message: 'Course class not found.',
         },
         PROGRAM: { status: HTTP_STATUS.NOT_FOUND, code: 'PROGRAM_NOT_FOUND', message: 'Program not found.' },
+        COURSE_REQUIREMENT: { status: HTTP_STATUS.NOT_FOUND, code: 'COURSE_REQUIREMENT_NOT_FOUND', message: 'Course requirement not found.' },
         LECTURE: { status: HTTP_STATUS.NOT_FOUND, code: 'LECTURE_NOT_FOUND', message: 'Lecture not found.' },
         SCHEDULE: { status: HTTP_STATUS.NOT_FOUND, code: 'SCHEDULE_NOT_FOUND', message: 'Schedule not found.' },
         PASSWORD_RECOVERY_TOKEN: { status: HTTP_STATUS.NOT_FOUND, code: 'PASSWORD_RECOVERY_TOKEN_NOT_FOUND', message: 'Password recovery token not found.' },

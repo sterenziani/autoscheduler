@@ -161,7 +161,7 @@ export default class DatabaseProgramDao extends ProgramDao {
         try {
             const relId = getRelId(IN_PREFIX, courseId, id);
             const result = await session.run(
-                'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
+                'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
                 'CREATE (c)-[:IN {relId: $relId, optional: $optional}]->(p)',
                 {id, universityId, courseId, optional, relId}
             );
@@ -270,17 +270,105 @@ export default class DatabaseProgramDao extends ProgramDao {
     async addCourseRequiredCourse(id: string, universityId: string, courseId: string, requiredCourseId: string): Promise<void> {
         const session = graphDriver.session();
         try {
-            const relId = getRelId(REQUI, courseId, id);
+            const relId = getRelId(REQUIRES_PREFIX, courseId, requiredCourseId, id);
             const result = await session.run(
-                'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
-                'CREATE (c)-[:IN {relId: $relId, optional: $optional}]->(p)',
-                {id, universityId, courseId, optional, relId}
+                'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(: University {id: $universityId}) ' +
+                'OPTIONAL MATCH (c: Course {id: $courseId})-[:IN]->(p)<-[:IN]-(rc: Course {id: $requiredCourseId}) ' +
+                'CREATE (c)-[:REQUIRES {relId: $relId, programId: $id}]->(rc) ' +
+                'RETURN p.id as id',
+                {id, universityId, courseId, requiredCourseId, relId}
             );
             const stats = getStats(result);
-            if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if either of the courses or program was not found
+            if (stats.relationshipsCreated === 0) {
+                const maybeId = getValue<string | undefined>(result, 'id');
+                throw new GenericException(maybeId ? ERRORS.NOT_FOUND.COURSE : ERRORS.NOT_FOUND.PROGRAM);
+            }
         } catch (err) {
             throw parseErrors(err, '[ProgramDao:addCourseRequiredCourse]', ERRORS.BAD_REQUEST.COURSE_ALREADY_REQUIRED_IN_PROGRAM);
         } finally {
+            await session.close();
+        }
+    }
+
+    async removeCourseRequiredCourse(id: string, universityId: string, courseId: string, requiredCourseId: string): Promise<void> {
+        const session = graphDriver.session();
+        try {
+            const relId = getRelId(REQUIRES_PREFIX, courseId, requiredCourseId, id);
+            const result = await session.run(
+                'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(: University {id: $universityId}) ' +
+                'OPTIONAL MATCH ()-[r:REQUIRES {relId: $relId, programId: $id}]->() ' +
+                'DELETE r ' +
+                'RETURN p.id as id',
+                {id, universityId, courseId, requiredCourseId, relId}
+            );
+            const stats = getStats(result);
+            if (stats.relationshipsDeleted === 0) {
+                const maybeId = getValue<string | undefined>(result, 'id');
+                throw new GenericException(maybeId ? ERRORS.NOT_FOUND.COURSE_REQUIREMENT : ERRORS.NOT_FOUND.PROGRAM);
+            }
+        } catch (err) {
+            throw parseErrors(err, '[ProgramDao:removeCourseRequiredCourse]', ERRORS.BAD_REQUEST.COURSE_ALREADY_REQUIRED_IN_PROGRAM);
+        } finally {
+            await session.close();
+        }
+    }
+
+    async bulkAddCourseRequiredCourses(id: string, universityId: string, courseId: string, requirements: string[]): Promise<void> {
+        const parsedCourses = this.parseRequiredCourses(requirements, courseId, id);
+        if (parsedCourses.length === 0) return;
+
+        const session = graphDriver.session();
+        try {
+            const result = await session.run(
+                'MATCH (c:Course {id: $courseId})-[:IN]->(p:Program {id: $id})-[:BELONGS_TO]->(:University {id: $universityId}) ' +
+                'UNWIND $parsedCourses as course ' +
+                'MATCH (rc:Course {id: course.id})-[:IN]->(p) ' +
+                'CREATE (c)-[:REQUIRES {relId: course.relId, programId: $id}]->(rc)',
+                {id, universityId, parsedCourses}
+            );
+            const stats = getStats(result);
+            if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or required course or program was not found
+        } catch (err) {
+            throw parseErrors(err, '[ProgramDao:bulkAddCourseRequiredCourses]', ERRORS.BAD_REQUEST.COURSE_ALREADY_REQUIRED_IN_PROGRAM);
+        } finally {
+            await session.close();
+        }
+    }
+
+    async bulkReplaceCourseRequiredCourses(id: string, universityId: string, courseId: string, requirements: string[]): Promise<void> {
+        const parsedCourses = this.parseRequiredCourses(requirements, courseId, id);
+
+        const session = graphDriver.session();
+        const transaction = session.beginTransaction();
+        try {
+            // We delete first since we are going to replace all the existing course requirements with the new requirements
+            const deleteResult = await transaction.run(
+                'MATCH (c:Course {id: $courseId})-[:IN]->(p:Program {id: $id})-[:BELONGS_TO]->(:University {id: $universityId}) ' +
+                'OPTIONAL MATCH (c)-[r:REQUIRES {programId: $id}]->() ' +
+                'DELETE r ' +
+                'RETURN c.id as id',
+                {id, universityId, courseId}
+            );
+            const maybeId = getValue<string | undefined>(deleteResult, 'id');
+            if (!maybeId) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
+            // If no new requirements provided we commit transaction and return, there is no point in caling db again
+            if (parsedCourses.length === 0) {
+                await transaction.commit();
+                return;
+            }
+            await transaction.run(
+                'MATCH (c:Course {id: $courseId})-[:IN]->(p:Program {id: $id}) ' +
+                'UNWIND $parsedCourses as course ' +
+                'MATCH (rc:Course {id: course.id})-[:IN]->(p) ' +
+                'CREATE (c)-[:REQUIRES {relId: course.relId, programId: $id}]->(rc)',
+                {id, courseId, parsedCourses}
+            );
+            await transaction.commit();
+        } catch (err) {
+            await transaction.rollback();
+            throw parseErrors(err, '[ProgramDao:bulkReplaceCourseRequiredCourses]', ERRORS.BAD_REQUEST.COURSE_ALREADY_REQUIRED_IN_PROGRAM);
+        } finally {
+            await transaction.close();
             await session.close();
         }
     }
@@ -303,6 +391,17 @@ export default class DatabaseProgramDao extends ProgramDao {
                 id,
                 optional: true,
                 relId: getRelId(IN_PREFIX, id, programId)
+            });
+        }
+        return parsed;
+    }
+
+    private parseRequiredCourses(courseIds: string[], courseId: string, programId: string) {
+        const parsed: {id: string, relId: string}[] = [];
+        for (const id of courseIds) {
+            parsed.push({
+                id,
+                relId: getRelId(REQUIRES_PREFIX, courseId, id, programId)
             });
         }
         return parsed;
