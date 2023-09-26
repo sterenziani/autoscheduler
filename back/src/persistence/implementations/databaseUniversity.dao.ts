@@ -21,19 +21,24 @@ export default class DatabaseUniversityDao extends UniversityDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const constraintPromises: Promise<any>[] = [];
-            constraintPromises.push(session.run(
+            const promises: Promise<any>[] = [];
+            // Constraints
+            promises.push(session.run(
                 'CREATE CONSTRAINT university_id_unique_constraint IF NOT EXISTS FOR (u: University) REQUIRE u.id IS UNIQUE'
             ));
-            constraintPromises.push(session.run(
+            promises.push(session.run(
                 'CREATE CONSTRAINT university_name_unique_constraint IF NOT EXISTS FOR (u: University) REQUIRE u.name IS UNIQUE'
             ));
-            constraintPromises.push(session.run(
+            promises.push(session.run(
                 'CREATE CONSTRAINT belongs_to_unique_constraint IF NOT EXISTS FOR ()-[r:BELONGS_TO]-() REQUIRE r.relId IS REL UNIQUE'
             ));
-            await Promise.allSettled(constraintPromises);
+            // Indexes
+            promises.push(session.run(
+                'CREATE TEXT INDEX university_name_text_index IF NOT EXISTS FOR (u: University) ON (u.name)'
+            ));
+            await Promise.allSettled(promises);
         } catch (err) {
-            console.log(`[UniversityDao:init] Warning: Failed to set constraints. Reason: ${JSON.stringify(err)}`);
+            console.log(`[UniversityDao:init] Warning: Failed to create constraints and indexes. Reason: ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }

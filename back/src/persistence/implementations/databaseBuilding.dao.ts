@@ -27,19 +27,24 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const constraintPromises: Promise<any>[] = [];
-            constraintPromises.push(session.run(
+            const promises: Promise<any>[] = [];
+            // Constraints
+            promises.push(session.run(
                 'CREATE CONSTRAINT building_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.id IS UNIQUE'
             ));
-            constraintPromises.push(session.run(
+            promises.push(session.run(
                 'CREATE CONSTRAINT building_internal_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.internalId IS UNIQUE'
             ));
-            constraintPromises.push(session.run(
+            promises.push(session.run(
                 'CREATE CONSTRAINT distance_to_unique_constraint IF NOT EXISTS FOR ()-[r:DISTANCE_TO]-() REQUIRE r.relId IS REL UNIQUE'
             ));
-            await Promise.allSettled(constraintPromises);
+            // Indexes
+            promises.push(session.run(
+                'CREATE TEXT INDEX building_name_text_index IF NOT EXISTS FOR (b: Building) ON (b.name)'
+            ));
+            await Promise.allSettled(promises);
         } catch (err) {
-            console.log(`[BuildingDao] Warning: Failed to set constraints. Reason ${JSON.stringify(err)}`);
+            console.log(`[BuildingDao] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }
@@ -70,7 +75,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async modify(id: string, universityId: string, internalId?: string, name?: string): Promise<Building> {
         const session = graphDriver.session();
         try {
-            internalId = internalId ? globalizeField(universityId, internalId) : internalId;
+            internalId = internalId ? globalizeField(universityId, internalId) : undefined;
             const baseQuery = buildQuery('MATCH (u: University {id: $universityId})<-[r:BELONGS_TO]-(b: Building {id: $id})', 'SET', ',', [
                 {entry: 'b.internalId = $internalId', value: internalId},
                 {entry: 'b.name = $name', value: name}

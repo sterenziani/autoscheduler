@@ -26,19 +26,24 @@ export default class DatabaseProgramDao extends ProgramDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const constraintPromises: Promise<any>[] = [];
-            constraintPromises.push(session.run(
+            const promises: Promise<any>[] = [];
+            // Constraints
+            promises.push(session.run(
                 'CREATE CONSTRAINT program_id_unique_constraint IF NOT EXISTS FOR (p: Program) REQUIRE p.id IS UNIQUE'
             ));
-            constraintPromises.push(session.run(
+            promises.push(session.run(
                 'CREATE CONSTRAINT program_internal_id_unique_constraint IF NOT EXISTS FOR (p: Program) REQUIRE p.internalId IS UNIQUE'
             ));
-            constraintPromises.push(session.run(
+            promises.push(session.run(
                 'CREATE CONSTRAINT in_unique_constraint IF NOT EXISTS FOR ()-[r:IN]-() REQUIRE r.relId IS REL UNIQUE'
             ));
-            await Promise.allSettled(constraintPromises);
+            // Indexes
+            promises.push(session.run(
+                'CREATE TEXT INDEX program_name_text_index IF NOT EXISTS FOR (p: Program) ON (p.name)'
+            ));
+            await Promise.allSettled(promises);
         } catch (err) {
-            console.log(`[BuildingDao] Warning: Failed to set constraints. Reason ${JSON.stringify(err)}`);
+            console.log(`[BuildingDao] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }
@@ -69,7 +74,7 @@ export default class DatabaseProgramDao extends ProgramDao {
     async modify(id: string, universityId: string, internalId?: string, name?: string): Promise<Program> {
         const session = graphDriver.session();
         try {
-            internalId = internalId ? globalizeField(universityId, internalId) : internalId;
+            internalId = internalId ? globalizeField(universityId, internalId) : undefined;
             const baseQuery = buildQuery('MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})', 'SET', ',', [
                 {entry: 'p.internalId = $internalId', value: internalId},
                 {entry: 'p.name = $name', value: name}
