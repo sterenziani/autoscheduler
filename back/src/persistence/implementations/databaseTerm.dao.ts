@@ -81,7 +81,7 @@ export default class DatabaseTermDao extends TermDao {
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN t`,
-                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding}
+                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, startDate: startDate, published: published}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -150,7 +150,7 @@ export default class DatabaseTermDao extends TermDao {
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(t) as count`,
-                {regex, globalRegex, universityId}
+                {regex, globalRegex, universityId, from, to, published}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
