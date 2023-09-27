@@ -3,9 +3,10 @@ import DatabaseUniversity from '../../models/implementations/databaseUniversity.
 import UniversityDao from '../abstract/university.dao';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, getNode, getNodes, getRegex, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, getNode, getNodes, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
 import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
+import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
 
 export default class DatabaseUniversityDao extends UniversityDao {
     private static instance: UniversityDao;
@@ -47,9 +48,10 @@ export default class DatabaseUniversityDao extends UniversityDao {
     async create(id: string, name: string, verified: boolean): Promise<University> {
         const session = graphDriver.session();
         try {
+            const encodedName = encodeText(name);
             const result = await session.run(
-                'CREATE (u: University {id: $id, name: $name, verified: $verified}) RETURN u',
-                {id, name, verified}
+                'CREATE (u: University {id: $id, name: $name, encoding: $encoding, verified: $verified}) RETURN u',
+                {id, name: encodedName.cleanText, encoding: encodedName.encoding, verified}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.EMPTY_NODE);
@@ -64,13 +66,14 @@ export default class DatabaseUniversityDao extends UniversityDao {
     async modify(id: string, name?: string, verified?: boolean): Promise<University> {
         const session = graphDriver.session();
         try {
+            const encodedName = name ? encodeText(name) : undefined;
             const baseQuery = buildQuery('MATCH (u: University {id: $id})', 'SET', ',', [
-                {entry: 'u.name = $name', value: name},
+                {entry: 'u.name = $name, u.encoding = $encoding', value: name},
                 {entry: 'u.verified = $verified', value: verified}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN u`,
-                {id, name, verified}
+                {id, name: encodedName?.cleanText, encoding: encodedName?.encoding, verified}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -109,19 +112,19 @@ export default class DatabaseUniversityDao extends UniversityDao {
         // Initialize useful variables
         const collection: University[] = [];
         let lastPage = 1;
-        const regex = getRegex(textSearch);
 
         const session = graphDriver.session();
         try {
+            textSearch = cleanMaybeText(textSearch);
             // Build query
             const baseQuery = buildQuery('MATCH (u: University)', 'WHERE', 'AND', [
-                {entry: 'u.name =~ $regex', value: textSearch},
+                {entry: 'u.name CONTAINS $textSearch', value: textSearch},
                 {entry: 'u.verified = $verified', value: verified}
             ]);
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(u) as count`,
-                {regex, verified}
+                {textSearch, verified}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
@@ -130,7 +133,7 @@ export default class DatabaseUniversityDao extends UniversityDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN u ORDER BY u.name SKIP $skip LIMIT $limit`,
-                    {regex, verified, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, verified, skip: getSkipFromPageLimit(page, limit), limit}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -147,6 +150,6 @@ export default class DatabaseUniversityDao extends UniversityDao {
     }
 
     private nodeToUniversity(node: any): DatabaseUniversity {
-        return new DatabaseUniversity(node.id, node.name, node.verified)
+        return new DatabaseUniversity(node.id, decodeText(node.name, node.encoding), node.verified)
     }
 }

@@ -2,7 +2,7 @@ import TermDao from '../persistence/abstract/term.dao';
 import TermDaoFactory from '../factories/termDao.factory';
 import Term from '../models/abstract/term.model';
 import { PaginatedCollection } from '../interfaces/paging.interface';
-import { cleanMaybeText, cleanText } from '../helpers/string.helper';
+import { cleanMaybeText } from '../helpers/string.helper';
 
 export default class TermService {
     private static instance: TermService;
@@ -35,11 +35,11 @@ export default class TermService {
     }
 
     async createTerm(universityId: string, internalId: string, name: string, startDate: Date, published: boolean): Promise<Term> {
-        return await this.dao.create(universityId, cleanText(internalId), cleanText(name), startDate, published);
+        return await this.dao.create(universityId, internalId, name, startDate, published);
     }
 
     async modifyTerm(id: string, universityIdFilter: string, internalId?: string, name?: string, startDate?: Date, published?: boolean): Promise<Term> {
-        return await this.dao.modify(id, universityIdFilter, cleanMaybeText(internalId), cleanMaybeText(name), startDate, published);
+        return await this.dao.modify(id, universityIdFilter, internalId, name, startDate, published);
     }
 
     async deleteTerm(id: string, universityIdFilter: string): Promise<void> {

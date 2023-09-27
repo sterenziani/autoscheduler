@@ -7,7 +7,7 @@ import { PaginatedCollection } from '../interfaces/paging.interface';
 import { IStudentInfo } from '../interfaces/student.interface';
 import EmailService from './email.service';
 import { mapStudentProgram } from '../helpers/auth.helper';
-import { cleanMaybeText, cleanText } from '../helpers/string.helper';
+import { cleanMaybeText } from '../helpers/string.helper';
 
 export default class StudentService {
     private static instance: StudentService;
@@ -46,7 +46,7 @@ export default class StudentService {
         // create user
         const user = await this.userService.createUser(email, password, locale, ROLE.STUDENT);
         // create student
-        const student = await this.dao.create(user.id, universityId, programId, cleanText(name));
+        const student = await this.dao.create(user.id, universityId, programId, name);
         // send welcome email
         this.emailService.sendStudentWelcomeEmail(user.email, user.locale, student)
             .catch((err) => console.log(`[StudentService:createStudent] Failed to send student welcome email. ${JSON.stringify(err)}`));
@@ -54,7 +54,7 @@ export default class StudentService {
     }
 
     async modifyStudent(id: string, programId?: string, name?: string): Promise<Student> {
-        const student = await this.dao.modify(id, programId, cleanMaybeText(name));
+        const student = await this.dao.modify(id, programId, name);
         if (programId !== undefined) mapStudentProgram(id, programId);
         return student;
     }

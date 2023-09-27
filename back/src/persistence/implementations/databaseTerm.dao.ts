@@ -1,6 +1,7 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { deglobalizeField, getNode, getRelId, globalizeField, graphDriver, parseErrors, parseGraphDate, toGraphDate } from '../../helpers/persistence/graphPersistence.helper';
+import { decodeText, encodeText } from '../../helpers/string.helper';
 import Term from '../../models/abstract/term.model';
 import DatabaseTerm from '../../models/implementations/databaseTerm.model';
 import TermDao from '../abstract/term.dao';
@@ -48,11 +49,12 @@ export default class DatabaseTermDao extends TermDao {
 
         const session = graphDriver.session();
         try {
+            const encodedName = encodeText(name);
             internalId = globalizeField(universityId, internalId);
             const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (t: Term {id: $id, internalId: $internalId, name: $name, startDate: $startDate, published: $published})-[:BELONGS_TO {relId: $relId}]->(u) RETURN t',
-                {universityId, id, internalId, name, startDate: toGraphDate(startDate), published, relId}
+                'MATCH (u: University {id: $universityId}) CREATE (t: Term {id: $id, internalId: $internalId, name: $name, encoding: $encoding, startDate: $startDate, published: $published})-[:BELONGS_TO {relId: $relId}]->(u) RETURN t',
+                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, startDate: toGraphDate(startDate), published, relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
@@ -65,6 +67,6 @@ export default class DatabaseTermDao extends TermDao {
     }
 
     private nodeToTerm(node: any): DatabaseTerm {
-        return new DatabaseTerm(node.id, deglobalizeField(node.internalId), node.name, node.published, parseGraphDate(node.startDate));
+        return new DatabaseTerm(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.published, parseGraphDate(node.startDate));
     }
 }

@@ -1,6 +1,7 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { deglobalizeField, getNode, getRelId, globalizeField, graphDriver, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { decodeText, encodeText } from '../../helpers/string.helper';
 import CourseClass from '../../models/abstract/courseClass.model';
 import DatabaseCourseClass from '../../models/implementations/databaseCourseClass.model';
 import CourseClassDao from '../abstract/courseClass.dao';
@@ -52,13 +53,14 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
 
         const session = graphDriver.session();
         try {
+            const encodedName = encodeText(name);
             internalId = globalizeField(universityId, internalId);
             const ofRelId = getRelId(OF_PREFIX, id, courseId);
             const happensInRelId = getRelId(HAPPENS_IN_PREFIX, id, termId);
             const result = await session.run(
                 'MATCH (t: Term {id: $termId})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
-                'CREATE (t)<-[:HAPPENS_IN {relId: $happensInRelId}]-(cc: CourseClass {id: $id, internalId: $internalId, name: $name})-[:OF {relId: $ofRelId}]->(c) RETURN cc',
-                {universityId, courseId, termId, id, internalId, name, ofRelId, happensInRelId}
+                'CREATE (t)<-[:HAPPENS_IN {relId: $happensInRelId}]-(cc: CourseClass {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:OF {relId: $ofRelId}]->(c) RETURN cc',
+                {universityId, courseId, termId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, ofRelId, happensInRelId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);     // TODO: Better error, we dont know if term or course or uni was not found
@@ -71,6 +73,6 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
     }
 
     private nodeToCourseClass(node: any): DatabaseCourseClass {
-        return new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), node.name);
+        return new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
     }
 }

@@ -6,7 +6,7 @@ import User from '../models/abstract/user.model';
 import { API_SCOPE, DEFAULT_LOCALE, RESOURCES, ROLE } from '../constants/general.constants';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidEmail, isValidLocale, isValidPassword, validateEnum, validateInt, validateString } from '../helpers/validation.helper';
+import { isValidEmail, isValidFilter, isValidLocale, isValidPassword, validateEnum, validateInt, validateString } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import { getReqPath, getResourceUrl } from '../helpers/url.helper';
@@ -23,6 +23,8 @@ export class UsersController {
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
         const role = validateEnum<ROLE>(req.query.role, ROLE);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));       // TODO: I think for users we are fine since it just searchs on email
 
         try {
             const paginatedUsers: PaginatedCollection<User> = await this.userService.getUsers(page, limit, filter, role);

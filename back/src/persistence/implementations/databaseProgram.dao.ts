@@ -2,6 +2,7 @@ import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
 import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRegex, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import Program from '../../models/abstract/program.model';
 import DatabaseProgram from '../../models/implementations/databaseProgram.model';
@@ -55,11 +56,12 @@ export default class DatabaseProgramDao extends ProgramDao {
 
         const session = graphDriver.session();
         try {
+            const encodedName = encodeText(name);
             internalId = globalizeField(universityId, internalId);
             const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (p: Program {id: $id, internalId: $internalId, name: $name})-[:BELONGS_TO {relId: $relId}]->(u) RETURN p',
-                {universityId, id, internalId, name, relId}
+                'MATCH (u: University {id: $universityId}) CREATE (p: Program {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:BELONGS_TO {relId: $relId}]->(u) RETURN p',
+                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
@@ -74,14 +76,15 @@ export default class DatabaseProgramDao extends ProgramDao {
     async modify(id: string, universityId: string, internalId?: string, name?: string): Promise<Program> {
         const session = graphDriver.session();
         try {
+            const encodedName = name ? encodeText(name) : undefined;
             internalId = internalId ? globalizeField(universityId, internalId) : undefined;
             const baseQuery = buildQuery('MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})', 'SET', ',', [
                 {entry: 'p.internalId = $internalId', value: internalId},
-                {entry: 'p.name = $name', value: name}
+                {entry: 'p.name = $name, p.encoding = $encoding', value: name}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN p`,
-                {universityId, id, internalId, name}
+                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -137,20 +140,20 @@ export default class DatabaseProgramDao extends ProgramDao {
         // Initialize useful variables
         const collection: DatabaseProgram[] = [];
         let lastPage = 1;
-        const regex = getRegex(textSearch);
-        const globalRegex = getGlobalRegex(textSearch);
 
         const session = graphDriver.session();
         try {
+            textSearch = cleanMaybeText(textSearch);
+            const globalRegex = getGlobalRegex(textSearch);
             // Build query
             const baseQuery = buildQuery('MATCH (u: University)<-[:BELONGS_TO]-(p: Program)', 'WHERE', 'AND', [
-                {entry: '(p.name =~ $regex OR p.internalId =~ $globalRegex)', value: textSearch},
+                {entry: '(p.name CONTAINS $textSearch OR p.internalId =~ $globalRegex)', value: textSearch},
                 {entry: 'u.id = $universityId', value: universityId},
             ]);
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(p) as count`,
-                {regex, globalRegex, universityId}
+                {textSearch, globalRegex, universityId}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
@@ -159,7 +162,7 @@ export default class DatabaseProgramDao extends ProgramDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN p ORDER BY p.name SKIP $skip LIMIT $limit`,
-                    {regex, globalRegex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, globalRegex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -393,7 +396,7 @@ export default class DatabaseProgramDao extends ProgramDao {
     }
 
     private nodeToProgram(node: any): DatabaseProgram {
-        return new DatabaseProgram(node.id, deglobalizeField(node.internalId), node.name);
+        return new DatabaseProgram(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
     }
 
     private parseCourses(mandatoryCoursesIds: string[], optionalCoursesIds: string[], programId: string) {

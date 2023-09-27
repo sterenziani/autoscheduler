@@ -13,7 +13,7 @@ import { API_SCOPE, DEFAULT_LOCALE, RESOURCES } from '../constants/general.const
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidDay, isValidEmail, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
+import { isValidDay, isValidEmail, isValidFilter, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -113,6 +113,8 @@ export class UniversityController {
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
 
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
         try {
             const paginatedPrograms: PaginatedCollection<Program> = await this.programService.getPrograms(page, limit, filter, universityId);
             res.status(HTTP_STATUS.OK)
@@ -196,6 +198,8 @@ export class UniversityController {
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
         const optional = validateBoolean(req.query.optional);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCourses(page, limit, filter, programId, optional, universityId);
@@ -293,6 +297,8 @@ export class UniversityController {
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
 
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
         try {
             const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getRequiredCourses(page, limit, courseId, filter, programId, universityId);
             res.status(HTTP_STATUS.OK)
@@ -370,6 +376,8 @@ export class UniversityController {
         const filter = validateString(req.query.filter);
         const optional = validateBoolean(req.query.optional);
         const programId = validateString(req.query.programId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCourses(page, limit, filter, programId, optional, universityId);
@@ -451,6 +459,8 @@ export class UniversityController {
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
         const termId = validateString(req.query.termId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
@@ -542,6 +552,8 @@ export class UniversityController {
         const filter = validateString(req.query.filter);
         const programId = validateString(req.query.programId);
 
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
         try {
             const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getRequiredCourses(page, limit, courseId, filter, programId, universityId);
             res.status(HTTP_STATUS.OK)
@@ -557,6 +569,8 @@ export class UniversityController {
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedBuildings: PaginatedCollection<Building> = await this.buildingService.getBuildings(page, limit, filter, universityId);
@@ -764,6 +778,7 @@ export class UniversityController {
         const published = validateBoolean(req.query.published);
 
         if (from && to && to < from) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FROM_AND_TO));
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedTerms: PaginatedCollection<Term> = await this.termService.getTerms(page, limit, filter, from, to, published, universityId);
@@ -850,6 +865,8 @@ export class UniversityController {
         const filter = validateString(req.query.filter);
         const courseId = validateString(req.query.courseId);
 
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
         try {
             const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
             res.status(HTTP_STATUS.OK)
@@ -865,6 +882,8 @@ export class UniversityController {
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedStudents: PaginatedCollection<Student> = await this.studentService.getStudents(page, limit, filter, universityId);
@@ -895,6 +914,8 @@ export class UniversityController {
         const filter = validateString(req.query.filter);
         const courseId = validateString(req.query.courseId);
         const termId = validateString(req.query.termId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);

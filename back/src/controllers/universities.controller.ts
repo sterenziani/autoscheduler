@@ -6,7 +6,7 @@ import UniversityService from '../services/university.service';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
-import { isValidName, validateBoolean, validateInt, validateString } from '../helpers/validation.helper';
+import { isValidFilter, isValidName, validateBoolean, validateInt, validateString } from '../helpers/validation.helper';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import { getReqPath, getResourceUrl } from '../helpers/url.helper';
 import GenericException from '../exceptions/generic.exception';
@@ -28,6 +28,8 @@ export class UniversitiesController {
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
         const verified = validateBoolean(req.query.verified);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedUniversities: PaginatedCollection<University> = await this.universityService.getUniversities(page, limit, filter, verified);
@@ -73,6 +75,8 @@ export class UniversitiesController {
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedPrograms: PaginatedCollection<Program> = await this.programService.getPrograms(page, limit, filter, universityId);

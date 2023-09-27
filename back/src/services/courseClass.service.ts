@@ -35,11 +35,11 @@ export default class CourseClassService {
     }
 
     async createCourseClass(universityId: string, courseId: string, termId: string, name: string, internalId?: string): Promise<CourseClass> {
-        return await this.dao.create(universityId, courseId, termId, cleanText(internalId ?? `${courseId}-${termId}-${name.toLowerCase()}`), cleanText(name));
+        return await this.dao.create(universityId, courseId, termId, internalId ?? `${courseId}-${termId}-${cleanText(name)}`, name);
     }
 
     async modifyCourseClass(id: string, universityIdFilter: string, courseIdFilter?: string, termId?: string, name?: string, internalId?: string): Promise<CourseClass> {
-        return await this.dao.modify(id, universityIdFilter, courseIdFilter, termId, cleanMaybeText(internalId), cleanMaybeText(name));
+        return await this.dao.modify(id, universityIdFilter, courseIdFilter, termId, internalId, name);
     }
 
     async deleteCourseClass(id: string, universityIdFilter: string, courseIdFilter?: string): Promise<void> {

@@ -1,7 +1,8 @@
 import { ERRORS } from "../../constants/error.constants";
 import GenericException from "../../exceptions/generic.exception";
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from "../../helpers/collection.helper";
-import { buildQuery, getNode, getNodes, getRegex, getRelId, getValue, graphDriver, logErrors, parseErrors } from "../../helpers/persistence/graphPersistence.helper";
+import { buildQuery, getNode, getNodes, getRelId, getValue, graphDriver, logErrors, parseErrors } from "../../helpers/persistence/graphPersistence.helper";
+import { cleanMaybeText, decodeText, encodeText } from "../../helpers/string.helper";
 import { PaginatedCollection } from "../../interfaces/paging.interface";
 import Student from "../../models/abstract/student.model";
 import DatabaseStudent from "../../models/implementations/databaseStudent.model";
@@ -54,12 +55,13 @@ export default class DatabaseStudentDao extends StudentDao {
     async create(id: string, universityId: string, programId: string, name: string): Promise<Student> {
         const session = graphDriver.session();
         try {
+            const encodedName = encodeText(name);
             const enrolledInRelId = getRelId(ENROLLED_IN_PREFIX, id, universityId);
             const followsRelId = getRelId(FOLLOWS_PREFIX, id, programId);
             const result = await session.run(
                 'MATCH (p: Program {id: $programId})-[:BELONGS_TO]->(u: University {id: $universityId}) ' +
-                'CREATE (u)<-[:ENROLLED_IN {relId: $enrolledInRelId}]-(s: Student {id: $id, name: $name})-[:FOLLOWS {relId: $followsRelId}]->(p) RETURN s',
-                {universityId, programId, id, name, enrolledInRelId, followsRelId}
+                'CREATE (u)<-[:ENROLLED_IN {relId: $enrolledInRelId}]-(s: Student {id: $id, name: $name, encoding: $encoding})-[:FOLLOWS {relId: $followsRelId}]->(p) RETURN s',
+                {universityId, programId, id, name: encodedName.cleanText, encoding: encodedName.encoding, enrolledInRelId, followsRelId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY); // TODO: Actually i can be either university or program
@@ -74,14 +76,15 @@ export default class DatabaseStudentDao extends StudentDao {
     async modify(id: string, programId?: string, name?: string): Promise<Student> {
         const session = graphDriver.session();
         try {
+            const encodedName = name ? encodeText(name) : undefined;
             const followsRelId = programId ? getRelId(FOLLOWS_PREFIX, id, programId) : undefined;
             const result = await session.run(
                 'MATCH (p)<-[f:FOLLOWS]-(s:Student {id: $id})-[:ENROLLED_IN]->(u) ' +
                 (programId ? 'MATCH (np:Program {id: $programId})-[:BELONGS_TO]->(u) ' : '') +
-                (name ? 'SET s.name = $name ' : '') +
+                (name ? 'SET s.name = $name, s.encoding = $encoding ' : '') +
                 (programId ? 'DELETE f CREATE (s)-[:FOLLOWS {relId: $followsRelId}]->(np) ' : '') +
                 'RETURN s',
-                {id, programId, name, followsRelId}
+                {id, programId, name: encodedName?.cleanText, encoding: encodedName?.encoding, followsRelId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(programId ? ERRORS.NOT_FOUND.PROGRAM : this.notFoundError);
@@ -123,19 +126,19 @@ export default class DatabaseStudentDao extends StudentDao {
         // Initialize useful variables
         const collection: DatabaseStudent[] = [];
         let lastPage = 1;
-        const regex = getRegex(textSearch);
 
         const session = graphDriver.session();
         try {
+            textSearch = cleanMaybeText(textSearch);
             // Build query
             const baseQuery = buildQuery('MATCH (s:Student)-[:ENROLLED_IN]->(u)', 'WHERE', 'AND', [
-                {entry: 's.name =~ $regex', value: textSearch},
+                {entry: 's.name CONTAINS $textSearch', value: textSearch},
                 {entry: 'u.id = $universityId', value: universityId}
             ]);
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(s) as count`,
-                {regex, universityId}
+                {textSearch, universityId}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
@@ -144,7 +147,7 @@ export default class DatabaseStudentDao extends StudentDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN s ORDER BY s.name SKIP $skip LIMIT $limit`,
-                    {regex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, universityId, skip: getSkipFromPageLimit(page, limit), limit}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -161,6 +164,6 @@ export default class DatabaseStudentDao extends StudentDao {
     }
 
     private nodeToStudent(node: any): DatabaseStudent {
-        return new DatabaseStudent(node.id, node.name);
+        return new DatabaseStudent(node.id, decodeText(node.name, node.encoding));
     }
 }

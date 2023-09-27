@@ -42,7 +42,12 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         INVALID_NAME: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_NAME',
-            message: 'Provided name is invalid. It must have a length between 3 and 80 characters.',
+            message: 'Provided name is invalid. It must have a length between 3 and 80 characters and not contain any weird characters.',
+        },
+        INVALID_FILTER: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_FILTER',
+            message: 'Provided filter is invalid. It must not contain any weird characters.',
         },
         INVALID_INTERNAL_ID: {
             status: HTTP_STATUS.BAD_REQUEST,

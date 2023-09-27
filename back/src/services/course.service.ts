@@ -2,7 +2,7 @@ import CourseDaoFactory from '../factories/courseDao.factory';
 import CourseDao from '../persistence/abstract/course.dao';
 import Course from '../models/abstract/course.model';
 import { PaginatedCollection } from '../interfaces/paging.interface';
-import { cleanMaybeText, cleanText } from '../helpers/string.helper';
+import { cleanMaybeText } from '../helpers/string.helper';
 
 export default class CourseService {
     private static instance: CourseService;
@@ -37,11 +37,11 @@ export default class CourseService {
     }
 
     async createCourse(universityId: string, internalId: string, name: string): Promise<Course> {
-        return await this.dao.create(universityId, cleanText(internalId), cleanText(name));
+        return await this.dao.create(universityId, internalId, name);
     }
 
     async modifyCourse(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Course> {
-        return await this.dao.modify(id, universityIdFilter, cleanMaybeText(internalId), cleanMaybeText(name));
+        return await this.dao.modify(id, universityIdFilter, internalId, name);
     }
 
     async deleteCourse(id: string, universityIdFilter: string): Promise<void> {

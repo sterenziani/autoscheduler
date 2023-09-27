@@ -9,6 +9,7 @@ import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
 import { IBuildingDistance, IBuildingDistancesInput } from '../../interfaces/building.interface';
 import { Integer } from 'neo4j-driver';
+import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
 
 const BELONGS_TO_PREFIX = 'B-U';
 const DISTANCE_TO_PREFIX = 'B-B';
@@ -56,11 +57,12 @@ export default class DatabaseBuildingDao extends BuildingDao {
 
         const session = graphDriver.session();
         try {
+            const encodedName = encodeText(name);
             internalId = globalizeField(universityId, internalId);
             const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (b: Building {id: $id, internalId: $internalId, name: $name})-[:BELONGS_TO {relId: $relId}]->(u) RETURN b',
-                {universityId, id, internalId, name, relId}
+                'MATCH (u: University {id: $universityId}) CREATE (b: Building {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:BELONGS_TO {relId: $relId}]->(u) RETURN b',
+                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
@@ -75,14 +77,15 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async modify(id: string, universityId: string, internalId?: string, name?: string): Promise<Building> {
         const session = graphDriver.session();
         try {
+            const encodedName = name ? encodeText(name) : undefined;
             internalId = internalId ? globalizeField(universityId, internalId) : undefined;
             const baseQuery = buildQuery('MATCH (u: University {id: $universityId})<-[r:BELONGS_TO]-(b: Building {id: $id})', 'SET', ',', [
                 {entry: 'b.internalId = $internalId', value: internalId},
-                {entry: 'b.name = $name', value: name}
+                {entry: 'b.name = $name, b.encoding = $encoding', value: name}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN b`,
-                {id, universityId, internalId, name}
+                {id, universityId, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -135,20 +138,20 @@ export default class DatabaseBuildingDao extends BuildingDao {
         // Initialize useful variables
         const collection: DatabaseBuilding[] = [];
         let lastPage = 1;
-        const regex = getRegex(textSearch);
-        const globalRegex = getGlobalRegex(textSearch);
 
         const session = graphDriver.session();
         try {
+            textSearch = cleanMaybeText(textSearch);
+            const globalRegex = getGlobalRegex(textSearch);
             // Build query
             const baseQuery = buildQuery('MATCH (u: University)<-[:BELONGS_TO]-(b: Building)', 'WHERE', 'AND', [
-                {entry: '(b.name =~ $regex OR b.internalId =~ $globalRegex)', value: textSearch},
+                {entry: '(b.name CONTAINS $textSearch OR b.internalId =~ $globalRegex)', value: textSearch},
                 {entry: 'u.id = $universityId', value: universityId},
             ]);
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(b) as count`,
-                {regex, globalRegex, universityId}
+                {textSearch, globalRegex, universityId}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
@@ -157,7 +160,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN b ORDER BY b.name SKIP $skip LIMIT $limit`,
-                    {regex, globalRegex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, globalRegex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -346,7 +349,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
     }
 
     private nodeToBuilding(node: any): DatabaseBuilding {
-        return new DatabaseBuilding(node.id, deglobalizeField(node.internalId), node.name);
+        return new DatabaseBuilding(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
     }
 
     private nodeToBuildingDistance(node: any): IBuildingDistance {

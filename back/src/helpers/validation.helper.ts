@@ -1,9 +1,9 @@
 import TimeRange from './classes/timeRange.class';
 import { DAY } from '../constants/time.constants';
 import Time from './classes/time.class';
-import { ILecture } from '../interfaces/courseClass.interface';
 import { IBuildingDistancesInput } from '../interfaces/building.interface';
 import { getDateFromISO, isValidISODate } from './time.helper';
+import { isValidText } from './string.helper';
 
 // Parsing validators
 
@@ -115,7 +115,7 @@ export const validateLocale = (data: any): string | undefined => {
     const maybeLocale = validateString(data);
     if (maybeLocale === undefined || !isValidLocale(maybeLocale)) return undefined;
     return maybeLocale;
-}
+};
 
 export const validateTimes = (data: any): TimeRange[] | undefined => {
     const timeStrings = validateElemOrElemArray(data, validateString);
@@ -127,7 +127,7 @@ export const validateTimes = (data: any): TimeRange[] | undefined => {
         times.push(maybeTimeRange);
     }
     return times.sort((a, b) => a.compareTo(b));
-}
+};
 
 export const validateBuildingDistances = (maybeDistances: any): IBuildingDistancesInput | undefined => {
     if (maybeDistances === undefined || typeof maybeDistances !== 'object') return undefined;
@@ -138,7 +138,7 @@ export const validateBuildingDistances = (maybeDistances: any): IBuildingDistanc
         if (distance === undefined) return undefined;
     }
     return maybeDistances as IBuildingDistancesInput;
-}
+};
 
 // IsValid Validators
 
@@ -167,20 +167,26 @@ export const isValidPassword = (password: string): boolean => {
 
 export const isValidLocale = (locale: string): boolean => {
     return true;    // TODO: Make the validator
-}
+};
 
 export const isValidEnum = <T>(data: any, enumObject: any): boolean => {
     const maybeEnum = validateEnum<T>(data, enumObject);
     return maybeEnum !== undefined;
-}
+};
 
 export const isValidInternalId = (internalId: string): boolean => {
     return internalId.length >= 1 && internalId.length <= 100;
-}
+};
 
 export const isValidName = (name: string): boolean => {
-    return name.length >= 3 && name.length <= 80;
-}
+    if (name.length < 3 || name.length > 80) return false;
+    return isValidText(name);
+};
+
+export const isValidFilter = (filter?: string): boolean => {
+    if (filter === undefined) return true;
+    return isValidText(filter);
+};
 
 /**
  * Checks time ranges are not overlapping (things like ["0-10:00-20:00", "0-11:00-19:00"] or ["0-10:00-15:00", "0-14:00-18:00"])
@@ -197,17 +203,17 @@ export const isValidTimes = (sortedTimes: TimeRange[], allowEmpty = false): bool
         if (current.overlaps(next)) return false;
     }
     return true;
-}
+};
 
 export const isValidDay = (day: number): boolean => {
     const dayEnum = validateEnum<DAY>(day, DAY);
     return dayEnum !== undefined;
-}
+};
 
 export const isValidTime = (timeString: string): boolean => {
     return Time.parseString(timeString) !== undefined;
-}
+};
 
 export const isValidTimeRange = (startTime: Time, endTime: Time): boolean => {
     return startTime.compareTo(endTime) < 0;
-}
+};

@@ -1,6 +1,7 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { deglobalizeField, getNode, getRelId, globalizeField, graphDriver, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { decodeText, encodeText } from '../../helpers/string.helper';
 import Course from '../../models/abstract/course.model';
 import DatabaseCourse from '../../models/implementations/databaseCourse.model';
 import CourseDao from '../abstract/course.dao';
@@ -54,11 +55,12 @@ export default class DatabaseCourseDao extends CourseDao {
 
         const session = graphDriver.session();
         try {
+            const encodedName = encodeText(name);
             internalId = globalizeField(universityId, internalId);
             const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (c: Course {id: $id, internalId: $internalId, name: $name})-[:BELONGS_TO {relId: $relId}]->(u) RETURN c',
-                {universityId, id, internalId, name, relId}
+                'MATCH (u: University {id: $universityId}) CREATE (c: Course {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:BELONGS_TO {relId: $relId}]->(u) RETURN c',
+                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
@@ -71,6 +73,6 @@ export default class DatabaseCourseDao extends CourseDao {
     }
 
     private nodeToCourse(node: any): DatabaseCourse {
-        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), node.name);
+        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
     }
 }

@@ -4,7 +4,7 @@ import { HTTP_STATUS } from '../constants/http.constants';
 import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidName, validateInt, validateString } from '../helpers/validation.helper';
+import { isValidFilter, isValidName, validateInt, validateString } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import { getReqPath, getResourceUrl } from '../helpers/url.helper';
@@ -22,6 +22,8 @@ export class StudentsController {
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
             const paginatedStudents: PaginatedCollection<Student> = await this.studentService.getStudents(page, limit, filter);
