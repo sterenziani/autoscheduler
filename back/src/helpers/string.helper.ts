@@ -65,7 +65,11 @@ export const encodeText = (text: string): {cleanText: string, encoding: number[]
     for (let i = 0; i < text.length; i++) {
         const charInfo = encodeChar(text.charAt(i));
         cleanText.push(charInfo.cleanChar);
-        if (charInfo.encoding !== undefined) encoding.push(...[i, charInfo.encoding]);
+        if (charInfo.encoding !== undefined && charInfo.encoding >= 193) 
+            encoding.push(...[i, charInfo.encoding]);
+        else if (charInfo.encoding !== undefined)
+            encoding.push(i);
+
     }
     return {
         cleanText: cleanText.join(''),
@@ -74,8 +78,13 @@ export const encodeText = (text: string): {cleanText: string, encoding: number[]
 };
 
 export const decodeText = (cleanText: string, encoding: number[]): string => {
-    for (let i = 0; i < encoding.length; i+=2) {
-        cleanText = cleanText.substring(0, encoding[i]) + String.fromCharCode(encoding[i+1]) + cleanText.substring(encoding[i] + 1);
+    for (let i = 0; i < encoding.length; i++) {
+        if (encoding[i + 1] !== undefined && encoding[i + 1] >= 193) {
+            cleanText = cleanText.substring(0, encoding[i]) + String.fromCharCode(encoding[i+1]) + cleanText.substring(encoding[i] + 1);
+            i++;
+        } else {
+            cleanText = cleanText.substring(0, encoding[i]) + String.fromCharCode(cleanText.charCodeAt(encoding[i]) - 32) + cleanText.substring(encoding[i] + 1);
+        }
     }
     return cleanText;
 };

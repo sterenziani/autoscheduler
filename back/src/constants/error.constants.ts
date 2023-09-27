@@ -47,7 +47,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         INVALID_FILTER: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_FILTER',
-            message: 'Provided filter is invalid. It must not contain any weird characters.',
+            message: 'Provided filter is invalid. It must not contain any weird characters and cannot be longer than 180 characters.',
         },
         INVALID_INTERNAL_ID: {
             status: HTTP_STATUS.BAD_REQUEST,
