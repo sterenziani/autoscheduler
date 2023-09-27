@@ -47,7 +47,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         INVALID_FILTER: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_FILTER',
-            message: 'Provided filter is invalid. It must not contain any weird characters.',
+            message: 'Provided filter is invalid. It must not contain any weird characters and cannot be longer than 180 characters.',
         },
         INVALID_INTERNAL_ID: {
             status: HTTP_STATUS.BAD_REQUEST,
@@ -153,7 +153,12 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'COURSE_ALREADY_REQUIRED_IN_PROGRAM',
             message: 'Required course is already set as required in the program.',
-        }
+        },
+        COURSE_ALREADY_COMPLETED_BY_STUDENT: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_COMPLETED_BY_STUDENT',
+            message: 'Course already marked as completed by student.',
+        },
     },
     UNAUTHORIZED: {
         GENERAL: { status: HTTP_STATUS.UNAUTHORIZED, code: 'UNAUTHORIZED', message: 'Unauthorized.' },

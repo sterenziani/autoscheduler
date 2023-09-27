@@ -1,9 +1,10 @@
 import { ERRORS } from "../../constants/error.constants";
 import GenericException from "../../exceptions/generic.exception";
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from "../../helpers/collection.helper";
-import { buildQuery, getNode, getNodes, getRelId, getValue, graphDriver, logErrors, parseErrors } from "../../helpers/persistence/graphPersistence.helper";
+import { buildQuery, getNode, getNodes, getRelId, getStats, getValue, graphDriver, logErrors, parseErrors } from "../../helpers/persistence/graphPersistence.helper";
 import { cleanMaybeText, decodeText, encodeText } from "../../helpers/string.helper";
 import { PaginatedCollection } from "../../interfaces/paging.interface";
+import { IStudentInfo } from "../../interfaces/student.interface";
 import Student from "../../models/abstract/student.model";
 import DatabaseStudent from "../../models/implementations/databaseStudent.model";
 import StudentDao from "../abstract/student.dao";
@@ -98,7 +99,19 @@ export default class DatabaseStudentDao extends StudentDao {
 
     // Never used
     async delete(id: string): Promise<void> {
-        throw new Error('Not Implemented.');
+        const session = graphDriver.session();
+        try {
+            const result = await session.run(
+                `MATCH (s:Student {id: $id}) DETACH DELETE s`,
+                {id}
+            );
+            const stats = getStats(result);
+            if (stats.nodesDeleted === 0) throw new GenericException(this.notFoundError);
+        } catch (err) {
+            throw parseErrors(err, '[StudentDao:delete]', ERRORS.CONFLICT.CANNOT_DELETE);
+        } finally {
+            await session.close();
+        }
     }
 
     async findById(id: string, universityId?: string): Promise<Student | undefined> {
@@ -163,7 +176,133 @@ export default class DatabaseStudentDao extends StudentDao {
         return simplePaginateCollection(collection, page, lastPage);
     }
 
+    async getStudentInfo(id: string): Promise<IStudentInfo> {
+        const session = graphDriver.session();
+        try {
+            const result = await session.run(
+                `MATCH (p)<-[:FOLLOWS]-(s:Student {id: $id})-[:ENROLLED_IN]->(u) RETURN p.id as programId, u.id as universityId`,
+                {id}
+            );
+            const programId = getValue<string | undefined>(result, 'programId');
+            const universityId = getValue<string | undefined>(result, 'universityId');
+            if (!programId || !universityId) throw new GenericException(this.notFoundError);
+            return {
+                studentId: id,
+                universityId: universityId,
+                programId: programId
+            };
+        } catch (err) {
+            throw parseErrors(err, '[StudentDao:getStudentInfo]');
+        } finally {
+            await session.close();
+        }
+    }
+
+    async addCompletedCourse(id: string, universityId: string, courseId: string): Promise<void> {
+        const session = graphDriver.session();
+        try {
+            const relId = getRelId(COMPLETED_PREFIX, id, courseId);
+            const result = await session.run(
+                'MATCH (c:Course {id: $courseId})-[:BELONGS_TO]->(:University {id: $universityId})<-[:ENROLLED_IN]-(s:Student {id: $id}) ' +
+                'CREATE (s)-[:COMPLETED {relId: $relId]->(c)',
+                {id, universityId, courseId, relId}
+            );
+            const stats = getStats(result);
+            if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or student was not found
+        } catch (err) {
+            throw parseErrors(err, '[StudentDao:addCompletedCourse]', ERRORS.BAD_REQUEST.COURSE_ALREADY_COMPLETED_BY_STUDENT);
+        } finally {
+            await session.close();
+        }
+    }
+
+    async removeCompletedCourse(id: string, universityId: string, courseId: string): Promise<void> {
+        const session = graphDriver.session();
+        try {
+            const relId = getRelId(COMPLETED_PREFIX, id, courseId);
+            const result = await session.run(
+                'MATCH ()-[r:COMPLETED {relId: $relId]->(c)-[:BELONGS_TO]->(:University {id: $universityId}) ' +
+                'DELETE r',
+                {universityId, relId}
+            );
+            const stats = getStats(result);
+            if (stats.relationshipsDeleted === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or student or relationship was not found
+        } catch (err) {
+            throw parseErrors(err, '[StudentDao:removeCompletedCourse]');
+        } finally {
+            await session.close();
+        }
+    }
+
+    async bulkAddCompletedCourses(id: string, universityId: string, courseIds: string[]): Promise<void> {
+        const parsedCourses = this.parseCourses(courseIds, id);
+        if (parsedCourses.length === 0) return;
+
+        const session = graphDriver.session();
+        try {
+            const result = await session.run(
+                'MATCH (s:Student {id: $id})-[:ENROLLED_IN]->(u:University {id: $universityId}) ' +
+                'UNWIND $parsedCourses as course ' +
+                'MATCH (c:Course {id: course.id})-[:BELONGS_TO]->(u) ' +
+                'CREATE (s)-[:COMPLETED {relId: course.relId}]->(c)',
+                {id, universityId, parsedCourses}
+            );
+            const stats = getStats(result);
+            if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or students was not found
+        } catch (err) {
+            throw parseErrors(err, '[StudentDao:bulkAddCompletedCourses]', ERRORS.BAD_REQUEST.COURSE_ALREADY_COMPLETED_BY_STUDENT);
+        } finally {
+            await session.close();
+        }
+    }
+
+    async bulkReplaceCompletedCourses(id: string, universityId: string, courseIds: string[]): Promise<void> {
+        const parsedCourses = this.parseCourses(courseIds, id);
+
+        const session = graphDriver.session();
+        const transaction = session.beginTransaction();
+        try {
+            // We delete first since we are going to replace all the existing courses with the new courses
+            const deleteResult = await transaction.run(
+                'MATCH (s:Student {id: $id})-[:ENROLLED_IN]->(u:University {id: $universityId}) OPTIONAL MATCH (s)-[r:COMPLETED]->() DELETE r RETURN s.id as id',
+                {id, universityId}
+            );
+            const maybeId = getValue<string | undefined>(deleteResult, 'id');
+            if (!maybeId) throw new GenericException(this.notFoundError);
+            // If no new courses provided we commit transaction and return, there is no point in caling db again
+            if (parsedCourses.length === 0) {
+                await transaction.commit();
+                return;
+            }
+            await transaction.run(
+                'MATCH (s:Student {id: $id})-[:ENROLLED_IN]->(u:University {id: $universityId}) ' +
+                'UNWIND $parsedCourses as course ' +
+                'MATCH (c:Course {id: course.id})-[:BELONGS_TO]->(u) ' +
+                'CREATE (s)-[:COMPLETED {relId: course.relId}]->(c)',
+                {id, universityId, parsedCourses}
+            );
+            await transaction.commit();
+        } catch (err) {
+            await transaction.rollback();
+            throw parseErrors(err, '[StudentDao:bulkReplaceCompletedCourses]', ERRORS.BAD_REQUEST.COURSE_ALREADY_COMPLETED_BY_STUDENT);
+        } finally {
+            await transaction.close();
+            await session.close();
+        }
+    }
+
     private nodeToStudent(node: any): DatabaseStudent {
         return new DatabaseStudent(node.id, decodeText(node.name, node.encoding));
+    }
+
+    private parseCourses(courseIds: string[], studentId: string) {
+        const parsed: {id: string, relId: string}[] = [];
+        for (const id of courseIds) {
+            parsed.push({
+                id,
+                relId: getRelId(COMPLETED_PREFIX, studentId, id)
+            });
+        }
+        return parsed;
     }
 }

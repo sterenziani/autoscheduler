@@ -59,23 +59,33 @@ export const cleanMaybeText = (text?: string): string | undefined => {
     return cleanText(text);
 };
 
-export const encodeText = (text: string): {cleanText: string, encoding: number[]} => {
+export const encodeText = (text: string): {cleanText: string, encoding: Int8Array} => {
     const cleanText: string[] = [];
     const encoding: number[] = [];
     for (let i = 0; i < text.length; i++) {
         const charInfo = encodeChar(text.charAt(i));
         cleanText.push(charInfo.cleanChar);
-        if (charInfo.encoding !== undefined) encoding.push(...[i, charInfo.encoding]);
+        if (charInfo.encoding !== undefined && charInfo.encoding >= 193) 
+            encoding.push(...[i, charInfo.encoding]);
+        else if (charInfo.encoding !== undefined)
+            encoding.push(i);
+
     }
     return {
         cleanText: cleanText.join(''),
-        encoding: encoding
+        encoding: new Int8Array(encoding)
     }
 };
 
-export const decodeText = (cleanText: string, encoding: number[]): string => {
-    for (let i = 0; i < encoding.length; i+=2) {
-        cleanText = cleanText.substring(0, encoding[i]) + String.fromCharCode(encoding[i+1]) + cleanText.substring(encoding[i] + 1);
+export const decodeText = (cleanText: string, signed: Int8Array): string => {
+    const encoding = new Uint8Array(signed);
+    for (let i = 0; i < encoding.length; i++) {
+        if (encoding[i + 1] !== undefined && encoding[i + 1] >= 193) {
+            cleanText = cleanText.substring(0, encoding[i]) + String.fromCharCode(encoding[i+1]) + cleanText.substring(encoding[i] + 1);
+            i++;
+        } else {
+            cleanText = cleanText.substring(0, encoding[i]) + String.fromCharCode(cleanText.charCodeAt(encoding[i]) - 32) + cleanText.substring(encoding[i] + 1);
+        }
     }
     return cleanText;
 };

@@ -185,6 +185,7 @@ export const isValidName = (name: string): boolean => {
 
 export const isValidFilter = (filter?: string): boolean => {
     if (filter === undefined) return true;
+    if (filter.length > 180) return false;
     return isValidText(filter);
 };
 
