@@ -54,6 +54,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
         const session = graphDriver.session();
         try {
             const encodedName = encodeText(name);
+            // TODO: InternalId should only be exclusive within the course and term, not university itself
             internalId = globalizeField(universityId, internalId);
             const ofRelId = getRelId(OF_PREFIX, id, courseId);
             const happensInRelId = getRelId(HAPPENS_IN_PREFIX, id, termId);
