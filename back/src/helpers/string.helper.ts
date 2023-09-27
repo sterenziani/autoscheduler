@@ -59,7 +59,7 @@ export const cleanMaybeText = (text?: string): string | undefined => {
     return cleanText(text);
 };
 
-export const encodeText = (text: string): {cleanText: string, encoding: number[]} => {
+export const encodeText = (text: string): {cleanText: string, encoding: Int8Array} => {
     const cleanText: string[] = [];
     const encoding: number[] = [];
     for (let i = 0; i < text.length; i++) {
@@ -73,11 +73,12 @@ export const encodeText = (text: string): {cleanText: string, encoding: number[]
     }
     return {
         cleanText: cleanText.join(''),
-        encoding: encoding
+        encoding: new Int8Array(encoding)
     }
 };
 
-export const decodeText = (cleanText: string, encoding: number[]): string => {
+export const decodeText = (cleanText: string, signed: Int8Array): string => {
+    const encoding = new Uint8Array(signed);
     for (let i = 0; i < encoding.length; i++) {
         if (encoding[i + 1] !== undefined && encoding[i + 1] >= 193) {
             cleanText = cleanText.substring(0, encoding[i]) + String.fromCharCode(encoding[i+1]) + cleanText.substring(encoding[i] + 1);
