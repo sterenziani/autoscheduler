@@ -153,7 +153,12 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'COURSE_ALREADY_REQUIRED_IN_PROGRAM',
             message: 'Required course is already set as required in the program.',
-        }
+        },
+        COURSE_ALREADY_COMPLETED_BY_STUDENT: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_COMPLETED_BY_STUDENT',
+            message: 'Course already marked as completed by student.',
+        },
     },
     UNAUTHORIZED: {
         GENERAL: { status: HTTP_STATUS.UNAUTHORIZED, code: 'UNAUTHORIZED', message: 'Unauthorized.' },
