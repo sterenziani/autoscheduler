@@ -79,4 +79,12 @@ export default class Time {
     getValueInMinutes(): number {
         return this.hour*60 + this.minute;
     }
+
+    /**
+     * Creates a new Time object from an integer representing minutes passed since midnight
+     * @param minutes
+     */
+    static fromValueInMinutes(minutes: number): Time {
+        return new Time(minutes/60, minutes%60);
+    }
 }

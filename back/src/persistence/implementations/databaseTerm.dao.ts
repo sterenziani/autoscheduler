@@ -81,7 +81,7 @@ export default class DatabaseTermDao extends TermDao {
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN t`,
-                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, startDate: startDate, published: published}
+                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, startDate, published}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
