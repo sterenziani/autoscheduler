@@ -19,12 +19,12 @@ export default class Time {
 
     // Static constructors
     /**
-     * Creates a new Time object from a string in hh:mm format.
-     * If string does not match format it returns undefined
+     * Creates a new Time object from a string in hh:mm, hh:mm:ss format.
+     * If string does not match either format it returns undefined
      * @param timeString
      */
     static parseString(timeString: string): Time | undefined {
-        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+        const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9]Z?)?$/;
         if (!timeRegex.test(timeString)) return undefined;
         const [hour, minute]: number[] = timeString.split(':', 2).map((n) => parseInt(n));
         return new Time(hour, minute);

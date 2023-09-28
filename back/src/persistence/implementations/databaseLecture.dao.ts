@@ -51,12 +51,12 @@ export default class DatabaseLectureDao extends LectureDao {
             const ofRelId = getRelId(OF_PREFIX, id, courseClassId);
             const takesPlaceInRelId = getRelId(TAKES_PLACE_IN_PREFIX, id, buildingId);
             const dayOfWeek = timeRange ? timeRange.dayOfWeek : undefined;
-            const startTime = timeRange ? timeRange.startTime.getValueInMinutes() : undefined;
-            const endTime = timeRange ? timeRange.endTime.getValueInMinutes() : undefined;
+            const startTime = timeRange ? timeRange.startTime.toString() : undefined;
+            const endTime = timeRange ? timeRange.endTime.toString() : undefined;
 
             const result = await session.run(
                 'MATCH (cc: CourseClass {id: $courseClassId})-[:OF]->(:Course)-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(b: Building {id: $buildingId}) ' +
-                'CREATE (b)<-[:TAKES_PLACE_IN {relId: $takesPlaceInRelId}]-(l: Lecture {id: $id, dayOfWeek: $dayOfWeek, startTime: $startTime, endTime: $endTime})-[:OF {relId: $ofRelId}]->(cc) RETURN l',
+                'CREATE (b)<-[:TAKES_PLACE_IN {relId: $takesPlaceInRelId}]-(l: Lecture {id: $id, dayOfWeek: $dayOfWeek, startTime: time($startTime), endTime: time($endTime)})-[:OF {relId: $ofRelId}]->(cc) RETURN l',
                 {universityId, courseClassId, buildingId, id, dayOfWeek, startTime, endTime, ofRelId, takesPlaceInRelId}
             );
             const node = getNode(result);
@@ -74,8 +74,8 @@ export default class DatabaseLectureDao extends LectureDao {
         try {
             const takesPlaceInRelId = getRelId(TAKES_PLACE_IN_PREFIX, id, buildingId?? "");
             const dayOfWeek = timeRange ? timeRange.dayOfWeek : undefined;
-            const startTime = timeRange ? timeRange.startTime.getValueInMinutes() : undefined;
-            const endTime = timeRange ? timeRange.endTime.getValueInMinutes() : undefined;
+            const startTime = timeRange ? timeRange.startTime.toString() : undefined;
+            const endTime = timeRange ? timeRange.endTime.toString() : undefined;
 
             // If buildingId is defined, we add specific parts in the middle of the query to replace edge
             let newBuildingMatch = ''
@@ -87,8 +87,8 @@ export default class DatabaseLectureDao extends LectureDao {
 
             const baseQuery = buildQuery(`MATCH (: Building)<-[obr:TAKES_PLACE_IN]-(l: Lecture {id: $id})-[:OF]->(:CourseClass {id: $courseClassId})-[:OF]->(:Course)-[:BELONGS_TO]->(u: University {id: $universityId}) ${newBuildingMatch}`, 'SET', ',', [
                 {entry: 'l.dayOfWeek = $dayOfWeek', value: dayOfWeek},
-                {entry: 'l.startTime = $startTime', value: startTime},
-                {entry: 'l.endTime = $endTime', value: endTime},
+                {entry: 'l.startTime = time($startTime)', value: startTime},
+                {entry: 'l.endTime = time($endTime)', value: endTime},
             ]);
             const result = await session.run(
                 `${baseQuery} ${newBuildingRelationshipReplace} RETURN l`,
@@ -154,9 +154,9 @@ export default class DatabaseLectureDao extends LectureDao {
             if(times){
                  for(const t of times){
                      const dayOfWeek = t.dayOfWeek;
-                     const startTime = t.startTime.toString().replace(':', '');
-                     const endTime = t.endTime.toString().replace(':', '');
-                     timeEntries.push({entry: `(left(l.time, 1) = ${dayOfWeek} AND toInteger(${startTime}) < toInteger(replace(split(l.time, '-')[1], ':', '')) AND toInteger(replace(split(l.time, '-')[2], ':', '')) < toInteger(${endTime}))`, value: t});
+                     const startTime = t.startTime.toString();
+                     const endTime = t.endTime.toString();
+                     timeEntries.push({entry: `( l.dayOfWeek = ${dayOfWeek}   AND   time(${startTime}) <= time(l.startTime)   AND   time(l.endTime) <= time(${endTime}) )`, value: t});
                  }
             }
 
@@ -178,7 +178,7 @@ export default class DatabaseLectureDao extends LectureDao {
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
-                    `${baseQuery} RETURN l ORDER BY l.time SKIP $skip LIMIT $limit`,
+                    `${baseQuery} RETURN l ORDER BY l.dayOfWeek, l.startTime, l.endTime SKIP $skip LIMIT $limit`,
                     {universityId, skip: getSkipFromPageLimit(page, limit), limit}
                 );
                 const nodes = getNodes(result);
@@ -187,7 +187,7 @@ export default class DatabaseLectureDao extends LectureDao {
                 }
             }
         } catch (err) {
-            logErrors(err, '[TermDao:findPaginated]');
+            logErrors(err, '[LectureDao:findPaginated]');
         } finally {
             await session.close();
         }
@@ -196,8 +196,8 @@ export default class DatabaseLectureDao extends LectureDao {
     }
 
     private nodeToLecture(node: any): DatabaseLecture {
-        const startTime = Time.fromValueInMinutes(node.startTime);
-        const endTime = Time.fromValueInMinutes(node.endTime);
+        const startTime = Time.fromString(node.startTime);
+        const endTime = Time.fromString(node.endTime);
         return new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime));
     }
 }
