@@ -28,7 +28,7 @@ export default class DatabaseProgram extends Program {
             this.coursesCache[this.id] = {courses: courses};
             return courses;
         } catch (err) {
-            logErrors(err, '[Lecture:getBuilding]');
+            logErrors(err, '[Program:getCourses]');
             return undefined;
         } finally {
             await session.close();
