@@ -19,7 +19,10 @@ export default class DatabaseLecture extends Lecture {
                 {id: this.id}
             );
             const node = getNode(result);
-            if (!node) return undefined;
+            if (!node){
+                this.buildingCache[this.id] = {building: undefined};
+                return undefined;
+            }
 
             const building = this.nodeToBuilding(node);
             this.buildingCache[this.id] = {building: building};

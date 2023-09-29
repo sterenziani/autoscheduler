@@ -14,5 +14,5 @@ export default abstract class Program extends GenericModel {
     }
 
     // Methods
-    public abstract getCourses(): Promise<IProgramCourses>;
+    public abstract getCourses(): Promise<IProgramCourses | undefined>;
 }
