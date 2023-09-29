@@ -9,12 +9,12 @@ export default class DatabaseBuilding extends Building {
     /////////////////// Abstract Methods Implementation ///////////////////
     public async getDistanceInMinutesTo(other: Building): Promise<number | undefined> {
         // Get relIds
-        const relId = getRelId('BB', this.id, other.id);
-        const counterRelId = getRelId('BB', other.id, this.id);
+        const relId = getRelId('B-B', this.id, other.id);
+        const counterRelId = getRelId('B-B', other.id, this.id);
         // Check cache first
         const cacheHit = DatabaseBuilding.distancesCache[relId];
         if (cacheHit !== undefined) return cacheHit.distance;
-        
+
         const session = graphDriver.session();
         try {
             const result = await session.run(

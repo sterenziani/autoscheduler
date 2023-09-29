@@ -156,7 +156,7 @@ export default class DatabaseLectureDao extends LectureDao {
                      const dayOfWeek = t.dayOfWeek;
                      const startTime = t.startTime.toString();
                      const endTime = t.endTime.toString();
-                     timeEntries.push({entry: `( l.dayOfWeek = ${dayOfWeek}   AND   time(${startTime}) <= time(l.startTime)   AND   time(l.endTime) <= time(${endTime}) )`, value: t});
+                     timeEntries.push({entry: `( l.dayOfWeek = ${dayOfWeek}   AND   time(${startTime}) <= l.startTime   AND   l.endTime <= time(${endTime}) )`, value: t});
                  }
             }
 
