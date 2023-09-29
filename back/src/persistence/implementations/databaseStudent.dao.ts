@@ -204,7 +204,7 @@ export default class DatabaseStudentDao extends StudentDao {
             const relId = getRelId(COMPLETED_PREFIX, id, courseId);
             const result = await session.run(
                 'MATCH (c:Course {id: $courseId})-[:BELONGS_TO]->(:University {id: $universityId})<-[:ENROLLED_IN]-(s:Student {id: $id}) ' +
-                'CREATE (s)-[:COMPLETED {relId: $relId]->(c)',
+                'CREATE (s)-[:COMPLETED {relId: $relId}]->(c)',
                 {id, universityId, courseId, relId}
             );
             const stats = getStats(result);

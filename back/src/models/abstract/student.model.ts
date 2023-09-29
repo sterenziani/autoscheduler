@@ -12,5 +12,5 @@ export default abstract class Student extends GenericModel {
     }
 
     // Methods
-    public abstract getEnabledCourses(programId: string): Promise<Course[]>;
+    public abstract getEnabledCourses(programId: string): Promise<Course[] | undefined>;
 }
