@@ -15,7 +15,7 @@ export default abstract class CourseClass extends GenericModel {
     }
 
     // Methods
-    public abstract getLectures(): Promise<Lecture[]>;
-    public abstract getWeeklyClassTimeInMinutes(): Promise<number>;
-    public abstract getCourse(): Promise<Course>;
+    public abstract getLectures(): Promise<Lecture[] | undefined>;
+    public abstract getWeeklyClassTimeInMinutes(): Promise<number | undefined>;
+    public abstract getCourse(): Promise<Course | undefined>;
 }
