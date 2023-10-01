@@ -1,3 +1,8 @@
+import { IScheduleInputData } from '../interfaces/schedule.interface';
+import { ERRORS } from '../constants/error.constants';
+import GenericException from '../exceptions/generic.exception';
+import ScheduleDao from '../persistence/abstract/schedule.dao';
+import ScheduleDaoFactory from '../factories/scheduleDao.factory';
 import Program from '../models/abstract/program.model';
 import StudentService from './student.service';
 import ProgramService from './program.service';
@@ -15,6 +20,8 @@ const TARGET_HOUR_EXCEED_RATE_LIMIT = 1.25;
 
 export default class ScheduleService {
     private static instance: ScheduleService;
+    private dao: ScheduleDao;
+
     private studentService!: StudentService;
     private programService!: ProgramService;
     private termService!: TermService;
@@ -26,13 +33,16 @@ export default class ScheduleService {
         return ScheduleService.instance;
     }
 
+    constructor() {
+        this.dao = ScheduleDaoFactory.get();
+    }
+
     init() {
         this.studentService = StudentService.getInstance();
         this.termService = TermService.getInstance();
         this.programService = ProgramService.getInstance();
     }
 
-    // TODO: Maybe add functions to services like getStudentWithEnabledCourses that populates that query already in that instance of that student, idk
     async getSchedules(
         studentId: string,
         universityId: string,
@@ -43,38 +53,19 @@ export default class ScheduleService {
         prioritizeUnlocks: boolean,
         unavailableTimeSlots: TimeRange[]
     ): Promise<IScheduleWithScore[]> {
-        const student = await this.studentService.getStudent(studentId);
-        const program = await this.programService.getProgram(programId);
-        const term = await this.termService.getTerm(termId);
-        unavailableTimeSlots = unavailableTimeSlots.filter(t => t.startTime < t.endTime);   // TODO: We already checked for overlaps in controller and sorted it
-
-        // STEP 1 - Get mandatory and optional courses in program
-        const courses = await program.getCourses();
-        const mandatoryCourses = courses.mandatoryCourses;
-        const optionalCourses = courses.optionalCourses;
-
-        // STEP 2 - Filter already completed courses and courses the student is not yet enabled to sign up for
-        const enabledCourses = await student.getEnabledCourses(program.id);
-
-        // STEP 3 - Calculate "importance" of each course (direct + indirect unlockables)
-        const correlatives = await this.getIndirectCorrelatives(program, mandatoryCourses, optionalCourses, enabledCourses);
-        const importance: { [courseId: string]: number } = {};
-        for(const c of enabledCourses) importance[c.id] = correlatives[c.id].size;
-
-        // STEP 4 - Get all courseClasses for each course
-        // STEP 5 - Remove courseClasses that fall inside unavailableTimeSlots
-        const viableCourseClassesArray = await this.getSortedViableCourseClassesArray(enabledCourses, term.id, unavailableTimeSlots, mandatoryCourses, importance);
+        // STEPS 1-5 - Get and filter information needed
+        const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId, unavailableTimeSlots);
 
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         const deadline = new Date(Date.now() + MINUTE_IN_MS)
-        const courseClassCombinations = await this.getCourseClassCombinations(viableCourseClassesArray, targetHours, deadline);
+        const courseClassCombinations = this.getCourseClassCombinations(inputData, targetHours, deadline);
 
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
         const schedules = [];
         for(const combo of courseClassCombinations){
-            const schedule = await this.createSchedule(combo, program, importance, mandatoryCourses);
+            const schedule = this.createSchedule(combo, inputData);
             const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks);
             schedules.push({schedule: schedule, score: score});
         }
@@ -83,133 +74,44 @@ export default class ScheduleService {
         return schedules.sort((a, b) =>  b.score-a.score).slice(0, 10);
     }
 
-    // This is also implemented in course model, but being able to access the created map is much more efficient than starting from scratch for each course.
-    // If coursesToAnalyze is defined, we recursively expand only those courses for efficiency.
-    private async getIndirectCorrelatives(program: Program, mandatoryCourses: Course[], optionalCourses: Course[], coursesToAnalyze?: Course[]): Promise<{ [courseId: string]: Set<Course> }> {
-        const programCourses = [...mandatoryCourses, ...optionalCourses];
-
-        // Create map where key is a course ID and values are the courses enabled immediately after completing the key.
-        const unlocks: { [courseId: string]: Set<Course> } = {};
-        for(const c of programCourses) unlocks[c.id] = new Set();
-        for(const c of programCourses) {
-            const requirements = await c.getRequiredCoursesForProgram(program.id);
-            requirements.forEach( r => unlocks[r.id].add(c) );
-        };
-
-        // Expand each map entry to also include the courses indirectly correlative to it.
-        if(coursesToAnalyze){
-            for (const c of coursesToAnalyze)
-                unlocks[c.id] = this.findIndirectCorrelativesRec(unlocks, c.id);
-            // Clear courses we don't wish to analyze to avoid confusion
-            for (const key in unlocks)
-                if(!coursesToAnalyze.find(x => x.id === key)) unlocks[key] = new Set();
-        } else {
-            for (const key in unlocks)
-                unlocks[key] = this.findIndirectCorrelativesRec(unlocks, key);
-        }
-        return unlocks;
-    }
-
-    private findIndirectCorrelativesRec(unlocks: { [courseId: string]: Set<Course> }, courseId: string): Set<Course> {
-        if (!unlocks[courseId]) return new Set();
-        unlocks[courseId].forEach( u => {
-            const unlockablesFromU = this.findIndirectCorrelativesRec(unlocks, u.id);
-            unlocks[courseId] = new Set([...unlocks[courseId], ...unlockablesFromU]);
-        });
-        return unlocks[courseId];
-    }
-
-    private areTimeRangesCompatible(timeRangeA: TimeRange[], timeRangeB: TimeRange[]): boolean {
-        for (const tA of timeRangeA) {
-            for (const tB of timeRangeB) {
-                if(tA.overlaps(tB)) return false;
-            }
-        }
-        return true;
-    }
-
-    private async getViableCourseClassesMap(courses: Course[], termId: string, unavailableTimeSlots: TimeRange[]): Promise<Map<string, CourseClass[]>> {
-        const viableCourseClassesMap: Map<string, CourseClass[]> = new Map<string, CourseClass[]>();
-        for(const c of courses) {
-            viableCourseClassesMap.set(c.id, []);
-            const ccs = await c.getCourseClasses(termId);
-            for(const cc of ccs) {
-                const ccLectures: Lecture[] = await cc.getLectures();   // TODO: Analyze
-                if(this.areTimeRangesCompatible(ccLectures.map(l => l.time), unavailableTimeSlots))
-                    viableCourseClassesMap.get(c.id)?.push(cc);
-            }
-        }
-        return viableCourseClassesMap;
-    }
-
-    private async getSortedViableCourseClassesArray(courses: Course[], termId: string, unavailableTimeSlots: TimeRange[], mandatoryCourses: Course[], importance: { [courseId: string]: number }): Promise<CourseClass[][]> {
-        const viableCourseClassesMap = await this.getViableCourseClassesMap(courses, termId, unavailableTimeSlots);
+    private getSortedViableCourseClassesArray(inputData: IScheduleInputData): CourseClass[][] {
+        const mandatoryIds = inputData.mandatoryCourseIds;
+        const importance = inputData.indirectCorrelativesAmount;
+        const viableCourseClassesMap = inputData.viableCourseClasses;
         const viableCourseIds: string[] = Array.from(viableCourseClassesMap.keys());
-        const mandatoryIds = mandatoryCourses.map(m => m.id);
 
         // Sort course IDs by their importance (in case of a draw, mandatory courses take proirity)
         viableCourseIds.sort((c1,c2) => {
-            if(importance[c1] == importance[c2]) {
+            const importance1 = importance.get(c1);
+            const importance2 = importance.get(c2);
+            if(importance1 == importance2) {
                 if(mandatoryIds.includes(c1) && !mandatoryIds.includes(c2)) return 1;
                 if(!mandatoryIds.includes(c1) && mandatoryIds.includes(c2)) return -1;
                 return 0;
             }
-            return importance[c1]-importance[c2]
+            if(!importance1 || !importance2) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+            return importance1-importance2;
         });
 
         // Most important (or mandatory) courses go at the end of the array to ensure they're processed first in case of timeout
         const viableCourseClassesArray: CourseClass[][] = [];
         for(const courseId of viableCourseIds) {
-            const classes = viableCourseClassesMap.get(courseId);
-            if(classes) viableCourseClassesArray.push(classes);
+            const classIds = viableCourseClassesMap.get(courseId);
+            if(classIds){
+                const classes: CourseClass[] = [];
+                for(const ccId of classIds){
+                    const cc = inputData.courseClasses.get(ccId);
+                    if(cc) classes.push(cc);
+                }
+                viableCourseClassesArray.push(classes);
+            }
         }
         return viableCourseClassesArray;
     }
 
-    // Slightly less efficient than non-recursive version. Kept here in case it's needed
-    private async getCourseClassCombinationsRec(arr: CourseClass[][], targetHours: number, deadline: Date): Promise<CourseClass[][]> {
-        if(arr.length === 0) return [];
-
-        // We will focus on the first array. This will be our "current course" to work on.
-        // otherValidCombos calls this function recursively on all arrays that come after the current course.
-        let otherValidCombos = await this.getCourseClassCombinationsRec(arr.slice(1), targetHours, deadline);
-
-        // validCombosOfArr will keep all valid combinations with the courses in arr. That set contains otherValidCombos.
-        let validCombosOfArr: CourseClass[][] = otherValidCombos.slice();
-
-        // Consider the case where this course is the only one in the schedule
-        // Add its classes to our list of possible combinations
-        for(const cc of arr[0]) validCombosOfArr.push([cc]);
-
-        // Now consider combining classes of our current course with an existing valid combination
-        for (const combo of otherValidCombos) {
-            for (const cc of arr[0]) {
-                // If we're past the deadline, return what we've found so far
-                if(new Date() > deadline) return validCombosOfArr;
-
-                const combinationProposal = [cc, ...combo];
-                let weeklyMinutes = 0;
-                for(const c of combinationProposal) weeklyMinutes += await c.getWeeklyClassTimeInMinutes(); // TODO: Analyze
-                const weeklyHours = weeklyMinutes/60;
-
-                // If this combination is much longer than the desired week, discard it. It would only grow longer in following recursions
-                // We only add a combination to the array if it's valid
-                if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && await this.isClassCombinationValid(combinationProposal))
-                    validCombosOfArr.push(combinationProposal);
-            }
-        }
-        console.log("REC otherValidCombos has " +otherValidCombos.length +" elements. validCombosOfArr has " +validCombosOfArr.length +" elements")
-        console.log("\tI have now processed " +arr.length +" courses at " +new Date().toISOString())
-        return validCombosOfArr;
-    }
-
-    // Receives matrix where each array contains classes belonging to a course, example:
-    // arr = [ [A1, A2], [B1, B2], [C1] ]
-    // Since getting all combinations takes too long, the following sacrifices have been made:
-    // -- When deadline is passed, the function will return all valid combinations found so far
-    // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
-    private async getCourseClassCombinations(arr: CourseClass[][], targetHours: number, deadline: Date): Promise<CourseClass[][]> {
-        let index = arr.length-1;
+    private getCourseClassCombinations(inputData: IScheduleInputData, targetHours: number, deadline: Date): CourseClass[][] {
+        const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData);
+        let index = viableCourseClassesArray.length-1;
         let validCombos: CourseClass[][] = [];
 
         // Start from most important course (at the end of array) and work our way to less important ones
@@ -217,19 +119,23 @@ export default class ScheduleService {
             const newValidCombos: CourseClass[][] = [];
 
             // Schedules that only contain a class of our current course are a possibility
-            for(const cc of arr[index]) newValidCombos.push([cc]);
+            for(const cc of viableCourseClassesArray[index]) newValidCombos.push([cc]);
 
             for (const combo of validCombos) {
                 // If adding a class belonging to the current course to an existing combo is valid, push it to the array
-                for (const cc of arr[index]) {
+                for (const cc of viableCourseClassesArray[index]) {
                     if(new Date() > deadline) return validCombos.concat(newValidCombos);
 
                     const combinationProposal = [cc, ...combo];
                     let weeklyMinutes = 0;
-                    for(const courseClass of combinationProposal) weeklyMinutes += await courseClass.getWeeklyClassTimeInMinutes();     // TODO: Cache inside model, check no duplicates, otherwise this call inside a gazillion loops is gonna kill performance
+                    for(const courseClass of combinationProposal) {
+                        const classDuration = inputData.weeklyClassTimeInMinutes.get(courseClass.id);
+                        if(!classDuration) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+                        weeklyMinutes += classDuration;
+                    }
                     const weeklyHours = weeklyMinutes/60;
 
-                    if(weeklyHours <= targetHours*1.25 && await this.isClassCombinationValid(combinationProposal))
+                    if(weeklyHours <= targetHours*1.25 && this.isClassCombinationValid(combinationProposal, inputData))
                         newValidCombos.push(combinationProposal);
                 }
             }
@@ -243,11 +149,12 @@ export default class ScheduleService {
         return validCombos;
     }
 
-    private async isClassCombinationValid(courseClasses: CourseClass[]): Promise<boolean> {
+    private isClassCombinationValid(courseClasses: CourseClass[], inputData: IScheduleInputData): boolean {
         for(let i=0; i < courseClasses.length-1; i++){
             for(let j=i+1; j < courseClasses.length; j++){
-                const lectures1 = await courseClasses[i].getLectures();     // TODO: Cache inside model, check no duplicate models
-                const lectures2 = await courseClasses[j].getLectures();     // TODO: Cache inside model, check no duplicate models
+                const lectures1 = inputData.lectures.get(courseClasses[i].id);
+                const lectures2 = inputData.lectures.get(courseClasses[j].id);
+                if(!lectures1 || !lectures2) return false
                 for(const l1 of lectures1) {
                     for(const l2 of lectures2) {
                         // STEP 7a - Only one courseClass per Course (Guaranteed in steps 5-6)
@@ -256,10 +163,17 @@ export default class ScheduleService {
                         if(gap < 0) return false;
 
                         // STEP 7c - No unavailable time between buildings
-                        const b1 = await l1.getBuilding();                  // TODO: Cache inside model, check no duplicate models
-                        const b2 = await l2.getBuilding();                  // TODO: Cache inside model, check no duplicate models
-                        if(b1 && b2 && b1.id != b2.id) {
-                            const distance = await b1.getDistanceInMinutesTo(b2);   // TODO: Cache inside model, check no duplicate models (Maybe static map?)
+                        const b1 = inputData.lectureBuildings.get(l1.id);
+                        const b2 = inputData.lectureBuildings.get(l2.id);
+                        if(b1 && b2 && b1 !== b2) {
+                            let distancesOfB = inputData.distances.get(b1);
+                            let distance = distancesOfB?.get(b2);
+                            if(!distance){
+                                // Check if reverse relationship is defined
+                                distancesOfB = inputData.distances.get(b2);
+                                distance = distancesOfB?.get(b1);
+                            }
+
                             if(gap < (distance ?? DEFAULT_DISTANCE)) return false;
                         }
                     }
@@ -269,8 +183,7 @@ export default class ScheduleService {
         return true;
     }
 
-    private async createSchedule(courseClasses: CourseClass[], program: Program, importanceMap: { [courseId: string]: number }, mandatoryCourses: Course[]): Promise<ISchedule> {
-
+    private createSchedule(courseClasses: CourseClass[], inputData: IScheduleInputData): ISchedule {
         let totalMinutes = 0;
         let totalDays = new Set();
         let totalImportance = 0;
@@ -279,12 +192,15 @@ export default class ScheduleService {
         let latestLecture = Time.minValue();
 
         for(const cc of courseClasses) {
-            const course = await cc.getCourse();            // TODO: Analyze
-            const lectures = await cc.getLectures();        // TODO: Analyze
+            const courseId = inputData.courseOfCourseClass.get(cc.id);
+            const lectures = inputData.lectures.get(cc.id);
+            if(!courseId || !lectures) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
 
-            totalImportance += importanceMap[course.id];
-            if(mandatoryCourses.includes(course))
-                amountOfMandatoryCourses++;
+            const classImportance = inputData.indirectCorrelativesAmount.get(courseId);
+            if(!classImportance) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+            totalImportance += classImportance;
+
+            if(inputData.mandatoryCourseIds.includes(courseId)) amountOfMandatoryCourses++;
 
             for(const l of lectures){
                 totalMinutes += l.time.getDurationInMinutes();
