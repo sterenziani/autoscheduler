@@ -54,6 +54,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_INTERNAL_ID',
             message: 'Provided internalId is invalid. It must have a length between 1 and 100 characters.',
         },
+        INVALID_CREDIT_VALUE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_CREDIT_VALUE',
+            message: 'Provided credit value amount is invalid. It must be equal or greater than zero.',
+        },
         COURSES_INTERSECT: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'COURSES_INTERSECT',

@@ -36,12 +36,12 @@ export default class CourseService {
         return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), programId, optional, universityId);
     }
 
-    async createCourse(universityId: string, internalId: string, name: string): Promise<Course> {
-        return await this.dao.create(universityId, internalId, name);
+    async createCourse(universityId: string, internalId: string, name: string, creditValue: number): Promise<Course> {
+        return await this.dao.create(universityId, internalId, name, creditValue);
     }
 
-    async modifyCourse(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Course> {
-        return await this.dao.modify(id, universityIdFilter, internalId, name);
+    async modifyCourse(id: string, universityIdFilter: string, internalId?: string, name?: string, creditValue?: number): Promise<Course> {
+        return await this.dao.modify(id, universityIdFilter, internalId, name, creditValue);
     }
 
     async deleteCourse(id: string, universityIdFilter: string): Promise<void> {

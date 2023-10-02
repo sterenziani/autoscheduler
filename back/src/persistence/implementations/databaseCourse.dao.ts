@@ -51,7 +51,7 @@ export default class DatabaseCourseDao extends CourseDao {
         }
     }
 
-    async create(universityId: string, internalId: string, name: string): Promise<Course> {
+    async create(universityId: string, internalId: string, name: string, creditValue: number): Promise<Course> {
         // Generate a new id
         const id = uuidv4();
 
@@ -61,8 +61,8 @@ export default class DatabaseCourseDao extends CourseDao {
             internalId = globalizeField(universityId, internalId);
             const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (c: Course {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:BELONGS_TO {relId: $relId}]->(u) RETURN c',
-                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, relId}
+                'MATCH (u: University {id: $universityId}) CREATE (c: Course {id: $id, internalId: $internalId, name: $name, encoding: $encoding, creditValue: $creditValue})-[:BELONGS_TO {relId: $relId}]->(u) RETURN c',
+                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, creditValue, relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
@@ -74,18 +74,19 @@ export default class DatabaseCourseDao extends CourseDao {
         }
     }
 
-    async modify(id: string, universityId: string, internalId?: string, name?: string): Promise<Course> {
+    async modify(id: string, universityId: string, internalId?: string, name?: string, creditValue?: number): Promise<Course> {
         const session = graphDriver.session();
         try {
             const encodedName = name ? encodeText(name) : undefined;
             internalId = internalId ? globalizeField(universityId, internalId) : undefined;
             const baseQuery = buildQuery('MATCH (c:Course {id: $id})-[:BELONGS_TO]->(:University {id: $universityId})', 'SET', ',', [
                 {entry: 'c.name = $name, c.encoding = $encoding', value: name},
-                {entry: 'c.internalId = $internalId', value: internalId}
+                {entry: 'c.internalId = $internalId', value: internalId},
+                {entry: 'c.creditValue = $creditValue', value: creditValue}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN c`,
-                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding}
+                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, creditValue}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -310,6 +311,6 @@ export default class DatabaseCourseDao extends CourseDao {
     }
 
     private nodeToCourse(node: any): DatabaseCourse {
-        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.creditValue);
     }
 }

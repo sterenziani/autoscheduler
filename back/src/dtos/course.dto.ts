@@ -10,6 +10,7 @@ export const courseToDto = (course: Course, scope: API_SCOPE): ICourseDto => {
         id: course.id,
         internalId: course.internalId,
         name: course.name,
+        creditValue: course.creditValue,
         url,
         courseClassesUrl: applyPathToBase(url, 'course-classes'),
         requiredCoursesUrl: applyPathToBase(url, 'required-courses')
@@ -40,6 +41,7 @@ interface ICourseDto {
     id: string;
     internalId: string;
     name: string;
+    creditValue: number;
     url: string;
     courseClassesUrl: string;
     requiredCoursesUrl: string;

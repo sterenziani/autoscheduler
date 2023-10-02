@@ -74,7 +74,10 @@ export default class ScheduleService {
     private getSortedViableCourseClassesArray(inputData: IScheduleInputData): CourseClass[][] {
         const mandatoryIds = inputData.mandatoryCourseIds;
         const importance = inputData.indirectCorrelativesAmount;
-        const viableCourseClassesMap = inputData.viableCourseClasses;
+        const courseClassesOfCourse = inputData.courseClassesOfCourse;
+
+        // TODO: Filter courseClassesOfCourse into viableCourseClassesMap
+        const viableCourseClassesMap: Map<string, string[]> = courseClassesOfCourse;
         const viableCourseIds: string[] = Array.from(viableCourseClassesMap.keys());
 
         // Sort course IDs by their importance (in case of a draw, mandatory courses take proirity)

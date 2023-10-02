@@ -13,7 +13,7 @@ import { API_SCOPE, DEFAULT_LOCALE, RESOURCES } from '../constants/general.const
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidDay, isValidEmail, isValidFilter, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
+import { isValidDay, isValidEmail, isValidFilter, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateNumber, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -405,13 +405,15 @@ export class UniversityController {
         const universityId = req.user.id;
         const internalId = validateString(req.body.internalId);
         const name = validateString(req.body.name);
-        
-        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        const creditValue = validateNumber(req.body.creditValue);
+
+        if (!internalId || !name || !creditValue) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (creditValue < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));
 
         try {
-            const course: Course = await this.courseService.createCourse(universityId, internalId, name);
+            const course: Course = await this.courseService.createCourse(universityId, internalId, name, creditValue);
             res.status(HTTP_STATUS.CREATED)
                 .location(getResourceUrl(RESOURCES.COURSE, API_SCOPE.UNIVERSITY, course.id))
                 .send(CourseDto.courseToDto(course, API_SCOPE.UNIVERSITY));
@@ -425,13 +427,15 @@ export class UniversityController {
         const courseId = req.params.courseId;
         const internalId = validateString(req.body.internalId);
         const name = validateString(req.body.name);
-        
-        if (!internalId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        const creditValue = validateNumber(req.body.creditValue);
+
+        if (!internalId && !name && !creditValue) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (creditValue && creditValue < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));
 
         try {
-            const course: Course = await this.courseService.modifyCourse(courseId, universityId, internalId, name);
+            const course: Course = await this.courseService.modifyCourse(courseId, universityId, internalId, name, creditValue);
             res.status(HTTP_STATUS.OK)
                 .location(getResourceUrl(RESOURCES.COURSE, API_SCOPE.UNIVERSITY, course.id))
                 .send(CourseDto.courseToDto(course, API_SCOPE.UNIVERSITY));

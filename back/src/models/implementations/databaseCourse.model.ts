@@ -89,7 +89,7 @@ export default class DatabaseCourse extends Course {
     }
 
     private nodeToCourse(node: any): DatabaseCourse {
-        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.creditValue);
     }
 
     private nodeToCourseClass(node: any): DatabaseCourseClass {

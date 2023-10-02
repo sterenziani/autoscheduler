@@ -36,6 +36,6 @@ export default class DatabaseProgram extends Program {
     }
 
     private nodeToCourse(node: any): DatabaseCourse {
-        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+        return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.creditValue);
     }
 }
