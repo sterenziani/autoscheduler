@@ -3,7 +3,7 @@ import GenericException from '../../exceptions/generic.exception';
 import TimeRange from '../../helpers/classes/timeRange.class';
 import Time from '../../helpers/classes/time.class';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRegex, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, toGraphDate, parseGraphDate } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, getNode, getNodes, getRelId, getStats, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import Lecture from '../../models/abstract/lecture.model';
 import DatabaseLecture from '../../models/implementations/databaseLecture.model';
@@ -72,26 +72,18 @@ export default class DatabaseLectureDao extends LectureDao {
     async modify(id: string, universityId: string, courseClassId?: string, timeRange?: TimeRange, buildingId?: string): Promise<Lecture>{
         const session = graphDriver.session();
         try {
-            const takesPlaceInRelId = getRelId(TAKES_PLACE_IN_PREFIX, id, buildingId?? "");
+            const takesPlaceInRelId = buildingId ? getRelId(TAKES_PLACE_IN_PREFIX, id, buildingId) : undefined;
             const dayOfWeek = timeRange ? timeRange.dayOfWeek : undefined;
             const startTime = timeRange ? timeRange.startTime.toString() : undefined;
             const endTime = timeRange ? timeRange.endTime.toString() : undefined;
 
-            // If buildingId is defined, we add specific parts in the middle of the query to replace edge
-            let newBuildingMatch = ''
-            let newBuildingRelationshipReplace = ''
-            if(buildingId !== undefined){
-                newBuildingMatch = ', (b:Building {id: $buildingId})-[:BELONGS_TO]->(u)'
-                newBuildingRelationshipReplace = 'DELETE obr CREATE (l)-[nbr:TAKES_PLACE_IN {relId: $takesPlaceInRelId}]->(b)'
-            }
-
-            const baseQuery = buildQuery(`MATCH (: Building)<-[obr:TAKES_PLACE_IN]-(l: Lecture {id: $id})-[:OF]->(:CourseClass {id: $courseClassId})-[:OF]->(:Course)-[:BELONGS_TO]->(u: University {id: $universityId}) ${newBuildingMatch}`, 'SET', ',', [
-                {entry: 'l.dayOfWeek = $dayOfWeek', value: dayOfWeek},
-                {entry: 'l.startTime = time($startTime)', value: startTime},
-                {entry: 'l.endTime = time($endTime)', value: endTime},
-            ]);
             const result = await session.run(
-                `${baseQuery} ${newBuildingRelationshipReplace} RETURN l`,
+                'MATCH (u:University {id: $universityId})<-[:BELONGS_TO]-(:Building)<-[r:TAKES_PLACE_IN]-(l:Lecture {id: $id}) ' +
+                (courseClassId ? 'WHERE EXISTS((l)-[:OF]->(:CourseClass {id: $courseClassId})) ' : '') +
+                (buildingId ? 'MATCH (b:Building {id: $buildingId})-[:BELONGS_TO]->(u) ' : '') +
+                (timeRange ? 'SET l.dayOfWeek = $dayOfWeek, l.startTime = time($startTime), l.endTime = time($endTime) ' : '') +
+                (buildingId ? 'DELETE r CREATE (l)-[:TAKES_PLACE_IN {relId: $takesPlaceInRelId}]->(b) ' : '') +
+                'RETURN l',
                 {universityId, id, dayOfWeek, startTime, endTime, courseClassId, buildingId, takesPlaceInRelId}
             );
             const node = getNode(result);
@@ -107,8 +99,11 @@ export default class DatabaseLectureDao extends LectureDao {
     async delete(id: string, universityId: string, courseClassId?: string): Promise<void>{
         const session = graphDriver.session();
         try {
+            const baseQuery = buildQuery('MATCH (l: Lecture {id: $id})-[:OF]->(cc:CourseClass)-[:OF]->(:Course)-[:BELONGS_TO]->(:University {id: $universityId})', 'WHERE', 'AND', [
+                {entry: 'cc.id = $courseClassId', value: courseClassId}
+            ]);
             const result = await session.run(
-                `MATCH (l: Lecture {id: $id})-[:OF]->(:CourseClass {id: $courseClassId})-[:OF]->(:Course)-[:BELONGS_TO]->(u:University {id: $universityId}) DETACH DELETE l`,
+                `${baseQuery} DETACH DELETE l`,
                 {id, courseClassId, universityId}
             );
             const stats = getStats(result);

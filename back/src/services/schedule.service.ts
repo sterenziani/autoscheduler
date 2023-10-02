@@ -3,14 +3,11 @@ import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import ScheduleDao from '../persistence/abstract/schedule.dao';
 import ScheduleDaoFactory from '../factories/scheduleDao.factory';
-import Program from '../models/abstract/program.model';
 import StudentService from './student.service';
 import ProgramService from './program.service';
 import TermService from './term.service';
-import Course from '../models/abstract/course.model';
 import CourseClass from '../models/abstract/courseClass.model';
 import {ISchedule, IScheduleWithScore} from '../interfaces/schedule.interface';
-import Lecture from '../models/abstract/lecture.model';
 import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
 import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
@@ -54,7 +51,7 @@ export default class ScheduleService {
         unavailableTimeSlots: TimeRange[]
     ): Promise<IScheduleWithScore[]> {
         // STEPS 1-5 - Get and filter information needed
-        const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId, unavailableTimeSlots);
+        const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId);
 
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
@@ -152,19 +149,23 @@ export default class ScheduleService {
     private isClassCombinationValid(courseClasses: CourseClass[], inputData: IScheduleInputData): boolean {
         for(let i=0; i < courseClasses.length-1; i++){
             for(let j=i+1; j < courseClasses.length; j++){
-                const lectures1 = inputData.lectures.get(courseClasses[i].id);
-                const lectures2 = inputData.lectures.get(courseClasses[j].id);
+                const lectures1 = inputData.lecturesOfCourseClass.get(courseClasses[i].id);
+                const lectures2 = inputData.lecturesOfCourseClass.get(courseClasses[j].id);
                 if(!lectures1 || !lectures2) return false
-                for(const l1 of lectures1) {
-                    for(const l2 of lectures2) {
+                for(const lectureId1 of lectures1) {
+                    const l1 = inputData.lectures.get(lectureId1);
+                    if (!l1) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+                    for(const lectureId2 of lectures2) {
+                        const l2 = inputData.lectures.get(lectureId2);
+                        if (!l2) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
                         // STEP 7a - Only one courseClass per Course (Guaranteed in steps 5-6)
                         // STEP 7b - Lectures should not overlap
                         const gap = l1.time.getGapInMinutesAgainst(l2.time);
                         if(gap < 0) return false;
 
                         // STEP 7c - No unavailable time between buildings
-                        const b1 = inputData.lectureBuildings.get(l1.id);
-                        const b2 = inputData.lectureBuildings.get(l2.id);
+                        const b1 = inputData.lectureBuilding.get(l1.id);
+                        const b2 = inputData.lectureBuilding.get(l2.id);
                         if(b1 && b2 && b1 !== b2) {
                             let distancesOfB = inputData.distances.get(b1);
                             let distance = distancesOfB?.get(b2);
@@ -193,7 +194,7 @@ export default class ScheduleService {
 
         for(const cc of courseClasses) {
             const courseId = inputData.courseOfCourseClass.get(cc.id);
-            const lectures = inputData.lectures.get(cc.id);
+            const lectures = inputData.lecturesOfCourseClass.get(cc.id);
             if(!courseId || !lectures) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
 
             const classImportance = inputData.indirectCorrelativesAmount.get(courseId);
@@ -202,7 +203,9 @@ export default class ScheduleService {
 
             if(inputData.mandatoryCourseIds.includes(courseId)) amountOfMandatoryCourses++;
 
-            for(const l of lectures){
+            for(const lectureId of lectures){
+                const l = inputData.lectures.get(lectureId);
+                if (!l) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
                 totalMinutes += l.time.getDurationInMinutes();
                 totalDays.add(l.time.dayOfWeek);
                 if (!earliestLecture || l.time.startTime < earliestLecture) earliestLecture = l.time.startTime;;

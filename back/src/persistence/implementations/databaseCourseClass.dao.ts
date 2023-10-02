@@ -56,8 +56,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
         const session = graphDriver.session();
         try {
             const encodedName = encodeText(name);
-            // TODO: InternalId should only be exclusive within the course and term, not university itself
-            internalId = globalizeField(universityId, internalId);
+            internalId = globalizeField(`${universityId}-${courseId}-${termId}`, internalId);
             const ofRelId = getRelId(OF_PREFIX, id, courseId);
             const happensInRelId = getRelId(HAPPENS_IN_PREFIX, id, termId);
             const result = await session.run(
@@ -75,31 +74,29 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
         }
     }
 
-    async modify(id: string, universityId: string, courseId?: string | undefined, termId?: string | undefined, internalId?: string | undefined, name?: string | undefined): Promise<CourseClass> {
+    async modify(id: string, universityId: string, courseId?: string, termId?: string, internalId?: string, name?: string): Promise<CourseClass> {
         const session = graphDriver.session();
         try {
             const encodedName = name ? encodeText(name) : undefined;
-            // TODO: InternalId should only be exclusive within the course and term, not university itself
-            internalId = internalId ? globalizeField(universityId, internalId) : undefined;
-            const ofRelId = (courseId !== undefined) ? getRelId(OF_PREFIX, id, courseId) : undefined;
-            const happensInRelId = (termId !== undefined) ? getRelId(HAPPENS_IN_PREFIX, id, termId) : undefined;
-            
-            // If termId is defined, we add specific parts in the middle of the query to replace edge
-            let newTermMatch = ''
-            let newTermRelationshipReplace = ''
-            if(termId !== undefined){
-                newTermMatch = ', (t: Term {id: $termId})-[:BELONGS_TO]->(u)'
-                newTermRelationshipReplace = 'DELETE ohr CREATE (cc) -[:HAPPENS_IN {relId: $happensInRelId}]-> (t)'
-            }
+            internalId = internalId ? globalizeField(`${universityId}-${courseId}-${termId}`, internalId) : undefined;
+            const happensInRelId = termId ? getRelId(HAPPENS_IN_PREFIX, id, termId) : undefined;
 
-            const baseQuery = buildQuery(`MATCH (u: University {id: $universityId}), (u) <-[:BELONGS_TO]- (: Term) <-[ohr:HAPPENS_IN]- (cc:CourseClass {id: $id}) -[:OF {relId: $ofRelId}]->(: Course {id: $courseId}) -[:BELONGS_TO]-> (u) ${newTermMatch}`, 'SET', ',', [
-                {entry: 'cc.name = $name, c.encoding = $encoding', value: name},
+            let query = buildQuery('MATCH (:Term)<-[r:HAPPENS_IN]-(cc:CourseClass {id: $courseClassId})-[:OF]->(c:Course)-[:BELONGS_TO]->(u:University {id: $universityId})', 'WHERE', 'AND', [
+                {entry: 'c.id = $courseId', value: courseId}
+            ]);
+
+            query += termId ? ' MATCH (t:Term {id: $termId})-[:BELONGS_TO]->(u)' : '';
+
+            query = buildQuery(query, 'SET', ',', [
+                {entry: 'cc.name = $name, cc.encoding = $encoding', value: name},
                 {entry: 'cc.internalId = $internalId', value: internalId}
             ]);
 
+            query += termId ? ' DELETE r CREATE (cc)-[:HAPPENS_IN {relId: $happensInRelId}]->(t)' : '';
+
             const result = await session.run(
-                `${baseQuery} ${newTermRelationshipReplace} RETURN cc`,
-                {universityId, courseId, termId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, ofRelId, happensInRelId}
+                `${query} RETURN cc`,
+                {universityId, courseId, termId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, happensInRelId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -111,14 +108,14 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
         }
     }
 
-    async delete(id: string, universityId: string, courseId?: string | undefined): Promise<void> {
+    async delete(id: string, universityId: string, courseId?: string): Promise<void> {
         const session = graphDriver.session();
         try {
-            const baseQuery = buildQuery('MATCH (cc:CourseClass {id: $id}) -[:OF]-> (c: Course) -[:BELONGS_TO]-> (u: University {id: $universityId})', 'WHERE', 'AND', [
+            const baseQuery = buildQuery('MATCH (cc:CourseClass {id: $id})-[:OF]->(c:Course)-[:BELONGS_TO]->(:University {id: $universityId})', 'WHERE', 'AND', [
                 {entry: 'c.id = $courseId', value: courseId},
             ]);
             const result = await session.run(
-                `${baseQuery} DETACH DELETE cc`,
+                `${baseQuery} OPTIONAL MATCH (l:Lecture)-[:OF]->(cc) DETACH DELETE l, cc`,
                 {id, universityId, courseId}
             );
             const stats = getStats(result);
@@ -130,10 +127,10 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
         }
     }
 
-    async findById(id: string, universityId?: string | undefined, courseId?: string | undefined): Promise<CourseClass | undefined> {
+    async findById(id: string, universityId?: string, courseId?: string): Promise<CourseClass | undefined> {
         const session = graphDriver.session();
         try {
-            const baseQuery = buildQuery('MATCH (cc:CourseClass {id: $id}) -[:OF]->(c: Course) -[:BELONGS_TO]-> (u: University)', 'WHERE', 'AND', [
+            const baseQuery = buildQuery('MATCH (cc:CourseClass {id: $id})-[:OF]->(c: Course)-[:BELONGS_TO]->(u: University)', 'WHERE', 'AND', [
                 {entry: 'u.id = $universityId', value: universityId},
                 {entry: 'c.id = $courseId', value: courseId},
             ]);
@@ -152,7 +149,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
         }
     }
 
-    async findPaginated(page: number, limit: number, textSearch?: string | undefined, courseId?: string | undefined, termId?: string | undefined, universityId?: string | undefined): Promise<PaginatedCollection<CourseClass>> {
+    async findPaginated(page: number, limit: number, textSearch?: string, courseId?: string, termId?: string, universityId?: string): Promise<PaginatedCollection<CourseClass>> {
         // Initialize useful variables
         const collection: DatabaseCourseClass[] = [];
         let lastPage = 1;

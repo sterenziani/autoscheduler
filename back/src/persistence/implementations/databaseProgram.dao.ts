@@ -346,7 +346,7 @@ export default class DatabaseProgramDao extends ProgramDao {
                 'UNWIND $parsedCourses as course ' +
                 'MATCH (rc:Course {id: course.id})-[:IN]->(p) ' +
                 'CREATE (c)-[:REQUIRES {relId: course.relId, programId: $id}]->(rc)',
-                {id, universityId, parsedCourses}
+                {id, courseId, universityId, parsedCourses}
             );
             const stats = getStats(result);
             if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or required course or program was not found
