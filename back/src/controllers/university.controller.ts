@@ -13,7 +13,7 @@ import { API_SCOPE, DEFAULT_LOCALE, RESOURCES } from '../constants/general.const
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidDay, isValidEmail, isValidFilter, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateNumber, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
+import { isValidDay, isValidEmail, isValidFilter, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateNumber, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateStringToNumberObject, validateString, validateTimes } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -28,6 +28,7 @@ import BuildingService from '../services/building.service';
 import Building from '../models/abstract/building.model';
 import LectureService from '../services/lecture.service';
 import Lecture from '../models/abstract/lecture.model';
+import { IProgramRequiredCredits } from '../interfaces/course.interface';
 import { IBuildingDistance } from '../interfaces/building.interface';
 import Term from '../models/abstract/term.model';
 import TermService from '../services/term.service';
@@ -216,11 +217,13 @@ export class UniversityController {
         const programId = req.params.programId;
         const courseId = validateString(req.body.courseId);
         const optional = validateBoolean(req.body.optional);
+        const requiredCredits = validateNumber(req.body.requiredCredits);
 
-        if (!courseId || optional === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
-        
+        if (!courseId || optional === undefined || requiredCredits === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (requiredCredits < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_REQUIREMENT));
+
         try {
-            await this.programService.addCourse(programId, universityId, courseId, optional);
+            await this.programService.addCourse(programId, universityId, courseId, optional, requiredCredits);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
@@ -232,11 +235,13 @@ export class UniversityController {
         const programId = req.params.programId;
         const courseId = req.params.courseId;
         const optional = validateBoolean(req.body.optional);
+        const requiredCredits = validateNumber(req.body.requiredCredits);
 
         if (optional === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
-        
+        if (requiredCredits && requiredCredits < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_REQUIREMENT));
+
         try {
-            await this.programService.modifyCourse(programId, universityId, courseId, optional);
+            await this.programService.modifyCourse(programId, universityId, courseId, optional, requiredCredits);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
@@ -261,12 +266,18 @@ export class UniversityController {
         const programId = req.params.programId;
         const mandatoryCourses = removeDuplicates(validateArray(req.body.mandatoryCourses, validateString) ?? []);
         const optionalCourses = removeDuplicates(validateArray(req.body.optionalCourses, validateString) ?? []);
+        const creditRequirements = validateStringToNumberObject(req.body.mandatoryCourses)?? {};
 
         if (mandatoryCourses.length === 0 && optionalCourses.length === 0) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (valuesIntersect(mandatoryCourses, optionalCourses)) return next(new GenericException(ERRORS.BAD_REQUEST.COURSES_INTERSECT));
+        for(const cId of Object.keys(creditRequirements)){
+            if(!mandatoryCourses.includes(cId) && !optionalCourses.includes(cId))
+                return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_REQUIREMENT_MAP));
+            if(creditRequirements[cId] < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_REQUIREMENT));
+        }
 
         try {
-            await this.programService.bulkAddCourses(programId, universityId, mandatoryCourses, optionalCourses);
+            await this.programService.bulkAddCourses(programId, universityId, mandatoryCourses, optionalCourses, creditRequirements);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
@@ -278,11 +289,17 @@ export class UniversityController {
         const programId = req.params.programId;
         const mandatoryCourses = removeDuplicates(validateArray(req.body.mandatoryCourses, validateString) ?? []);
         const optionalCourses = removeDuplicates(validateArray(req.body.optionalCourses, validateString) ?? []);
+        const creditRequirements = validateStringToNumberObject(req.body.mandatoryCourses)?? {};
 
         if (valuesIntersect(mandatoryCourses, optionalCourses)) return next(new GenericException(ERRORS.BAD_REQUEST.COURSES_INTERSECT));
+        for(const cId of Object.keys(creditRequirements)){
+            if(!mandatoryCourses.includes(cId) && !optionalCourses.includes(cId))
+                return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_REQUIREMENT_MAP));
+            if(creditRequirements[cId] < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_REQUIREMENT));
+        }
 
         try {
-            await this.programService.bulkReplaceCourses(programId, universityId, mandatoryCourses, optionalCourses);
+            await this.programService.bulkReplaceCourses(programId, universityId, mandatoryCourses, optionalCourses, creditRequirements);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
@@ -407,7 +424,7 @@ export class UniversityController {
         const name = validateString(req.body.name);
         const creditValue = validateNumber(req.body.creditValue);
 
-        if (!internalId || !name || !creditValue) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!internalId || !name || creditValue === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
         if (creditValue < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));
@@ -429,7 +446,7 @@ export class UniversityController {
         const name = validateString(req.body.name);
         const creditValue = validateNumber(req.body.creditValue);
 
-        if (!internalId && !name && !creditValue) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!internalId && !name && creditValue === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
         if (creditValue && creditValue < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));
@@ -563,6 +580,31 @@ export class UniversityController {
             res.status(HTTP_STATUS.OK)
                 .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, undefined, programId))
                 .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.UNIVERSITY));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityCourseRequiredCredits: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+
+        try {
+            const creditRequirements: IProgramRequiredCredits[] = await this.courseService.getCreditRequirements(courseId, universityId);
+            res.status(HTTP_STATUS.OK).send(CourseDto.requiredCreditsListToDto(creditRequirements, API_SCOPE.UNIVERSITY, courseId));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getUniversityCourseRequiredCreditsForProgram: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.id;
+        const courseId = req.params.courseId;
+        const programId = req.params.courseId;
+
+        try {
+            const creditRequirement: IProgramRequiredCredits = await this.courseService.getCreditRequirement(courseId, programId, universityId);
+            res.status(HTTP_STATUS.OK).send(CourseDto.requiredCreditsToDto(creditRequirement, API_SCOPE.UNIVERSITY, courseId));
         } catch (e) {
             next(e);
         }

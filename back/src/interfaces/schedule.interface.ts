@@ -12,8 +12,7 @@ export interface IScheduleInputData {
     optionalCourseIds: string[],                        // Of the given courses, which are optional
 
     indirectCorrelativesAmount: Map<string, number>,    // courseId -> number
-    weeklyClassTimeInMinutes: Map<string, number>,      // courseClassId -> number   // TODO: this should be course.credits
-    // viableCourseClasses: Map<string, string[]>          // courseId -> courseClassIds returned by course.getCourseClasses() that don't overlap unavailableTimeSlots
+    weeklyClassTimeInMinutes: Map<string, number>,      // courseClassId -> number
 
     courseClassesOfCourse: Map<string, string[]>,       // courseId -> courseClassIds
     courseOfCourseClass: Map<string, string>,           // courseClassId -> courseId

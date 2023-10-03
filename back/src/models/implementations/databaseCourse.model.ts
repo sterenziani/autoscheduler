@@ -9,6 +9,7 @@ import DatabaseCourseClass from "./databaseCourseClass.model";
 export default class DatabaseCourse extends Course {
     private requiredCoursesCache: {[programId: string]: {requiredCourses: Course[] | undefined}} = {};
     private courseClassesCache: {[courseId: string]: {courseClasses: CourseClass[] | undefined}} = {};
+    private requiredCreditsCache: {[programId: string]: {requiredCredits: number | undefined}} = {};
     private correlativesCache: {[courseId: string]: {correlatives: number | undefined}} = {};
 
     public async getRequiredCoursesForProgram(programId: string): Promise<Course[] | undefined> {
@@ -32,6 +33,28 @@ export default class DatabaseCourse extends Course {
             return collection;
         } catch (err) {
             logErrors(err, '[Course:getRequiredCoursesForProgram]');
+            return undefined;
+        } finally {
+            await session.close();
+        }
+    }
+
+    public async getCreditsRequirementForProgram(programId: string): Promise<number | undefined> {
+        // Check cache first
+        const cacheHit = this.requiredCreditsCache[this.id];
+        if (cacheHit !== undefined) return cacheHit.requiredCredits;
+
+        const session = graphDriver.session();
+        try {
+            const result = await session.run(
+                'MATCH (c:Course {id:$id})-[r:IN]->(p:Program {id:$programId}) RETURN r.requiredCredits as requiredCredits',
+                {id: this.id, programId}
+            );
+            const requiredCredits = getValue<number | undefined>(result, 'requiredCredits');
+            this.requiredCreditsCache[this.id] = { requiredCredits: requiredCredits };
+            return requiredCredits;
+        } catch (err) {
+            logErrors(err, '[Course:getCreditsRequirementForProgram]');
             return undefined;
         } finally {
             await session.close();

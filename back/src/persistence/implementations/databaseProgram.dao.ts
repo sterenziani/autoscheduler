@@ -178,14 +178,14 @@ export default class DatabaseProgramDao extends ProgramDao {
         return simplePaginateCollection(collection, page, lastPage);
     }
 
-    async addCourse(id: string, universityId: string, courseId: string, optional: boolean): Promise<void> {
+    async addCourse(id: string, universityId: string, courseId: string, optional: boolean, requiredCredits: number): Promise<void> {
         const session = graphDriver.session();
         try {
             const relId = getRelId(IN_PREFIX, courseId, id);
             const result = await session.run(
                 'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
-                'CREATE (c)-[:IN {relId: $relId, optional: $optional}]->(p)',
-                {id, universityId, courseId, optional, relId}
+                'CREATE (c)-[:IN {relId: $relId, optional: $optional, requiredCredits: $requiredCredits}]->(p)',
+                {id, universityId, courseId, optional, requiredCredits, relId}
             );
             const stats = getStats(result);
             if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or program was not found
@@ -196,15 +196,15 @@ export default class DatabaseProgramDao extends ProgramDao {
         }
     }
 
-    async modifyCourse(id: string, universityId: string, courseId: string, optional: boolean): Promise<void> {
+    async modifyCourse(id: string, universityId: string, courseId: string, optional: boolean, requiredCredits?: number): Promise<void> {
         const session = graphDriver.session();
         try {
-            const result = await session.run(
-                'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
-                'MATCH (c)-[r:IN]->(p) ' +
-                'SET r.optional = $optional',
-                {id, universityId, courseId, optional}
-            );
+            const query = buildQuery('MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
+            'MATCH (c)-[r:IN]->(p) ', 'SET', ',', [
+                {entry: 'r.optional = $optional', value: optional},
+                {entry: 'r.requiredCredits = $requiredCredits', value: requiredCredits}
+            ]);
+            const result = await session.run(query, {id, universityId, courseId, optional, requiredCredits});
             const stats = getStats(result);
             if (stats.propertiesSet === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or program was not found
         } catch (err) {
@@ -232,8 +232,8 @@ export default class DatabaseProgramDao extends ProgramDao {
         }
     }
 
-    async bulkAddCourses(id: string, universityId: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[]): Promise<void> {
-        const parsedCourses = this.parseCourses(mandatoryCoursesIds, optionalCoursesIds, id);
+    async bulkAddCourses(id: string, universityId: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}): Promise<void> {
+        const parsedCourses = this.parseCourses(mandatoryCoursesIds, optionalCoursesIds, requiredCredits, id);
         if (parsedCourses.length === 0) return;
 
         const session = graphDriver.session();
@@ -242,7 +242,7 @@ export default class DatabaseProgramDao extends ProgramDao {
                 'MATCH (p:Program {id: $id})-[:BELONGS_TO]->(u:University {id: $universityId}) ' +
                 'UNWIND $parsedCourses as course ' +
                 'MATCH (c:Course {id: course.id})-[:BELONGS_TO]->(u) ' +
-                'CREATE (c)-[:IN {relId: course.relId, optional: course.optional}]->(p)',
+                'CREATE (c)-[:IN {relId: course.relId, optional: course.optional, requiredCredits: course.requiredCredits}]->(p)',
                 {id, universityId, parsedCourses}
             );
             const stats = getStats(result);
@@ -254,8 +254,8 @@ export default class DatabaseProgramDao extends ProgramDao {
         }
     }
 
-    async bulkReplaceCourses(id: string, universityId: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[]): Promise<void> {
-        const parsedCourses = this.parseCourses(mandatoryCoursesIds, optionalCoursesIds, id);
+    async bulkReplaceCourses(id: string, universityId: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}): Promise<void> {
+        const parsedCourses = this.parseCourses(mandatoryCoursesIds, optionalCoursesIds, requiredCredits, id);
 
         const session = graphDriver.session();
         const transaction = session.beginTransaction();
@@ -276,7 +276,7 @@ export default class DatabaseProgramDao extends ProgramDao {
                 'MATCH (p:Program {id: $id})->[:BELONGS_TO]->(u:University {id: $universityId}) ' +
                 'UNWIND $parsedCourses as course ' +
                 'MATCH (c:Course {id: course.id})-[:BELONGS_TO]->(u) ' +
-                'CREATE (c)-[:IN {relId: course.relId, optional: course.optional}]->(p)',
+                'CREATE (c)-[:IN {relId: course.relId, optional: course.optional, requiredCredits: course.requiredCredits}]->(p)',
                 {id, universityId, parsedCourses}
             );
             await transaction.commit();
@@ -399,12 +399,13 @@ export default class DatabaseProgramDao extends ProgramDao {
         return new DatabaseProgram(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
     }
 
-    private parseCourses(mandatoryCoursesIds: string[], optionalCoursesIds: string[], programId: string) {
-        const parsed: {id: string, optional: boolean, relId: string}[] = [];
+    private parseCourses(mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}, programId: string) {
+        const parsed: {id: string, optional: boolean, requiredCredits: number, relId: string}[] = [];
         for (const id of mandatoryCoursesIds) {
             parsed.push({
                 id,
                 optional: false,
+                requiredCredits: requiredCredits[id]?? 0,
                 relId: getRelId(IN_PREFIX, id, programId)
             });
         }
@@ -412,6 +413,7 @@ export default class DatabaseProgramDao extends ProgramDao {
             parsed.push({
                 id,
                 optional: true,
+                requiredCredits: requiredCredits[id]?? 0,
                 relId: getRelId(IN_PREFIX, id, programId)
             });
         }

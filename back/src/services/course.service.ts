@@ -1,6 +1,7 @@
 import CourseDaoFactory from '../factories/courseDao.factory';
 import CourseDao from '../persistence/abstract/course.dao';
 import Course from '../models/abstract/course.model';
+import { IProgramRequiredCredits } from '../interfaces/course.interface';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import { cleanMaybeText } from '../helpers/string.helper';
 
@@ -50,6 +51,14 @@ export default class CourseService {
 
     async getRequiredCourses(page: number, limit: number, id: string, textSearch?: string, programId?: string, universityId?: string): Promise<PaginatedCollection<Course>> {
         return await this.dao.findPaginatedRequiredCourses(page, limit, id, cleanMaybeText(textSearch), programId, universityId);
+    }
+
+    async getCreditRequirements(courseId: string, universityId: string): Promise<IProgramRequiredCredits[]> {
+        return await this.dao.getCreditRequirements(courseId, universityId);
+    }
+
+    async getCreditRequirement(courseId: string, programId: string, universityId: string): Promise<IProgramRequiredCredits> {
+        return await this.dao.getCreditRequirement(courseId, programId, universityId);
     }
 
     async getRemainingCourses(page: number, limit: number, studentId: string, programId: string, universityId: string, textSearch?: string, optional?: boolean): Promise<PaginatedCollection<Course>> {

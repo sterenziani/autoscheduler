@@ -150,6 +150,14 @@ export class UniversityRoutes {
             this.controller.bulkReplaceUniversityProgramCourseRequiredCourses
         );
 
+        // /university/programs/:programId/courses/:courseId/required-credits routes
+        this.router.get(
+            '/programs/:programId/courses/:courseId/required-credits',
+            authUsersOnlyMiddleware,
+            universitiesOnlyMiddleware,
+            this.controller.getUniversityCourseRequiredCreditsForProgram
+        );
+
         // /university/courses routes
         this.router.get(
             '/courses',
@@ -223,6 +231,20 @@ export class UniversityRoutes {
             authUsersOnlyMiddleware,
             universitiesOnlyMiddleware,
             this.controller.getUniversityCourseRequiredCourses
+        );
+
+        // /university/courses/:courseId/required-credits routes
+        this.router.get(
+            '/courses/:courseId/required-credits',
+            authUsersOnlyMiddleware,
+            universitiesOnlyMiddleware,
+            this.controller.getUniversityCourseRequiredCredits
+        );
+        this.router.get(
+            '/courses/:courseId/required-credits/:programId',
+            authUsersOnlyMiddleware,
+            universitiesOnlyMiddleware,
+            this.controller.getUniversityCourseRequiredCreditsForProgram
         );
 
         // /university/buildings routes

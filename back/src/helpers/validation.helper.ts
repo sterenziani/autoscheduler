@@ -140,6 +140,15 @@ export const validateBuildingDistances = (maybeDistances: any): IBuildingDistanc
     return maybeDistances as IBuildingDistancesInput;
 };
 
+export const validateStringToNumberObject = (data: any): {[key:string]: number} | undefined => {
+    if (data == undefined || typeof data !== 'object') return undefined;
+
+    const keys = validateArray(Object.keys(data), validateString);
+    const values = validateArray(Object.values(data), validateNumber);
+    if(!keys || !values) return undefined;
+    return data as {[key:string]: number};
+};
+
 // IsValid Validators
 
 export const isValidEmail = (email: string): boolean => {

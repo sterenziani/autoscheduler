@@ -46,24 +46,24 @@ export default class ProgramService {
         return await this.dao.delete(id, universityIdFilter);
     }
 
-    async addCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean): Promise<void> {
-        await this.dao.addCourse(id, universityIdFilter, courseId, optional);
+    async addCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean, requiredCredits: number): Promise<void> {
+        await this.dao.addCourse(id, universityIdFilter, courseId, optional, requiredCredits);
     }
 
-    async modifyCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean): Promise<void> {
-        await this.dao.modifyCourse(id, universityIdFilter, courseId, optional);
+    async modifyCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean, requiredCredits?: number): Promise<void> {
+        await this.dao.modifyCourse(id, universityIdFilter, courseId, optional, requiredCredits);
     }
 
     async removeCourse(id: string, universityIdFilter: string, courseId: string): Promise<void> {
         await this.dao.removeCourse(id, universityIdFilter, courseId);
     }
 
-    async bulkAddCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[]): Promise<void> {
-        await this.dao.bulkAddCourses(id, universityIdFilter, mandatoryCoursesIds, optionalCoursesIds);
+    async bulkAddCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}): Promise<void> {
+        await this.dao.bulkAddCourses(id, universityIdFilter, mandatoryCoursesIds, optionalCoursesIds, requiredCredits);
     }
 
-    async bulkReplaceCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[]): Promise<void> {
-        await this.dao.bulkReplaceCourses(id, universityIdFilter, mandatoryCoursesIds, optionalCoursesIds);
+    async bulkReplaceCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}): Promise<void> {
+        await this.dao.bulkReplaceCourses(id, universityIdFilter, mandatoryCoursesIds, optionalCoursesIds, requiredCredits);
     }
 
     async addCourseRequiredCourse(id: string, universityIdFilter: string, courseId: string, requiredCourseId: string): Promise<void> {

@@ -59,10 +59,20 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_CREDIT_VALUE',
             message: 'Provided credit value amount is invalid. It must be equal or greater than zero.',
         },
+        INVALID_CREDIT_REQUIREMENT: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_CREDIT_REQUIREMENT',
+            message: 'Provided amount of required credits is invalid. It must be equal or greater than zero.',
+        },
         COURSES_INTERSECT: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'COURSES_INTERSECT',
-            message: 'There is a conflict between values in mandatory courses y values in optional courses.',
+            message: 'There is a conflict between values in mandatory courses and values in optional courses.',
+        },
+        INVALID_CREDIT_REQUIREMENT_MAP: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_CREDIT_REQUIREMENT_MAP',
+            message: 'Provided map of credit requirements for courses contains course IDs that are not courses declared in the provided mandatory or optional courses for this request.',
         },
         INVALID_TIMES: {
             status: HTTP_STATUS.BAD_REQUEST,
@@ -195,6 +205,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         COURSE: { status: HTTP_STATUS.NOT_FOUND, code: 'COURSE_NOT_FOUND', message: 'Course not found.' },
         BUILDING: { status: HTTP_STATUS.NOT_FOUND, code: 'BUILDING_NOT_FOUND', message: 'Building not found.' },
         BUILDING_DISTANCE: { status: HTTP_STATUS.NOT_FOUND, code: 'BUILDING_DISTANCE_NOT_FOUND', message: 'Building distance not found.' },
+        CREDIT_REQUIREMENT: { status: HTTP_STATUS.NOT_FOUND, code: 'CREDIT_REQUIREMENT_NOT_FOUND', message: 'Credit requirement not found.' },
         COURSE_CLASS: {
             status: HTTP_STATUS.NOT_FOUND,
             code: 'COURSE_CLASS_NOT_FOUND',

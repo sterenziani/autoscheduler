@@ -1,8 +1,9 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, getToIdFromRelId } from '../../helpers/persistence/graphPersistence.helper';
 import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
+import { IProgramRequiredCredits } from '../../interfaces/course.interface';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import Course from '../../models/abstract/course.model';
 import DatabaseCourse from '../../models/implementations/databaseCourse.model';
@@ -310,7 +311,61 @@ export default class DatabaseCourseDao extends CourseDao {
         return simplePaginateCollection(collection, page, lastPage);
     }
 
+    async getCreditRequirements(id: string, universityId: string): Promise<IProgramRequiredCredits[]> {
+        // Initialize useful variables
+        const collection: IProgramRequiredCredits[] = [];
+
+        const session = graphDriver.session();
+        try {
+            const baseQuery = buildQuery('MATCH (c: Course {id: $id})-[r: IN]->(: Program)', 'WHERE', 'AND', [
+                {entry: '(c)-[:BELONGS_TO]->(: University {id: $universityId})', value: universityId}
+            ]);
+            const result = await session.run(
+                `${baseQuery} RETURN r`,
+                {id, universityId}
+            );
+            const nodes = getNodes(result);
+            for (const node of nodes) {
+                collection.push(this.nodeToCreditRequirement(node));
+            }
+        } catch (err) {
+            logErrors(err, '[CourseDao:getCreditRequirements]');
+        } finally {
+            await session.close();
+        }
+
+        return collection;
+    }
+
+    async findCreditRequirement(id: string, programId: string, universityId: string): Promise<IProgramRequiredCredits | undefined> {
+        const session = graphDriver.session();
+        try {
+            const baseQuery = buildQuery('MATCH (c: Course {id: $id})-[r: IN]->(p: Program {id:$programId})', 'WHERE', 'AND', [
+                {entry: '(c)-[:BELONGS_TO]->(: University {id: $universityId})', value: universityId}
+            ]);
+            const result = await session.run(
+                `${baseQuery} RETURN r`,
+                {id, programId, universityId}
+            );
+            const node = getNode(result);
+            if (!node) return undefined;
+            return this.nodeToCreditRequirement(node);
+        } catch (err) {
+            logErrors(err, '[CourseDao:getCreditRequirement]');
+            return undefined;
+        } finally {
+            await session.close();
+        }
+    }
+
     private nodeToCourse(node: any): DatabaseCourse {
         return new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.creditValue);
+    }
+
+    private nodeToCreditRequirement(node: any): IProgramRequiredCredits {
+        return {
+            programId: getToIdFromRelId(node.relId),
+            requiredCredits: node.requiredCredits
+        }
     }
 }
