@@ -50,7 +50,7 @@ export default class DatabaseProgramDao extends ProgramDao {
         }
     }
 
-    async create(universityId: string, internalId: string, name: string): Promise<Program> {
+    async create(universityId: string, internalId: string, name: string, optionalCourseCredits: number): Promise<Program> {
         // Generate a new id
         const id = uuidv4();
 
@@ -60,8 +60,8 @@ export default class DatabaseProgramDao extends ProgramDao {
             internalId = globalizeField(universityId, internalId);
             const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
-                'MATCH (u: University {id: $universityId}) CREATE (p: Program {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:BELONGS_TO {relId: $relId}]->(u) RETURN p',
-                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, relId}
+                'MATCH (u: University {id: $universityId}) CREATE (p: Program {id: $id, internalId: $internalId, name: $name, encoding: $encoding, optionalCourseCredits: $optionalCourseCredits})-[:BELONGS_TO {relId: $relId}]->(u) RETURN p',
+                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, optionalCourseCredits, relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
@@ -73,18 +73,19 @@ export default class DatabaseProgramDao extends ProgramDao {
         }
     }
 
-    async modify(id: string, universityId: string, internalId?: string, name?: string): Promise<Program> {
+    async modify(id: string, universityId: string, internalId?: string, name?: string, optionalCourseCredits?: number): Promise<Program> {
         const session = graphDriver.session();
         try {
             const encodedName = name ? encodeText(name) : undefined;
             internalId = internalId ? globalizeField(universityId, internalId) : undefined;
             const baseQuery = buildQuery('MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})', 'SET', ',', [
                 {entry: 'p.internalId = $internalId', value: internalId},
-                {entry: 'p.name = $name, p.encoding = $encoding', value: name}
+                {entry: 'p.name = $name, p.encoding = $encoding', value: name},
+                {entry: 'p.optionalCourseCredits', value: optionalCourseCredits}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN p`,
-                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding}
+                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, optionalCourseCredits}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -157,7 +158,7 @@ export default class DatabaseProgramDao extends ProgramDao {
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
-            
+
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
@@ -396,7 +397,7 @@ export default class DatabaseProgramDao extends ProgramDao {
     }
 
     private nodeToProgram(node: any): DatabaseProgram {
-        return new DatabaseProgram(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+        return new DatabaseProgram(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.optionalCourseCredits);
     }
 
     private parseCourses(mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}, programId: string) {

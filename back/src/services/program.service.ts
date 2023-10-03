@@ -34,12 +34,12 @@ export default class ProgramService {
         return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), universityId);
     }
 
-    async createProgram(universityId: string, internalId: string, name: string): Promise<Program> {
-        return await this.dao.create(universityId, internalId, name);
+    async createProgram(universityId: string, internalId: string, name: string, optionalCourseCredits: number): Promise<Program> {
+        return await this.dao.create(universityId, internalId, name, optionalCourseCredits);
     }
 
-    async modifyProgram(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Program> {
-        return await this.dao.modify(id, universityIdFilter, internalId, name);
+    async modifyProgram(id: string, universityIdFilter: string, internalId?: string, name?: string, optionalCourseCredits?: number): Promise<Program> {
+        return await this.dao.modify(id, universityIdFilter, internalId, name, optionalCourseCredits);
     }
 
     async deleteProgram(id: string, universityIdFilter: string): Promise<void> {

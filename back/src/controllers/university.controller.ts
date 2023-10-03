@@ -142,13 +142,15 @@ export class UniversityController {
         const universityId = req.user.id;
         const internalId = validateString(req.body.internalId);
         const name = validateString(req.body.name);
+        const optionalCourseCredits = validateNumber(req.body.optionalCourseCredits);
 
-        if (!internalId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!internalId || !name || !optionalCourseCredits) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if(optionalCourseCredits < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));
 
         try {
-            const program: Program = await this.programService.createProgram(universityId, internalId, name);
+            const program: Program = await this.programService.createProgram(universityId, internalId, name, optionalCourseCredits);
 
             res.status(HTTP_STATUS.CREATED)
                 .location(getResourceUrl(RESOURCES.PROGRAM, API_SCOPE.UNIVERSITY, program.id))
@@ -163,13 +165,15 @@ export class UniversityController {
         const programId = req.params.programId;
         const internalId = validateString(req.body.internalId);
         const name = validateString(req.body.name);
+        const optionalCourseCredits = validateNumber(req.body.optionalCourseCredits);
 
-        if (!internalId && !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!internalId && !name && !optionalCourseCredits) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if(optionalCourseCredits && optionalCourseCredits < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));
 
         try {
-            const program: Program = await this.programService.modifyProgram(programId, universityId, internalId, name);
+            const program: Program = await this.programService.modifyProgram(programId, universityId, internalId, name, optionalCourseCredits);
 
             res.status(HTTP_STATUS.OK)
                 .location(getResourceUrl(RESOURCES.PROGRAM, API_SCOPE.UNIVERSITY, program.id))
@@ -266,7 +270,7 @@ export class UniversityController {
         const programId = req.params.programId;
         const mandatoryCourses = removeDuplicates(validateArray(req.body.mandatoryCourses, validateString) ?? []);
         const optionalCourses = removeDuplicates(validateArray(req.body.optionalCourses, validateString) ?? []);
-        const creditRequirements = validateStringToNumberObject(req.body.mandatoryCourses)?? {};
+        const creditRequirements = validateStringToNumberObject(req.body.creditRequirements)?? {};
 
         if (mandatoryCourses.length === 0 && optionalCourses.length === 0) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (valuesIntersect(mandatoryCourses, optionalCourses)) return next(new GenericException(ERRORS.BAD_REQUEST.COURSES_INTERSECT));
@@ -289,7 +293,7 @@ export class UniversityController {
         const programId = req.params.programId;
         const mandatoryCourses = removeDuplicates(validateArray(req.body.mandatoryCourses, validateString) ?? []);
         const optionalCourses = removeDuplicates(validateArray(req.body.optionalCourses, validateString) ?? []);
-        const creditRequirements = validateStringToNumberObject(req.body.mandatoryCourses)?? {};
+        const creditRequirements = validateStringToNumberObject(req.body.creditRequirements)?? {};
 
         if (valuesIntersect(mandatoryCourses, optionalCourses)) return next(new GenericException(ERRORS.BAD_REQUEST.COURSES_INTERSECT));
         for(const cId of Object.keys(creditRequirements)){

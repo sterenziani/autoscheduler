@@ -9,6 +9,7 @@ export const programToDto = (program: Program, scope: API_SCOPE): IProgramDto =>
         id: program.id,
         internalId: program.internalId,
         name: program.name,
+        optionalCourseCredits: program.optionalCourseCredits,
         url,
         coursesUrl: applyPathToBase(url, 'courses')
     };
@@ -36,6 +37,7 @@ interface IProgramDto {
     id: string;
     internalId: string;
     name: string;
+    optionalCourseCredits: number;
     url: string;
     coursesUrl: string;
 }

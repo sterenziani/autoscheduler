@@ -10,8 +10,8 @@ export default abstract class ProgramDao extends GenericDao<Program> {
     }
 
     // Abstract Methods Signature Override
-    public abstract create(universityId: string, internalId: string, name: string): Promise<Program>;
-    public abstract modify(id: string, universityIdFilter: string, internalId?: string, name?: string): Promise<Program>;
+    public abstract create(universityId: string, internalId: string, name: string, optionalCourseCredits: number): Promise<Program>;
+    public abstract modify(id: string, universityIdFilter: string, internalId?: string, name?: string, optionalCourseCredits?: number): Promise<Program>;
     public abstract delete(id: string, universityIdFilter: string): Promise<void>;
 
     public abstract findById(id: string, universityIdFilter?: string): Promise<Program | undefined>;
