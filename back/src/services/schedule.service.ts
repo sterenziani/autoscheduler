@@ -50,13 +50,14 @@ export default class ScheduleService {
         prioritizeUnlocks: boolean,
         unavailableTimeSlots: TimeRange[]
     ): Promise<IScheduleWithScore[]> {
-        // STEPS 1-5 - Get and filter information needed
+        // STEPS 1-4 - Get all information needed
         const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId);
 
+        // STEP 5 - Remove courseClasses that fall inside unavailableTimeSlots (done inside getCourseClassCombinations)
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         const deadline = new Date(Date.now() + MINUTE_IN_MS)
-        const courseClassCombinations = this.getCourseClassCombinations(inputData, targetHours, deadline);
+        const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, deadline);
 
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
@@ -71,16 +72,44 @@ export default class ScheduleService {
         return schedules.sort((a, b) =>  b.score-a.score).slice(0, 10);
     }
 
-    private getSortedViableCourseClassesArray(inputData: IScheduleInputData): CourseClass[][] {
-        const mandatoryIds = inputData.mandatoryCourseIds;
-        const importance = inputData.indirectCorrelativesAmount;
-        const courseClassesOfCourse = inputData.courseClassesOfCourse;
+    private areTimeRangesCompatible(timeRangeA: TimeRange[], timeRangeB: TimeRange[]): boolean {
+        for (const tA of timeRangeA) {
+            for (const tB of timeRangeB) {
+                if(tA.overlaps(tB)) return false;
+            }
+        }
+        return true;
+    }
 
-        // TODO: Filter courseClassesOfCourse into viableCourseClassesMap
-        const viableCourseClassesMap: Map<string, string[]> = courseClassesOfCourse;
+    private getViableCourseClassesMap(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[]): Map<string, string[]> {
+        const viableCourseClassesMap: Map<string, string[]> = new Map<string, string[]>();
+        for(const courseId of viableCourseClassesMap.keys()) {
+            viableCourseClassesMap.set(courseId, []);
+            const ccIds = inputData.courseClassesOfCourse.get(courseId) ?? [];
+            for(const ccId of ccIds) {
+                const ccLectureIds = inputData.lecturesOfCourseClass.get(ccId) ?? [];
+                const ccLectureTimes: TimeRange[] = [];
+                for(const lectureId of ccLectureIds){
+                    const l = inputData.lectures.get(lectureId);
+                    if(l !== undefined) ccLectureTimes.push(l.time);
+                }
+                if(this.areTimeRangesCompatible(ccLectureTimes, unavailableTimeSlots))
+                    viableCourseClassesMap.get(courseId)?.push(ccId);
+            }
+        }
+        return viableCourseClassesMap;
+    }
+
+    // Returns matrix where each array contains classes belonging to a course, example:
+    // resp = [ [A1, A2], [B1, B2], [C1] ]
+    // Returned groups of classes will be sorted by their course's correlatives in increasing order
+    private getSortedViableCourseClassesArray(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[]): CourseClass[][] {
+        const viableCourseClassesMap: Map<string, string[]> = this.getViableCourseClassesMap(inputData, unavailableTimeSlots);
         const viableCourseIds: string[] = Array.from(viableCourseClassesMap.keys());
 
         // Sort course IDs by their importance (in case of a draw, mandatory courses take proirity)
+        const mandatoryIds = inputData.mandatoryCourseIds;
+        const importance = inputData.indirectCorrelativesAmount;
         viableCourseIds.sort((c1,c2) => {
             const importance1 = importance.get(c1);
             const importance2 = importance.get(c2);
@@ -109,8 +138,12 @@ export default class ScheduleService {
         return viableCourseClassesArray;
     }
 
-    private getCourseClassCombinations(inputData: IScheduleInputData, targetHours: number, deadline: Date): CourseClass[][] {
-        const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData);
+
+    // Since getting all combinations takes too long, the following sacrifices have been made:
+    // -- When deadline is passed, the function will return all valid combinations found so far
+    // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
+    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date): CourseClass[][] {
+        const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
         let index = viableCourseClassesArray.length-1;
         let validCombos: CourseClass[][] = [];
 
@@ -161,6 +194,7 @@ export default class ScheduleService {
                     for(const lectureId2 of lectures2) {
                         const l2 = inputData.lectures.get(lectureId2);
                         if (!l2) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+                        
                         // STEP 7a - Only one courseClass per Course (Guaranteed in steps 5-6)
                         // STEP 7b - Lectures should not overlap
                         const gap = l1.time.getGapInMinutesAgainst(l2.time);
