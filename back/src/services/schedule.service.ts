@@ -50,6 +50,9 @@ export default class ScheduleService {
         prioritizeUnlocks: boolean,
         unavailableTimeSlots: TimeRange[]
     ): Promise<IScheduleWithScore[]> {
+        // TODO: Calculate maxOptionalCourseCredits properly
+        const maxOptionalCourseCredits = 12;
+
         // STEPS 1-4 - Get all information needed
         const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId);
 
@@ -57,7 +60,7 @@ export default class ScheduleService {
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         const deadline = new Date(Date.now() + MINUTE_IN_MS)
-        const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, deadline);
+        const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, maxOptionalCourseCredits, deadline);
 
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
@@ -142,24 +145,45 @@ export default class ScheduleService {
     // Since getting all combinations takes too long, the following sacrifices have been made:
     // -- When deadline is passed, the function will return all valid combinations found so far
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
-    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date): CourseClass[][] {
+    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, maxOptionalCourseCredits: number, deadline: Date): CourseClass[][] {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
         let index = viableCourseClassesArray.length-1;
         let validCombos: CourseClass[][] = [];
+        let validCombosOptionalCredits: number[] = []; // Each index contains the amount of optioanl course credits earned from the combination in the same index on validCombos
 
         // Start from most important course (at the end of array) and work our way to less important ones
         while(index >= 0 && new Date() < deadline) {
+            // Calculate this course's impact on proposed combinations' optionalCourseCredits
+            const courseId = inputData.courseOfCourseClass.get(viableCourseClassesArray[index][0].id);
+            if(!courseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+            const course = inputData.courses.get(courseId);
+            if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+            const courseOptionalCredits = inputData.optionalCourseIds.includes(courseId)? course.creditValue : 0;
+
             const newValidCombos: CourseClass[][] = [];
+            const newValidCombosOptionalCredits: number[] = [];
 
             // Schedules that only contain a class of our current course are a possibility
-            for(const cc of viableCourseClassesArray[index]) newValidCombos.push([cc]);
+            for(const cc of viableCourseClassesArray[index]){
+                newValidCombos.push([cc]);
+                newValidCombosOptionalCredits.push(courseOptionalCredits);
+            }
 
-            for (const combo of validCombos) {
+            for (let i=0; i < validCombos.length; i++) {
+                const combo = validCombos[i];
+                const comboOptionalCredits = validCombosOptionalCredits[i];
+
+                // Skip this course if adding it makes the combo exceed the max amount of optional credits we can suggest
+                if(courseOptionalCredits > 0 && comboOptionalCredits > maxOptionalCourseCredits)
+                    continue;
+
                 // If adding a class belonging to the current course to an existing combo is valid, push it to the array
                 for (const cc of viableCourseClassesArray[index]) {
-                    if(new Date() > deadline) return validCombos.concat(newValidCombos);
+                    if(new Date() > deadline)
+                        return validCombos.concat(newValidCombos);
 
                     const combinationProposal = [cc, ...combo];
+                    const combinationProposalCredits = comboOptionalCredits + courseOptionalCredits
                     let weeklyMinutes = 0;
                     for(const courseClass of combinationProposal) {
                         const classDuration = inputData.weeklyClassTimeInMinutes.get(courseClass.id);
@@ -168,14 +192,17 @@ export default class ScheduleService {
                     }
                     const weeklyHours = weeklyMinutes/60;
 
-                    if(weeklyHours <= targetHours*1.25 && this.isClassCombinationValid(combinationProposal, inputData))
+                    if(weeklyHours <= targetHours*1.25 && this.isClassCombinationValid(combinationProposal, inputData)){
                         newValidCombos.push(combinationProposal);
+                        newValidCombosOptionalCredits.push(comboOptionalCredits + courseOptionalCredits);
+                    }
                 }
             }
 
             // Add all new combinations that contain the current course to validCombos
             // This is done outside the loop to avoid growing validCombos and iterating forever
             validCombos = validCombos.concat(newValidCombos);
+            validCombosOptionalCredits = validCombosOptionalCredits.concat(newValidCombosOptionalCredits);
             index -= 1;
         }
 
@@ -194,7 +221,7 @@ export default class ScheduleService {
                     for(const lectureId2 of lectures2) {
                         const l2 = inputData.lectures.get(lectureId2);
                         if (!l2) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-                        
+
                         // STEP 7a - Only one courseClass per Course (Guaranteed in steps 5-6)
                         // STEP 7b - Lectures should not overlap
                         const gap = l1.time.getGapInMinutesAgainst(l2.time);
