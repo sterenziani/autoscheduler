@@ -40,6 +40,7 @@ function EditCourseClassPage(props) {
     const [selectedCourse, setSelectedCourse] = useState();
     const [selectedTermId, setselectedTermId] = useState();
     const [lectures, setLectures] = useState([]);
+    const [oldLectures, setOldLectures] = useState([]);
     const [selectionError, setSelectionError] = useState();
     const [timeError, setTimeError] = useState();
 
@@ -117,6 +118,7 @@ function EditCourseClassPage(props) {
                         lecturesWithBuilding.push(l)
                     }
                     setLectures(lecturesWithBuilding)
+                    setOldLectures(JSON.parse(JSON.stringify(lecturesWithBuilding)))
                 }
             });
         }
@@ -152,7 +154,7 @@ function EditCourseClassPage(props) {
             if(!inputValue){
                 callback([])
             } else {
-                ApiService.getCourses(user.id, inputValue).then((resp) => {
+                ApiService.getCourses(inputValue).then((resp) => {
                     let findError = null;
                     if (resp && resp.status && resp.status !== OK) findError = resp.status
                     if (findError) {
@@ -168,7 +170,7 @@ function EditCourseClassPage(props) {
     }
 
     const loadTerms = async (universityId) => {
-        ApiService.getTerms(universityId).then((resp) => {
+        ApiService.getTerms().then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
@@ -183,7 +185,7 @@ function EditCourseClassPage(props) {
     }
 
     const loadBuildings = async (universityId) => {
-        ApiService.getAllBuildings(universityId).then((resp) => {
+        ApiService.getBuildings().then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
@@ -249,6 +251,20 @@ function EditCourseClassPage(props) {
         setLectures(lecturesCopy)
     }
 
+    const categorizeLectures = (oldLectures, newLectures) => {
+        const categories = { post: [], put: [], delete: []}
+        for(const oldL of oldLectures){
+            const newL = newLectures.find(x => x.id === oldL.id)
+            if(!newL) categories.delete.push(oldL)  // removed from list, DELETE old
+            else if( JSON.stringify(oldL) !== JSON.stringify(newL) ) categories.put.push(newL) // values changed, PUT new
+        }
+        for(const newL of newLectures){
+            const oldL = oldLectures.find(x => x.id === newL.id)
+            if(!oldL) categories.post.push(newL)  // new in list, POST new
+        }
+        return categories
+    }
+
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true)
         for(const l of lectures){
@@ -261,7 +277,8 @@ function EditCourseClassPage(props) {
 
         if (selectedCourse && selectedTermId && values.className)
         {
-            const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTermId, values.className, lectures)
+            const categorizedLectures = categorizeLectures(oldLectures, lectures)
+            const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTermId, values.className, categorizedLectures.post, categorizedLectures.put, categorizedLectures.delete)
             if(resp.status === OK || resp.status === CREATED)
                 navigate("/courses/"+selectedCourse.id+"?termId="+selectedTermId);
             else{

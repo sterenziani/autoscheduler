@@ -15,7 +15,6 @@ function UniversityProgramsList(props){
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const user = props.user;
     const [programs, setPrograms] = useState(null);
     const [programToDelete, setProgramToDelete] = useState();
     const [paginationLinks, setPaginationLinks] = useState(null);
@@ -48,7 +47,7 @@ function UniversityProgramsList(props){
 
     const loadPrograms = (page) => {
         setLoading(true)
-        ApiService.getProgramsPage(user.id, page).then((resp) => {
+        ApiService.getProgramsPage(page).then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;

@@ -127,7 +127,7 @@ function SearchForm(props) {
         if(!student)
             navigate("/register")
         // Load terms
-        ApiService.getTerms(student.university.id).then((respTerm) => {
+        ApiService.getTerms().then((respTerm) => {
             let findError = null
             if (respTerm && respTerm.status && respTerm.status !== OK)
                 findError = respTerm.status
@@ -150,7 +150,7 @@ function SearchForm(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(student.university.id, inputValue).then((resp) => {
+            ApiService.getPrograms(inputValue).then((resp) => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;

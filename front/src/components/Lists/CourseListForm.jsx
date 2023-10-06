@@ -8,7 +8,6 @@ import { OK, CREATED } from '../../services/ApiConstants';
 
 function CourseListForm(props) {
     const { t } = useTranslation();
-    const user = ApiService.getActiveUser();
     const listedCourses = props.listedCourses
     const unavailableCourses = props.unavailableCourses
     const onClickTrashCan = props.onClickTrashCan
@@ -39,7 +38,7 @@ function CourseListForm(props) {
                 callback([])
             }
             else{
-                ApiService.getCoursesNotInList(user.id, inputValue, unavailableCourses).then((resp) => {
+                ApiService.getCoursesNotInList(inputValue, unavailableCourses).then((resp) => {
                     let findError = null;
                     if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
                         findError = resp.status;

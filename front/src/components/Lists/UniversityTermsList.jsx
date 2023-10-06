@@ -14,7 +14,6 @@ function UniversityTermsList(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const user = props.user;
     const [terms, setTerms] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [changingPublishStatus, setChangingPublishStatus] = useState([]);
@@ -49,7 +48,7 @@ function UniversityTermsList(props) {
 
     const loadTerms = (page) => {
         setLoading(true)
-        ApiService.getTerms(user.id, page).then((resp) => {
+        ApiService.getTerms(page).then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;

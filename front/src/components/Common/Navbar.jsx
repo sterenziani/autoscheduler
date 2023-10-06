@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
-import { Col, Container, Navbar as BootstrapNavbar } from 'react-bootstrap';
+import { Col, Navbar as BootstrapNavbar } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import AuthService from '../../services/AuthService';
 import { Link } from 'react-router-dom';

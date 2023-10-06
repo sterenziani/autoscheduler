@@ -19,7 +19,7 @@ function CourseList(props){
     const deleteCourse = async () => {
         if (!courseToDelete) return;
         if (user.role === Roles.STUDENT)
-            await ApiService.deleteFinishedCourse(user.id, courseToDelete.id)
+            await ApiService.deleteFinishedCourse(courseToDelete.id)
         else if (user.role === Roles.UNIVERSITY)
             await ApiService.deleteCourse(courseToDelete.id)
         closeDeleteModal()

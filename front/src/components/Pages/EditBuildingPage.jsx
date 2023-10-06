@@ -43,7 +43,7 @@ function EditBuildingPage(props) {
     }, [user, navigate])
 
     const loadBuildings = async (universityId) => {
-        ApiService.getBuildingDictionary(universityId).then((resp) => {
+        ApiService.getBuildingDictionary().then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;

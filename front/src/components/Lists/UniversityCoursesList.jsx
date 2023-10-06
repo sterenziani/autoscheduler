@@ -14,7 +14,6 @@ function StudentCoursesList(props){
     const [courses,setCourses] = useState(props.course);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
-    const user = props.user;
 
     const [paginationLinks, setPaginationLinks] = useState(null);
     const [page, setPage] = useState(1);
@@ -50,7 +49,7 @@ function StudentCoursesList(props){
 
     const loadCourses = (page) => {
         setLoading(true)
-        ApiService.getCoursesPage(user.id, page).then(resp => {
+        ApiService.getCoursesPage(page).then(resp => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
                 findError = resp.status;
