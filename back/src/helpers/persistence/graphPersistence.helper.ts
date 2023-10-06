@@ -102,7 +102,8 @@ export const deglobalizeField = (globalizedField: string): string => {
 };
 
 // Neo4j doesnt work well with integers, so we have to transform them somtimes
-export const toGraphInt = (value: number): Integer => {
+export const toGraphInt = (value?: number): Integer | undefined => {
+    if (value === undefined) return undefined;
     return neo4j.int(value);
 };
 

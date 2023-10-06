@@ -360,7 +360,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
     }
 
     private parseBuildingDistancesInput(distances: IBuildingDistancesInput, buildingId: string) {
-        const parsed: {distancedBuildingId: string, distance: Integer, relId: string, counterRelId: string}[] = [];
+        const parsed: {distancedBuildingId: string, distance: Integer | undefined, relId: string, counterRelId: string}[] = [];
         for (const distancedBuildingId of Object.keys(distances)) {
             if (distancedBuildingId === buildingId) continue;
             parsed.push({

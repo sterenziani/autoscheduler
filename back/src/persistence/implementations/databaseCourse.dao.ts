@@ -1,7 +1,7 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, getToIdFromRelId } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, getToIdFromRelId, toGraphInt } from '../../helpers/persistence/graphPersistence.helper';
 import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
 import { IProgramRequiredCredits } from '../../interfaces/course.interface';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
@@ -63,7 +63,7 @@ export default class DatabaseCourseDao extends CourseDao {
             const relId = getRelId(BELONGS_TO_PREFIX, id, universityId);
             const result = await session.run(
                 'MATCH (u: University {id: $universityId}) CREATE (c: Course {id: $id, internalId: $internalId, name: $name, encoding: $encoding, creditValue: $creditValue})-[:BELONGS_TO {relId: $relId}]->(u) RETURN c',
-                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, creditValue, relId}
+                {universityId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, creditValue: toGraphInt(creditValue), relId}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(ERRORS.NOT_FOUND.UNIVERSITY);
@@ -87,7 +87,7 @@ export default class DatabaseCourseDao extends CourseDao {
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN c`,
-                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, creditValue}
+                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, creditValue: toGraphInt(creditValue)}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);

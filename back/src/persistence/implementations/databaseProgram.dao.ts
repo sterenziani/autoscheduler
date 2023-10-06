@@ -1,7 +1,8 @@
+import { Integer } from 'neo4j-driver';
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRegex, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRegex, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, toGraphInt } from '../../helpers/persistence/graphPersistence.helper';
 import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import Program from '../../models/abstract/program.model';
@@ -186,7 +187,7 @@ export default class DatabaseProgramDao extends ProgramDao {
             const result = await session.run(
                 'MATCH (p: Program {id: $id})-[:BELONGS_TO]->(: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
                 'CREATE (c)-[:IN {relId: $relId, optional: $optional, requiredCredits: $requiredCredits}]->(p)',
-                {id, universityId, courseId, optional, requiredCredits, relId}
+                {id, universityId, courseId, optional, requiredCredits: toGraphInt(requiredCredits), relId}
             );
             const stats = getStats(result);
             if (stats.relationshipsCreated === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or program was not found
@@ -205,7 +206,7 @@ export default class DatabaseProgramDao extends ProgramDao {
                 {entry: 'r.optional = $optional', value: optional},
                 {entry: 'r.requiredCredits = $requiredCredits', value: requiredCredits}
             ]);
-            const result = await session.run(query, {id, universityId, courseId, optional, requiredCredits});
+            const result = await session.run(query, {id, universityId, courseId, optional, requiredCredits: toGraphInt(requiredCredits)});
             const stats = getStats(result);
             if (stats.propertiesSet === 0) throw new GenericException(ERRORS.NOT_FOUND.COURSE);  // TODO: We don't know if course or program was not found
         } catch (err) {
@@ -401,12 +402,12 @@ export default class DatabaseProgramDao extends ProgramDao {
     }
 
     private parseCourses(mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}, programId: string) {
-        const parsed: {id: string, optional: boolean, requiredCredits: number, relId: string}[] = [];
+        const parsed: {id: string, optional: boolean, requiredCredits: Integer, relId: string}[] = [];
         for (const id of mandatoryCoursesIds) {
             parsed.push({
                 id,
                 optional: false,
-                requiredCredits: requiredCredits[id]?? 0,
+                requiredCredits: toGraphInt(requiredCredits[id] ?? 0)!,
                 relId: getRelId(IN_PREFIX, id, programId)
             });
         }
@@ -414,7 +415,7 @@ export default class DatabaseProgramDao extends ProgramDao {
             parsed.push({
                 id,
                 optional: true,
-                requiredCredits: requiredCredits[id]?? 0,
+                requiredCredits: toGraphInt(requiredCredits[id]?? 0)!,
                 relId: getRelId(IN_PREFIX, id, programId)
             });
         }
