@@ -17,7 +17,6 @@ function UniversityBuildingsList(props) {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const user = props.user;
     const [buildings, setBuildings] = useState(null);
-    const [buildingDictionary, setBuildingDictionary] = useState(null);
     const [buildingToDelete, setBuildingToDelete] = useState();
     const [paginationLinks, setPaginationLinks] = useState(null);
     const [page, setPage] = useState(1);
@@ -33,31 +32,13 @@ function UniversityBuildingsList(props) {
             return requestedPage
         }
 
-        const loadBuildingDictionary = () => {
-            setLoading(true)
-            ApiService.getBuildingDictionary().then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
-                    setError(true)
-                    setStatus(findError)
-                }
-                else{
-                    setBuildingDictionary(resp.data)
-                }
-                setLoading(false)
-            });
-        }
-
         const requestedPage = readPageInSearchParams()
-        if((!buildings && !buildingDictionary) || requestedPage !== page){
+        if(!buildings || requestedPage !== page){
             setPage(requestedPage)
             loadBuildings(requestedPage)
-            loadBuildingDictionary()
         }
         // eslint-disable-next-line
-    }, [search, buildingDictionary, buildings, page, user.id])
+    }, [search, buildings, page, user.id])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -76,7 +57,7 @@ function UniversityBuildingsList(props) {
                 setStatus(findError)
             }
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setBuildings(resp.data)
             }
@@ -92,12 +73,12 @@ function UniversityBuildingsList(props) {
         navigate("/buildings/new")
     }
 
-    const deleteBuilding = () => {
+    const deleteBuilding = async () => {
         if (!buildingToDelete)
             return;
-        ApiService.deleteBuilding(buildingToDelete.id);
         closeDeleteModal()
-        loadBuildings()
+        await ApiService.deleteBuilding(buildingToDelete.id)
+        loadBuildings(page)
     }
 
     const closeDeleteModal = () => {
@@ -117,45 +98,39 @@ function UniversityBuildingsList(props) {
     return (
         <React.Fragment>
             <div className="pt-4">
-                {buildingDictionary && buildings && buildings.length > 0
+                {buildings && buildings.length > 0
                     ? [
-                          <div key="buildings-list" className="my-3 container">
-                              <Row xs={1} md={2} lg={3} className="g-4 m-auto justify-content-center">
-                                  {buildings.map((entry, index) => (
-                                      <Card key={'card-' + index} className="m-3 p-0">
-                                          <Card.Header className="bg-white text-primary text-start py-0 pe-0 me-0">
-                                              <div className="d-flex ms-1">
-                                                  <div className="text-start my-auto me-auto">
-                                                      <Card.Title className="m-0 h6">
-                                                          {entry.code + ' - ' + entry.name}
-                                                      </Card.Title>
-                                                  </div>
-                                                  <div className="d-flex my-auto text-center">
-                                                      <i
-                                                          className="bi bi-pencil-fill btn btn-lg"
-                                                          id={'edit-' + index}
-                                                          onClick={() => redirectToEdit(entry.id)}
-                                                      ></i>
-                                                      <i
-                                                          className="bi bi-trash-fill btn btn-lg"
-                                                          id={'trash-' + index}
-                                                          onClick={() => openDeleteModal(entry)}
-                                                      ></i>
-                                                  </div>
-                                              </div>
-                                          </Card.Header>
-                                          <Card.Body className="bg-grey text-black">
-                                              {entry.distances.map((b, bidx) => (
-                                                  <Row key={'row-' + index + '-' + bidx}>
-                                                        <Col className="text-end">{buildingDictionary[b.buildingId].code}</Col>
-                                                        <Col className="text-start">{t('minutes', { minutes: b.time })}</Col>
-                                                  </Row>
-                                              ))}
-                                          </Card.Body>
-                                      </Card>
-                                  ))}
-                              </Row>
-                          </div>,
+                          buildings.map((entry, index) => (
+                                    <Row
+                                        key={'row-' + index} xs={1} md={4}
+                                        className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"
+                                    >
+                                        <div className="my-auto">{entry.internalId}</div>
+                                        <div className="my-auto w-min-50">
+                                            <a
+                                                key={'link-' + entry.id}
+                                                className="text-white"
+                                                href={'/buildings/' + entry.id}
+                                            >
+                                                {entry.name}
+                                            </a>
+                                        </div>
+                                        <div className="d-flexmy-auto justify-content-center">
+                                            <i
+                                                key={'pencil-' + index}
+                                                className="bi bi-pencil-fill btn btn-lg text-white"
+                                                id={'edit-' + index}
+                                                onClick={() => redirectToEdit(entry.id)}
+                                            ></i>
+                                            <i
+                                                className="bi bi-trash-fill btn btn-lg text-white"
+                                                id={'trash-' + index}
+                                                data-testid={'trash-' + index}
+                                                onClick={() => openDeleteModal(entry)}
+                                            ></i>
+                                        </div>
+                                    </Row>
+                                )),
                       ]
                     : [
                           <div key="empty-list">{t('emptyList')}</div>,
@@ -178,7 +153,7 @@ function UniversityBuildingsList(props) {
                     {
                         buildingToDelete &&
                         t('modal.areYouSureBuilding', {
-                            code: buildingToDelete.code,
+                            code: buildingToDelete.internalId,
                             name: buildingToDelete.name,
                         })
                     }

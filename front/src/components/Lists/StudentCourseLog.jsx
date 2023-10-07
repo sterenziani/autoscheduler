@@ -63,7 +63,7 @@ function StudentCourseLog(props) {
                 setStatus(findError)
             }
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setCourses(resp.data)
             }

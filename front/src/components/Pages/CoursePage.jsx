@@ -81,7 +81,7 @@ function CoursePage(props) {
         <React.Fragment>
             <HelmetProvider>
                 <Helmet>
-                    <title>{course ? course.code : ''} - AutoScheduler</title>
+                    <title>{course ? course.internalId+" - "+course.name : ''} - AutoScheduler</title>
                 </Helmet>
             </HelmetProvider>
             <div className="container my-5">

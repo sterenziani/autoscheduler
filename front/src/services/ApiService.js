@@ -1,4 +1,4 @@
-import { CREATED, TIMEOUT, OK } from './ApiConstants';
+import { CREATED, TIMEOUT, OK, NO_CONTENT, INTERNAL_ERROR } from './ApiConstants';
 import { DAYS } from './SystemConstants';
 import api from './api'
 import AuthService from './AuthService'
@@ -36,7 +36,7 @@ const simpleApiGetRequest = async (endpoint) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
-        else return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -46,29 +46,32 @@ const longApiGetRequest = async (endpoint) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
-        else return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
 const simpleApiMultiPageGetRequest = async (baseEndpoint, params, limit, idsToFilter) => {
     try {
-        let page = 0
-        let lastPage = 0
+        let page = 1
+        let lastPage = 1
         const finalResponse = {data: []}
 
         let additionalQuery = ""
-        for (const [key, value] of Object.entries(params))
-            additionalQuery = `${additionalQuery}&${key}=${value}`
+        if(params){
+            for (const [key, value] of Object.entries(params)){
+                additionalQuery = `${additionalQuery}&${key}=${value}`
+            }
+        }
 
         while(page <= lastPage && (!limit || finalResponse.data.length < limit)) {
             const endpoint = `${baseEndpoint}?page=${page}${additionalQuery}`
             const response = await api.get(endpoint, AuthService.getRequestHeaders())
 
             // Process page data (last is checked every time in case one has been added after first page was read)
-            const links = parsePagination(response)
+            const links = parsePagination(response, page)
             page = page+1
-            if(links && links.last && links.last.includes("page="))
-                lastPage = parseInt(links.last.split("page=")[1].match(/\d+/))
+            if(links && links.last)
+                lastPage = links.last
 
             // Add the items we're interested in to finalResponse array
             if(idsToFilter){
@@ -87,7 +90,7 @@ const simpleApiMultiPageGetRequest = async (baseEndpoint, params, limit, idsToFi
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
-        else return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -97,7 +100,7 @@ const simpleApiPostRequest = async (endpoint, body) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
-        else return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -107,7 +110,7 @@ const simpleApiPutRequest = async (endpoint, body) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
-        else return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -118,7 +121,7 @@ const simpleApiDeleteRequest = async (endpoint) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
-        else return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -134,16 +137,17 @@ const createOrUpdateObject = async (baseEndpoint, body, id) => {
         } else {
             response = await api.post(endpoint, body, AuthService.getRequestHeaders())
         }
-        const responseId = response.headers.location? response.headers.location.split('/')[1] : id
+        const splitLocation = response.headers?.location?.split('/')
+        const responseId = splitLocation? splitLocation[splitLocation.length-1] : id
         return { status: successStatus, id: responseId }
     }
     catch(e) {
         if (e.response) return e.response
-        else return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
-const parsePagination = (response) => {
+const parsePagination = (response, page) => {
     let arrData = response.headers.link
     const links = {}
 
@@ -151,9 +155,25 @@ const parsePagination = (response) => {
         arrData = arrData.split(",")
         for (var d of arrData){
             const linkInfo = /<([^>]+)>;\s+rel="([^"]+)"/ig.exec(d)
-            links[linkInfo[2]] = api.defaults.baseURL + "/" + linkInfo[1]
+            const pageNumber = parseInt(linkInfo[1].split("page=")[1].match(/\d+/))
+            links[linkInfo[2]] = pageNumber
         }
     }
+
+    // Only 1 page
+    if(links.prev === links.next){
+        delete links['prev']
+        delete links['next']
+        return links
+    }
+
+    // Currently on page 1
+    if(page === links.first)
+        delete links['prev']
+    // Currently on last page
+    if(page === links.last)
+        delete links['next']
+
     return links
 }
 
@@ -246,12 +266,12 @@ const getStudent = async (studentId) => {
         if (e.response)
             return { status: e.response.status }
         else
-            return { status: TIMEOUT }
+            return { status: INTERNAL_ERROR }
     }
 }
 
 const getFinishedCourses = async (page) => {
-    const endpoint = studentCompletedCoursesEndpoint +`?page=${page-1}`
+    const endpoint = studentCompletedCoursesEndpoint +`?page=${page}`
     return simpleApiGetRequest(endpoint)
 }
 
@@ -299,13 +319,13 @@ const getUniversities = async (inputText) => {
 //////////////////////////////////////////////////////////////////////////////
 
 const getBuildingsPage = async (page) => {
-    const endpoint = getEndpointForActiveUser(`${universityBuildingsEndpoint}?page=${page-1}`)
+    const endpoint = getEndpointForActiveUser(`${universityBuildingsEndpoint}?page=${page}`)
     return simpleApiGetRequest(endpoint)
 }
 
 const getBuildings = async () => {
     const endpoint = getEndpointForActiveUser(universityBuildingsEndpoint)
-    return simpleApiMultiPageGetRequest(endpoint)
+    return await simpleApiMultiPageGetRequest(endpoint)
 }
 
 const getBuildingDictionary = async () => {
@@ -324,7 +344,15 @@ const getBuildingDictionary = async () => {
 
 const getBuilding = async (buildingId) => {
     const endpoint = getEndpointForActiveUser(`${universityBuildingsEndpoint}/${buildingId}`)
-    return simpleApiGetRequest(endpoint)
+    const buildingResponse = await simpleApiGetRequest(endpoint)
+    if(buildingResponse.status !== OK)
+        return buildingResponse
+
+    const distancesResponse = await simpleApiGetRequest(`${endpoint}/distances`)
+    if(distancesResponse.status !== OK)
+        return distancesResponse
+    buildingResponse.data.distances = distancesResponse.data
+    return buildingResponse
 }
 
 const saveBuilding = async (id, name, internalId, distances) => {
@@ -333,18 +361,19 @@ const saveBuilding = async (id, name, internalId, distances) => {
         'internalId': internalId,
     }
     const response = await createOrUpdateObject(universityBuildingsEndpoint, payload, id)
-    if(response !== OK || response !== CREATED)
+    if(response.status !== OK && response.status !== CREATED)
         return response
 
 
     // Once created/updated, define distances
     const distanceEndpoint = `${universityBuildingsEndpoint}/${response.id}/distances-collection`
     const distancePayload = { "distances": {} }
-    for (const pair of Object.values(distances))
+    for (const pair of Object.values(distances)){
         distancePayload.distances[pair.building.id] = pair.time
+    }
 
     const distanceResponse = await simpleApiPutRequest(distanceEndpoint, distancePayload)
-    if(distanceResponse !== OK || distanceResponse !== CREATED)
+    if(distanceResponse.status !== NO_CONTENT && distanceResponse.status !== OK && distanceResponse.status !== CREATED)
         return distanceResponse
     return response
 }
@@ -368,7 +397,7 @@ const getPrograms = async (inputText) => {
 }
 
 const getProgramsPage = async (page) => {
-    const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}?page=${page-1}`)
+    const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}?page=${page}`)
     return simpleApiGetRequest(endpoint)
 }
 
@@ -387,13 +416,14 @@ const getOptionalCourses = async (programId) => {
     return simpleApiMultiPageGetRequest(endpoint, {optional: true})
 }
 
-const saveProgram = async (id, name, internalId, mandatoryCourseIDs, optionalCourseIDs) => {
+const saveProgram = async (id, name, internalId, mandatoryCourseIDs, optionalCourseIDs, optionalCourseCredits) => {
     const payload = {
         'name': name,
-        'internalId': internalId
+        'internalId': internalId,
+        'optionalCourseCredits': optionalCourseCredits,
     }
     const response = await createOrUpdateObject(universityProgramsEndpoint, payload, id)
-    if(response !== OK || response !== CREATED)
+    if(response !== OK && response !== CREATED)
         return response
 
 
@@ -402,7 +432,7 @@ const saveProgram = async (id, name, internalId, mandatoryCourseIDs, optionalCou
     const coursesPayload = { "mandatoryCourses": mandatoryCourseIDs, "optionalCourses": optionalCourseIDs }
     const coursesResponse = await simpleApiPutRequest(coursesEndpoint, coursesPayload)
 
-    if(coursesResponse !== OK || coursesResponse !== CREATED)
+    if(coursesResponse !== OK && coursesResponse !== CREATED)
         return coursesResponse
     return response
 }
@@ -422,7 +452,7 @@ const getCourses = async (inputText) => {
 }
 
 const getCoursesPage = async (page) => {
-    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}?page=${page-1}`)
+    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}?page=${page}`)
     return simpleApiGetRequest(endpoint)
 }
 
@@ -447,7 +477,7 @@ const saveCourse = async (id, name, internalId, requirementIDs) => {
         'internalId': internalId
     }
     const response = createOrUpdateObject(universityCoursesEndpoint, payload, id)
-    if(response !== OK || response !== CREATED)
+    if(response !== OK && response !== CREATED)
         return response
 
     // Once created/updated, define requirements
@@ -455,7 +485,7 @@ const saveCourse = async (id, name, internalId, requirementIDs) => {
         const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses/${response.id}/required-courses-collection`
         const requirementsPayload = { "requirements": requirementsInProgram }
         const requirementsResponse = await simpleApiPutRequest(requirementsEndpoint, requirementsPayload)
-        if(requirementsResponse !== OK || requirementsResponse !== CREATED)
+        if(requirementsResponse !== OK && requirementsResponse !== CREATED)
             return requirementsResponse
     }
     return response
@@ -471,7 +501,7 @@ const deleteCourse = async (courseId) => {
 //////////////////////////////////////////////////////////////////////////////
 
 const getTerms = async (page=1) => {
-    const endpoint = getEndpointForActiveUser(`${universityTermsEndpoint}?page=${page-1}`)
+    const endpoint = getEndpointForActiveUser(`${universityTermsEndpoint}?page=${page}`)
     return simpleApiGetRequest(endpoint)
 }
 
@@ -511,7 +541,7 @@ const deleteTerm = async (termId) => {
 
 const getCourseClassesForTerm = async (courseId, termId, page) => {
     try {
-        const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}/${courseId}/course-classes?termId=${termId}&page=${page-1}`)
+        const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}/${courseId}/course-classes?termId=${termId}&page=${page}`)
         const listOfClassesResponse = await api.get(endpoint, AuthService.getRequestHeaders())
 
         // Load lecture data
@@ -529,7 +559,7 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
         if (e.response)
             return { status: e.response.status }
         else
-            return { status: TIMEOUT }
+            return { status: INTERNAL_ERROR }
     }
 }
 
@@ -565,7 +595,7 @@ const getCourseClass = async (classId) => {
         if (e.response)
             return { status: e.response.status }
         else
-            return { status: TIMEOUT }
+            return { status: INTERNAL_ERROR }
     }
 }
 
@@ -576,7 +606,7 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
     }
     const endpoint = `${universityCoursesEndpoint}/${courseId}/course-classes`
     const response = createOrUpdateObject(endpoint, payload, id)
-    if(response !== OK || response !== CREATED)
+    if(response !== OK && response !== CREATED)
         return response
 
     // Once created/updated, define lectures
@@ -589,7 +619,7 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
 
         const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
         const lectureResponse = await simpleApiPutRequest(`${lecturesEndpoint}/${l.id}`, lecturePayload)
-        if(lectureResponse !== OK || lectureResponse !== CREATED)
+        if(lectureResponse !== OK && lectureResponse !== CREATED)
             return lectureResponse
     }
 
@@ -600,13 +630,13 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
 
         const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
         const lectureResponse = await simpleApiPostRequest(lecturesEndpoint, lecturePayload)
-        if(lectureResponse !== OK || lectureResponse !== CREATED)
+        if(lectureResponse !== OK && lectureResponse !== CREATED)
             return lectureResponse
     }
 
     for(const l of lecturesToDelete) {
         const lectureResponse = await simpleApiDeleteRequest(`${lecturesEndpoint}/${l.id}`)
-        if(lectureResponse !== OK || lectureResponse !== CREATED)
+        if(lectureResponse !== OK && lectureResponse !== CREATED)
             return lectureResponse
     }
 

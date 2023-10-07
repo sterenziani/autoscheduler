@@ -56,7 +56,7 @@ function UniversityProgramsList(props){
                 setStatus(findError)
             }
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setPrograms(resp.data)
             }

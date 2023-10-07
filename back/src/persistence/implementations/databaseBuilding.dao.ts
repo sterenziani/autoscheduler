@@ -99,11 +99,11 @@ export default class DatabaseBuildingDao extends BuildingDao {
         const session = graphDriver.session();
         try {
             const result = await session.run(
-                `MATCH (:CourseClass)<-[lr:OF]-(l: Lecture)-[:TAKES_PLACE_IN]->(b: Building {id: $id})-[r]-() WHERE (b)-[:BELONGS_TO]->(: University {id: $universityId}) DELETE lr, r, l, b`,
+                `MATCH (b: Building {id: $id})-[:BELONGS_TO]->(: University {id: $universityId}) DETACH DELETE b`,
                 {id, universityId}
             );
             const stats = getStats(result);
-            if (stats.nodesDeleted === 0) throw new GenericException(this.notFoundError);    
+            if (stats.nodesDeleted === 0) throw new GenericException(this.notFoundError);
         } catch (err) {
             throw parseErrors(err, '[BuildingDao:delete]', ERRORS.CONFLICT.CANNOT_DELETE);
         } finally {

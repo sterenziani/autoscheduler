@@ -60,7 +60,7 @@ function CourseClassesList(props) {
                 setStatus(findError)
             }
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setTermClasses(resp.data)
             }

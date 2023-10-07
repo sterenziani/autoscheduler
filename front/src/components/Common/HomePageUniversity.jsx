@@ -43,7 +43,7 @@ function HomePageUniversity(props) {
             </HelmetProvider>
             {props.user && !JSON.parse(props.user.verified) && (
                 <Alert className="m-5 text-center" variant="danger">
-                    {t('home.getVerified', { email: CONTACT_EMAIL })}
+                    {t('home.getVerified', { email: CONTACT_EMAIL, universityName: props.user.name })}
                 </Alert>
             )}
             <div className="container my-5">

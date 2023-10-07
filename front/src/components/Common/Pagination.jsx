@@ -9,9 +9,9 @@ const Pagination = (props) => {
     const loadContent = props.loadContent
     const [selectedPage, setSelectedPage] = useState(1)
 
-    const prevPage = links.prev;
-    const nextPage = links.next;
-    const lastPage = (links.last && (links.last.includes("page=")))? parseInt(links.last.split("page=")[1].match(/\d+/))+1 : 1
+    const prevPage = links.prev
+    const nextPage = links.next
+    const lastPage = links.last?? 1
     const [showModal, setShowModal] = useState(false)
 
     const movePagePrev = () => {
@@ -69,7 +69,11 @@ const Pagination = (props) => {
                 </Modal.Header>
                 <Modal.Body>
                 <Row>
-                    <Col><Form.Control id="page-text-selector" type="number" className="text-end" min="1" max={lastPage} defaultValue={page} onChange={(e) => setSelectedPage(e.target.value)}/></Col>
+                    <Col>
+                        <Form onSubmit={() => goToSelectedPage(selectedPage)}>
+                            <Form.Control id="page-text-selector" type="number" className="text-end" min="1" max={lastPage} defaultValue={page} onChange={(e) => setSelectedPage(e.target.value)}/>
+                        </Form>
+                    </Col>
                     <Col xs={1} className="my-auto text-center">/</Col>
                     <Col className="my-auto text-start ml-5">{lastPage}</Col>
                 </Row>

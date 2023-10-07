@@ -136,7 +136,7 @@
     },
     "home": {
         "welcomeAdmin": "Welcome, administrator. Please refer to the official documentation on how to verify universities through the AutoScheduler API.",
-        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with this school so we can verify the account and add your school to our list."
+        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with {{universityName}} so we can verify the account and add your school to our list."
     },
     "terms": {
         "hide": "Hide",
@@ -163,6 +163,7 @@
         "createProgram":"Create Program",
         "programCode":"Program code/ID",
         "programName":"Program name",
+        "programOptionalCredits": "Optional Credits",
         "mandatoryCourses":"Mandatory courses",
         "optionalCourses":"Optional courses",
         "editBuilding": "Edit Building",

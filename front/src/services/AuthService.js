@@ -4,9 +4,9 @@ import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, CREATED } from './ApiConstants';
 
 const logInEndpoint = '/';
 const getActiveUserEndpoint = '/user';
-const signUpUniversityEndpoint = '/universities';
-const signUpStudentEndpoint = '/students';
-const setProgramEndpoint = "student/program"
+const universityEndpoint = '/university';
+const studentEndpoint = '/student';
+const setProgramEndpoint = "student/program";
 
 const TokenStore = {
     setToken: token => localStorage.setItem('token', token),
@@ -93,6 +93,17 @@ const logIn = async (email, password) => {
         }
 
         const userData = await api.get(getActiveUserEndpoint, getRequestHeaders())
+        if(userData.data.role === Roles.UNIVERSITY){
+            const universityData = await api.get(universityEndpoint, getRequestHeaders())
+            if(universityData.status === OK)
+                userData.data = {...userData.data, name: universityData.data.name, verified: universityData.data.verified, locale: universityData.data.locale}
+        }
+        if(userData.data.role === Roles.STUDENT){
+            const studentData = await api.get(studentEndpoint, getRequestHeaders())
+            if(studentData.status === OK)
+                userData.data = {...userData.data, name: studentData.data.name, locale: studentData.data.locale}
+        }
+
         UserStore.setUser(userData.data)
         return { status: OK }
     }
@@ -115,7 +126,7 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
             "locale": navigator.language
         }
 
-        const createResponse = await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
+        const createResponse = await api.post(studentEndpoint, payload, getRequestHeaders())
         if(createResponse.status !== CREATED) return createResponse
 
         const authenticateResponse = await logIn(email, password)
@@ -142,7 +153,7 @@ const signUpUniversity = async (email, password, name) => {
             "locale": navigator.language,
             'name': name,
         }
-        return await api.post(signUpUniversityEndpoint, payload, getRequestHeaders())
+        return await api.post(universityEndpoint, payload, getRequestHeaders())
     }
     catch(e) {
         if (e.response)

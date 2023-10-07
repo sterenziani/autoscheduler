@@ -12,10 +12,11 @@ import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_BUILDING_ERROR = "BUILDING_ALREADY_EXISTS"
+const DEFAULT_DISTANCE = 45
 
 function EditBuildingPage(props) {
     const BuildingSchema = Yup.object().shape({
-        buildingCode: Yup.string()
+        buildingInternalId: Yup.string()
             .min(1, 'forms.errors.building.minCodeLength')
             .max(25, 'forms.errors.building.maxCodeLength')
             .required('forms.errors.building.codeIsRequired'),
@@ -72,7 +73,17 @@ function EditBuildingPage(props) {
                 else{
                     setBuilding(resp.data)
                     const dist = {}
-                    resp.data.distances.forEach((d) => dist[d.buildingId] = {building: buildings[d.buildingId], time: d.time})
+                    // Set defined distances
+                    resp.data.distances.forEach((d) => {
+                        if(d.distancedBuildingId !== id){
+                            dist[d.distancedBuildingId] = {building: buildings[d.distancedBuildingId], time: d.distance}
+                        }
+                    })
+
+                    // Use default for undefined distances
+                    for (const [bId, b] of Object.entries(buildings)){
+                        if(bId !== id && !dist[bId]) dist[bId] = {building: b, time: DEFAULT_DISTANCE}
+                    }
                     setDistances(dist)
                 }
             });
@@ -89,10 +100,10 @@ function EditBuildingPage(props) {
                 if(buildings && !building){
                     const emptyDist = {}
                     for (const [bId, b] of Object.entries(buildings)){
-                        emptyDist[bId] = {building: b, time: 0}
+                        emptyDist[bId] = {building: b, time: DEFAULT_DISTANCE}
                     }
                     setDistances(emptyDist)
-                    setBuilding({"name": t("forms.placeholders.buildingName"), "code": t("forms.placeholders.buildingCode")})
+                    setBuilding({"name": t("forms.placeholders.buildingName"), "internalId": t("forms.placeholders.buildingCode")})
                 }
             }
             if(building && buildings)
@@ -109,9 +120,9 @@ function EditBuildingPage(props) {
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true);
-        if(values.buildingCode && values.buildingName)
+        if(values.buildingInternalId && values.buildingName)
         {
-            const resp = await ApiService.saveBuilding(id, values.buildingName, values.buildingCode, distances)
+            const resp = await ApiService.saveBuilding(id, values.buildingName, values.buildingInternalId, distances)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=buildings")
             }
@@ -144,15 +155,15 @@ function EditBuildingPage(props) {
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editBuilding':'forms.createBuilding')}</h2>
                 {error && (<p className="form-error">{t('forms.errors.building.codeAlreadyTaken')}</p>)}
-                <Formik initialValues={{ buildingName: building.name, buildingCode: building.code }} validationSchema={BuildingSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ buildingName: building.name, buildingInternalId: building.internalId }} validationSchema={BuildingSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
                         id="building-code"
-                        label="forms.buildingCode" name="buildingCode"
+                        label="forms.buildingCode" name="buildingInternalId"
                         placeholder="forms.placeholders.buildingCode"
-                        value={values.buildingCode} error={errors.buildingCode}
-                        touched={touched.buildingCode} onChange={handleChange} onBlur={handleBlur}
+                        value={values.buildingInternalId} error={errors.buildingInternalId}
+                        touched={touched.buildingInternalId} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
                         id="building-name"
@@ -168,10 +179,10 @@ function EditBuildingPage(props) {
                         <div className="col-9 text-center my-auto">
                         {
                             Object.keys(distances).length > 0? [
-                                Object.values(distances).map((entry, index) => (
+                                Object.values(distances).sort((a,b) => a.building.internalId.localeCompare(b.building.internalId)).map((entry, index) => (
                                     <Form.Group controlId={"distance-"+entry.building.id} key={"time-input-"+index} className={'row mx-auto form-row'}>
                                         <Col className="my-auto text-end text-break" xs={3} md={2}>
-                                            <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.code}</h6></Form.Label>
+                                            <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.internalId}</h6></Form.Label>
                                         </Col>
                                         <Col className="pe-0" xs={6} md={8}>
                                             <Form.Control type="number" value={entry.time} onChange={(e) => onChangeTime(e, entry)}/>
