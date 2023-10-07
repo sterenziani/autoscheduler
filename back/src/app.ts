@@ -25,6 +25,17 @@ import { AuthRoutes } from './routes/auth.routes';
 import LectureService from './services/lecture.service';
 import { StudentRoutes } from './routes/student.routes';
 import { ProgramsRoutes } from './routes/programs.routes';
+import UserDaoFactory from './factories/userDao.factory';
+import UniversityDaoFactory from './factories/universityDao.factory';
+import TermDaoFactory from './factories/termDao.factory';
+import StudentDaoFactory from './factories/studentDao.factory';
+import ScheduleDaoFactory from './factories/scheduleDao.factory';
+import ProgramDaoFactory from './factories/programDao.factory';
+import PasswordRecoveryTokenDaoFactory from './factories/passwordRecoveryTokenDao.factory';
+import LectureDaoFactory from './factories/lectureDao.factory';
+import CourseClassDaoFactory from './factories/courseClassDao.factory';
+import CourseDaoFactory from './factories/courseDao.factory';
+import BuildingDaoFactory from './factories/buildingDao.factory';
 
 class App {
     public app: Application;
@@ -54,7 +65,10 @@ class App {
             .catch((err) => console.log(JSON.stringify(err)));
         // Neo4j connection
         initializeGraphConnection()
-            .then(() => console.log(`[Initialization] Connected to Graph Database`))
+            .then(() => {
+                console.log(`[Initialization] Connected to Graph Database`);
+                this.initializeDaos();
+            })
             .catch((err) => console.log(JSON.stringify(err)));
     }
 
@@ -94,10 +108,17 @@ class App {
     }
 
     private initializeDaos() {
-        // UserDaoFactory.get().init();
-        // BuildingDaoFactory.get().init();
-        // CourseClassDaoFactory.get().init();
-        // ProgramDaoFactory.get().init();
+        UserDaoFactory.get().init().catch((_) => {});
+        UniversityDaoFactory.get().init().catch((_) => {});
+        TermDaoFactory.get().init().catch((_) => {});
+        StudentDaoFactory.get().init().catch((_) => {});
+        ScheduleDaoFactory.get().init().catch((_) => {});
+        ProgramDaoFactory.get().init().catch((_) => {});
+        PasswordRecoveryTokenDaoFactory.get().init().catch((_) => {});
+        LectureDaoFactory.get().init().catch((_) => {});
+        CourseClassDaoFactory.get().init().catch((_) => {});
+        CourseDaoFactory.get().init().catch((_) => {});
+        BuildingDaoFactory.get().init().catch((_) => {});
     }
 }
 
