@@ -1,7 +1,7 @@
 import { ERRORS } from "../../constants/error.constants";
 import GenericException from "../../exceptions/generic.exception";
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from "../../helpers/collection.helper";
-import { buildQuery, getNode, getNodes, getRelId, getStats, getValue, graphDriver, logErrors, parseErrors } from "../../helpers/persistence/graphPersistence.helper";
+import { buildQuery, getNode, getNodes, getRelId, getStats, getValue, graphDriver, logErrors, parseErrors, toGraphInt } from "../../helpers/persistence/graphPersistence.helper";
 import { cleanMaybeText, decodeText, encodeText } from "../../helpers/string.helper";
 import { PaginatedCollection } from "../../interfaces/paging.interface";
 import { IStudentInfo } from "../../interfaces/student.interface";
@@ -153,12 +153,12 @@ export default class DatabaseStudentDao extends StudentDao {
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
-            
+
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN s ORDER BY s.name SKIP $skip LIMIT $limit`,
-                    {textSearch, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {

@@ -1,7 +1,7 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRegex, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, toGraphDate, parseGraphDate } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRegex, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, toGraphDate, parseGraphDate, toGraphInt } from '../../helpers/persistence/graphPersistence.helper';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import { decodeText, encodeText } from '../../helpers/string.helper';
 import Term from '../../models/abstract/term.model';
@@ -157,7 +157,7 @@ export default class DatabaseTermDao extends TermDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN t ORDER BY t.name SKIP $skip LIMIT $limit`,
-                    {regex, globalRegex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {regex, globalRegex, universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {

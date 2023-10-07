@@ -153,12 +153,12 @@ export default class DatabaseBuildingDao extends BuildingDao {
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
-            
+
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN b ORDER BY b.name SKIP $skip LIMIT $limit`,
-                    {textSearch, globalRegex, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, globalRegex, universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {

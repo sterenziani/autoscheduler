@@ -3,7 +3,7 @@ import DatabaseUniversity from '../../models/implementations/databaseUniversity.
 import UniversityDao from '../abstract/university.dao';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, getNode, getNodes, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, getNode, getNodes, getValue, graphDriver, logErrors, parseErrors, toGraphInt } from '../../helpers/persistence/graphPersistence.helper';
 import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
 import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
@@ -126,12 +126,12 @@ export default class DatabaseUniversityDao extends UniversityDao {
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
-            
+
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN u ORDER BY u.name SKIP $skip LIMIT $limit`,
-                    {textSearch, verified, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, verified, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {

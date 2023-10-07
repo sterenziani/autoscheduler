@@ -3,7 +3,7 @@ import GenericException from '../../exceptions/generic.exception';
 import TimeRange from '../../helpers/classes/timeRange.class';
 import Time from '../../helpers/classes/time.class';
 import { getLastPageFromCount, getSkipFromPageLimit, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, getNode, getNodes, getRelId, getStats, getValue, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, getNode, getNodes, getRelId, getStats, getValue, graphDriver, logErrors, parseErrors, toGraphInt } from '../../helpers/persistence/graphPersistence.helper';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import Lecture from '../../models/abstract/lecture.model';
 import DatabaseLecture from '../../models/implementations/databaseLecture.model';
@@ -172,7 +172,7 @@ export default class DatabaseLectureDao extends LectureDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN l ORDER BY l.dayOfWeek, l.startTime, l.endTime SKIP $skip LIMIT $limit`,
-                    {universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {

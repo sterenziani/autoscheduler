@@ -149,7 +149,7 @@ export default class DatabaseCourseDao extends CourseDao {
             // Build query
             const baseQuery = buildQuery('MATCH (c:Course)', 'WHERE', 'AND', [
                 {entry: '(c.name CONTAINS $textSearch OR c.internalId =~ $globalRegex)', value: textSearch},
-                {entry: '(c)-[:BELONGS_TO]->(:University {id: $univesityId})', value: universityId},
+                {entry: '(c)-[:BELONGS_TO]->(:University {id: $universityId})', value: universityId},
                 {entry: `(c)-[:IN${optional !== undefined ? ` {optional: ${optional}}` : ''}]->(:Program {id: $programId})`, value: programId}
             ]);
             // Count
@@ -159,12 +159,12 @@ export default class DatabaseCourseDao extends CourseDao {
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
-            
+
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN c ORDER BY c.name SKIP $skip LIMIT $limit`,
-                    {textSearch, globalRegex, universityId, programId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {textSearch, globalRegex, universityId, programId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -192,7 +192,7 @@ export default class DatabaseCourseDao extends CourseDao {
             // Build query
             const baseQuery = buildQuery('MATCH (c:Course {id: $id})-[r:REQUIRES]->(rc:Course)', 'WHERE', 'AND', [
                 {entry: '(rc.name CONTAINS $textSearch OR rc.internalId =~ $globalRegex)', value: textSearch},
-                {entry: '(c)-[:BELONGS_TO]->(:University {id: $univesityId})', value: universityId},
+                {entry: '(c)-[:BELONGS_TO]->(:University {id: $universityId})', value: universityId},
                 {entry: `r.programId = $programId`, value: programId}
             ]);
             // Count
@@ -202,12 +202,12 @@ export default class DatabaseCourseDao extends CourseDao {
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
-            
+
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN rc ORDER BY rc.name SKIP $skip LIMIT $limit`,
-                    {id, textSearch, globalRegex, universityId, programId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {id, textSearch, globalRegex, universityId, programId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {

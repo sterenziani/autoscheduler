@@ -1,7 +1,7 @@
 import { ERRORS } from '../../constants/error.constants';
 import GenericException from '../../exceptions/generic.exception';
 import { getSkipFromPageLimit, getLastPageFromCount, simplePaginateCollection } from '../../helpers/collection.helper';
-import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { buildQuery, deglobalizeField, getGlobalRegex, getNode, getNodes, getRelId, getStats, getValue, globalizeField, graphDriver, logErrors, parseErrors, toGraphInt } from '../../helpers/persistence/graphPersistence.helper';
 import { cleanMaybeText, decodeText, encodeText } from '../../helpers/string.helper';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import CourseClass from '../../models/abstract/courseClass.model';
@@ -166,7 +166,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(cc) as count`,
-                {textSearch, globalRegex, courseId, termId, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                {textSearch, globalRegex, courseId, termId, universityId}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
@@ -175,7 +175,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN cc ORDER BY cc.name SKIP $skip LIMIT $limit`,
-                    {universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
