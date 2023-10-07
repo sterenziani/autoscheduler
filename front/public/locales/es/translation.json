@@ -220,7 +220,8 @@
                 "minNameLength":"El nombre del plan de carrera debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre del plan de carrera no puede superar los 50 characters.",
                 "nameIsRequired":"El plan de carrera debe tener un nombre.",
-                "codeAlreadyTaken":"Ya existe un plan de carrera con ese código."
+                "codeAlreadyTaken":"Ya existe un plan de carrera con ese código.",
+                "positiveZeroOptionalCredits":"La cantidad de créditos de materias electivas requeridos debe ser un número igual o mayor que 0."
             },
             "building":{
                 "minCodeLength":"La sede debe tener un código con el cual la identifique.",

@@ -80,7 +80,7 @@ export default class DatabaseProgramDao extends ProgramDao {
             const baseQuery = buildQuery('MATCH (p: Program {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})', 'SET', ',', [
                 {entry: 'p.internalId = $internalId', value: internalId},
                 {entry: 'p.name = $name, p.encoding = $encoding', value: name},
-                {entry: 'p.optionalCourseCredits', value: optionalCourseCredits}
+                {entry: 'p.optionalCourseCredits = $optionalCourseCredits', value: optionalCourseCredits}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN p`,

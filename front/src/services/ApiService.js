@@ -420,7 +420,7 @@ const saveProgram = async (id, name, internalId, mandatoryCourseIDs, optionalCou
     const payload = {
         'name': name,
         'internalId': internalId,
-        'optionalCourseCredits': optionalCourseCredits,
+        'optionalCourseCredits': Number(optionalCourseCredits)?? 0,
     }
     const response = await createOrUpdateObject(universityProgramsEndpoint, payload, id)
     if(response !== OK && response !== CREATED)

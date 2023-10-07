@@ -220,7 +220,8 @@
                 "minNameLength":"The program's code must be at least 3 characters long.",
                 "maxNameLength":"The program's name can't exceed 50 characters.",
                 "nameIsRequired":"The program must have a name.",
-                "codeAlreadyTaken":"A program with that code already exists."
+                "codeAlreadyTaken":"A program with that code already exists.",
+                "positiveZeroOptionalCredits":"The amount of required optional course credits must be 0 or greater."
             },
             "building":{
                 "minCodeLength":"The building must have a code you identify it with.",

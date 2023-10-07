@@ -144,7 +144,7 @@ export class UniversityController {
         const name = validateString(req.body.name);
         const optionalCourseCredits = validateNumber(req.body.optionalCourseCredits);
 
-        if (!internalId || !name || !optionalCourseCredits) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!internalId || !name || optionalCourseCredits === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
         if(optionalCourseCredits < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));

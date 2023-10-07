@@ -106,7 +106,7 @@ function UniversityProgramsList(props){
                               >
                                   <div className="my-auto w-50">
                                       <a className="text-white" href={'/programs/' + entry.id}>
-                                          {entry.code + ' - ' + entry.name}
+                                          {entry.internalId + ' - ' + entry.name}
                                       </a>
                                   </div>
                                   <div className="d-flex my-auto justify-content-center">
@@ -143,7 +143,7 @@ function UniversityProgramsList(props){
                     {
                         programToDelete &&
                         t('modal.areYouSureProgram', {
-                            code: programToDelete.code,
+                            code: programToDelete.internalId,
                             name: programToDelete.name,
                         })
                     }

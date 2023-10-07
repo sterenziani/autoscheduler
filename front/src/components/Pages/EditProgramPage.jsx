@@ -24,6 +24,7 @@ function EditProgramPage(props) {
             .min(3, 'forms.errors.program.minNameLength')
             .max(50, 'forms.errors.program.maxNameLength')
             .required('forms.errors.program.nameIsRequired'),
+        programOptionalCredits: Yup.number().min(0, 'forms.errors.program.positiveZeroOptionalCredits'),
     });
 
     const navigate = useNavigate();
@@ -106,7 +107,7 @@ function EditProgramPage(props) {
                 else if(!program && !mandatoryCourses && !optionalCourses){
                     setMandatoryCourses([])
                     setOptionalCourses([])
-                    setProgram({"name": t("forms.placeholders.programName"), "code": t("forms.placeholders.programCode")})
+                    setProgram({"name": t("forms.placeholders.programName"), "internalId": t("forms.placeholders.programCode"), "optionalCourseCredits": 0})
                 }
             }
 
@@ -138,7 +139,7 @@ function EditProgramPage(props) {
         {
             const mandatoryCourseIDs = mandatoryCourses.map(a => a.id)
             const optionalCourseIDs = optionalCourses.map(a => a.id)
-            const resp = await ApiService.saveProgram(id, values.programName, values.programCode, mandatoryCourseIDs, optionalCourseIDs)
+            const resp = await ApiService.saveProgram(id, values.programName, values.programCode, mandatoryCourseIDs, optionalCourseIDs, values.programOptionalCredits)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=programs")
             }
@@ -199,7 +200,7 @@ function EditProgramPage(props) {
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editProgram':'forms.createProgram')}</h2>
                 {error && (<p className="form-error">{t('forms.errors.program.codeAlreadyTaken')}</p>)}
-                <Formik initialValues={{ programName: program.name, programCode: program.code }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ programName: program.name, programCode: program.internalId, programOptionalCredits: program.optionalCourseCredits }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
@@ -215,6 +216,13 @@ function EditProgramPage(props) {
                         placeholder="forms.placeholders.programName"
                         value={values.programName} error={errors.programName}
                         touched={touched.programName} onChange={handleChange} onBlur={handleBlur}
+                    />
+                    <FormInputField
+                        id="program-optional-credits"
+                        label="forms.programOptionalCredits" name="programOptionalCredits"
+                        placeholder="0"
+                        value={values.programOptionalCredits} error={errors.programOptionalCredits}
+                        touched={touched.programOptionalCredits} onChange={handleChange} onBlur={handleBlur}
                     />
                     <Row>
                     <Col>
