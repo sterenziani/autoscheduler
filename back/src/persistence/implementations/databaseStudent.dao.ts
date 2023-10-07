@@ -27,25 +27,23 @@ export default class DatabaseStudentDao extends StudentDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const promises: Promise<any>[] = [];
             // Constraints
-            promises.push(session.run(
+            await session.run(
                 'CREATE CONSTRAINT student_id_unique_constraint IF NOT EXISTS FOR (s: Student) REQUIRE s.id IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT enrolled_in_unique_constraint IF NOT EXISTS FOR ()-[r:ENROLLED_IN]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT follows_unique_constraint IF NOT EXISTS FOR ()-[r:FOLLOWS]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT completed_unique_constraint IF NOT EXISTS FOR ()-[r:COMPLETED]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
+            );
             // Indexes
-            promises.push(session.run(
+            await session.run(
                 'CREATE TEXT INDEX student_name_text_index IF NOT EXISTS FOR (s: Student) ON (s.name)'
-            ));
-            await Promise.allSettled(promises);
+            );
         } catch (err) {
             console.log(`[StudentDao:init] Warning: Failed to create constraints and indexes. Reason: ${JSON.stringify(err)}`);
         } finally {

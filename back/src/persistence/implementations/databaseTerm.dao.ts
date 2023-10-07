@@ -25,21 +25,19 @@ export default class DatabaseTermDao extends TermDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const promises: Promise<any>[] = [];
             // Constraints
-            promises.push(session.run(
+            await session.run(
                 'CREATE CONSTRAINT term_id_unique_constraint IF NOT EXISTS FOR (t: Term) REQUIRE t.id IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT term_internal_id_unique_constraint IF NOT EXISTS FOR (t: Term) REQUIRE t.internalId IS UNIQUE'
-            ));
+            );
             // Indexes
-            promises.push(session.run(
+            await session.run(
                 'CREATE TEXT INDEX term_name_text_index IF NOT EXISTS FOR (t: Term) ON (t.name)'
-            ));
-            await Promise.allSettled(promises);
+            );
         } catch (err) {
-            console.log(`[TermDao] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
+            console.log(`[TermDao:init] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }

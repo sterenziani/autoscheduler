@@ -27,16 +27,14 @@ export default class DatabaseLectureDao extends LectureDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const constraintPromises: Promise<any>[] = [];
-            constraintPromises.push(session.run(
+            await session.run(
                 'CREATE CONSTRAINT lecture_id_unique_constraint IF NOT EXISTS FOR (l: Lecture) REQUIRE l.id IS UNIQUE'
-            ));
-            constraintPromises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT takes_place_in_unique_constraint IF NOT EXISTS FOR ()-[r:TAKES_PLACE_IN]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
-            await Promise.allSettled(constraintPromises);
+            );
         } catch (err) {
-            console.log(`[LectureDao] Warning: Failed to set constraints. Reason ${JSON.stringify(err)}`);
+            console.log(`[LectureDao:init] Warning: Failed to set constraints. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }

@@ -28,24 +28,22 @@ export default class DatabaseProgramDao extends ProgramDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const promises: Promise<any>[] = [];
             // Constraints
-            promises.push(session.run(
+            await session.run(
                 'CREATE CONSTRAINT program_id_unique_constraint IF NOT EXISTS FOR (p: Program) REQUIRE p.id IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT program_internal_id_unique_constraint IF NOT EXISTS FOR (p: Program) REQUIRE p.internalId IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT in_unique_constraint IF NOT EXISTS FOR ()-[r:IN]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
+            );
             // Indexes
-            promises.push(session.run(
+            await session.run(
                 'CREATE TEXT INDEX program_name_text_index IF NOT EXISTS FOR (p: Program) ON (p.name)'
-            ));
-            await Promise.allSettled(promises);
+            );
         } catch (err) {
-            console.log(`[BuildingDao] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
+            console.log(`[ProgramDao:init] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }

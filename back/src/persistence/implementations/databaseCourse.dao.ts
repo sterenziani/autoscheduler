@@ -26,27 +26,25 @@ export default class DatabaseCourseDao extends CourseDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const promises: Promise<any>[] = [];
             // Constraints
-            promises.push(session.run(
+            await session.run(
                 'CREATE CONSTRAINT course_id_unique_constraint IF NOT EXISTS FOR (c: Course) REQUIRE c.id IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT course_internal_id_unique_constraint IF NOT EXISTS FOR (c: Course) REQUIRE c.internalId IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT requires_unique_constraint IF NOT EXISTS FOR ()-[r:REQUIRES]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT of_unique_constraint IF NOT EXISTS FOR ()-[r:OF]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
+            );
             // Indexes
-            promises.push(session.run(
+            await session.run(
                 'CREATE TEXT INDEX course_name_text_index IF NOT EXISTS FOR (c: Course) ON (c.name)'
-            ));
-            await Promise.allSettled(promises);
+            );
         } catch (err) {
-            console.log(`[CourseDao] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
+            console.log(`[CourseDao:init] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }

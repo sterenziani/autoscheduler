@@ -28,29 +28,27 @@ export default class DatabaseBuildingDao extends BuildingDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const promises: Promise<any>[] = [];
             // Constraints
-            promises.push(session.run(
+            await session.run(
                 'CREATE CONSTRAINT building_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.id IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT building_internal_id_unique_constraint IF NOT EXISTS FOR (b: Building) REQUIRE b.internalId IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT distance_to_unique_constraint IF NOT EXISTS FOR ()-[r:DISTANCE_TO]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
+            );
             // Indexes
-            promises.push(session.run(
+            await session.run(
                 'CREATE TEXT INDEX building_name_text_index IF NOT EXISTS FOR (b: Building) ON (b.name)'
-            ));
-            await Promise.allSettled(promises);
+            );
         } catch (err) {
-            console.log(`[BuildingDao] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
+            console.log(`[BuildingDao:init] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }
     }
-    
+
     async create(universityId: string, internalId: string, name: string): Promise<Building> {
         // Generate a new id
         const id = uuidv4();

@@ -16,6 +16,9 @@ export default class DatabaseScheduleDao extends ScheduleDao {
         return DatabaseScheduleDao.instance;
     };
 
+    async init(): Promise<void> {
+    }
+
     async getScheduleInfo(universityId: string, programId: string, termId: string, studentId: string): Promise<IScheduleInputData> {
         const session = graphDriver.session();
         try {

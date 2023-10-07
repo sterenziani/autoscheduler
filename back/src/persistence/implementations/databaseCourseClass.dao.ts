@@ -26,24 +26,22 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
     async init(): Promise<void> {
         const session = graphDriver.session();
         try {
-            const promises: Promise<any>[] = [];
             // Constraints
-            promises.push(session.run(
+            await session.run(
                 'CREATE CONSTRAINT course_class_id_unique_constraint IF NOT EXISTS FOR (cc: CourseClass) REQUIRE cc.id IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT course_class_internal_id_unique_constraint IF NOT EXISTS FOR (cc: CourseClass) REQUIRE cc.internalId IS UNIQUE'
-            ));
-            promises.push(session.run(
+            );
+            await session.run(
                 'CREATE CONSTRAINT happens_in_unique_constraint IF NOT EXISTS FOR ()-[r:HAPPENS_IN]-() REQUIRE r.relId IS REL UNIQUE'
-            ));
+            );
             // Indexes
-            promises.push(session.run(
+            await session.run(
                 'CREATE TEXT INDEX course_class_name_text_index IF NOT EXISTS FOR (cc: CourseClass) ON (cc.name)'
-            ));
-            await Promise.allSettled(promises);
+            );
         } catch (err) {
-            console.log(`[CourseClassDao] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
+            console.log(`[CourseClassDao:init] Warning: Failed to create constraints and indexes. Reason ${JSON.stringify(err)}`);
         } finally {
             await session.close();
         }
