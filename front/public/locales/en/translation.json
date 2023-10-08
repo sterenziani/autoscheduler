@@ -261,10 +261,11 @@
         "408": "Received no response from server.",
         "500": "The AutoScheduler server had an internal error.",
         "noTerms": "No terms have been found. Create at least one term to define classes for a course.",
-        "noBuildings": "No buildings have been found. Create at least one building to define classes for a course."
+        "noBuildings": "No buildings have been found. Create at least one building to define classes for a course.",
+        "notPartOfAnyPrograms": "This course is not associated with any program yet. Add it to a program's list of courses to define course requirements under that program."
     },
     "noSchedulesFound": "Could not find any recommended schedules for your search.",
-    "noDefinedRequirements": "No requirements defined. It is possible this course does not belong to the selected program.",
+    "noDefinedRequirements": "No requirements defined.",
     "selectNoOptions": "Please type in a character to search for options.",
     "selectNoResults": "No results found for the given query.",
     "goHome": "Go home",

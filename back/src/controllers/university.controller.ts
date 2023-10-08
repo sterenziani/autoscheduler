@@ -113,11 +113,12 @@ export class UniversityController {
         const page = validateInt(req.query.page) ?? 1;
         const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
         const filter = validateString(req.query.filter);
+        const courseId = validateString(req.query.courseId);
 
         if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
-            const paginatedPrograms: PaginatedCollection<Program> = await this.programService.getPrograms(page, limit, filter, universityId);
+            const paginatedPrograms: PaginatedCollection<Program> = await this.programService.getPrograms(page, limit, filter, universityId, courseId);
             res.status(HTTP_STATUS.OK)
                 .links(ProgramDto.paginatedProgramsToLinks(paginatedPrograms, getReqPath(req), limit, filter))
                 .send(ProgramDto.paginatedProgramsToDto(paginatedPrograms, API_SCOPE.UNIVERSITY));

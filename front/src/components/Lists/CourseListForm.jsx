@@ -9,6 +9,7 @@ import { OK, CREATED } from '../../services/ApiConstants';
 function CourseListForm(props) {
     const { t } = useTranslation();
     const listedCourses = props.listedCourses
+    const addCourseOptions = props.addCourseOptions
     const unavailableCourses = props.unavailableCourses
     const onClickTrashCan = props.onClickTrashCan
     const addCourseToParent = props.addCourse
@@ -42,6 +43,10 @@ function CourseListForm(props) {
                 callback([])
             }
             else{
+                if(addCourseOptions){
+                    const result = addCourseOptions.filter( (c) => !unavailableCourses.find((u) => u.id === c.id) && (c.name.includes(inputValue) || c.internalId.includes(inputValue)) )
+                    callback(result)
+                }
                 ApiService.getCoursesNotInList(inputValue, unavailableCourses).then((resp) => {
                     let findError = null;
                     if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)

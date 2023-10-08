@@ -47,11 +47,12 @@ function CoursePage(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(user.id, inputValue).then((resp) => {
+            ApiService.getProgramsCourseIsIn(id, inputValue).then((resp) => {
                 let findError = null;
-                if (resp && resp.status && resp.status !== OK) findError = resp.status;
+                if (resp && resp.status && resp.status !== OK)
+                    findError = resp.status;
                 if (findError) {
-                    setError(resp.data.code)
+                    setError(true)
                     setStatus(findError)
                     callback([])
                 } else {
@@ -86,7 +87,7 @@ function CoursePage(props) {
             </HelmetProvider>
             <div className="container my-5">
                 <div className="mb-3 text-center text-primary">
-                    <h6 className="m-0">{course.code}</h6>
+                    <h6 className="m-0">{course.internalId}</h6>
                     <h2 className="">{course.name}</h2>
                 </div>
                 <Tabs className="borderless-tabs" defaultActiveKey={'classes'} fill>
@@ -101,7 +102,7 @@ function CoursePage(props) {
                                 cacheOptions
                                 defaultOptions
                                 noOptionsMessage={() => t('selectNoResults')}
-                                getOptionLabel={e => e.code+' - '+e.name}
+                                getOptionLabel={e => e.internalId+' - '+e.name}
                                 getOptionValue={e => e.id}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt)}

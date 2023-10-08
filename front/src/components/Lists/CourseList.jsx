@@ -97,7 +97,7 @@ function CourseList(props){
                     {
                         courseToDelete &&
                         t('modal.areYouSureCourse', {
-                            internalId: courseToDelete.internalId,
+                            code: courseToDelete.internalId,
                             name: courseToDelete.name,
                         })
                     }

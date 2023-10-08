@@ -406,10 +406,10 @@ const getProgram = async (programId) => {
     return simpleApiGetRequest(endpoint)
 }
 
-const getMandatoryCourses = async (programId) => {
+const getMandatoryCourses = async (programId, withRequiredCredits) => {
     const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}/courses`)
     const response = await simpleApiMultiPageGetRequest(endpoint, {optional: false})
-    if(response.status !== OK)
+    if(response.status !== OK || !withRequiredCredits)
         return response
 
     for(const c of response.data){
@@ -421,10 +421,10 @@ const getMandatoryCourses = async (programId) => {
     return response
 }
 
-const getOptionalCourses = async (programId) => {
+const getOptionalCourses = async (programId, withRequiredCredits) => {
     const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}/courses`)
     const response = await simpleApiMultiPageGetRequest(endpoint, {optional: true})
-    if(response.status !== OK)
+    if(response.status !== OK || !withRequiredCredits)
         return response
 
     for(const c of response.data){
@@ -491,13 +491,18 @@ const getRequiredCoursesForProgram = async (courseId, programId) => {
     return simpleApiMultiPageGetRequest(endpoint)
 }
 
+const getProgramsCourseIsIn = async (courseId, inputText) => {
+    const endpoint = getEndpointForActiveUser(universityProgramsEndpoint)
+    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText, courseId: courseId})
+}
+
 const saveCourse = async (id, name, internalId, creditValue, requirementIDs) => {
     const payload = {
         'name': name,
         'internalId': internalId,
         'creditValue': Number(creditValue)?? 0,
     }
-    const response = createOrUpdateObject(universityCoursesEndpoint, payload, id)
+    const response = await createOrUpdateObject(universityCoursesEndpoint, payload, id)
     if(response.status !== OK && response.status !== CREATED)
         return response
 
@@ -506,7 +511,7 @@ const saveCourse = async (id, name, internalId, creditValue, requirementIDs) => 
         const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses/${response.id}/required-courses-collection`
         const requirementsPayload = { "requirements": requirementsInProgram }
         const requirementsResponse = await simpleApiPutRequest(requirementsEndpoint, requirementsPayload)
-        if(requirementsResponse.status !== OK && requirementsResponse.status !== NO_CONTENT)
+        if(requirementsInProgram.length > 1 && requirementsResponse.status !== OK && requirementsResponse.status !== NO_CONTENT)
             return requirementsResponse
     }
     return response
@@ -626,7 +631,7 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
         name: name
     }
     const endpoint = `${universityCoursesEndpoint}/${courseId}/course-classes`
-    const response = createOrUpdateObject(endpoint, payload, id)
+    const response = await createOrUpdateObject(endpoint, payload, id)
     if(response.status !== OK && response.status !== CREATED)
         return response
 
@@ -715,6 +720,7 @@ const ApiService = {
     getCoursesPage: getCoursesPage,
     getCourse: getCourse,
     getRequiredCoursesForProgram: getRequiredCoursesForProgram,
+    getProgramsCourseIsIn: getProgramsCourseIsIn,
     saveCourse: saveCourse,
     deleteCourse: deleteCourse,
 

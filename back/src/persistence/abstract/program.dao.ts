@@ -15,7 +15,7 @@ export default abstract class ProgramDao extends GenericDao<Program> {
     public abstract delete(id: string, universityIdFilter: string): Promise<void>;
 
     public abstract findById(id: string, universityIdFilter?: string): Promise<Program | undefined>;
-    public abstract findPaginated(page: number, limit: number, textSearch?: string, universityId?: string): Promise<PaginatedCollection<Program>>;
+    public abstract findPaginated(page: number, limit: number, textSearch?: string, universityId?: string, courseId?: string): Promise<PaginatedCollection<Program>>;
 
     // Abstract Methods
     public abstract addCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean, requiredCredits: number): Promise<void>;

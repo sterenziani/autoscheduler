@@ -261,10 +261,11 @@
         "408": "No se recibió respuesta del servidor.",
         "500": "El servidor de AutoScheduler tuvo un error interno.",
         "noTerms": "No se encontraron períodos. Cree al menos uno para crear comisiones.",
-        "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones."
+        "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones.",
+        "notPartOfAnyPrograms": "Este curso no está asociado a ningún programa. Añádalo a un programa para definir sus correlativas bajo el mismo."
     },
     "noSchedulesFound": "No hubo planes encontrados para su búsqueda.",
-    "noDefinedRequirements": "No hay correlativas definidas. Es posible que esta materia no sea parte del plan seleccionado.",
+    "noDefinedRequirements": "No hay correlativas definidas.",
     "selectNoOptions": "Ingrese un caracter para buscar.",
     "selectNoResults": "No se hallaron resultados para su búsqueda.",
     "goHome": "Volver al inicio",

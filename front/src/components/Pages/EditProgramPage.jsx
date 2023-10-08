@@ -63,7 +63,7 @@ function EditProgramPage(props) {
         }
 
         const loadMandatoryCourses = async (programId) => {
-            ApiService.getMandatoryCourses(programId).then((resp) => {
+            ApiService.getMandatoryCourses(programId, true).then((resp) => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;
@@ -79,7 +79,7 @@ function EditProgramPage(props) {
         }
 
         const loadOptionalCourses = async (programId) => {
-            ApiService.getOptionalCourses(programId).then((resp) => {
+            ApiService.getOptionalCourses(programId, true).then((resp) => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;

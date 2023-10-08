@@ -30,8 +30,8 @@ export default class ProgramService {
         return await this.dao.getById(id, universityIdFilter);
     }
 
-    async getPrograms(page: number, limit: number, textSearch?: string, universityId?: string): Promise<PaginatedCollection<Program>> {
-        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), universityId);
+    async getPrograms(page: number, limit: number, textSearch?: string, universityId?: string, courseId?:string): Promise<PaginatedCollection<Program>> {
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), universityId, courseId);
     }
 
     async createProgram(universityId: string, internalId: string, name: string, optionalCourseCredits: number): Promise<Program> {

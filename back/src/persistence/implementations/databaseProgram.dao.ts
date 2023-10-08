@@ -136,7 +136,7 @@ export default class DatabaseProgramDao extends ProgramDao {
         }
     }
 
-    async findPaginated(page: number, limit: number, textSearch?: string, universityId?: string): Promise<PaginatedCollection<Program>> {
+    async findPaginated(page: number, limit: number, textSearch?: string, universityId?: string, courseId?: string): Promise<PaginatedCollection<Program>> {
         // Initialize useful variables
         const collection: DatabaseProgram[] = [];
         let lastPage = 1;
@@ -146,14 +146,16 @@ export default class DatabaseProgramDao extends ProgramDao {
             textSearch = cleanMaybeText(textSearch);
             const globalRegex = getGlobalRegex(textSearch);
             // Build query
-            const baseQuery = buildQuery('MATCH (u: University)<-[:BELONGS_TO]-(p: Program)', 'WHERE', 'AND', [
+            let baseQuery = buildQuery('MATCH (u: University)<-[:BELONGS_TO]-(p: Program) ', 'WHERE', 'AND', [
                 {entry: '(p.name CONTAINS $textSearch OR p.internalId =~ $globalRegex)', value: textSearch},
                 {entry: 'u.id = $universityId', value: universityId},
             ]);
+            baseQuery += courseId? ' MATCH (c:Course {id:$courseId})-[:IN]->(p)':''
+
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(p) as count`,
-                {textSearch, globalRegex, universityId}
+                {textSearch, globalRegex, universityId, courseId}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
@@ -162,7 +164,7 @@ export default class DatabaseProgramDao extends ProgramDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN p ORDER BY p.name SKIP $skip LIMIT $limit`,
-                    {textSearch, globalRegex, universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
+                    {textSearch, globalRegex, universityId, courseId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
