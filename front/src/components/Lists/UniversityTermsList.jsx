@@ -11,7 +11,7 @@ import { OK } from '../../services/ApiConstants';
 function UniversityTermsList(props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [terms, setTerms] = useState(null);
@@ -33,12 +33,12 @@ function UniversityTermsList(props) {
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!terms || requestedPage !== page){
+        if(!loading && !error && !terms || requestedPage !== page){
+            setLoading(true)
             setPage(requestedPage)
             loadTerms(requestedPage)
         }
-        // eslint-disable-next-line
-    }, [search, page, terms])
+    }, [search, page, terms, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)

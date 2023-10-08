@@ -39,12 +39,12 @@ function StudentCourseLog(props) {
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!courses || requestedPage !== page){
+        if(!loading && !error && !courses || requestedPage !== page){
+            setLoading(false)
             setPage(requestedPage)
             loadCourses(requestedPage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search, courses, page])
+    }, [search, courses, page, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)

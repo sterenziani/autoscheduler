@@ -11,7 +11,7 @@ import ErrorMessage from '../Common/ErrorMessage';
 function CourseClassesList(props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
 
@@ -36,12 +36,13 @@ function CourseClassesList(props) {
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!termClasses || requestedPage !== page){
+        if(!loading && !error && !termClasses || requestedPage !== page){
+            setLoading(true)
             setPage(requestedPage)
             loadClasses(requestedPage)
         }
         // eslint-disable-next-line
-    }, [search, page, termClasses])
+    }, [search, page, termClasses, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -134,7 +135,7 @@ function CourseClassesList(props) {
                                             entry.lectures.map((l, lidx) => (
                                                 <Row key={'row-' + index + '-' + lidx}>
                                                     <Col className="text-start">
-                                                        <b>{t('days.' + l.day)}:</b>{' '} {l.startTime} - {l.endTime} ({l.building && l.building.code})
+                                                        <b>{t('days.' + l.day)}:</b>{' '} {l.startTime} - {l.endTime} ({l.building && l.building.internalId})
                                                     </Col>
                                                 </Row>
                                             ))
@@ -166,7 +167,7 @@ function CourseClassesList(props) {
                 <Modal.Body>
                         {
                             t('modal.areYouSureClass', {
-                                code: course.code,
+                                code: course.internalId,
                                 name: course.name,
                                 class: courseClassToDelete.name,
                                 term: term.name,

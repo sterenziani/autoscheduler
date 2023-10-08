@@ -10,7 +10,7 @@ import ErrorMessage from '../Common/ErrorMessage';
 
 function StudentCoursesList(props){
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [courses,setCourses] = useState(props.course);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
@@ -30,12 +30,12 @@ function StudentCoursesList(props){
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!courses || requestedPage !== page){
+        if(!loading && !error && !courses || requestedPage !== page){
+            setLoading(true)
             setPage(requestedPage)
             loadCourses(requestedPage)
         }
-        // eslint-disable-next-line
-    }, [search, courses, page])
+    }, [search, courses, page, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)

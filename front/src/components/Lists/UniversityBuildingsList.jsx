@@ -11,11 +11,10 @@ import ErrorMessage from '../Common/ErrorMessage';
 function UniversityBuildingsList(props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [status, setStatus] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const user = props.user;
     const [buildings, setBuildings] = useState(null);
     const [buildingToDelete, setBuildingToDelete] = useState();
     const [paginationLinks, setPaginationLinks] = useState(null);
@@ -33,12 +32,12 @@ function UniversityBuildingsList(props) {
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!buildings || requestedPage !== page){
+        if(!loading && !error && !buildings || requestedPage !== page){
+            setLoading(true)
             setPage(requestedPage)
             loadBuildings(requestedPage)
         }
-        // eslint-disable-next-line
-    }, [search, buildings, page, user.id])
+    }, [search, buildings, page, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)

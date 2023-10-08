@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Row, Col, Form, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
@@ -30,6 +30,20 @@ const Pagination = (props) => {
         setShowModal(false)
         loadContent(parseInt(requestedPage))
     }
+
+    useEffect(() => {
+        if(page && lastPage){
+            let redirectPage = page
+            if(page > lastPage)
+                redirectPage = lastPage
+            if(page <= 0)
+                redirectPage = 1
+            if(redirectPage !== page){
+                setShowModal(false)
+                loadContent(parseInt(redirectPage))
+            }
+        }
+    }, [page, lastPage, loadContent, setShowModal])
 
     return (
         <React.Fragment>

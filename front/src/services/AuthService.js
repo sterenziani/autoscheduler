@@ -1,6 +1,6 @@
 import api from './api';
 import Roles from '../resources/RoleConstants';
-import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, CREATED } from './ApiConstants';
+import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, INTERNAL_ERROR, CREATED, TIMEOUT_ERROR } from './ApiConstants';
 
 const logInEndpoint = '/';
 const getActiveUserEndpoint = '/user';
@@ -108,10 +108,9 @@ const logIn = async (email, password) => {
         return { status: OK }
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status, data: e.response.data}
-        else
-            return { status: TIMEOUT }
+        if (e.response) return { status: e.response.status, data: e.response.data}
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -138,10 +137,9 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
         return createResponse
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status, data: e.response.data}
-        else
-            return { status: TIMEOUT }
+        if (e.response) return { status: e.response.status, data: e.response.data}
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -156,10 +154,9 @@ const signUpUniversity = async (email, password, name) => {
         return await api.post(universityEndpoint, payload, getRequestHeaders())
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status, data: e.response.data}
-        else
-            return { status: TIMEOUT }
+        if (e.response) return { status: e.response.status, data: e.response.data}
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 

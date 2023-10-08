@@ -1,4 +1,4 @@
-import { CREATED, OK, NO_CONTENT, INTERNAL_ERROR } from './ApiConstants';
+import { CREATED, OK, NO_CONTENT, INTERNAL_ERROR, TIMEOUT, TIMEOUT_ERROR } from './ApiConstants';
 import { DAYS } from './SystemConstants';
 import api from './api'
 import AuthService from './AuthService'
@@ -36,6 +36,7 @@ const simpleApiGetRequest = async (endpoint) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -46,6 +47,7 @@ const longApiGetRequest = async (endpoint) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -90,6 +92,7 @@ const simpleApiMultiPageGetRequest = async (baseEndpoint, params, limit, idsToFi
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -100,6 +103,7 @@ const simpleApiPostRequest = async (endpoint, body) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -110,6 +114,7 @@ const simpleApiPutRequest = async (endpoint, body) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -121,6 +126,7 @@ const simpleApiDeleteRequest = async (endpoint) => {
     }
     catch(e) {
         if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -143,6 +149,7 @@ const createOrUpdateObject = async (baseEndpoint, body, id) => {
     }
     catch(e) {
         if (e.response) return e.response
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -263,10 +270,9 @@ const getStudent = async (studentId) => {
         return resp
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: INTERNAL_ERROR }
+        if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -582,10 +588,9 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
         return listOfClassesResponse
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: INTERNAL_ERROR }
+        if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -618,10 +623,9 @@ const getCourseClass = async (classId) => {
         return courseClassResponse
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status }
-        else
-            return { status: INTERNAL_ERROR }
+        if (e.response) return { status: e.response.status }
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
