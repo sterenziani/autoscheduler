@@ -273,7 +273,7 @@ export default class DatabaseProgramDao extends ProgramDao {
                 return;
             }
             await transaction.run(
-                'MATCH (p:Program {id: $id})->[:BELONGS_TO]->(u:University {id: $universityId}) ' +
+                'MATCH (p:Program {id: $id})-[:BELONGS_TO]->(u:University {id: $universityId}) ' +
                 'UNWIND $parsedCourses as course ' +
                 'MATCH (c:Course {id: course.id})-[:BELONGS_TO]->(u) ' +
                 'CREATE (c)-[:IN {relId: course.relId, optional: course.optional, requiredCredits: course.requiredCredits}]->(p)',

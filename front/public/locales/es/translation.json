@@ -90,6 +90,8 @@
         "deleteBuilding": "Eliminando sede",
         "deleteTerm": "Eliminando período",
         "addCourse": "Añadiendo materia",
+        "creditsRequired":"Créditos requeridos:",
+        "creditsRequiredHint":"Si desea que este curso sólo sea recomendado a sus estudiantes una vez que hayan aprobado una cierta cantidad de créditos, puede especificarla aquí.\n\nSi los estudiantes pueden inscribirse al mismo sólo con aprobar las materias correlativas, sin importar sus créditos totales, ignore este campo.",
         "areYouSureCourse": "¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?",
         "areYouSureProgram": "¿Seguro que desea eliminar la carrera '{{code}} - {{name}}'?",
         "areYouSureClass": "¿Seguro que desea eliminar la comisión {{class}} de la materia '{{code}} - {{name}}' del período {{term}}?",
@@ -158,12 +160,14 @@
         "createCourse":"Crear Materia",
         "courseName":"Nombre de materia",
         "courseCode":"Código/ID de la materia",
+        "creditsEarned":"Créditos otorgados",
         "requirements":"Correlativas",
         "editProgram":"Editar Carrera",
         "createProgram":"Crear Carrera",
         "programCode":"Código/ID del plan",
         "programName":"Nombre del plan",
         "programOptionalCredits": "Créditos electivos",
+        "courseRequiresCredits":"(Requiere {{credits}} créditos)",
         "mandatoryCourses":"Materias obligatorias",
         "optionalCourses":"Materias electivas",
         "editBuilding": "Editar Sede",
@@ -211,7 +215,8 @@
                 "minNameLength":"El nombre de la materia debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre de la materia no puede superar los 50 characters.",
                 "nameIsRequired":"La materia debe tener un nombre.",
-                "codeAlreadyTaken":"Ya existe una materia con ese código."
+                "codeAlreadyTaken":"Ya existe una materia con ese código.",
+                "positiveZeroOptionalCredits":"Aprobar este curso debería otorgar 0 o más créditos."
             },
             "program":{
                 "minCodeLength":"El plan de carrera debe tener un código con el cual la identifique.",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
+import { Button, Modal, Spinner, Row } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';

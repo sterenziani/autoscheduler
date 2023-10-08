@@ -167,7 +167,7 @@ export class UniversityController {
         const name = validateString(req.body.name);
         const optionalCourseCredits = validateNumber(req.body.optionalCourseCredits);
 
-        if (!internalId && !name && !optionalCourseCredits) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!internalId && !name && optionalCourseCredits === undefined) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
         if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
         if(optionalCourseCredits && optionalCourseCredits < 0) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_CREDIT_VALUE));
@@ -604,7 +604,7 @@ export class UniversityController {
     public getUniversityCourseRequiredCreditsForProgram: RequestHandler = async (req, res, next) => {
         const universityId = req.user.id;
         const courseId = req.params.courseId;
-        const programId = req.params.courseId;
+        const programId = req.params.programId;
 
         try {
             const creditRequirement: IProgramRequiredCredits = await this.courseService.getCreditRequirement(courseId, programId, universityId);

@@ -1,4 +1,4 @@
-import { CREATED, TIMEOUT, OK, NO_CONTENT, INTERNAL_ERROR } from './ApiConstants';
+import { CREATED, OK, NO_CONTENT, INTERNAL_ERROR } from './ApiConstants';
 import { DAYS } from './SystemConstants';
 import api from './api'
 import AuthService from './AuthService'
@@ -408,31 +408,51 @@ const getProgram = async (programId) => {
 
 const getMandatoryCourses = async (programId) => {
     const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}/courses`)
-    return simpleApiMultiPageGetRequest(endpoint, {optional: false})
+    const response = await simpleApiMultiPageGetRequest(endpoint, {optional: false})
+    if(response.status !== OK)
+        return response
+
+    for(const c of response.data){
+        const requiredCreditsResponse = await simpleApiGetRequest(`${universityProgramsEndpoint}/${programId}/courses/${c.id}/required-credits`)
+        if(requiredCreditsResponse.status !== OK)
+            return requiredCreditsResponse
+        c.requiredCredits = requiredCreditsResponse.data.requiredCredits?? 0
+    }
+    return response
 }
 
 const getOptionalCourses = async (programId) => {
     const endpoint = getEndpointForActiveUser(`${universityProgramsEndpoint}/${programId}/courses`)
-    return simpleApiMultiPageGetRequest(endpoint, {optional: true})
+    const response = await simpleApiMultiPageGetRequest(endpoint, {optional: true})
+    if(response.status !== OK)
+        return response
+
+    for(const c of response.data){
+        const requiredCreditsResponse = await simpleApiGetRequest(`${universityProgramsEndpoint}/${programId}/courses/${c.id}/required-credits`)
+        if(requiredCreditsResponse.status !== OK)
+            return requiredCreditsResponse
+        c.requiredCredits = requiredCreditsResponse.data.requiredCredits?? 0
+    }
+    return response
 }
 
-const saveProgram = async (id, name, internalId, mandatoryCourseIDs, optionalCourseIDs, optionalCourseCredits) => {
+const saveProgram = async (id, name, internalId, optionalCourseCredits, mandatoryCourseIDs, optionalCourseIDs, creditRequirements) => {
     const payload = {
         'name': name,
         'internalId': internalId,
         'optionalCourseCredits': Number(optionalCourseCredits)?? 0,
     }
     const response = await createOrUpdateObject(universityProgramsEndpoint, payload, id)
-    if(response !== OK && response !== CREATED)
+    if(response.status !== OK && response.status !== CREATED)
         return response
 
 
     // Once created/updated, define courses
     const coursesEndpoint = `${universityProgramsEndpoint}/${response.id}/courses-collection`
-    const coursesPayload = { "mandatoryCourses": mandatoryCourseIDs, "optionalCourses": optionalCourseIDs }
+    const coursesPayload = { "mandatoryCourses": mandatoryCourseIDs, "optionalCourses": optionalCourseIDs, "creditRequirements": creditRequirements }
     const coursesResponse = await simpleApiPutRequest(coursesEndpoint, coursesPayload)
 
-    if(coursesResponse !== OK && coursesResponse !== CREATED)
+    if(coursesResponse.status !== NO_CONTENT && coursesResponse.status !== OK && coursesResponse.status !== CREATED)
         return coursesResponse
     return response
 }
@@ -471,13 +491,14 @@ const getRequiredCoursesForProgram = async (courseId, programId) => {
     return simpleApiMultiPageGetRequest(endpoint)
 }
 
-const saveCourse = async (id, name, internalId, requirementIDs) => {
+const saveCourse = async (id, name, internalId, creditValue, requirementIDs) => {
     const payload = {
         'name': name,
-        'internalId': internalId
+        'internalId': internalId,
+        'creditValue': Number(creditValue)?? 0,
     }
     const response = createOrUpdateObject(universityCoursesEndpoint, payload, id)
-    if(response !== OK && response !== CREATED)
+    if(response.status !== OK && response.status !== CREATED)
         return response
 
     // Once created/updated, define requirements
@@ -485,7 +506,7 @@ const saveCourse = async (id, name, internalId, requirementIDs) => {
         const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses/${response.id}/required-courses-collection`
         const requirementsPayload = { "requirements": requirementsInProgram }
         const requirementsResponse = await simpleApiPutRequest(requirementsEndpoint, requirementsPayload)
-        if(requirementsResponse !== OK && requirementsResponse !== CREATED)
+        if(requirementsResponse.status !== OK && requirementsResponse.status !== NO_CONTENT)
             return requirementsResponse
     }
     return response
@@ -606,7 +627,7 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
     }
     const endpoint = `${universityCoursesEndpoint}/${courseId}/course-classes`
     const response = createOrUpdateObject(endpoint, payload, id)
-    if(response !== OK && response !== CREATED)
+    if(response.status !== OK && response.status !== CREATED)
         return response
 
     // Once created/updated, define lectures
@@ -619,7 +640,7 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
 
         const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
         const lectureResponse = await simpleApiPutRequest(`${lecturesEndpoint}/${l.id}`, lecturePayload)
-        if(lectureResponse !== OK && lectureResponse !== CREATED)
+        if(lectureResponse.status !== OK && lectureResponse.status !== CREATED)
             return lectureResponse
     }
 
@@ -630,13 +651,13 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
 
         const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
         const lectureResponse = await simpleApiPostRequest(lecturesEndpoint, lecturePayload)
-        if(lectureResponse !== OK && lectureResponse !== CREATED)
+        if(lectureResponse.status !== OK && lectureResponse.status !== CREATED)
             return lectureResponse
     }
 
     for(const l of lecturesToDelete) {
         const lectureResponse = await simpleApiDeleteRequest(`${lecturesEndpoint}/${l.id}`)
-        if(lectureResponse !== OK && lectureResponse !== CREATED)
+        if(lectureResponse.status !== OK && lectureResponse.status !== CREATED)
             return lectureResponse
     }
 

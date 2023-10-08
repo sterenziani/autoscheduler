@@ -139,7 +139,12 @@ function EditProgramPage(props) {
         {
             const mandatoryCourseIDs = mandatoryCourses.map(a => a.id)
             const optionalCourseIDs = optionalCourses.map(a => a.id)
-            const resp = await ApiService.saveProgram(id, values.programName, values.programCode, mandatoryCourseIDs, optionalCourseIDs, values.programOptionalCredits)
+
+            const creditRequirements = {}
+            mandatoryCourses.forEach((c) => {if(c.requiredCredits > 0) creditRequirements[c.id] = c.requiredCredits})
+            optionalCourses.forEach((c) => {if(c.requiredCredits > 0)  creditRequirements[c.id] = c.requiredCredits})
+
+            const resp = await ApiService.saveProgram(id, values.programName, values.programCode, values.programOptionalCredits, mandatoryCourseIDs, optionalCourseIDs, creditRequirements)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=programs")
             }
@@ -154,7 +159,7 @@ function EditProgramPage(props) {
         }
     };
 
-    const onClickReqTrashCan = (e) => {
+    const onClickMandatoryTrashCan = (e) => {
         const mandatoriesCopy = Object.assign([], mandatoryCourses);
         mandatoriesCopy.splice(mandatoryCourses.indexOf(e), 1);
         setMandatoryCourses(mandatoriesCopy)
@@ -166,19 +171,19 @@ function EditProgramPage(props) {
         setOptionalCourses(optionalsCopy)
     }
 
-    const addRequiredCourse = (courseToAdd) => {
+    const addMandatoryCourse = (courseToAdd) => {
         if(!courseToAdd)
-            return;
-        const mandatoriesCopy = Object.assign([], mandatoryCourses);
-        mandatoriesCopy.push(courseToAdd);
+            return
+        const mandatoriesCopy = Object.assign([], mandatoryCourses)
+        mandatoriesCopy.push(courseToAdd)
         setMandatoryCourses(mandatoriesCopy)
     }
 
     const addOptionalCourse = (courseToAdd) => {
         if(!courseToAdd)
-            return;
-        const optionalsCopy = Object.assign([], optionalCourses);
-        optionalsCopy.push(courseToAdd);
+            return
+        const optionalsCopy = Object.assign([], optionalCourses)
+        optionalsCopy.push(courseToAdd)
         setOptionalCourses(optionalsCopy)
     }
 
@@ -231,9 +236,9 @@ function EditProgramPage(props) {
                                 <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
                             </div>
                             <div className="align-items-start align-items-center">
-                                <CourseListForm courses={courses}
+                            <CourseListForm editCreditRequirements courses={courses}
                                     listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
-                                    onClickTrashCan={onClickReqTrashCan} addCourse={addRequiredCourse}
+                                    onClickTrashCan={onClickMandatoryTrashCan} addCourse={addMandatoryCourse}
                                 />
                             </div>
                         </Row>
@@ -244,7 +249,7 @@ function EditProgramPage(props) {
                                 <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
                             </div>
                             <div className="align-items-start align-items-center">
-                                <CourseListForm courses={courses}
+                                <CourseListForm editCreditRequirements courses={courses}
                                     listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
                                     onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
                                 />
