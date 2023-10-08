@@ -228,7 +228,7 @@ function SignUpStudentForm(props) {
                                             placeholder={t('register.program')}
                                             cacheOptions
                                             defaultOptions
-                                            getOptionLabel={e => e.code+' - '+e.name}
+                                            getOptionLabel={e => e.internalId+' - '+e.name}
                                             getOptionValue={e => e.id}
                                             noOptionsMessage={() => t('selectNoResults')}
                                             loadOptions={loadProgramOptions}

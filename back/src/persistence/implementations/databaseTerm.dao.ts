@@ -71,15 +71,16 @@ export default class DatabaseTermDao extends TermDao {
         try {
             const encodedName = name ? encodeText(name) : undefined;
             internalId = internalId ? globalizeField(universityId, internalId) : undefined;
+            const graphStartDate = startDate? toGraphDate(startDate):undefined;
             const baseQuery = buildQuery('MATCH (t: Term {id: $id})-[:BELONGS_TO]->(u: University {id: $universityId})', 'SET', ',', [
                 {entry: 't.internalId = $internalId', value: internalId},
-                {entry: 'p.name = $name, p.encoding = $encoding', value: name},
+                {entry: 't.name = $name, t.encoding = $encoding', value: name},
                 {entry: 't.startDate = $startDate', value: startDate},
                 {entry: 't.published = $published', value: published}
             ]);
             const result = await session.run(
                 `${baseQuery} RETURN t`,
-                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, startDate, published}
+                {universityId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, startDate: graphStartDate, published}
             );
             const node = getNode(result);
             if (!node) throw new GenericException(this.notFoundError);
@@ -95,7 +96,7 @@ export default class DatabaseTermDao extends TermDao {
         const session = graphDriver.session();
         try {
             const result = await session.run(
-                `MATCH (l: Lecture)-[:OF]->(cc:CourseClass)-[:HAPPENS_IN]->(t:Term {id: $id})-[:BELONGS_TO]->(: University {id: $universityId}) DETACH DELETE l, cc, t`,
+                `MATCH (t:Term {id: $id})-[:BELONGS_TO]->(: University {id: $universityId}) OPTIONAL MATCH (cc:CourseClass)-[:HAPPENS_IN]->(t) OPTIONAL MATCH (l: Lecture)-[:OF]->(cc) DETACH DELETE l, cc, t`,
                 {id, universityId}
             );
             const stats = getStats(result);
@@ -134,6 +135,8 @@ export default class DatabaseTermDao extends TermDao {
         let lastPage = 1;
         const regex = getRegex(textSearch);
         const globalRegex = getGlobalRegex(textSearch);
+        const fromDate = from? toGraphDate(from):undefined;
+        const toDate = to? toGraphDate(to):undefined;
 
         const session = graphDriver.session();
         try {
@@ -148,7 +151,7 @@ export default class DatabaseTermDao extends TermDao {
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(t) as count`,
-                {regex, globalRegex, universityId, from, to, published}
+                {regex, globalRegex, universityId, from: fromDate, to: toDate, published}
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);

@@ -1,4 +1,4 @@
-import neo4j, { Driver, Integer, Neo4jError, QueryResult, RecordShape, Date as Neo4jDate } from 'neo4j-driver';
+import neo4j, { Driver, Integer, Neo4jError, QueryResult, RecordShape, DateTime as Neo4jDateTime } from 'neo4j-driver';
 import { GRAPH_CONSTRAINT_ERROR_CODE } from '../../constants/persistence/graphPersistence.constants';
 import { IErrorData } from '../../interfaces/error.interface';
 import GenericException from '../../exceptions/generic.exception';
@@ -107,10 +107,10 @@ export const toGraphInt = (value?: number): Integer | undefined => {
     return neo4j.int(value);
 };
 
-export const toGraphDate = (value: Date): Neo4jDate<number> => {
-    return Neo4jDate.fromStandardDate(value);
+export const toGraphDate = (value: Date): Neo4jDateTime<number> => {
+    return Neo4jDateTime.fromStandardDate(value);
 };
 
-export const parseGraphDate = (value: Neo4jDate): Date => {
+export const parseGraphDate = (value: Neo4jDateTime): Date => {
     return value.toStandardDate();
 };

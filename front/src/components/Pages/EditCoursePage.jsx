@@ -95,7 +95,7 @@ function EditCoursePage(props) {
 
     useEffect( () => {
         if(requirements && programs && (!selectedProgram || coursesOfSelectedProgram)) setLoading(false)
-    },[requirements, coursesOfSelectedProgram, programs])
+    },[requirements, coursesOfSelectedProgram, programs, selectedProgram])
 
     const loadRequirements = async(courseId, programId) => {
         ApiService.getRequiredCoursesForProgram(courseId, programId).then((resp) => {

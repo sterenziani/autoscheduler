@@ -92,9 +92,9 @@ function UniversityTermsList(props) {
         }
     }
 
-    const deleteTerm = () => {
+    const deleteTerm = async () => {
         if (!termToDelete) return;
-        ApiService.deleteTerm(termToDelete.id);
+        await ApiService.deleteTerm(termToDelete.id);
         closeDeleteModal()
         loadTerms(page)
     }
@@ -127,7 +127,7 @@ function UniversityTermsList(props) {
                     ? [
                           terms.map((entry, index) => (
                               <Row key={'row-' + index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
-                                  <div className="m-auto">{entry.code}</div>
+                                  <div className="m-auto">{entry.internalId}</div>
                                   <div className="m-auto">{entry.name}</div>
                                   <div className="m-auto">{convertDateFormat(entry.startDate)}</div>
                                   <div className="d-flex m-auto justify-content-center">
@@ -199,7 +199,7 @@ function UniversityTermsList(props) {
                         {
                             termToDelete &&
                             t('modal.areYouSureTerm', {
-                                code: termToDelete.code,
+                                code: termToDelete.internalId,
                                 name: termToDelete.name,
                             })
                         }

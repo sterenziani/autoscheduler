@@ -69,7 +69,7 @@ function EditTermPage(props) {
             }
             else{
                 if(!term){
-                    setTerm({"name": t("forms.placeholders.termName"), "code": t("forms.placeholders.termCode")})
+                    setTerm({"name": t("forms.placeholders.termName"), "internalId": t("forms.placeholders.termCode")})
                     setStartDate(new Date().toISOString().slice(0, 10))
                     setLoading(false)
                 }
@@ -87,7 +87,9 @@ function EditTermPage(props) {
         if (startDate && values.termName && values.code)
         {
             const published = id? term.published : false
-            const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.code, startDate, published)
+            const browserDate = new Date(startDate)
+            const gmtTime = new Date(browserDate.getTime() + browserDate.getTimezoneOffset()*60000)
+            const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.code, gmtTime, published)
             if(resp.status === OK || resp.status === CREATED)
                 navigate("/?tab=terms");
             else{
@@ -119,7 +121,7 @@ function EditTermPage(props) {
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editTerm':'forms.createTerm')}</h2>
                 {error && (<p className="form-error">{t('forms.errors.term.codeAlreadyTaken')}</p>)}
-                <Formik initialValues={{ termName: term.name, code: term.code }} validationSchema={TermSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ termName: term.name, code: term.internalId }} validationSchema={TermSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
                     <FormInputField
