@@ -219,7 +219,7 @@ export default class DatabaseStudentDao extends StudentDao {
         try {
             const relId = getRelId(COMPLETED_PREFIX, id, courseId);
             const result = await session.run(
-                'MATCH ()-[r:COMPLETED {relId: $relId]->(c)-[:BELONGS_TO]->(:University {id: $universityId}) ' +
+                'MATCH ()-[r:COMPLETED {relId: $relId}]->(c)-[:BELONGS_TO]->(:University {id: $universityId}) ' +
                 'DELETE r',
                 {universityId, relId}
             );

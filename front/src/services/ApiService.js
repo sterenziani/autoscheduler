@@ -16,7 +16,7 @@ const studentUniversityPrefix = "student/"
 const studentUniversityEndpoint = "student/university"
 const studentProgramEndpoint = "student/program"
 const studentCompletedCoursesEndpoint = "student/completed-courses"
-const studentRemainingCoursesEndpoint = "student/remaining-courses"
+const studentUniversityProgramsEndpoint = "student/university/programs"
 const studentSchedulesEndpoint = "student/schedules"
 
 const universitiesEndpoint = "universities"
@@ -68,6 +68,7 @@ const simpleApiMultiPageGetRequest = async (baseEndpoint, params, limit, idsToFi
         while(page <= lastPage && (!limit || finalResponse.data.length < limit)) {
             const endpoint = `${baseEndpoint}?page=${page}${additionalQuery}`
             const response = await api.get(endpoint, AuthService.getRequestHeaders())
+            if(response.status !== OK) return response
 
             // Process page data (last is checked every time in case one has been added after first page was read)
             const links = parsePagination(response, page)
@@ -188,6 +189,7 @@ const scheduleParamsToQuery = (params) => {
     let query = '';
     if (params) {
         query += '?termId=' + params.termId;
+        query += '&programId=' + params.programId;
         query += '&targetHours=' + params.hours;
         query += '&reduceDays=' + params.reduceDays;
         query += '&prioritizeUnlocks=' + params.prioritizeUnlocks;
@@ -292,8 +294,8 @@ const deleteFinishedCourse = async (courseId) => {
 }
 
 const getRemainingCoursesProgram = async (programId, inputText) => {
-    const endpoint = `${studentRemainingCoursesEndpoint}?programId=${programId}&filter=${inputText}`
-    return simpleApiGetRequest(endpoint)
+    const endpoint = `${studentUniversityProgramsEndpoint}/${programId}/remaining-courses`
+    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText})
 }
 
 const getSchedules = async (params) => {

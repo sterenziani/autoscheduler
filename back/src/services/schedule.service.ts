@@ -86,7 +86,7 @@ export default class ScheduleService {
 
     private getViableCourseClassesMap(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[]): Map<string, string[]> {
         const viableCourseClassesMap: Map<string, string[]> = new Map<string, string[]>();
-        for(const courseId of viableCourseClassesMap.keys()) {
+        for(const courseId of inputData.courses.keys()) {
             viableCourseClassesMap.set(courseId, []);
             const ccIds = inputData.courseClassesOfCourse.get(courseId) ?? [];
             for(const ccId of ccIds) {
@@ -121,7 +121,8 @@ export default class ScheduleService {
                 if(!mandatoryIds.includes(c1) && mandatoryIds.includes(c2)) return -1;
                 return 0;
             }
-            if(!importance1 || !importance2) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+            if(importance1 === undefined || importance2 === undefined)
+                throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             return importance1-importance2;
         });
 
@@ -262,7 +263,7 @@ export default class ScheduleService {
             if(!courseId || !lectures) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
 
             const classImportance = inputData.indirectCorrelativesAmount.get(courseId);
-            if(!classImportance) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+            if(classImportance === undefined) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             totalImportance += classImportance;
 
             if(inputData.mandatoryCourseIds.includes(courseId)) amountOfMandatoryCourses++;

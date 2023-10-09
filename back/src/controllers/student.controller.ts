@@ -638,7 +638,7 @@ export class StudentController {
     public getStudentSchedules: RequestHandler = async (req, res, next) => {
         const studentId = req.user.id;
         const universityId = req.user.universityId!     // Can assert only for user with student role
-        const programId = req.user.programId!           // Can assert only for user with student role
+        const programId = validateString(req.query.programId)??req.user.programId! // Accept alternate programs, but default to student's program
         const termId = validateString(req.query.termId);
         const hours = validateInt(req.query.hours) ?? DEFAULT_TARGET_HOURS;
         const reduceDays = validateBoolean(req.query.reduceDays) ?? DEFAULT_REDUCE_DAYS;

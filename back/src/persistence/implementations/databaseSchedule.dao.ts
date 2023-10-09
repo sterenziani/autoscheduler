@@ -33,8 +33,8 @@ export default class DatabaseScheduleDao extends ScheduleDao {
                 'MATCH (s:Student {id: $studentId})-[:COMPLETED]->(c:Course) ' +
                 'WITH collect(c) AS completedCourses, sum(c.creditValue) AS completedCredits ' +
                 'MATCH (:Program {id: $programId})<-[r:IN]-(fc:Course) ' +
-                'MATCH (fc)<-[:REQUIRES* {programId: $programId}]-(rq:Course) ' +
-                'WITH fc, r, completedCourses, completedCredits, count(rq) AS ica' +
+                'OPTIONAL MATCH (fc)<-[:REQUIRES* {programId: $programId}]-(rq:Course) ' +
+                'WITH fc, r, completedCourses, completedCredits, count(rq) AS ica ' +
                 'WHERE NOT fc IN completedCourses AND NOT EXISTS {(fc)-[:REQUIRES]->(req) WHERE NOT req IN completedCourses} AND r.requiredCredits <= completedCredits ' +
                 'RETURN {properties: fc{.*, optional:r.optional, indirectCorrelativesAmount:ica}}',
                 {programId, studentId}
@@ -58,7 +58,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
             const lecturesResult = await session.run(
                 'UNWIND $courseClassIds as courseClassId ' +
                 'MATCH (b:Building)<-[:TAKES_PLACE_IN]-(l:Lecture)-[:OF]->(cc:CourseClass {id:courseClassId}) ' +
-                'RETURN l{.*, buildingId: b.id, courseClassId: cc.id}',
+                'RETURN {properties: l{.*, buildingId: b.id, courseClassId: cc.id}}',
                 {courseClassIds}
             );
             const lectureInfo = this.parseLectures(lecturesResult);
@@ -121,6 +121,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
         const weeklyClassTimeInMinutes: Map<string, number> = new Map();
         for (const node of nodes) {
             const courseClass = new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+            courseClasses.set(courseClass.id, courseClass);
             courseClassIds.push(courseClass.id);
             if (!courseClassesOfCourse.has(node.courseId)) courseClassesOfCourse.set(node.courseId, []);
             courseClassesOfCourse.get(node.courseId)?.push(courseClass.id);

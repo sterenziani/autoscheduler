@@ -250,7 +250,7 @@ export default class DatabaseCourseDao extends CourseDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN c ORDER BY c.name SKIP $skip LIMIT $limit`,
-                    {studentId, programId, universityId, textSearch, globalRegex, optional, skip: getSkipFromPageLimit(page, limit), limit}
+                    {studentId, programId, universityId, textSearch, globalRegex, optional, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -288,12 +288,12 @@ export default class DatabaseCourseDao extends CourseDao {
             );
             const count = getValue<number>(countResult, 'count');
             lastPage = getLastPageFromCount(count, limit);
-            
+
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN c ORDER BY c.name SKIP $skip LIMIT $limit`,
-                    {studentId, textSearch, globalRegex, programId, universityId, skip: getSkipFromPageLimit(page, limit), limit}
+                    {studentId, textSearch, globalRegex, programId, universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
