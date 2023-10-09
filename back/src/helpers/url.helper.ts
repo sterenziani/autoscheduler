@@ -62,7 +62,7 @@ export const getResourceUrl = (resource: RESOURCES, scope: API_SCOPE, resourceId
         case RESOURCES.COURSE_CLASS:
             switch (scope) {
                 case API_SCOPE.STUDENT: return `${basePath}student/university/course-class/${resourceId}`;
-                case API_SCOPE.UNIVERSITY: return `${basePath}university/courses/course-class${resourceId}`;
+                case API_SCOPE.UNIVERSITY: return `${basePath}university/course-class/${resourceId}`;
                 case API_SCOPE.ROOT: return `${basePath}course-class/${resourceId}`
             }
         case RESOURCES.LECTURE:

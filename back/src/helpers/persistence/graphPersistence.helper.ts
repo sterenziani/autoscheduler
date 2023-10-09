@@ -54,7 +54,7 @@ export const buildQuery = (base: string, command: string, connector: string, ent
     for (const entry of entries) {
         if (entry.value === undefined) continue;
         if (filter === undefined) filter = command;
-        filter = filter + ` ${entry.entry}${connector}`
+        filter = filter + ` ${entry.entry} ${connector}`
     }
     if (filter === undefined) return base;
     const trimmedFilter = filter.slice(0, -1 * connector.length);

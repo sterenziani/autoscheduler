@@ -53,7 +53,7 @@ function CourseClassesTab(props) {
         <React.Fragment>
             <div className="mx-5 py-4">
                 <Form.Select id="course-class-term-select" className="w-75 m-auto" value={selectedTerm.id} onChange={onChangeTerms}>
-                    { terms.map((p) => ( <option key={p.id} value={p.id}> {p.code + ' - ' + p.name} </option>)) }
+                    { terms.map((p) => ( <option key={p.id} value={p.id}> {p.internalId + ' - ' + p.name} </option>)) }
                 </Form.Select>
                 <CourseClassesList
                     user={user}

@@ -473,11 +473,11 @@ const deleteProgram = async (programId) => {
 //////////////////////////////////////////////////////////////////////////////
 
 const getCourses = async (inputText) => {
-    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}?filter=${inputText}`)
-    return simpleApiMultiPageGetRequest(endpoint)
+    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}`)
+    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText})
 }
 
-const getCoursesPage = async (page) => {
+const getCoursesPage = async (page, inputText) => {
     const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}?page=${page}`)
     return simpleApiGetRequest(endpoint)
 }
@@ -578,10 +578,9 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
 
         // Load lecture data
         const finalData = []
-        for (const c of listOfClassesResponse.data) {
-            const courseClassResponse = await getCourseClass(c.id)
-            if(courseClassResponse.status !== OK)
-                return courseClassResponse
+        for (const cc of listOfClassesResponse.data) {
+            const courseClassResponse = await populateCourseClass(cc)
+            if(courseClassResponse.status !== OK) return courseClassResponse
             finalData.push(courseClassResponse.data)
         }
         listOfClassesResponse.data = finalData
@@ -598,28 +597,12 @@ const getCourseClass = async (classId) => {
     try {
         const courseClassEndpoint = getEndpointForActiveUser(`${universityClassesEndpoint}/${classId}`)
         const courseClassResponse = await api.get(courseClassEndpoint, AuthService.getRequestHeaders())
+        if(courseClassResponse !== OK) return courseClassResponse
+
         const courseClass = courseClassResponse.data
-
-        const courseResponse = await api.get(courseClass.courseUrl, AuthService.getRequestHeaders())
-        courseClass.course = courseResponse.data
-
-        const termResponse = await api.get(courseClass.termUrl, AuthService.getRequestHeaders())
-        courseClass.term = termResponse.data
-
-        const listOfLecturesResponse = await api.get(courseClass.lecturesUrl, AuthService.getRequestHeaders())
-        for (const l of listOfLecturesResponse.data) {
-            if(l.buildingUrl){
-                const buildingDataResponse = await api.get(l.buildingUrl, AuthService.getRequestHeaders())
-                l.building = buildingDataResponse.data
-            }
-
-            const startTime = l.startTime.split(':')
-            const endTime = l.endTime.split(':')
-            l.startTime = String(startTime[0]).padStart(2, '0') + ":" + String(startTime[1]).padStart(2, '0')
-            l.endTime = String(endTime[0]).padStart(2, '0') + ":" + String(endTime[1]).padStart(2, '0')
-            l.day = DAYS[l.day]
-        }
-        courseClass.lectures = listOfLecturesResponse.data
+        // TODO: Make sure returned courseClass has course, term and lectures+building fields
+        const populateCourseClassResponse = populateCourseClass(courseClass)
+        if(populateCourseClassResponse !== OK) return populateCourseClassResponse
         return courseClassResponse
     }
     catch(e) {
@@ -627,6 +610,38 @@ const getCourseClass = async (classId) => {
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
+}
+
+const populateCourseClass = async(courseClass) => {
+    // TODO: Update these
+    const courseResponse = await api.get(courseClass.courseUrl, AuthService.getRequestHeaders())
+    if(courseResponse.status !== OK) return courseResponse
+    courseClass.course = courseResponse.data
+
+    const termResponse = await api.get(courseClass.termUrl, AuthService.getRequestHeaders())
+    if(termResponse.status !== OK) return termResponse
+    courseClass.term = termResponse.data
+
+    const lecturesEndpoint = `${universityClassesEndpoint}/${courseClass.id}/lectures`
+    const listOfLecturesResponse = await api.get(lecturesEndpoint, AuthService.getRequestHeaders())
+    if(listOfLecturesResponse.status !== OK) return listOfLecturesResponse
+
+    for (const l of listOfLecturesResponse.data) {
+        if(l.buildingUrl){
+            const buildingDataResponse = await api.get(l.buildingUrl, AuthService.getRequestHeaders())
+            if(buildingDataResponse.status !== OK) return buildingDataResponse
+            l.building = buildingDataResponse.data
+        }
+
+        // TODO: See if this conversion is truly necessary
+        const startTime = l.startTime.split(':')
+        const endTime = l.endTime.split(':')
+        l.startTime = String(startTime[0]).padStart(2, '0') + ":" + String(startTime[1]).padStart(2, '0')
+        l.endTime = String(endTime[0]).padStart(2, '0') + ":" + String(endTime[1]).padStart(2, '0')
+        l.day = DAYS[l.day]
+    }
+    courseClass.lectures = listOfLecturesResponse.data
+    return {status: OK, data: courseClass}
 }
 
 const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lecturesToUpdate, lecturesToDelete) => {
@@ -642,22 +657,20 @@ const saveCourseClass = async (id, courseId, termId, name, lecturesToCreate, lec
     // Once created/updated, define lectures
     const lecturesEndpoint = `${universityClassesEndpoint}/${response.id}/lectures`
 
-    for(const l of lecturesToUpdate) {
-        const formattedLectures = []
-        lecturesToUpdate.forEach((l) => formattedLectures.push(Object.assign({}, l)))
-        formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
-
+    let formattedLectures = []
+    lecturesToUpdate.forEach((l) => formattedLectures.push(Object.assign({}, l)))
+    formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
+    for(const l of formattedLectures) {
         const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
         const lectureResponse = await simpleApiPutRequest(`${lecturesEndpoint}/${l.id}`, lecturePayload)
         if(lectureResponse.status !== OK && lectureResponse.status !== CREATED)
             return lectureResponse
     }
 
-    for(const l of lecturesToCreate) {
-        const formattedLectures = []
-        lecturesToCreate.forEach((l) => formattedLectures.push(Object.assign({}, l)))
-        formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
-
+    formattedLectures = []
+    lecturesToCreate.forEach((l) => formattedLectures.push(Object.assign({}, l)))
+    formattedLectures.forEach((l) => l.day = DAYS.indexOf(l.day))
+    for(const l of formattedLectures) {
         const lecturePayload = { "day": l.day, "startTime": l.startTime, "endTime": l.endTime, "buildingId": l.buildingId }
         const lectureResponse = await simpleApiPostRequest(lecturesEndpoint, lecturePayload)
         if(lectureResponse.status !== OK && lectureResponse.status !== CREATED)

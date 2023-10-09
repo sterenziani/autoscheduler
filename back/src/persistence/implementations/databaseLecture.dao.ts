@@ -159,7 +159,8 @@ export default class DatabaseLectureDao extends LectureDao {
                 {entry: 'cc.id = $courseClassId', value: courseClassId},
                 {entry: 'u.id = $universityId', value: universityId},
             ]);
-            baseQuery = buildQuery(`${baseQuery} AND (`, '', 'OR', [...timeEntries]) + ') '
+            if(timeEntries.length > 0)
+                baseQuery = buildQuery(`${baseQuery} AND (`, '', 'OR', [...timeEntries]) + ') '
             // Count
             const countResult = await session.run(
                 `${baseQuery} RETURN count(l) as count`,
@@ -172,7 +173,7 @@ export default class DatabaseLectureDao extends LectureDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN l ORDER BY l.dayOfWeek, l.startTime, l.endTime SKIP $skip LIMIT $limit`,
-                    {universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
+                    {universityId, buildingId, courseClassId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {

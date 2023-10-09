@@ -26,6 +26,8 @@ export default class Time {
     static parseString(timeString: string): Time | undefined {
         const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9]Z?)?$/;
         if (!timeRegex.test(timeString)) return undefined;
+
+        timeString = timeString.toString(); // Received string is apparently 'object', is accepted as a string but has no "split" function
         const [hour, minute]: number[] = timeString.split(':', 2).map((n) => parseInt(n));
         return new Time(hour, minute);
     }

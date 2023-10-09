@@ -157,11 +157,11 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             textSearch = cleanMaybeText(textSearch);
             const globalRegex = getGlobalRegex(textSearch);
             // Build query
-            const baseQuery = buildQuery('MATCH (cc:CourseClass) -[:OF]-> (c: Course)', 'WHERE', 'AND', [
-                {entry: '(cc.name CONTAINS $textSearch OR c.internalId =~ $globalRegex)', value: textSearch},
+            const baseQuery = buildQuery('MATCH (cc:CourseClass)-[:OF]->(c: Course)', 'WHERE', 'AND', [
+                {entry: '(cc.name CONTAINS $textSearch OR cc.internalId =~ $globalRegex)', value: textSearch},
                 {entry: 'c.id = $courseId', value: courseId},
-                {entry: '(cc)-[:HAPPENS_IN]->(t: Term {id: $termId})', value: termId},
-                {entry: '(c)-[:BELONGS_TO]->(:University {id: $univesityId})', value: universityId},
+                {entry: '(cc)-[:HAPPENS_IN]->(:Term {id: $termId})', value: termId},
+                {entry: '(c)-[:BELONGS_TO]->(:University {id: $universityId})', value: universityId},
             ]);
             // Count
             const countResult = await session.run(
@@ -175,7 +175,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             if (page <= lastPage) {
                 const result = await session.run(
                     `${baseQuery} RETURN cc ORDER BY cc.name SKIP $skip LIMIT $limit`,
-                    {universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
+                    {textSearch, globalRegex, courseId, termId, universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
                 for (const node of nodes) {
@@ -192,7 +192,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
     }
 
     // Private helper methods
-    
+
     private nodeToCourseClass(node: any): DatabaseCourseClass {
         return new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
     }
