@@ -208,7 +208,7 @@ function UniversityTermsList(props) {
                     <Button variant="grey" onClick={() => closeDeleteModal()}>
                         {t('modal.cancel')}
                     </Button>
-                    <Button variant="danger" onClick={() => deleteTerm(termToDelete)}>
+                    <Button variant="danger" onClick={() => deleteTerm()}>
                         {t('modal.delete')}
                     </Button>
                 </Modal.Footer>

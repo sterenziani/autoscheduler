@@ -161,7 +161,7 @@ function UniversityBuildingsList(props) {
                     <Button variant="grey" onClick={() => closeDeleteModal()}>
                         {t('modal.cancel')}
                     </Button>
-                    <Button variant="danger" onClick={() => deleteBuilding(buildingToDelete)}>
+                    <Button variant="danger" onClick={() => deleteBuilding()}>
                         {t('modal.delete')}
                     </Button>
                 </Modal.Footer>

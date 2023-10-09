@@ -154,7 +154,7 @@ function UniversityProgramsList(props){
                     </Button>
                     <Button
                         variant="danger"
-                        onClick={() => deleteProgram(programToDelete)}
+                        onClick={() => deleteProgram()}
                     >
                         {t('modal.delete')}
                     </Button>

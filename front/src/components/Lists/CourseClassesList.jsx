@@ -77,19 +77,17 @@ function CourseClassesList(props) {
         navigate("/classes/new?course="+course.id+"&term="+term.id);
     }
 
-    const deleteCourseClass = () => {
+    const deleteCourseClass = async () => {
         if (!courseClassToDelete)
-            return;
-        ApiService.deleteCourseClass(courseClassToDelete.id).then(() => {
-            loadClasses()
-            closeDeleteModal()
-            setCourseClassToDelete({})
-        })
+            return
+        await ApiService.deleteCourseClass(courseClassToDelete.id)
+        closeDeleteModal()
+        loadClasses(page)
     }
 
     const closeDeleteModal = () => {
         setShowDeleteModal(false)
-        setCourseClassToDelete({})
+        setCourseClassToDelete(undefined)
     }
 
     const openDeleteModal = (e) => {
@@ -166,6 +164,7 @@ function CourseClassesList(props) {
                 </Modal.Header>
                 <Modal.Body>
                         {
+                            courseClassToDelete &&
                             t('modal.areYouSureClass', {
                                 code: course.internalId,
                                 name: course.name,
