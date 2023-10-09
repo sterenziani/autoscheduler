@@ -191,9 +191,9 @@ function SearchForm(props) {
                             placeholder={t('search.program')}
                             cacheOptions
                             defaultOptions
-                            defaultValue = {student.program? {value:student.program.id, code: student.program.code, name: student.program.name}:undefined}
+                            defaultValue = {student.program? {value:student.program.id, internalId: student.program.internalId, name: student.program.name}:undefined}
                             noOptionsMessage={() => t('selectNoResults')}
-                            getOptionLabel={e => e.code+' - '+e.name}
+                            getOptionLabel={e => e.internalId+' - '+e.name}
                             getOptionValue={e => e.id}
                             loadOptions={loadProgramOptions}
                             onChange={opt => onChangePrograms(opt.id)}

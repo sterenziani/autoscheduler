@@ -51,7 +51,7 @@ function StudentCoursesList(props){
         setLoading(true)
         ApiService.getCoursesPage(page).then(resp => {
             let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
+            if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
             if (findError){
                 setError(true)
