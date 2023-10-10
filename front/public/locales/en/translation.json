@@ -27,7 +27,8 @@
                 "USER_ALREADY_EXISTS": "A user with that email address already exists.",
                 "UNIVERSITY_ALREADY_EXISTS": "A university with that name is already registered.",
                 "INVALID_PASSWORD": "Invalid password. Please make it longer and ensure it has a mix of numbers, uppercase and lowercase letters.",
-                "INVALID_PARAMS": "The form was not completed correctly. Please make sure all fields have been filled in."
+                "INVALID_PARAMS": "The form was not completed correctly. Please make sure all fields have been filled in.",
+                "INVALID_NAME": "The name is invalid. Our only supported non-standard characters at the moment are Ñ, ü and á/é/í/ó/ú."
             },
             "gettingUniversitiesData": "There was an error fetching universities data.",
             "email": {
@@ -139,6 +140,9 @@
     },
     "home": {
         "welcomeAdmin": "Welcome, administrator. Please refer to the official documentation on how to verify universities through the AutoScheduler API.",
+        "search": "Search for a university",
+        "verify": "Mark as verified",
+        "unverify": "Revoke verification",
         "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with {{universityName}} so we can verify the account and add your school to our list."
     },
     "terms": {

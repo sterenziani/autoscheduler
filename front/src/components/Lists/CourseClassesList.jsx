@@ -29,7 +29,7 @@ function CourseClassesList(props) {
     useEffect(() => {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
-            const requestedPage = Number(params.get('page'))
+            const requestedPage = Number(params.get('page')??1)
             if(!requestedPage)
                 return 1
             return requestedPage

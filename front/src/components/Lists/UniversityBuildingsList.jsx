@@ -25,7 +25,7 @@ function UniversityBuildingsList(props) {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            const requestedPage = Number(params.get('page'))
+            const requestedPage = Number(params.get('page')??1)
             if(!requestedTab || requestedTab !== "buildings" || !requestedPage)
                 return 1
             return requestedPage

@@ -27,7 +27,8 @@
                 "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
                 "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",
                 "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas.",
-                "INVALID_PARAMS": "El formulario no se completó correctamente. Revise que no haya campos vacíos."
+                "INVALID_PARAMS": "El formulario no se completó correctamente. Revise que no haya campos vacíos.",
+                "INVALID_NAME": "El nombre no es válido. Actualmente sólo se aceptan como caracteres no-estándar Ñ, ü y vocales con tilde."
             },
             "gettingUniversitiesData": "Ocurrió un error al buscar datos de universidades.",
             "email": {
@@ -139,6 +140,9 @@
     },
     "home": {
         "welcomeAdmin": "Bienvenido, administrator. Por favor lea la documentación oficial sobre cómo verificar universidades a través de la API.",
+        "search": "Busque una universidad",
+        "verify": "Marcar como verificado",
+        "unverify": "Revocar verificación",
         "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la universidad a nuestra lista."
     },
     "terms": {

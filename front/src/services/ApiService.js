@@ -329,6 +329,24 @@ const getUniversities = async (inputText) => {
     return simpleApiMultiPageGetRequest(universitiesEndpoint, {filter: inputText, verified: true})
 }
 
+const getUniversityUsersPage = async (page, inputText) => {
+    let endpoint = `${universitiesEndpoint}?page=${page}`
+    if(inputText && inputText.length > 0) endpoint += `&filter=${inputText}`
+    return simpleApiGetRequest(endpoint)
+}
+
+const verifyUniversity = async (universityId) => {
+    const endpoint = getEndpointForActiveUser(`${universitiesEndpoint}/${universityId}`)
+    const payload =  {verified: true}
+    return simpleApiPutRequest(endpoint, payload)
+}
+
+const unverifyUniversity = async (universityId) => {
+    const endpoint = getEndpointForActiveUser(`${universitiesEndpoint}/${universityId}`)
+    const payload = {verified: false}
+    return simpleApiPutRequest(endpoint, payload)
+}
+
 //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// BUILDING FUNCTIONS /////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -726,7 +744,11 @@ const ApiService = {
     deleteFinishedCourse: deleteFinishedCourse,
     getRemainingCoursesProgram: getRemainingCoursesProgram,
     getSchedules: getSchedules,
+
     getUniversities: getUniversities,
+    getUniversityUsersPage:getUniversityUsersPage,
+    verifyUniversity:verifyUniversity,
+    unverifyUniversity:unverifyUniversity,
 
     getBuildings: getBuildings,
     getBuildingsPage: getBuildingsPage,

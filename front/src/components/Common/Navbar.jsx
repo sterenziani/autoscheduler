@@ -40,10 +40,11 @@ function Navbar(props){
                                     <p className="my-auto me-2 text-end fw-bold">{user.name}</p>
                                     <p className="my-auto me-2 text-end fst-italic">{user.email}</p>
                                 </Col>
+                            </div>
+                            <div className="d-flex text-end flex-wrap">
                                 <Col className="mx-auto d-flex justify-content-end">
                                     <LinkButton variant="secondary" textKey="logout" onClick={logOut}/>
                                 </Col>
-
                             </div>
                         </Col>)
             }
