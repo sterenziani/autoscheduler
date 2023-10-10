@@ -1,4 +1,4 @@
-import { CREATED, OK, NO_CONTENT, INTERNAL_ERROR, TIMEOUT, TIMEOUT_ERROR } from './ApiConstants';
+import { CREATED, OK, NO_CONTENT, INTERNAL_ERROR, TIMEOUT, TIMEOUT_ERROR, CONNECTION_ERROR, SERVICE_UNAVAILABLE } from './ApiConstants';
 import { DAYS } from './SystemConstants';
 import api from './api'
 import AuthService from './AuthService'
@@ -37,6 +37,7 @@ const simpleApiGetRequest = async (endpoint) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -48,6 +49,7 @@ const longApiGetRequest = async (endpoint) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -105,6 +107,7 @@ const simpleApiPostRequest = async (endpoint, body) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -116,6 +119,7 @@ const simpleApiPutRequest = async (endpoint, body) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -128,6 +132,7 @@ const simpleApiDeleteRequest = async (endpoint) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -151,6 +156,7 @@ const createOrUpdateObject = async (baseEndpoint, body, id) => {
     catch(e) {
         if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -235,13 +241,13 @@ const requestPasswordChangeToken = async (email) => {
     return simpleApiPostRequest(passwordRecoveryTokensEndpoint, payload)
 }
 
-// TODO: Add an endpoint to check if token is valid
 const getPasswordChangeToken = async (token) => {
-    return simpleApiGetRequest(passwordRecoveryTokensEndpoint)
+    const endpoint = `${passwordRecoveryTokensEndpoint}/${token}`
+    return simpleApiGetRequest(endpoint)
 }
 
-const changePassword = async (userId, token, newPassword) => {
-    const endpoint = passwordRecoveryTokensEndpoint + token
+const changePassword = async (token, newPassword) => {
+    const endpoint = `${passwordRecoveryTokensEndpoint}/${token}`
     const payload = {'password': newPassword}
     return simpleApiPutRequest(endpoint, payload)
 }
@@ -274,6 +280,7 @@ const getStudent = async (studentId) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -591,6 +598,7 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
@@ -610,12 +618,14 @@ const getCourseClass = async (classId) => {
     catch(e) {
         if (e.response) return { status: e.response.status }
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
     }
 }
 
 const populateCourseClass = async(courseClass) => {
     // TODO: Update these
+    /**
     const courseResponse = await api.get(courseClass.courseUrl, AuthService.getRequestHeaders())
     if(courseResponse.status !== OK) return courseResponse
     courseClass.course = courseResponse.data
@@ -623,7 +633,7 @@ const populateCourseClass = async(courseClass) => {
     const termResponse = await api.get(courseClass.termUrl, AuthService.getRequestHeaders())
     if(termResponse.status !== OK) return termResponse
     courseClass.term = termResponse.data
-
+*/
     const lecturesEndpoint = `${universityClassesEndpoint}/${courseClass.id}/lectures`
     const listOfLecturesResponse = await api.get(lecturesEndpoint, AuthService.getRequestHeaders())
     if(listOfLecturesResponse.status !== OK) return listOfLecturesResponse

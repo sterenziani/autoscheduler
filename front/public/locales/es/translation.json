@@ -21,7 +21,8 @@
         "errors": {
             "codes": {
                 "401": "Ocurrió un error de permisos al enviar solicitud a AutoScheduler.",
-                "408": "No pudimos conectarnos al servicio de AutoScheduler.",
+                "408": "No obtuvimos respuesta del servicio de AutoScheduler.",
+                "503": "Could not connect to the AutoScheduler server.",
                 "TIMEOUT": "No pudimos conectarnos al servicio de AutoScheduler",
                 "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
                 "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",

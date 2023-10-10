@@ -94,7 +94,7 @@ export default class UserAuthService {
 
     async usePasswordRecoveryToken(tokenId: string, newPassword: string): Promise<string> {
         const token = await this.getPasswordRecoveryToken(tokenId);
-        const updatedUser = await this.userService.modifyUser(token.userId, newPassword);
+        const updatedUser = await this.userService.modifyUser(token.userId, undefined, newPassword);
         this.passwordRecoveryTokenDao.delete(token.id).catch((_) => {});
         return await this.generateLoginInfo(updatedUser);
     }
