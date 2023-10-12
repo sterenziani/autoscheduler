@@ -120,7 +120,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
         const courseOfCourseClass: Map<string, string> = new Map();
         const weeklyClassTimeInMinutes: Map<string, number> = new Map();
         for (const node of nodes) {
-            const courseClass = new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+            const courseClass = new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), '', '');
             courseClasses.set(courseClass.id, courseClass);
             courseClassIds.push(courseClass.id);
             if (!courseClassesOfCourse.has(node.courseId)) courseClassesOfCourse.set(node.courseId, []);
@@ -145,7 +145,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
         for (const node of nodes) {
             const startTime = Time.fromString(node.startTime);
             const endTime = Time.fromString(node.endTime);
-            const lecture = new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime));
+            const lecture = new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime), '');
             lectures.set(lecture.id, lecture);
             if(!lecturesOfCourseClass.has(node.courseClassId)) lecturesOfCourseClass.set(node.courseClassId, []);
             lecturesOfCourseClass.get(node.courseClassId)?.push(lecture.id);
