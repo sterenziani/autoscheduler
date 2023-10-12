@@ -211,6 +211,12 @@ const getEndpointForActiveUser = (endpoint) => {
     return (AuthService.isActiveUserStudent()? studentUniversityPrefix:"") + endpoint
 }
 
+const getIdFromURL = (url, universityEndpoint) => {
+    const partialPrefixString = AuthService.isActiveUserStudent()? studentUniversityPrefix:''
+    const fullPrefixString = `/api/${partialPrefixString}${universityEndpoint}/`
+    return url.replace(fullPrefixString, '')
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// USER FUNCTIONS ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -315,12 +321,20 @@ const getSchedules = async (params) => {
     const scheduleResponse = await longApiGetRequest(studentSchedulesEndpoint + query)
     if(scheduleResponse.status !== OK)
         return scheduleResponse
+
+    const courseClassCache = {}
+    const courseCache = {}
+    const buildingCache = {}
     for(const schedule of scheduleResponse.data){
         for(let i=0; i < schedule.courseClasses.length; i++){
-            const courseClassResponse = await getCourseClass(schedule.courseClasses[i].courseClassId)
-            if(courseClassResponse.status !== OK)
-                return {status: courseClassResponse.status}
-            schedule.courseClasses[i] = courseClassResponse.data
+            const ccId = schedule.courseClasses[i].courseClassId
+            if(!courseClassCache[ccId]){
+                const courseClassResponse = await getCourseClass(ccId, true, false, true, courseCache, buildingCache)
+                if(courseClassResponse.status !== OK)
+                    return {status: courseClassResponse.status}
+                courseClassCache[ccId] = courseClassResponse.data
+            }
+            schedule.courseClasses[i] = courseClassCache[ccId]
         }
     }
     return scheduleResponse
@@ -603,7 +617,7 @@ const deleteTerm = async (termId) => {
 /////////////////////////////// CLASS FUNCTIONS //////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-const getCourseClassesForTerm = async (courseId, termId, page, populateCourse=false, populateTerm=false, populateLectures=true, buildingCache={}) => {
+const getCourseClassesForTerm = async (courseId, termId, page, populateCourse=false, populateTerm=false, populateLectures=true, courseCache={}, buildingCache={}) => {
     try {
         const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}/${courseId}/course-classes?termId=${termId}&page=${page}`)
         const listOfClassesResponse = await simpleApiGetRequest(endpoint)
@@ -611,7 +625,7 @@ const getCourseClassesForTerm = async (courseId, termId, page, populateCourse=fa
         // Load lecture data
         const finalData = []
         for (const cc of listOfClassesResponse.data) {
-            const courseClassResponse = await populateCourseClass(cc, populateCourse, populateTerm, true, buildingCache)
+            const courseClassResponse = await populateCourseClass(cc, populateCourse, populateTerm, true, courseCache, buildingCache)
             if(courseClassResponse.status !== OK) return courseClassResponse
             finalData.push(courseClassResponse.data)
         }
@@ -626,14 +640,14 @@ const getCourseClassesForTerm = async (courseId, termId, page, populateCourse=fa
     }
 }
 
-const getCourseClass = async (classId, populateCourse=false, populateTerm=false, populateLectures=true, buildingCache={}) => {
+const getCourseClass = async (classId, populateCourse=false, populateTerm=false, populateLectures=true, courseCache={}, buildingCache={}) => {
     try {
         const courseClassEndpoint = getEndpointForActiveUser(`${universityClassesEndpoint}/${classId}`)
         const courseClassResponse = await simpleApiGetRequest(courseClassEndpoint)
         if(courseClassResponse.status !== OK) return courseClassResponse
 
         const courseClass = courseClassResponse.data
-        const populateCourseClassResponse = await populateCourseClass(courseClass, populateCourse, populateTerm, populateLectures, buildingCache)
+        const populateCourseClassResponse = await populateCourseClass(courseClass, populateCourse, populateTerm, populateLectures, courseCache, buildingCache)
         if(populateCourseClassResponse.status !== OK) return populateCourseClassResponse
         return courseClassResponse
     }
@@ -645,17 +659,20 @@ const getCourseClass = async (classId, populateCourse=false, populateTerm=false,
     }
 }
 
-const populateCourseClass = async (courseClass, course=false, term=false, lectures=true, buildingCache={}) => {
+const populateCourseClass = async (courseClass, course=false, term=false, lectures=true, courseCache={}, buildingCache={}) => {
     if(course){
-        const courseId = courseClass.courseUrl.replace(`/api/${universityCoursesEndpoint}/`, '')
-        const courseEndpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}/${courseId}`)
-        const courseResponse = await simpleApiGetRequest(courseEndpoint)
-        if(courseResponse.status !== OK) return courseResponse
-        courseClass.course = courseResponse.data
+        const courseId = getIdFromURL(courseClass.courseUrl, universityCoursesEndpoint)
+        if(!courseCache[courseId]){
+            const courseEndpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}/${courseId}`)
+            const courseResponse = await simpleApiGetRequest(courseEndpoint)
+            if(courseResponse.status !== OK) return courseResponse
+            courseCache[courseId] = courseResponse.data
+        }
+        courseClass.course = courseCache[courseId]
     }
 
     if(term){
-        const termId = courseClass.termUrl.replace(`/api/${universityTermsEndpoint}/`, '')
+        const termId = getIdFromURL(courseClass.termUrl, universityTermsEndpoint)
         const termEndpoint = getEndpointForActiveUser(`${universityTermsEndpoint}/${termId}`)
         const termResponse = await simpleApiGetRequest(termEndpoint)
         if(termResponse.status !== OK) return termResponse
@@ -671,13 +688,13 @@ const populateCourseClass = async (courseClass, course=false, term=false, lectur
 }
 
 const getLectures = async (courseClassId, buildingCache={}) => {
-    const lecturesEndpoint = `${universityClassesEndpoint}/${courseClassId}/lectures`
+    const lecturesEndpoint = getEndpointForActiveUser(`${universityClassesEndpoint}/${courseClassId}/lectures`)
     const listOfLecturesResponse = await simpleApiGetRequest(lecturesEndpoint)
     if(listOfLecturesResponse.status !== OK) return listOfLecturesResponse
 
     for (const l of listOfLecturesResponse.data) {
         if(l.buildingUrl){
-            const buildingId = l.buildingUrl.replace(`/api/${universityBuildingsEndpoint}/`, '')
+            const buildingId = getIdFromURL(l.buildingUrl, universityBuildingsEndpoint)
             if(!buildingCache[buildingId]){
                 const buildingEndpoint = getEndpointForActiveUser(`${universityBuildingsEndpoint}/${buildingId}`)
                 const buildingResponse = await simpleApiGetRequest(buildingEndpoint)

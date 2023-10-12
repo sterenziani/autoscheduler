@@ -77,10 +77,10 @@ function SearchResults(props) {
                                             >
                                                 <div>
                                                     <div className="col">
-                                                        <b> {c.courseClass.course.code} - {c.courseClass.course.name} </b>
+                                                        <b> {c.courseClass.course.internalId} - {c.courseClass.course.name} </b>
                                                         <i>&nbsp;({c.courseClass.name})</i>
                                                     </div>
-                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} ( {c.lecture.building.code} ) </div>
+                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} ( {c.lecture.building.internalId} ) </div>
                                                 </div>
                                             </td>
                                         );
@@ -274,16 +274,16 @@ function SearchResults(props) {
 
                 <div className="my-3 d-flex justify-content-center align-items-center">
                     <ul className="list-unstyled row container justify-content-center">
-                        {schedules[scheduleIndex].courseClasses.map((c, cidx) => {
+                        {schedules[scheduleIndex].courseClasses.sort((a, b) => a.course.internalId.localeCompare(b.course.internalId)).map((c, cidx) => {
                             return (
                                 <li key={'ci-' + cidx} className="list-item col border border-primary py-2">
-                                    {c.course.code} - {c.course.name} ({c.name})
+                                    {c.course.internalId} - {c.course.name} ({c.name})
                                     <ul>
                                         {c.lectures.map((l, lidx) => {
                                             return (
                                                 <li key={'li-' + lidx}>
                                                     <b> {t('days.' + l.day)}: </b>{' '}
-                                                    {l.startTime}-{l.endTime} ({l.building.code})
+                                                    {l.startTime}-{l.endTime} ({l.building.internalId})
                                                 </li>
                                             );
                                         })}
