@@ -36,6 +36,7 @@ function EditCourseClassPage(props) {
     const [courseClass, setCourseClass] = useState(null);
     const [terms, setTerms] = useState();
     const [buildings, setBuildings] = useState();
+    const [buildingDictionary, setBuildingDictionary] = useState();
 
     const [selectedCourse, setSelectedCourse] = useState();
     const [selectedTermId, setselectedTermId] = useState();
@@ -94,7 +95,7 @@ function EditCourseClassPage(props) {
         }
 
         const loadCourseClass = async () => {
-            ApiService.getCourseClass(id).then((resp) => {
+            ApiService.getCourseClass(id, true, true, true, buildingDictionary).then((resp) => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;
@@ -113,7 +114,6 @@ function EditCourseClassPage(props) {
                     for(const l of resp.data.lectures){
                         if(!l.building && buildings && buildings.length > 0){
                             l.building = buildings[0]
-                            l.buildingId = buildings[0].id
                         }
                         lecturesWithBuilding.push(l)
                     }
@@ -125,9 +125,9 @@ function EditCourseClassPage(props) {
 
         async function execute() {
             // 1. Load terms and buildings
-            if(!terms && !buildings)
+            if(!terms && !buildings && !buildingDictionary)
                 await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
-            if(terms && buildings) {
+            if(terms && buildings && buildingDictionary) {
                 // 2. Load courseClass or set placeholder
                 if(!courseClass){
                     if(id) await Promise.all([loadCourseClass()])
@@ -138,7 +138,7 @@ function EditCourseClassPage(props) {
                 else {
                     if(!id && buildings.length > 0) {
                         const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
-                        setLectures([{...firstLecture, buildingId: buildings[0].id}])
+                        setLectures([{...firstLecture, building: buildings[0]}])
                         await Promise.all([readCourseAndTerm()])
                     }
                     else
@@ -147,7 +147,7 @@ function EditCourseClassPage(props) {
             }
         }
         if(user) execute();
-    },[courseClass, terms, buildings, id, t, user, search])
+    },[courseClass, terms, buildings, buildingDictionary, id, t, user, search])
 
     const loadCourseOptions = (inputValue, callback) => {
         setTimeout(() => {
@@ -185,7 +185,7 @@ function EditCourseClassPage(props) {
     }
 
     const loadBuildings = async (universityId) => {
-        ApiService.getBuildings().then((resp) => {
+        ApiService.getBuildingDictionary().then((resp) => {
             let findError = null;
             if (resp && resp.status && resp.status !== OK)
                 findError = resp.status;
@@ -194,8 +194,10 @@ function EditCourseClassPage(props) {
                 setError(true)
                 setStatus(findError)
             }
-            else
-              setBuildings(resp.data)
+            else{
+                setBuildingDictionary(resp.data)
+                setBuildings(Object.values(resp.data))
+            }
         });
     }
 
@@ -231,9 +233,9 @@ function EditCourseClassPage(props) {
     }
 
     const onChangeBuilding = (e) => {
-        const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
-        lecturesCopy[index].buildingId = e.target.value;
+        const index = e.target.id.match(/\d/g)[0]
+        const lecturesCopy = Object.assign([], lectures)
+        lecturesCopy[index].building = buildingDictionary[e.target.value]
         setLectures(lecturesCopy)
     }
 
@@ -247,7 +249,7 @@ function EditCourseClassPage(props) {
     const onClickPlusSign = (e) => {
         const lecturesCopy = Object.assign([], lectures)
         const newLecture = JSON.parse(JSON.stringify(DEFAULT_DATE)) // Clone DEFAULT_DATE
-        lecturesCopy.push({...newLecture, buildingId: buildings[0].id})
+        lecturesCopy.push({...newLecture, building: buildings[0]})
         setLectures(lecturesCopy)
     }
 
@@ -336,7 +338,10 @@ function EditCourseClassPage(props) {
                         </div>
                         <div className="col-9 text-start">
                         {
-                            selectedCourse &&
+                            id && <p className="my-auto text-center text-gray fw-normal">{courseClass.course.name}</p>
+                        }
+                        {
+                            !id && selectedCourse &&
                             <AsyncSelect
                                 className="text-black" cacheOptions defaultOptions
                                 defaultValue = {{value:selectedCourse.id, internalId: selectedCourse.internalId, name: selectedCourse.name}}
@@ -350,7 +355,7 @@ function EditCourseClassPage(props) {
                             />
                         }
                         {
-                            !selectedCourse &&
+                            !id && !selectedCourse &&
                             <AsyncSelect
                                 className="text-black" cacheOptions defaultOptions
                                 placeholder={t("forms.course")}
@@ -410,7 +415,7 @@ function EditCourseClassPage(props) {
                                         value={lectures[index].endTime}
                                         onChange={onChangeEndTime}
                                     />
-                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].buildingId} onChange={onChangeBuilding}>
+                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].building?.id} onChange={onChangeBuilding}>
                                         {buildings.map((b) => (<option key={b.id} value={b.id}>{b.internalId}</option>))}
                                     </Form.Select>
                                     <i className="bi bi-trash-fill btn color-primary w-auto my-auto"

@@ -80,7 +80,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             internalId = internalId ? globalizeField(`${universityId}-${courseId}-${termId}`, internalId) : undefined;
             const happensInRelId = termId ? getRelId(HAPPENS_IN_PREFIX, id, termId) : undefined;
 
-            let query = buildQuery('MATCH (ot:Term)<-[r:HAPPENS_IN]-(cc:CourseClass {id: $courseClassId})-[:OF]->(c:Course)-[:BELONGS_TO]->(u:University {id: $universityId})', 'WHERE', 'AND', [
+            let query = buildQuery('MATCH (ot:Term)<-[r:HAPPENS_IN]-(cc:CourseClass {id: $id})-[:OF]->(c:Course)-[:BELONGS_TO]->(u:University {id: $universityId})', 'WHERE', 'AND', [
                 {entry: 'c.id = $courseId', value: courseId}
             ]);
 
@@ -161,7 +161,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             const baseQuery = buildQuery(`MATCH (t:Term)<-[r:HAPPENS_IN]-(cc:CourseClass)-[:OF]->(c: Course)`, 'WHERE', 'AND', [
                 {entry: '(cc.name CONTAINS $textSearch OR cc.internalId =~ $globalRegex)', value: textSearch},
                 {entry: 'c.id = $courseId', value: courseId},
-                {entry: 't.id = $termId})', value: termId},
+                {entry: 't.id = $termId', value: termId},
                 {entry: '(c)-[:BELONGS_TO]->(:University {id: $universityId})', value: universityId},
             ]);
             // Count
