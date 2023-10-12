@@ -93,7 +93,7 @@ export default class DatabaseCourse extends Course {
         const session = graphDriver.session();
         try {
             const result = await session.run(
-                'MATCH (:Term {id: $termId})<-[:HAPPENS_IN]-(cc:CourseClass)-[:OF]->(c:Course {id: $id}) RETURN cc',
+                'MATCH (t:Term {id: $termId})<-[:HAPPENS_IN]-(cc:CourseClass)-[:OF]->(c:Course {id: $id}) RETURN {properties:cc{.*, courseId:c.id, termId:t.id}}',
                 {id: this.id, termId}
             );
             const nodes = getNodes(result);
@@ -116,6 +116,6 @@ export default class DatabaseCourse extends Course {
     }
 
     private nodeToCourseClass(node: any): DatabaseCourseClass {
-        return new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+        return new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.courseId, node.termId);
     }
 }

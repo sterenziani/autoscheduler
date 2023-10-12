@@ -22,7 +22,7 @@ export default class DatabaseCourseClass extends CourseClass {
         const session = graphDriver.session();
         try {
             const result = await session.run(
-                'MATCH (l:Lecture)-[:OF]->(:CourseClass {id: $id}) RETURN l',
+                'MATCH (b:Building)<-[:TAKES_PLACE_IN]-(l:Lecture)-[:OF]->(:CourseClass {id: $id}) RETURN {properties:l{.*, buildingId:b.id}}',
                 {id: this.id}
             );
             const nodes = getNodes(result);
@@ -93,7 +93,7 @@ export default class DatabaseCourseClass extends CourseClass {
     private nodeToLecture(node: any): DatabaseLecture {
         const startTime = Time.fromString(node.startTime);
         const endTime = Time.fromString(node.endTime);
-        return new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime));
+        return new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime), node.buildingId);
     }
 
     private nodeToCourse(node: any): DatabaseCourse {

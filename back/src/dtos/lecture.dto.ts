@@ -11,7 +11,8 @@ export const lectureToDto = (lecture: Lecture, scope: API_SCOPE): ILectureDto =>
         day: lecture.time.dayOfWeek,
         startTime: lecture.time.startTime.toString(),
         endTime: lecture.time.endTime.toString(),
-        url
+        url,
+        buildingUrl: getResourceUrl(RESOURCES.BUILDING, scope, lecture.buildingId)       
     };
 };
 
@@ -40,4 +41,5 @@ interface ILectureDto {
     startTime: string,
     endTime: string,
     url: string;
+    buildingUrl: string;
 }

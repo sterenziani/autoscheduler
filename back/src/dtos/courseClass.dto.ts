@@ -10,6 +10,8 @@ export const courseClassToDto = (courseClass: CourseClass, scope: API_SCOPE): IC
         name: courseClass.name,
         url,
         lecturesUrl: applyPathToBase(url, 'lectures'),
+        courseUrl: getResourceUrl(RESOURCES.COURSE, scope, courseClass.courseId),
+        termUrl: getResourceUrl(RESOURCES.TERM, scope, courseClass.termId)
     };
 };
 
@@ -37,4 +39,6 @@ interface ICourseClassDto {
     name: string;
     url: string;
     lecturesUrl: string;
+    courseUrl: string;
+    termUrl: string;
 }

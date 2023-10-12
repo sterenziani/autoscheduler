@@ -59,7 +59,8 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             const happensInRelId = getRelId(HAPPENS_IN_PREFIX, id, termId);
             const result = await session.run(
                 'MATCH (t: Term {id: $termId})-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(c: Course {id: $courseId}) ' +
-                'CREATE (t)<-[:HAPPENS_IN {relId: $happensInRelId}]-(cc: CourseClass {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:OF {relId: $ofRelId}]->(c) RETURN cc',
+                'CREATE (t)<-[:HAPPENS_IN {relId: $happensInRelId}]-(cc: CourseClass {id: $id, internalId: $internalId, name: $name, encoding: $encoding})-[:OF {relId: $ofRelId}]->(c) ' +
+                'RETURN {properties:cc{.*, courseId:c.id, termId:t.id}}',
                 {universityId, courseId, termId, id, internalId, name: encodedName.cleanText, encoding: encodedName.encoding, ofRelId, happensInRelId}
             );
             const node = getNode(result);
@@ -79,7 +80,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             internalId = internalId ? globalizeField(`${universityId}-${courseId}-${termId}`, internalId) : undefined;
             const happensInRelId = termId ? getRelId(HAPPENS_IN_PREFIX, id, termId) : undefined;
 
-            let query = buildQuery('MATCH (:Term)<-[r:HAPPENS_IN]-(cc:CourseClass {id: $courseClassId})-[:OF]->(c:Course)-[:BELONGS_TO]->(u:University {id: $universityId})', 'WHERE', 'AND', [
+            let query = buildQuery('MATCH (ot:Term)<-[r:HAPPENS_IN]-(cc:CourseClass {id: $courseClassId})-[:OF]->(c:Course)-[:BELONGS_TO]->(u:University {id: $universityId})', 'WHERE', 'AND', [
                 {entry: 'c.id = $courseId', value: courseId}
             ]);
 
@@ -93,7 +94,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             query += termId ? ' DELETE r CREATE (cc)-[:HAPPENS_IN {relId: $happensInRelId}]->(t)' : '';
 
             const result = await session.run(
-                `${query} RETURN cc`,
+                `${query} RETURN {properties:cc{.*, courseId:c.id, termId:${termId ? 't.id' : 'ot.id'}}}`,
                 {universityId, courseId, termId, id, internalId, name: encodedName?.cleanText, encoding: encodedName?.encoding, happensInRelId}
             );
             const node = getNode(result);
@@ -128,12 +129,12 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
     async findById(id: string, universityId?: string, courseId?: string): Promise<CourseClass | undefined> {
         const session = graphDriver.session();
         try {
-            const baseQuery = buildQuery('MATCH (cc:CourseClass {id: $id})-[:OF]->(c: Course)-[:BELONGS_TO]->(u: University)', 'WHERE', 'AND', [
+            const baseQuery = buildQuery('MATCH (t:Term)<-[r:HAPPENS_IN]-(cc:CourseClass {id: $id})-[:OF]->(c: Course)-[:BELONGS_TO]->(u: University)', 'WHERE', 'AND', [
                 {entry: 'u.id = $universityId', value: universityId},
                 {entry: 'c.id = $courseId', value: courseId},
             ]);
             const result = await session.run(
-                `${baseQuery} RETURN cc`,
+                `${baseQuery} RETURN {properties:cc{.*, courseId:c.id, termId:t.id}}`,
                 {id, universityId, courseId}
             );
             const node = getNode(result);
@@ -157,10 +158,10 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             textSearch = cleanMaybeText(textSearch);
             const globalRegex = getGlobalRegex(textSearch);
             // Build query
-            const baseQuery = buildQuery('MATCH (cc:CourseClass)-[:OF]->(c: Course)', 'WHERE', 'AND', [
+            const baseQuery = buildQuery(`MATCH (t:Term)<-[r:HAPPENS_IN]-(cc:CourseClass)-[:OF]->(c: Course)`, 'WHERE', 'AND', [
                 {entry: '(cc.name CONTAINS $textSearch OR cc.internalId =~ $globalRegex)', value: textSearch},
                 {entry: 'c.id = $courseId', value: courseId},
-                {entry: '(cc)-[:HAPPENS_IN]->(:Term {id: $termId})', value: termId},
+                {entry: 't.id = $termId})', value: termId},
                 {entry: '(c)-[:BELONGS_TO]->(:University {id: $universityId})', value: universityId},
             ]);
             // Count
@@ -174,7 +175,7 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
-                    `${baseQuery} RETURN cc ORDER BY cc.name SKIP $skip LIMIT $limit`,
+                    `${baseQuery} RETURN {properties:cc{.*, courseId:c.id, termId:t.id}} ORDER BY cc.name SKIP $skip LIMIT $limit`,
                     {textSearch, globalRegex, courseId, termId, universityId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
@@ -194,6 +195,6 @@ export default class DatabaseCourseClassDao extends CourseClassDao {
     // Private helper methods
 
     private nodeToCourseClass(node: any): DatabaseCourseClass {
-        return new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding));
+        return new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.courseId, node.termId);
     }
 }

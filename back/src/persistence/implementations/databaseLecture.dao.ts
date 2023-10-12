@@ -54,7 +54,8 @@ export default class DatabaseLectureDao extends LectureDao {
 
             const result = await session.run(
                 'MATCH (cc: CourseClass {id: $courseClassId})-[:OF]->(:Course)-[:BELONGS_TO]->(u: University {id: $universityId})<-[:BELONGS_TO]-(b: Building {id: $buildingId}) ' +
-                'CREATE (b)<-[:TAKES_PLACE_IN {relId: $takesPlaceInRelId}]-(l: Lecture {id: $id, dayOfWeek: $dayOfWeek, startTime: time($startTime), endTime: time($endTime)})-[:OF {relId: $ofRelId}]->(cc) RETURN l',
+                'CREATE (b)<-[:TAKES_PLACE_IN {relId: $takesPlaceInRelId}]-(l: Lecture {id: $id, dayOfWeek: $dayOfWeek, startTime: time($startTime), endTime: time($endTime)})-[:OF {relId: $ofRelId}]->(cc) ' +
+                'RETURN {properties:l{.*, buildingId: b.id}}',
                 {universityId, courseClassId, buildingId, id, dayOfWeek, startTime, endTime, ofRelId, takesPlaceInRelId}
             );
             const node = getNode(result);
@@ -76,12 +77,12 @@ export default class DatabaseLectureDao extends LectureDao {
             const endTime = timeRange ? timeRange.endTime.toString() : undefined;
 
             const result = await session.run(
-                'MATCH (u:University {id: $universityId})<-[:BELONGS_TO]-(:Building)<-[r:TAKES_PLACE_IN]-(l:Lecture {id: $id}) ' +
+                'MATCH (u:University {id: $universityId})<-[:BELONGS_TO]-(ob:Building)<-[r:TAKES_PLACE_IN]-(l:Lecture {id: $id}) ' +
                 (courseClassId ? 'WHERE EXISTS((l)-[:OF]->(:CourseClass {id: $courseClassId})) ' : '') +
                 (buildingId ? 'MATCH (b:Building {id: $buildingId})-[:BELONGS_TO]->(u) ' : '') +
                 (timeRange ? 'SET l.dayOfWeek = $dayOfWeek, l.startTime = time($startTime), l.endTime = time($endTime) ' : '') +
                 (buildingId ? 'DELETE r CREATE (l)-[:TAKES_PLACE_IN {relId: $takesPlaceInRelId}]->(b) ' : '') +
-                'RETURN l',
+                `RETURN {properties:l{.*, buildingId:${buildingId ? 'b.id' : 'ob.id'}}}`,
                 {universityId, id, dayOfWeek, startTime, endTime, courseClassId, buildingId, takesPlaceInRelId}
             );
             const node = getNode(result);
@@ -116,12 +117,12 @@ export default class DatabaseLectureDao extends LectureDao {
     async findById(id: string, universityId?: string, courseClassId?: string): Promise<Lecture | undefined>{
         const session = graphDriver.session();
         try {
-            const baseQuery = buildQuery('MATCH (l: Lecture {id: $id})-[:OF]->(cc:CourseClass)-[:OF]->(:Course)-[:BELONGS_TO]->(u:University)', 'WHERE', 'AND', [
+            const baseQuery = buildQuery('MATCH (b:Building)<-[:TAKES_PLACE_IN]-(l: Lecture {id: $id})-[:OF]->(cc:CourseClass)-[:OF]->(:Course)-[:BELONGS_TO]->(u:University)', 'WHERE', 'AND', [
                 {entry: 'cc.id = $courseClassId', value: courseClassId},
                 {entry: 'u.id = $universityId', value: universityId},
             ]);
             const result = await session.run(
-                `${baseQuery} RETURN l`,
+                `${baseQuery} RETURN {properties:l{.*, buildingId:b.id}}`,
                 {id, universityId}
             );
             const node = getNode(result);
@@ -154,8 +155,8 @@ export default class DatabaseLectureDao extends LectureDao {
             }
 
             // Build query
-            let baseQuery = buildQuery('MATCH (l: Lecture)-[:OF]->(cc:CourseClass)-[:OF]->(:Course)-[:BELONGS_TO]->(u:University)', 'WHERE', 'AND', [
-                {entry: '(l)-[:TAKES_PLACE_IN]->(:Building {id: $buildingId})', value: buildingId},
+            let baseQuery = buildQuery('MATCH (b:Building)<-[:TAKES_PLACE_IN]-(l: Lecture)-[:OF]->(cc:CourseClass)-[:OF]->(:Course)-[:BELONGS_TO]->(u:University)', 'WHERE', 'AND', [
+                {entry: 'b.id = $buildingId', value: buildingId},
                 {entry: 'cc.id = $courseClassId', value: courseClassId},
                 {entry: 'u.id = $universityId', value: universityId},
             ]);
@@ -172,7 +173,7 @@ export default class DatabaseLectureDao extends LectureDao {
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
-                    `${baseQuery} RETURN l ORDER BY l.dayOfWeek, l.startTime, l.endTime SKIP $skip LIMIT $limit`,
+                    `${baseQuery} RETURN {properties:l{.*, buildingId: b.id}} ORDER BY l.dayOfWeek, l.startTime, l.endTime SKIP $skip LIMIT $limit`,
                     {universityId, buildingId, courseClassId, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
@@ -192,6 +193,6 @@ export default class DatabaseLectureDao extends LectureDao {
     private nodeToLecture(node: any): DatabaseLecture {
         const startTime = Time.fromString(node.startTime);
         const endTime = Time.fromString(node.endTime);
-        return new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime));
+        return new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime), node.buildingId);
     }
 }

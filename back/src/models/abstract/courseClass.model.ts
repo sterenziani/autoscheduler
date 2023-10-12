@@ -6,12 +6,17 @@ export default abstract class CourseClass extends GenericModel {
     // Properties
     internalId: string;
     name: string;
+    // Populated
+    courseId: string;
+    termId: string;
 
     // Abstract class constructor
-    constructor(id: string, internalId: string, name: string) {
+    constructor(id: string, internalId: string, name: string, courseId: string, termId: string) {
         super(id);
         this.internalId = internalId;
         this.name = name;
+        this.courseId = courseId;
+        this.termId = termId;
     }
 
     // Methods
