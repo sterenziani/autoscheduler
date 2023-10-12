@@ -28,7 +28,9 @@
                 "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",
                 "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas.",
                 "INVALID_PARAMS": "El formulario no se completó correctamente. Revise que no haya campos vacíos.",
-                "INVALID_NAME": "El nombre no es válido. Actualmente sólo se aceptan como caracteres no-estándar Ñ, ü y vocales con tilde."
+                "INVALID_NAME": "El nombre no es válido. Actualmente sólo se aceptan como caracteres no-estándar Ñ, ü y vocales con tilde.",
+                "INVALID_LOGIN": "Email y/o contraseña incorrecto.",
+                "USER_NOT_FOUND": "Esa dirección no está registrada en AutoScheduler."
             },
             "gettingUniversitiesData": "Ocurrió un error al buscar datos de universidades.",
             "email": {

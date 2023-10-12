@@ -66,7 +66,7 @@ function SignUpStudentForm(props) {
                 break;
             case BAD_REQUEST:
                 setSubmitting(false)
-                setError(data.code)
+                setError(data.code?? BAD_REQUEST)
                 break;
             default:
                 setSubmitting(false)

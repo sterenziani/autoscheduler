@@ -6,7 +6,7 @@ import ApiService from '../../services/ApiService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRecycle } from '@fortawesome/free-solid-svg-icons';
 import FormInputField from '../Common/FormInputField';
-import { OK } from '../../services/ApiConstants';
+import { OK, NOT_FOUND } from '../../services/ApiConstants';
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -33,18 +33,17 @@ function ResetPasswordPage(props) {
     const {t} = useTranslation()
     const navigate = useNavigate()
     const {token} = useParams()
-    const [invalidToken, setInvalidToken] = useState(false)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if(!token){
-            setInvalidToken(true)
+            setError(NOT_FOUND)
             setLoading(false)
         }
         ApiService.getPasswordChangeToken(token).then((resp) => {
             if (!resp || !resp.status || resp.status !== OK)
-                setInvalidToken(true)
+                setError(resp.status)
             setLoading(false)
         })
     }, [token])
@@ -74,7 +73,7 @@ function ResetPasswordPage(props) {
             </div>
         );
     }
-    if(invalidToken)
+    if(error && error === NOT_FOUND)
         return(<React.Fragment>
             <HelmetProvider>
                 <Helmet><title>{t('changePassword.title')}</title></Helmet>
@@ -92,7 +91,6 @@ function ResetPasswordPage(props) {
                 <Helmet><title>{t('changePassword.title')}</title></Helmet>
             </HelmetProvider>
             <div className="container my-5 bg-primary rounded">
-                {error && (<p className="text-center pt-3 form-error">{t('register.errors.codes.'+error)}</p>)}
                 <Formik
                     initialValues={{ password: '', repeat_password: '' }}
                     validationSchema={ChangePasswordSchema} onSubmit={onSubmit}
@@ -102,7 +100,7 @@ function ResetPasswordPage(props) {
                             <FontAwesomeIcon size="3x" icon={faRecycle} />
                             <h4>{t('changePassword.title')}</h4>
                             <input id="browser-warning-fix" type="text" autoComplete="username" ng-hide="true" className="invisible"></input>
-
+                            {error && (<p className="text-center pt-3 form-error">{t('register.errors.codes.'+error)}</p>)}
                             <FormInputField
                                 id="new-password"
                                 type="password"

@@ -94,7 +94,7 @@ const simpleApiMultiPageGetRequest = async (baseEndpoint, params, limit, idsToFi
         return finalResponse
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         else return { status: INTERNAL_ERROR }
     }
@@ -105,7 +105,7 @@ const simpleApiPostRequest = async (endpoint, body) => {
         return await api.post(endpoint, body, AuthService.getRequestHeaders())
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
@@ -117,7 +117,7 @@ const simpleApiPutRequest = async (endpoint, body) => {
         return await api.put(endpoint, body, AuthService.getRequestHeaders())
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
@@ -130,7 +130,7 @@ const simpleApiDeleteRequest = async (endpoint) => {
         return await api.delete(endpoint, config)
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
