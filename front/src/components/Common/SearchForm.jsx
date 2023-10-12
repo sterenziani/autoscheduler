@@ -13,24 +13,19 @@ function SearchForm(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const student = props.student
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [programError, setProgramError] = useState();
-    const [timeError, setTimeError] = useState();
-    const [terms, setTerms] = useState();
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const [programError, setProgramError] = useState()
+    const [timeError, setTimeError] = useState()
+
+    const [terms, setTerms] = useState()
     const [params, setParams] = useState({
         programId: (student.program? student.program.id:undefined),
         termId: undefined, hours: 24,
         reduceDays: true, prioritizeUnlocks: true,
         unavailableTimeSlots: [JSON.parse(JSON.stringify(INSTANT_DATE))]
     });
-
-    const onChangeTerms = (e) => {
-        const paramsCopy = Object.assign({}, params);
-        paramsCopy.term = e.target.value;
-        setParams(paramsCopy)
-    }
 
     const onChangeHours = (e) => {
         const newValue = e.target.value? e.target.value : 0
@@ -126,37 +121,31 @@ function SearchForm(props) {
     useEffect( () => {
         if(!student)
             navigate("/register")
-        // Load terms
-        ApiService.getTerms().then((respTerm) => {
-            let findError = null
-            if (respTerm && respTerm.status && respTerm.status !== OK)
-                findError = respTerm.status
-            if (findError) {
-                setError(true)
-                setStatus(findError)
-            }
-            else {
-                if(params && !params.termId){
-                    const paramsCopy = Object.assign({}, params)
-                    if(respTerm.data.length > 0)
-                        paramsCopy.termId = respTerm.data[0].id
-                    setParams(paramsCopy)
+        // Load terms once
+        if(!terms && loading)
+        {
+            ApiService.getTerms().then((resp) => {
+                if (resp && resp.status && resp.status !== OK)
+                    setError(resp.status)
+                else {
+                    if(params && !params.termId){
+                        const paramsCopy = Object.assign({}, params)
+                        if(resp.data.length > 0)
+                            paramsCopy.termId = resp.data[0].id
+                        setParams(paramsCopy)
+                    }
+                    setTerms(resp.data)
                 }
-                setTerms(respTerm.data)
-            }
-            setLoading(false)
-        })
+                setLoading(false)
+            })
+        }
     }, [navigate, params, student])
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
             ApiService.getPrograms(inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                     callback([])
                 } else {
                     callback(resp.data)
@@ -166,16 +155,22 @@ function SearchForm(props) {
     }
 
     const onChangePrograms = (programId) => {
-        const paramsCopy = Object.assign({}, params);
-        paramsCopy.programId = programId;
+        const paramsCopy = Object.assign({}, params)
+        paramsCopy.programId = programId
         setParams(paramsCopy)
         setProgramError(false)
+    }
+
+    const onChangeTerms = (e) => {
+        const paramsCopy = Object.assign({}, params)
+        paramsCopy.termId = e.target.value
+        setParams(paramsCopy)
     }
 
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     if(terms.length === 0)
         return <React.Fragment><div className="bg-primary rounded-bottom mx-5 py-4"><p>{t('search.noTermsFromUniversity')}</p></div></React.Fragment>
     return (

@@ -267,6 +267,7 @@
         "404": "El recurso solicitado no fue encontrado.",
         "408": "No se recibió respuesta del servidor.",
         "500": "El servidor de AutoScheduler tuvo un error interno.",
+        "503": "No pudimos conectarnos con el servidor de AutoScheduler.",
         "noTerms": "No se encontraron períodos. Cree al menos uno para crear comisiones.",
         "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones.",
         "notPartOfAnyPrograms": "Este curso no está asociado a ningún programa. Añádalo a un programa para definir sus correlativas bajo el mismo."

@@ -267,6 +267,7 @@
         "404": "The requested resource could not be found.",
         "408": "Received no response from server.",
         "500": "The AutoScheduler server had an internal error.",
+        "503": "Could not connect to the AutoScheduler server.",
         "noTerms": "No terms have been found. Create at least one term to define classes for a course.",
         "noBuildings": "No buildings have been found. Create at least one building to define classes for a course.",
         "notPartOfAnyPrograms": "This course is not associated with any program yet. Add it to a program's list of courses to define course requirements under that program."

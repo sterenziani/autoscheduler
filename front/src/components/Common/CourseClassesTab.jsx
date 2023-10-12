@@ -8,26 +8,21 @@ import ErrorMessage from '../Common/ErrorMessage';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function CourseClassesTab(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [terms, setTerms] = useState(null);
-    const [selectedTerm, setSelectedTerm] = useState(null);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
+    const search = useLocation().search
     const user = props.user;
     const course = props.course;
-    const search = useLocation().search
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+    const [terms, setTerms] = useState(null)
+    const [selectedTerm, setSelectedTerm] = useState(null)
 
     useEffect( () => {
         ApiService.getTerms(user.id).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
                 const params = new URLSearchParams(search)
                 const requestedTerm = resp.data.find(t => t.id === params.get('termId'))
@@ -46,7 +41,7 @@ function CourseClassesTab(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     if(!terms || terms.length < 1)
         return <React.Fragment><div className="mx-5 py-4"><p>{t('errors.noTerms')}</p></div></React.Fragment>
     return (

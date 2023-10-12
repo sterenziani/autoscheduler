@@ -3,8 +3,8 @@ import Alert from 'react-bootstrap/Alert';
 import LinkButton from './LinkButton';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleExclamation, faQuestionCircle, faHand } from '@fortawesome/free-solid-svg-icons';
-import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from '../../services/ApiConstants';
+import { faCircleExclamation, faQuestionCircle, faPlugCircleXmark, faHand } from '@fortawesome/free-solid-svg-icons';
+import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND, SERVICE_UNAVAILABLE } from '../../services/ApiConstants';
 
 function ErrorMessage(props){
     const { t } = useTranslation()
@@ -22,6 +22,9 @@ function ErrorMessage(props){
     if(props.status === NOT_FOUND){
         icon = faQuestionCircle
         title = t("errors.notFound")
+    }
+    if(props.status === SERVICE_UNAVAILABLE){
+        icon = faPlugCircleXmark
     }
 
     return <div className="p-5">
