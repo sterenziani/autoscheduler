@@ -8,7 +8,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import ApiService from '../../services/ApiService';
-import { OK, BAD_REQUEST } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 import SignInRecoverPasswordForm from './SignInRecoverPasswordForm';
 
@@ -20,21 +20,18 @@ const SignInSchema = Yup.object().shape({
 function SignInForm(props) {
     const navigate = useNavigate()
     const { t } = useTranslation()
-    const [error, setError] = useState(null)
+    const [error, setError] = useState()
 
     const authenticate = async (values, setSubmitting) => {
         const { status, data } = await ApiService.login(values.email, values.password);
+        console.log(data)
         switch (status) {
             case OK:
                 navigate("/")
                 break;
-            case BAD_REQUEST:
-                setSubmitting(false)
-                setError(data.code?? BAD_REQUEST)
-                break;
             default:
                 setSubmitting(false)
-                setError("TIMEOUT")
+                setError(data?.code?? status)
                 break;
         }
     }

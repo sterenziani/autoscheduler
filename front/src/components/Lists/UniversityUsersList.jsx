@@ -1,27 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Spinner, Row } from 'react-bootstrap';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
 
 function UniversityUsersList(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-
-    const [universities, setUniversities] = useState(null);
-    const [changingVerificationStatus, setChangingVerificationStatus] = useState([]);
-
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [filter, setFilter] = useState();
-    const [page, setPage] = useState(1);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [universities, setUniversities] = useState(null)
+    const [changingVerificationStatus, setChangingVerificationStatus] = useState([])
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [filter, setFilter] = useState()
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const readSearchParams = () => {
@@ -50,13 +49,8 @@ function UniversityUsersList(props) {
     const loadUniversities = (page, filter) => {
         setLoading(true)
         ApiService.getUniversityUsersPage(page, filter).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
                 const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
@@ -79,16 +73,14 @@ function UniversityUsersList(props) {
             resp = await ApiService.verifyUniversity(university.id)
         if (resp.status === OK)
             loadUniversities(page, filter)
-        else{
-            setError(true)
-            setStatus(resp.status)
-        }
+        else
+            setError(resp.status)
     }
 
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <div className="pt-4">

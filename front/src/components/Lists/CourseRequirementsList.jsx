@@ -7,25 +7,18 @@ import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseRequirementsList(props) {
     const { t } = useTranslation();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [requirements, setRequirements] = useState(null);
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+    const [requirements, setRequirements] = useState(null)
 
     useEffect( () => {
         if (props.course && props.program){
             ApiService.getRequiredCoursesForProgram(props.course.id, props.program.id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK) findError = resp.status;
-                if (findError){
-                    setLoading(false)
-                    setError(true)
-                    setStatus(findError)
-                }
-                else{
+                if (resp && resp.status && resp.status !== OK)
+                    setError(resp.status)
+                else
                   setRequirements(resp.data)
-                  setLoading(false)
-                }
+                setLoading(false)
             });
         }
     },[props.course, props.program])
@@ -33,7 +26,7 @@ function CourseRequirementsList(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     if(!requirements || requirements.length === 0)
         return <div className="mt-3 mx-5 text-wrap">{t('noDefinedRequirements')}</div>
     return (

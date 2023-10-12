@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Spinner } from 'react-bootstrap';
 import CourseList from './CourseList';
-import { useNavigate } from "react-router-dom";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from "react-router-dom";
 import { OK } from '../../services/ApiConstants';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
@@ -10,14 +9,15 @@ import ErrorMessage from '../Common/ErrorMessage';
 
 function StudentCoursesList(props){
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(false);
-    const [courses,setCourses] = useState(props.course);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [courses,setCourses] = useState(props.course)
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const readPageInSearchParams = () => {
@@ -50,13 +50,8 @@ function StudentCoursesList(props){
     const loadCourses = (page) => {
         setLoading(true)
         ApiService.getCoursesPage(page).then(resp => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
                 const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
@@ -69,7 +64,7 @@ function StudentCoursesList(props){
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <CourseList key="course-list" reloadCourses={() => loadCourses(page)} courses={courses}/>

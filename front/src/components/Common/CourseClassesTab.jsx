@@ -20,18 +20,20 @@ function CourseClassesTab(props) {
     const [selectedTerm, setSelectedTerm] = useState(null)
 
     useEffect( () => {
-        ApiService.getTerms(user.id).then((resp) => {
-            if (resp && resp.status && resp.status !== OK)
-                setError(resp.status)
-            else{
-                const params = new URLSearchParams(search)
-                const requestedTerm = resp.data.find(t => t.id === params.get('termId'))
-                setTerms(resp.data)
-                setSelectedTerm(requestedTerm? requestedTerm:resp.data[0])
-            }
-            setLoading(false)
-        });
-    }, [search, user.id])
+        if(!terms && loading){
+            ApiService.getTerms().then((resp) => {
+                if (resp && resp.status && resp.status !== OK)
+                    setError(resp.status)
+                else{
+                    const params = new URLSearchParams(search)
+                    const requestedTerm = resp.data.find(t => t.id === params.get('termId'))
+                    setTerms(resp.data)
+                    setSelectedTerm(requestedTerm? requestedTerm:resp.data[0])
+                }
+                setLoading(false)
+            });
+        }
+    }, [search, user.id, terms, loading])
 
     const onChangeTerms = (e) => {
         navigate("/courses/"+course.id+"?termId="+e.target.value)

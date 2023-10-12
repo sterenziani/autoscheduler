@@ -4,7 +4,7 @@ import { Button, Row, Modal, Form, Col, OverlayTrigger, Tooltip } from 'react-bo
 import AsyncSelect from 'react-select/async'
 import ApiService from '../../services/ApiService';
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../services/ApiConstants';
 
 function CourseListForm(props) {
     const { t } = useTranslation();
@@ -14,11 +14,10 @@ function CourseListForm(props) {
     const onClickTrashCan = props.onClickTrashCan
     const addCourseToParent = props.addCourse
     const editCreditRequirements = props.editCreditRequirements
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [courseToAdd, setCourseToAdd] = useState();
-    const [creditRequirementToAdd, setCreditRequirementToAdd] = useState(0);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
+    const [showAddModal, setShowAddModal] = useState(false)
+    const [courseToAdd, setCourseToAdd] = useState()
+    const [creditRequirementToAdd, setCreditRequirementToAdd] = useState(0)
+    const [error, setError] = useState()
 
     const switchAddModal = () => {
         setShowAddModal(!showAddModal)
@@ -48,12 +47,8 @@ function CourseListForm(props) {
                     callback(result)
                 }
                 ApiService.getCoursesNotInList(inputValue, unavailableCourses).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
-                        findError = resp.status;
-                    if (findError) {
-                        setError(true)
-                        setStatus(findError)
+                    if (resp && resp.status && resp.status !== OK){
+                        setError(resp.status)
                         callback([])
                     } else {
                         callback(resp.data)
@@ -64,7 +59,7 @@ function CourseListForm(props) {
     }
 
     if(error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return(
         <React.Fragment>
         {

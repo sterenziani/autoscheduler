@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, Spinner, Row } from 'react-bootstrap';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
 
 function UniversityTermsList(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [terms, setTerms] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const [changingPublishStatus, setChangingPublishStatus] = useState([]);
-    const [termToDelete, setTermToDelete] = useState();
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [terms, setTerms] = useState(null)
+    const [changingPublishStatus, setChangingPublishStatus] = useState([])
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [termToDelete, setTermToDelete] = useState()
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const readPageInSearchParams = () => {
@@ -49,13 +50,8 @@ function UniversityTermsList(props) {
     const loadTerms = (page) => {
         setLoading(true)
         ApiService.getTerms(page).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
                 const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
@@ -86,10 +82,8 @@ function UniversityTermsList(props) {
             resp = await ApiService.publishTerm(term)
         if (resp.status === OK)
             loadTerms(page)
-        else{
-            setError(true)
-            setStatus(resp.status)
-        }
+        else
+            setError(resp.status)
     }
 
     const deleteTerm = async () => {
@@ -119,7 +113,7 @@ function UniversityTermsList(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <div className="pt-4">

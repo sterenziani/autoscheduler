@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, Spinner, Row } from 'react-bootstrap';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import { OK } from '../../services/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function UniversityBuildingsList(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const [buildings, setBuildings] = useState(null);
-    const [buildingToDelete, setBuildingToDelete] = useState();
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [buildings, setBuildings] = useState(null)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [buildingToDelete, setBuildingToDelete] = useState()
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const readPageInSearchParams = () => {
@@ -48,13 +49,8 @@ function UniversityBuildingsList(props) {
     const loadBuildings = (page) => {
         setLoading(true)
         ApiService.getBuildingsPage(page).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
                 const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
@@ -93,7 +89,7 @@ function UniversityBuildingsList(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <div className="pt-4">
@@ -105,14 +101,8 @@ function UniversityBuildingsList(props) {
                                         className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"
                                     >
                                         <div className="my-auto">{entry.internalId}</div>
-                                        <div className="my-auto w-min-50">
-                                            <a
-                                                key={'link-' + entry.id}
-                                                className="text-white"
-                                                href={'/buildings/' + entry.id}
-                                            >
-                                                {entry.name}
-                                            </a>
+                                        <div className="my-auto w-min-50 text-white">
+                                            {entry.name}
                                         </div>
                                         <div className="d-flexmy-auto justify-content-center">
                                             <i

@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, Spinner, Row } from 'react-bootstrap';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
 
 function UniversityProgramsList(props){
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const [programs, setPrograms] = useState(null);
-    const [programToDelete, setProgramToDelete] = useState();
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [programs, setPrograms] = useState(null)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [programToDelete, setProgramToDelete] = useState()
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const readPageInSearchParams = () => {
@@ -48,13 +49,8 @@ function UniversityProgramsList(props){
     const loadPrograms = (page) => {
         setLoading(true)
         ApiService.getProgramsPage(page).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
                 const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
@@ -93,40 +89,39 @@ function UniversityProgramsList(props){
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <div className="pt-4">
                 {programs && programs.length > 0
                     ? [
-                          programs.map((entry, index) => (
-                              <Row
-                                  key={'row-' + index} xs={1} md={3}
-                                  className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"
-                              >
-                                  <div className="my-auto w-50">
-                                      <a className="text-white" href={'/programs/' + entry.id}>
-                                          {entry.internalId + ' - ' + entry.name}
-                                      </a>
-                                  </div>
-                                  <div className="d-flex my-auto justify-content-center">
-                                      <i
-                                          className="bi bi-pencil-fill btn btn-lg text-white"
-                                          id={'edit-' + index}
-                                          onClick={() => redirectToEdit(entry.id)}
-                                      ></i>
-                                      <i
-                                          className="bi bi-trash-fill btn btn-lg text-white"
-                                          id={'trash-' + index}
-                                          onClick={() => openDeleteModal(entry)}
-                                      ></i>
-                                  </div>
-                              </Row>
-                          )),
-                      ]
+                        programs.map((entry, index) => (
+                            <Row
+                                key={'row-' + index} xs={1} md={4}
+                                className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"
+                            >
+                                <div className="my-auto">{entry.internalId}</div>
+                                <div className="my-auto w-min-50 text-white">
+                                    {entry.name}
+                                </div>
+                                <div className="d-flex my-auto justify-content-center">
+                                    <i
+                                        className="bi bi-pencil-fill btn btn-lg text-white"
+                                        id={'edit-' + index}
+                                        onClick={() => redirectToEdit(entry.id)}
+                                    ></i>
+                                    <i
+                                        className="bi bi-trash-fill btn btn-lg text-white"
+                                        id={'trash-' + index}
+                                        onClick={() => openDeleteModal(entry)}
+                                    ></i>
+                                </div>
+                            </Row>
+                        )),
+                    ]
                     : [
-                          <div key="empty-list">{t('emptyList')}</div>,
-                      ]}
+                        <div key="empty-list">{t('emptyList')}</div>,
+                    ]}
             </div>
             <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">

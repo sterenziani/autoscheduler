@@ -30,7 +30,9 @@
                 "INVALID_PARAMS": "The form was not completed correctly. Please make sure all fields have been filled in.",
                 "INVALID_NAME": "The name is invalid. Our only supported non-standard characters at the moment are Ñ, ü and á/é/í/ó/ú.",
                 "INVALID_LOGIN": "Incorrect email and/or password.",
-                "USER_NOT_FOUND": "The provided address is not registered in AutoScheduler."
+                "USER_NOT_FOUND": "The provided address is not registered in AutoScheduler.",
+                "UNIVERSITY_NOT_FOUND": "We could not find the requested university because of a server error.",
+                "STUDENT_NOT_FOUND": "We could not find the requested student because of a server error."
             },
             "gettingUniversitiesData": "There was an error fetching universities data.",
             "email": {

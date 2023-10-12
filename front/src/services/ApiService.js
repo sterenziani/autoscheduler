@@ -35,7 +35,7 @@ const simpleApiGetRequest = async (endpoint) => {
         return await api.get(endpoint, AuthService.getRequestHeaders())
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
@@ -47,7 +47,7 @@ const longApiGetRequest = async (endpoint) => {
         return await api.get(endpoint, {...AuthService.getRequestHeaders(), timeout: 15*MINUTE_IN_MS})
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
@@ -262,11 +262,17 @@ const getStudent = async (studentId) => {
         if(user.id !== studentId){
             const endpoint = studentsEndpoint + studentId
             const resp = await api.get(endpoint, AuthService.getRequestHeaders())
+            if(resp.status !== OK) return resp
             user = resp.data
         }
 
         const universityResponse = await api.get(studentUniversityEndpoint, AuthService.getRequestHeaders())
+        if(universityResponse.status !== OK)
+            return universityResponse
+
         const programResponse = await api.get(studentProgramEndpoint, AuthService.getRequestHeaders())
+        if(programResponse.status !== OK)
+            return programResponse
 
         const resp = {
             ...user,
@@ -275,10 +281,10 @@ const getStudent = async (studentId) => {
         if(programResponse.data)
             resp.program = programResponse.data
 
-        return resp
+        return {status: OK, data: resp}
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
@@ -614,7 +620,7 @@ const getCourseClassesForTerm = async (courseId, termId, page) => {
         return listOfClassesResponse
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }
@@ -634,7 +640,7 @@ const getCourseClass = async (classId) => {
         return courseClassResponse
     }
     catch(e) {
-        if (e.response) return { status: e.response.status }
+        if (e.response) return e.response
         if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
         if (e.code && e.code === CONNECTION_ERROR) return { status: SERVICE_UNAVAILABLE }
         else return { status: INTERNAL_ERROR }

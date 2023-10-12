@@ -139,7 +139,7 @@ function SearchForm(props) {
                 setLoading(false)
             })
         }
-    }, [navigate, params, student])
+    }, [navigate, params, student, loading, terms])
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {

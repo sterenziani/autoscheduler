@@ -7,7 +7,7 @@ import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, BAD_REQUEST } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../services/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 import AsyncSelect from 'react-select/async'
 
@@ -44,7 +44,7 @@ function SignUpStudentForm(props) {
 
     const [selectedSchool, setSelectedSchool] = useState()
     const [selectedProgram, setSelectedProgram] = useState()
-    const [error, setError] = useState(null)
+    const [error, setError] = useState()
     const [programError, setProgramError] = useState(false)
 
     const onChangeSchools = (schoolId) => {
@@ -64,13 +64,9 @@ function SignUpStudentForm(props) {
             case CREATED:
                 authenticate(values)
                 break;
-            case BAD_REQUEST:
-                setSubmitting(false)
-                setError(data.code?? BAD_REQUEST)
-                break;
             default:
                 setSubmitting(false)
-                setError(data.code?? "TIMEOUT")
+                setError(data?.code?? status)
                 break;
         }
     }

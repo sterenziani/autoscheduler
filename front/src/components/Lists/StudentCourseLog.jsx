@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK } from '../../services/ApiConstants';
@@ -16,9 +15,8 @@ function StudentCourseLog(props) {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const [courses, setCourses] = useState(null)
-    const [error, setError] = useState(false)
-    const [status, setStatus] = useState(null)
-    const student = props.student;
+    const [error, setError] = useState()
+    const student = props.student
 
     const [paginationLinks, setPaginationLinks] = useState(null)
     const [page, setPage] = useState(1)
@@ -55,13 +53,8 @@ function StudentCourseLog(props) {
     const loadCourses = (page) => {
         setLoading(true)
         ApiService.getFinishedCourses(page).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
                 const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
@@ -99,12 +92,8 @@ function StudentCourseLog(props) {
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
             ApiService.getPrograms(inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                     callback([])
                 } else {
                     callback(resp.data)
@@ -119,12 +108,8 @@ function StudentCourseLog(props) {
                 callback([])
             } else {
                 ApiService.getRemainingCoursesProgram(selectedProgramId, inputValue).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK)
-                        findError = resp.status;
-                    if (findError) {
-                        setError(true)
-                        setStatus(findError)
+                    if (resp && resp.status && resp.status !== OK){
+                        setError(resp.status)
                         callback([])
                     } else {
                         callback(resp.data)
@@ -137,7 +122,7 @@ function StudentCourseLog(props) {
     if (loading === true || student === null)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             {
