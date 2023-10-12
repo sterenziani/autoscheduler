@@ -1,4 +1,4 @@
-import { createDocument, deleteDocuments, getDocument } from '../../helpers/persistence/mongoPersistence.helper';
+import { createDocument, deleteDocuments, getDocument, parseErrors } from '../../helpers/persistence/mongoPersistence.helper';
 import { PaginatedCollection } from '../../interfaces/paging.interface';
 import PasswordRecoveryToken from '../../models/abstract/passwordRecoveryToken.model';
 import DatabasePasswordRecoveryToken, { PasswordRecoveryTokenDocument, PasswordRecoveryTokenModel } from '../../models/implementations/databasePasswordRecoveryToken.model';
@@ -20,21 +20,41 @@ export default class DatabasePasswordRecoveryTokenDao extends PasswordRecoveryTo
     }
 
     public async create(userId: string, expirationDate: Date): Promise<PasswordRecoveryToken> {
-        const doc = await createDocument<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, {userId, expirationDate});
-        return this.documentToModel(doc);
+        try {
+            const doc = await createDocument<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, {userId, expirationDate});
+            return this.documentToModel(doc);
+        }
+        catch(err){
+            throw parseErrors(err, '[PasswordRecoveryTokenDao:create]');
+        }
     }
 
     public async modify(id: string): Promise<PasswordRecoveryToken> {
-        return await this.getById(id);
+        try {
+            return await this.getById(id);
+        }
+        catch(err){
+            throw parseErrors(err, '[PasswordRecoveryTokenDao:modify]');
+        }
     }
 
     public async delete(id: string): Promise<void> {
-        await deleteDocuments<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, {_id: id});
+        try {
+            await deleteDocuments<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, {_id: id});
+        }
+        catch(err){
+            throw parseErrors(err, '[PasswordRecoveryTokenDao:delete]');
+        }
     }
 
     public async findById(id: string): Promise<PasswordRecoveryToken | undefined> {
-        const maybeDoc = await getDocument<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, id, true);
-        return maybeDoc ? this.documentToModel(maybeDoc) : undefined;
+        try {
+            const maybeDoc = await getDocument<PasswordRecoveryTokenDocument>(PasswordRecoveryTokenModel, id, true);
+            return maybeDoc ? this.documentToModel(maybeDoc) : undefined;
+        }
+        catch(err){
+            throw parseErrors(err, '[PasswordRecoveryTokenDao:findById]');
+        }
     }
 
     // This is never used
@@ -50,5 +70,5 @@ export default class DatabasePasswordRecoveryTokenDao extends PasswordRecoveryTo
             doc.expirationDate
         );
     }
-    
+
 }
