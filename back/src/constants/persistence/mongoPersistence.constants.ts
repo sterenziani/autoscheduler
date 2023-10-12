@@ -1,0 +1,1 @@
+export const MONGO_CONSTRAINT_ERROR_CODE = 11000;

@@ -1,6 +1,9 @@
 import mongoose, { Model, ClientSession, FilterQuery, UpdateQuery, AnyKeys, Document } from 'mongoose';
+import { MongoError } from 'mongodb';
 import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
+import { IErrorData } from '../../interfaces/error.interface';
+import { MONGO_CONSTRAINT_ERROR_CODE } from '../../constants/persistence/mongoPersistence.constants';
 
 export const initializeMongoConnection = async (): Promise<void> => {
     // Mongo connection
@@ -14,6 +17,17 @@ export const initializeMongoConnection = async (): Promise<void> => {
         },
     );
     return;
+};
+
+export const parseErrors = (err: unknown, logPrefix: string, constraintError?: IErrorData): GenericException => {
+    if (err instanceof GenericException) return err;
+    if (constraintError && err instanceof MongoError && err.code == MONGO_CONSTRAINT_ERROR_CODE) return new GenericException(constraintError);
+    logErrors(err, logPrefix);
+    return new GenericException(ERRORS.INTERNAL_SERVER_ERROR.DATABASE);
+};
+
+export const logErrors = (err: unknown, logPrefix: string): void => {
+    console.log(`${logPrefix}. Unknown error: ${JSON.stringify(err)}`);
 };
 
 export const validateObjectId = (maybeId: string): void => {
