@@ -45,10 +45,10 @@ export default class DatabaseScheduleDao extends ScheduleDao {
             const courseIds: string[] = [...courseInfo.mandatoryCourseIds, ...courseInfo.optionalCourseIds];
             const courseClassResult = await session.run(
                 'UNWIND $courseIds as courseId ' +
-                'MATCH (c:Course {id: courseId})<-[:OF]-(cc:CourseClass)-[:HAPPENS_IN]->(t:Term {id: $termId}) ' +
+                'MATCH (c:Course {id: courseId})<-[:OF]-(cc:CourseClass)-[:HAPPENS_IN]->(:Term {id: $termId}) ' +
                 'MATCH (cc)<-[:OF]-(l: Lecture) ' +
                 'WITH cc, c.id AS cId, sum(duration.between(l.startTime, l.endTime)) AS duration ' +
-                'RETURN {properties: cc{.*, courseId:cId, weeklyClassTimeInMinutes: (duration.hours*60+duration.minutes)}}',
+                'RETURN {properties: cc{.*, courseId:cId, termId:$termId, weeklyClassTimeInMinutes: (duration.hours*60+duration.minutes)}}',
                 {courseIds, termId}
             );
             const courseClassInfo = this.parseCourseClasses(courseClassResult);
@@ -120,11 +120,11 @@ export default class DatabaseScheduleDao extends ScheduleDao {
         const courseOfCourseClass: Map<string, string> = new Map();
         const weeklyClassTimeInMinutes: Map<string, number> = new Map();
         for (const node of nodes) {
-            const courseClass = new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), '', '');
+            const courseClass = new DatabaseCourseClass(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.courseId, node.termId);
             courseClasses.set(courseClass.id, courseClass);
             courseClassIds.push(courseClass.id);
-            if (!courseClassesOfCourse.has(node.courseId)) courseClassesOfCourse.set(node.courseId, []);
-            courseClassesOfCourse.get(node.courseId)?.push(courseClass.id);
+            if (!courseClassesOfCourse.has(courseClass.courseId)) courseClassesOfCourse.set(courseClass.courseId, []);
+            courseClassesOfCourse.get(courseClass.courseId)?.push(courseClass.id);
             courseOfCourseClass.set(courseClass.id, node.courseId);
             weeklyClassTimeInMinutes.set(courseClass.id, node.weeklyClassTimeInMinutes);
         }
@@ -145,7 +145,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
         for (const node of nodes) {
             const startTime = Time.fromString(node.startTime);
             const endTime = Time.fromString(node.endTime);
-            const lecture = new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime), '');
+            const lecture = new DatabaseLecture(node.id, new TimeRange(node.dayOfWeek, startTime, endTime), node.buildingId);
             lectures.set(lecture.id, lecture);
             if(!lecturesOfCourseClass.has(node.courseClassId)) lecturesOfCourseClass.set(node.courseClassId, []);
             lecturesOfCourseClass.get(node.courseClassId)?.push(lecture.id);
