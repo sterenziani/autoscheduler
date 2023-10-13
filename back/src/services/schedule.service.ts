@@ -136,7 +136,8 @@ export default class ScheduleService {
                     const cc = inputData.courseClasses.get(ccId);
                     if(cc) classes.push(cc);
                 }
-                viableCourseClassesArray.push(classes);
+                if(classes.length > 0)
+                    viableCourseClassesArray.push(classes);
             }
         }
         return viableCourseClassesArray;
