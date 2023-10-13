@@ -99,7 +99,7 @@ export default class DatabaseBuildingDao extends BuildingDao {
         const session = graphDriver.session();
         try {
             const result = await session.run(
-                `MATCH (b: Building {id: $id})-[:BELONGS_TO]->(: University {id: $universityId}) DETACH DELETE b`,
+                `MATCH (b: Building {id: $id})-[:BELONGS_TO]->(: University {id: $universityId}) OPTIONAL MATCH (l:Lecture)-[:TAKES_PLACE_IN]->(b) DETACH DELETE b, l`,
                 {id, universityId}
             );
             const stats = getStats(result);
