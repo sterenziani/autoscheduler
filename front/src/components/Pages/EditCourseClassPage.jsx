@@ -113,7 +113,7 @@ function EditCourseClassPage(props) {
         async function execute() {
             // 1. Load terms and buildings
             if(!terms && !buildings && !buildingDictionary)
-                await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
+                await Promise.all([loadTerms()], loadBuildings());
             if(terms && buildings && buildingDictionary) {
                 // 2. Load courseClass or set placeholder
                 if(!courseClass){
@@ -153,7 +153,7 @@ function EditCourseClassPage(props) {
         })
     }
 
-    const loadTerms = async (universityId) => {
+    const loadTerms = async () => {
         ApiService.getTerms().then((resp) => {
             if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
@@ -164,7 +164,7 @@ function EditCourseClassPage(props) {
         });
     }
 
-    const loadBuildings = async (universityId) => {
+    const loadBuildings = async () => {
         ApiService.getBuildingDictionary().then((resp) => {
             if (resp && resp.status && resp.status !== OK){
                 setLoading(false)

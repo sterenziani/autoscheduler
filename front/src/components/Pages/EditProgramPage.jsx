@@ -39,8 +39,6 @@ function EditProgramPage(props) {
     const [mandatoryCourses, setMandatoryCourses] = useState()
     const [optionalCourses, setOptionalCourses] = useState()
 
-    const [courses, setCourses] = useState(null);
-
     useEffect(() => {
         if(!user)
             navigate("/login")
@@ -84,38 +82,25 @@ function EditProgramPage(props) {
 
         async function execute() {
             if(id){
-                if(!program && !courses)
-                    await Promise.all([loadProgram(), loadCourses(user.id)])
-                else if(program && courses && !mandatoryCourses && !optionalCourses)
+                if(!program)
+                    await Promise.all([loadProgram()])
+                else if(program && !mandatoryCourses && !optionalCourses)
                     await Promise.all([loadMandatoryCourses(program.id), loadOptionalCourses(program.id)])
             }
             else{
-                if(!courses)
-                    await Promise.all([loadCourses(user.id)])
-                else if(!program && !mandatoryCourses && !optionalCourses){
+                if(!program && !mandatoryCourses && !optionalCourses){
                     setMandatoryCourses([])
                     setOptionalCourses([])
                     setProgram({"name": t("forms.placeholders.programName"), "internalId": t("forms.placeholders.programCode"), "optionalCourseCredits": 0})
                 }
             }
 
-            if(program && courses && mandatoryCourses && optionalCourses)
+            if(program && mandatoryCourses && optionalCourses)
                 setLoading(false)
         }
         if(user) execute()
-    },[program, courses, mandatoryCourses, optionalCourses, id, t, user])
+    },[program, mandatoryCourses, optionalCourses, id, t, user])
 
-    const loadCourses = async (universityId) => {
-        ApiService.getCourses().then((resp) => {
-            if (resp && resp.status && resp.status !== OK){
-                setLoading(false)
-                setError(resp.status)
-            }
-            else{
-                setCourses(resp.data)
-            }
-        });
-    }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true);
@@ -219,7 +204,7 @@ function EditProgramPage(props) {
                                 <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
                             </div>
                             <div className="align-items-start align-items-center">
-                            <CourseListForm editCreditRequirements courses={courses}
+                            <CourseListForm editCreditRequirements
                                     listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
                                     onClickTrashCan={onClickMandatoryTrashCan} addCourse={addMandatoryCourse}
                                 />
@@ -232,7 +217,7 @@ function EditProgramPage(props) {
                                 <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
                             </div>
                             <div className="align-items-start align-items-center">
-                                <CourseListForm editCreditRequirements courses={courses}
+                                <CourseListForm editCreditRequirements
                                     listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
                                     onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
                                 />

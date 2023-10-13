@@ -23,6 +23,7 @@ function CourseClassesList(props) {
 
     const [paginationLinks, setPaginationLinks] = useState(null)
     const [page, setPage] = useState(1)
+    const [buildingCache] = useState({})
 
     useEffect(() => {
         const readPageInSearchParams = () => {
@@ -50,7 +51,7 @@ function CourseClassesList(props) {
 
     const loadClasses = (page) => {
         setLoading(true)
-        ApiService.getCourseClassesForTerm(course.id, term.id, page).then((resp) => {
+        ApiService.getCourseClassesForTerm(course.id, term.id, page, false, false, true, {}, buildingCache).then((resp) => {
             if (resp && resp.status && resp.status !== OK)
                 setError(resp.status)
             else{

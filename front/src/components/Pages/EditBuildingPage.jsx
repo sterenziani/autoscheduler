@@ -44,7 +44,7 @@ function EditBuildingPage(props) {
             navigate("/login")
     }, [user, navigate])
 
-    const loadBuildings = async (universityId) => {
+    const loadBuildings = async () => {
         ApiService.getBuildingDictionary().then((resp) => {
             if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
@@ -84,10 +84,10 @@ function EditBuildingPage(props) {
 
         async function execute() {
             if(!buildings)
-                await Promise.all([loadBuildings(user.id)]);
+                await Promise.all([loadBuildings()])
             if(id){
                 if(buildings && !building)
-                    await Promise.all([loadBuilding(id)]);
+                    await Promise.all([loadBuilding(id)])
             }
             else{
                 if(buildings && !building){

@@ -43,17 +43,19 @@ function CourseListForm(props) {
             }
             else{
                 if(addCourseOptions){
-                    const result = addCourseOptions.filter( (c) => !unavailableCourses.find((u) => u.id === c.id) && (c.name.includes(inputValue) || c.internalId.includes(inputValue)) )
+                    const result = addCourseOptions.filter( (c) => !unavailableCourses.find((u) => u.id === c.id) && (c.name.toLowerCase().includes(inputValue.toLowerCase()) || c.internalId.includes(inputValue.toLowerCase())) )
                     callback(result)
                 }
-                ApiService.getCoursesNotInList(inputValue, unavailableCourses).then((resp) => {
-                    if (resp && resp.status && resp.status !== OK){
-                        setError(resp.status)
-                        callback([])
-                    } else {
-                        callback(resp.data)
-                    }
-                })
+                else{
+                    ApiService.getCoursesNotInList(inputValue, unavailableCourses).then((resp) => {
+                        if (resp && resp.status && resp.status !== OK){
+                            setError(resp.status)
+                            callback([])
+                        } else {
+                            callback(resp.data)
+                        }
+                    })
+                }
             }
         })
     }

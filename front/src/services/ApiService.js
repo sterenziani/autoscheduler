@@ -313,7 +313,7 @@ const deleteFinishedCourse = async (courseId) => {
 
 const getRemainingCoursesProgram = async (programId, inputText) => {
     const endpoint = `${studentUniversityProgramsEndpoint}/${programId}/remaining-courses`
-    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText})
+    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText}, MULTI_PAGE_SEARCH_LIMIT)
 }
 
 const getSchedules = async (params) => {
@@ -520,7 +520,7 @@ const deleteProgram = async (programId) => {
 
 const getCourses = async (inputText) => {
     const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}`)
-    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText})
+    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText}, MULTI_PAGE_SEARCH_LIMIT)
 }
 
 const getCoursesPage = async (page, inputText) => {
