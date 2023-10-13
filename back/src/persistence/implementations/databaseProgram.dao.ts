@@ -102,7 +102,7 @@ export default class DatabaseProgramDao extends ProgramDao {
         try {
             const result = await session.run(
                 'MATCH (p:Program {id: $id})-[b:BELONGS_TO]->(:University {id: $universityId}) ' +
-                'OPTIONAL MATCH ()-[i:IN]->(p), ()-[r:REQUIRES {programId: $id}]->() ' +
+                'OPTIONAL MATCH ()-[i:IN]->(p) OPTIONAL MATCH ()-[r:REQUIRES {programId: $id}]->() ' +
                 'DELETE b, i, r, p',
                 {id, universityId}
             );

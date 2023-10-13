@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK } from '../../services/ApiConstants';
+import { OK, NO_CONTENT } from '../../services/ApiConstants';
 
 function UniversityProgramsList(props){
     const { t } = useTranslation()
@@ -71,9 +71,12 @@ function UniversityProgramsList(props){
     const deleteProgram = async () => {
         if (!programToDelete)
             return
-        await ApiService.deleteProgram(programToDelete.id)
+        const resp = await ApiService.deleteProgram(programToDelete.id)
+        if(resp.status === NO_CONTENT)
+            loadPrograms(page)
+        else
+            setError(resp.status)
         closeDeleteModal()
-        loadPrograms()
     }
 
     const closeDeleteModal = () => {

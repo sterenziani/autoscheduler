@@ -40,7 +40,7 @@ function ErrorMessage(props){
         <Alert variant="danger" className="text-center">
             <FontAwesomeIcon className="mb-3" size="3x" icon={icon}/>
             <Alert.Heading>{title}</Alert.Heading>
-            <p className="mx-4">{message}</p>
+            <p className="tooltip-inner mx-4">{message}</p>
             <LinkButton variant="primary" textKey="goHome" onClick={goHome}/>
         </Alert>
     </div>

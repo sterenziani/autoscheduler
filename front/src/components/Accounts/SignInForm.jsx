@@ -24,7 +24,6 @@ function SignInForm(props) {
 
     const authenticate = async (values, setSubmitting) => {
         const { status, data } = await ApiService.login(values.email, values.password);
-        console.log(data)
         switch (status) {
             case OK:
                 navigate("/")
