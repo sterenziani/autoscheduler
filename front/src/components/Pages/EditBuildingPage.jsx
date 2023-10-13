@@ -24,18 +24,19 @@ function EditBuildingPage(props) {
             .min(3, 'forms.errors.building.minNameLength')
             .max(50, 'forms.errors.building.maxNameLength')
             .required('forms.errors.building.nameIsRequired'),
-    });
+    })
 
-    const navigate = useNavigate();
-    const {t} = useTranslation();
+    const navigate = useNavigate()
+    const {t} = useTranslation()
     const {id} = useParams()
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
     const [user] = useState(ApiService.getActiveUser())
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [building, setBuilding] = useState(null);
-    const [buildings, setBuildings] = useState();
-    const [distances, setDistances] = useState();
+    const [building, setBuilding] = useState(null)
+    const [buildings, setBuildings] = useState()
+    const [distances, setDistances] = useState()
 
 
     useEffect(() => {
@@ -45,13 +46,9 @@ function EditBuildingPage(props) {
 
     const loadBuildings = async (universityId) => {
         ApiService.getBuildingDictionary().then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+            if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
+                setError(resp.status)
             }
             else{
                 setBuildings(resp.data)
@@ -62,13 +59,9 @@ function EditBuildingPage(props) {
     useEffect( () => {
         const loadBuilding = async () => {
             ApiService.getBuilding(id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setBuilding(resp.data)
@@ -127,8 +120,7 @@ function EditBuildingPage(props) {
                 navigate("/?tab=buildings")
             }
             else{
-                setError(resp.data.code)
-                setStatus(resp.status)
+                setError(resp.data?.code?? resp.status)
                 setSubmitting(false)
             }
         }
@@ -146,7 +138,7 @@ function EditBuildingPage(props) {
             <Spinner animation="border" variant="primary" />
         </div>
     if (error && error !== EXISTING_BUILDING_ERROR)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>

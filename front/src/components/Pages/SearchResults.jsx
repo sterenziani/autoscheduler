@@ -13,18 +13,20 @@ import ErrorMessage from '../Common/ErrorMessage';
 import Roles from '../../resources/RoleConstants';
 
 function SearchResults(props) {
-    const {t} = useTranslation();
+    const {t} = useTranslation()
     const navigate = useNavigate()
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [schedules, setSchedules] = useState([]);
-    const [scheduleIndex, setScheduleIndex] = useState(0);
-    const [tables, setTables] = useState();
-    const [params, setParams] = useState();
-    const [user] = useState(ApiService.getActiveUser())
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const [user] = useState(ApiService.getActiveUser())
+    const [schedules, setSchedules] = useState([])
+    const [scheduleIndex, setScheduleIndex] = useState(0)
+    const [tables, setTables] = useState()
+    const [params, setParams] = useState()
+
+
     const getTimeTable = (schedule, palette) => {
         var timeTable = {}
         DAYS.forEach((d) => timeTable[d] = Array.from({ length: 24 }))
@@ -147,12 +149,8 @@ function SearchResults(props) {
         else if(params === null) setLoading(false)
         else {
             ApiService.getSchedules(params).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true);
-                    setStatus(findError);
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                 }
                 else {
                     var tables = []
@@ -195,7 +193,7 @@ function SearchResults(props) {
         )
     }
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     if (params == null)
         return <ErrorMessage message={"search.invalidParams"}/>
     if(schedules.length === 0 || schedules[0].courseClasses.length === 0)

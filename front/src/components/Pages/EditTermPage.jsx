@@ -25,16 +25,16 @@ function EditTermPage(props) {
             .required('forms.errors.term.codeIsRequired'),
     });
 
-    const navigate = useNavigate();
-    const {t} = useTranslation();
+    const navigate = useNavigate()
+    const {t} = useTranslation()
     const {id} = useParams()
-    const [user] = useState(ApiService.getActiveUser())
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [term, setTerm] = useState(null);
 
-    const [startDate, setStartDate] = useState();
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const [user] = useState(ApiService.getActiveUser())
+    const [term, setTerm] = useState(null)
+    const [startDate, setStartDate] = useState()
 
     useEffect(() => {
         if(!user)
@@ -44,12 +44,8 @@ function EditTermPage(props) {
     useEffect( () => {
         const loadTerm = async () => {
             ApiService.getTerm(id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
-                    setError(true)
-                    setStatus(findError)
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                 }
                 else{
                     const date = new Date(resp.data.startDate)
@@ -62,10 +58,8 @@ function EditTermPage(props) {
 
         async function execute() {
             if(id){
-                if(!term)
-                    await Promise.all([loadTerm()]);
-                else
-                    setLoading(false)
+                if(!term) await Promise.all([loadTerm()]);
+                else setLoading(false)
             }
             else{
                 if(!term){
@@ -93,8 +87,7 @@ function EditTermPage(props) {
             if(resp.status === OK || resp.status === CREATED)
                 navigate("/?tab=terms");
             else{
-                setError(resp.data.code)
-                setStatus(resp.status)
+                setError(resp.data?.code?? resp.status)
                 setSubmitting(false)
             }
         }
@@ -112,7 +105,7 @@ function EditTermPage(props) {
             <Spinner animation="border" variant="primary" />
         </div>
     if (error && error !== EXISTING_TERM_ERROR)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>

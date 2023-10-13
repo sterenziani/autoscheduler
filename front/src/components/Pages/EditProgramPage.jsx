@@ -27,17 +27,17 @@ function EditProgramPage(props) {
         programOptionalCredits: Yup.number().min(0, 'forms.errors.program.positiveZeroOptionalCredits'),
     });
 
-    const navigate = useNavigate();
-    const {t} = useTranslation();
+    const navigate = useNavigate()
+    const {t} = useTranslation()
     const {id} = useParams()
-    const [user] = useState(ApiService.getActiveUser())
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
 
-    const [program, setProgram] = useState(null);
-    const [mandatoryCourses, setMandatoryCourses] = useState();
-    const [optionalCourses, setOptionalCourses] = useState();
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const [user] = useState(ApiService.getActiveUser())
+    const [program, setProgram] = useState()
+    const [mandatoryCourses, setMandatoryCourses] = useState()
+    const [optionalCourses, setOptionalCourses] = useState()
 
     const [courses, setCourses] = useState(null);
 
@@ -49,13 +49,9 @@ function EditProgramPage(props) {
     useEffect( () => {
         const loadProgram = async () => {
             ApiService.getProgram(id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else
                   setProgram(resp.data)
@@ -64,13 +60,9 @@ function EditProgramPage(props) {
 
         const loadMandatoryCourses = async (programId) => {
             ApiService.getMandatoryCourses(programId, true).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setMandatoryCourses(resp.data)
@@ -80,13 +72,9 @@ function EditProgramPage(props) {
 
         const loadOptionalCourses = async (programId) => {
             ApiService.getOptionalCourses(programId, true).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setOptionalCourses(resp.data)
@@ -119,13 +107,9 @@ function EditProgramPage(props) {
 
     const loadCourses = async (universityId) => {
         ApiService.getCourses().then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+            if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
+                setError(resp.status)
             }
             else{
                 setCourses(resp.data)
@@ -149,8 +133,7 @@ function EditProgramPage(props) {
                 navigate("/?tab=programs")
             }
             else{
-                setError(resp.data.code)
-                setStatus(resp.status)
+                setError(resp.data?.code?? resp.status)
                 setSubmitting(false);
             }
         }
@@ -195,8 +178,8 @@ function EditProgramPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-        if (error && error !== EXISTING_PROGRAM_ERROR)
-            return <ErrorMessage status={status}/>
+    if (error && error !== EXISTING_PROGRAM_ERROR)
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>

@@ -23,27 +23,28 @@ function EditCourseClassPage(props) {
             .min(1, 'forms.errors.courseClass.minLength')
             .max(25, 'forms.errors.courseClass.maxLength')
             .required('forms.errors.courseClass.isRequired'),
-    });
+    })
 
-    const navigate = useNavigate();
-    const {t} = useTranslation();
+    const navigate = useNavigate()
+    const {t} = useTranslation()
     const {id} = useParams()
-    const [user] = useState(ApiService.getActiveUser())
     const search = useLocation().search
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [courseClass, setCourseClass] = useState(null);
-    const [terms, setTerms] = useState();
-    const [buildings, setBuildings] = useState();
-    const [buildingDictionary, setBuildingDictionary] = useState();
 
-    const [selectedCourse, setSelectedCourse] = useState();
-    const [selectedTermId, setselectedTermId] = useState();
-    const [lectures, setLectures] = useState([]);
-    const [oldLectures, setOldLectures] = useState([]);
-    const [selectionError, setSelectionError] = useState();
-    const [timeError, setTimeError] = useState();
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const [user] = useState(ApiService.getActiveUser())
+    const [buildings, setBuildings] = useState()
+    const [buildingDictionary, setBuildingDictionary] = useState()
+    const [terms, setTerms] = useState()
+
+    const [courseClass, setCourseClass] = useState(null)
+    const [selectedCourse, setSelectedCourse] = useState()
+    const [selectedTermId, setselectedTermId] = useState()
+    const [oldLectures, setOldLectures] = useState([])
+    const [lectures, setLectures] = useState([])
+    const [selectionError, setSelectionError] = useState()
+    const [timeError, setTimeError] = useState()
 
     useEffect(() => {
         if(!user)
@@ -59,16 +60,11 @@ function EditCourseClassPage(props) {
 
             if(courseId) {
                 ApiService.getCourse(courseId).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK)
-                        findError = resp.status;
-                    if (findError){
+                    if (resp && resp.status && resp.status !== OK){
                         setLoading(false)
-                        setError(true)
-                        setStatus(findError)
-                    }
-                    else{
-                      setSelectedCourse(resp.data)
+                        setError(resp.status)
+                    } else {
+                        setSelectedCourse(resp.data)
                     }
                 });
             } else {
@@ -76,16 +72,11 @@ function EditCourseClassPage(props) {
             }
             if(termId) {
                 ApiService.getTerm(termId).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK)
-                        findError = resp.status;
-                    if (findError){
+                    if (resp && resp.status && resp.status !== OK){
                         setLoading(false)
-                        setError(true)
-                        setStatus(findError)
-                    }
-                    else{
-                      setselectedTermId(resp.data.id)
+                        setError(resp.status)
+                    } else {
+                        setselectedTermId(resp.data.id)
                     }
                 })
             } else {
@@ -96,13 +87,9 @@ function EditCourseClassPage(props) {
 
         const loadCourseClass = async () => {
             ApiService.getCourseClass(id, true, true, true, buildingDictionary).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setCourseClass(resp.data)
@@ -155,11 +142,8 @@ function EditCourseClassPage(props) {
                 callback([])
             } else {
                 ApiService.getCourses(inputValue).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK) findError = resp.status
-                    if (findError) {
-                        setError(true)
-                        setStatus(findError)
+                    if (resp && resp.status && resp.status !== OK){
+                        setError(resp.status)
                         callback([])
                     } else {
                         callback(resp.data)
@@ -171,13 +155,9 @@ function EditCourseClassPage(props) {
 
     const loadTerms = async (universityId) => {
         ApiService.getTerms().then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+            if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
+                setError(resp.status)
             }
             else
               setTerms(resp.data)
@@ -186,15 +166,10 @@ function EditCourseClassPage(props) {
 
     const loadBuildings = async (universityId) => {
         ApiService.getBuildingDictionary().then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+            if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
+                setError(resp.status)
+            } else {
                 setBuildingDictionary(resp.data)
                 setBuildings(Object.values(resp.data))
             }
@@ -282,16 +257,15 @@ function EditCourseClassPage(props) {
             const categorizedLectures = categorizeLectures(oldLectures, lectures)
             const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTermId, values.className, categorizedLectures.post, categorizedLectures.put, categorizedLectures.delete)
             if(resp.status === OK || resp.status === CREATED)
-                navigate("/courses/"+selectedCourse.id+"?termId="+selectedTermId);
+                navigate("/courses/"+selectedCourse.id+"?termId="+selectedTermId)
             else{
-                setError(resp.data.code)
-                setStatus(resp.status)
-                setSubmitting(false);
+                setError(resp.data?.code?? resp.status)
+                setSubmitting(false)
             }
         }
         else {
-            setSelectionError(true);
-            setSubmitting(false);
+            setSelectionError(true)
+            setSubmitting(false)
         }
     };
 
@@ -304,7 +278,7 @@ function EditCourseClassPage(props) {
             <Spinner animation="border" variant="primary" />
         </div>
     if (error && error !== EXISTING_CLASS_ERROR)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
 
     if(!terms || terms.length < 1 || !buildings || buildings.length < 1)
         return (

@@ -13,14 +13,15 @@ import ErrorMessage from '../Common/ErrorMessage';
 import AsyncSelect from 'react-select/async'
 
 function CoursePage(props) {
-    const {t} = useTranslation();
-    const navigate = useNavigate();
+    const {t} = useTranslation()
+    const navigate = useNavigate()
     const {id} = useParams()
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
     const [user] = useState(ApiService.getActiveUser())
-    const [course, setCourse] = useState();
+    const [course, setCourse] = useState()
     const [selectedProgram, setSelectedProgram] = useState(null);
 
     useEffect(() => {
@@ -30,30 +31,19 @@ function CoursePage(props) {
 
     useEffect( () => {
         ApiService.getCourse(id).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else {
+                setError(resp.status)
+            else
                 setCourse(resp.data)
-                setLoading(false)
-            }
+            setLoading(false)
         })
     }, [id])
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
             ApiService.getProgramsCourseIsIn(id, inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                     callback([])
                 } else {
                     callback(resp.data)
@@ -77,7 +67,7 @@ function CoursePage(props) {
             </div>
         )
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>

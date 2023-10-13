@@ -26,21 +26,22 @@ function EditCoursePage(props) {
             .max(50, 'forms.errors.course.maxNameLength')
             .required('forms.errors.course.nameIsRequired'),
         courseCredits: Yup.number().min(0, 'forms.errors.course.positiveZeroOptionalCredits'),
-    });
+    })
 
-    const navigate = useNavigate();
-    const {t} = useTranslation();
-    const {id} = useParams();
+    const navigate = useNavigate()
+    const {t} = useTranslation()
+    const {id} = useParams()
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
     const [user] = useState(ApiService.getActiveUser())
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
+    const [course, setCourse] = useState()
+    const [programs, setPrograms] = useState()
+    const [requirements, setRequirements] = useState()
 
-    const [course, setCourse] = useState(null);
-    const [programs, setPrograms] = useState();
-    const [requirements, setRequirements] = useState();
-    const [selectedProgram, setSelectedProgram] = useState();
-    const [coursesOfSelectedProgram, setCoursesOfSelectedProgram] = useState();
+    const [selectedProgram, setSelectedProgram] = useState()
+    const [coursesOfSelectedProgram, setCoursesOfSelectedProgram] = useState()
 
     useEffect(() => {
         if(!user)
@@ -50,13 +51,9 @@ function EditCoursePage(props) {
     useEffect( () => {
         const loadCourse = async () => {
             ApiService.getCourse(id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
-                    findError = resp.status;
-                if (findError){
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setCourse(resp.data)
@@ -67,12 +64,8 @@ function EditCoursePage(props) {
 
         const loadPrograms = async(inputValue) => {
             ApiService.getProgramsCourseIsIn(id, inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                     setPrograms([])
                 } else {
                     setPrograms(resp.data)
@@ -99,17 +92,13 @@ function EditCoursePage(props) {
 
     const loadRequirements = async(courseId, programId) => {
         ApiService.getRequiredCoursesForProgram(courseId, programId).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+            if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
+                setError(resp.status)
             }
             else{
-                const requirementsCopy = Object.assign([], requirements);
-                requirementsCopy[programId] = resp.data;
+                const requirementsCopy = Object.assign([], requirements)
+                requirementsCopy[programId] = resp.data
                 setRequirements(requirementsCopy)
             }
         });
@@ -118,26 +107,23 @@ function EditCoursePage(props) {
     const loadCoursesOfProgram = async(programId) => {
         const mandatoryCoursesResp = await ApiService.getMandatoryCourses(programId, false)
         const optionalCoursesResp = await ApiService.getOptionalCourses(programId, false)
-        let findError = null;
+
         if(!mandatoryCoursesResp || mandatoryCoursesResp.status !== OK || !optionalCoursesResp || optionalCoursesResp.status !== OK){
             if(mandatoryCoursesResp.status !== OK)
-                findError = mandatoryCoursesResp.status
+                setError(mandatoryCoursesResp.status)
             if(optionalCoursesResp.status !== OK)
-                findError = optionalCoursesResp.status
+                setError(optionalCoursesResp.status)
             setLoading(false)
-            setError(true)
-            setStatus(findError)
             return
         }
 
         mandatoryCoursesResp.data.forEach((item, i) => delete item['requiredCredits']);
         optionalCoursesResp.data.forEach((item, i) => delete item['requiredCredits']);
-
         setCoursesOfSelectedProgram([...mandatoryCoursesResp.data, ...optionalCoursesResp.data])
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
-        setSubmitting(true);
+        setSubmitting(true)
         if (values.courseCode && values.courseName)
         {
             const requirementIDs = {}
@@ -150,8 +136,7 @@ function EditCoursePage(props) {
                 navigate("/courses/"+resp.id)
             }
             else{
-                setError(resp.data.code)
-                setStatus(resp.status)
+                setError(resp.data?.code?? resp.status)
                 setSubmitting(false)
             }
         }
@@ -207,7 +192,7 @@ function EditCoursePage(props) {
             <Spinner animation="border" variant="primary" />
         </div>
     if (error && error !== EXISTING_COURSE_ERROR)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>
