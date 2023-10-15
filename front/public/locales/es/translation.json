@@ -5,9 +5,9 @@
         "password": "Contraseña",
         "repeatPassword": "Repetir contraseña",
         "name": "Nombre",
-        "school": "Universidad",
+        "school": "Institución",
         "program": "Carrera",
-        "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de universidades.",
+        "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de instituciones.",
         "submit": "Crear cuenta",
         "placeholders": {
             "nameStudent": "John Johnson",
@@ -25,16 +25,16 @@
                 "503": "Could not connect to the AutoScheduler server.",
                 "TIMEOUT": "No pudimos conectarnos al servicio de AutoScheduler",
                 "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
-                "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",
+                "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una institución con ese nombre.",
                 "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas.",
                 "INVALID_PARAMS": "El formulario no se completó correctamente. Revise que no haya campos vacíos.",
                 "INVALID_NAME": "El nombre no es válido. Actualmente sólo se aceptan como caracteres no-estándar Ñ, ü y vocales con tilde.",
                 "INVALID_LOGIN": "Email y/o contraseña incorrecto.",
                 "USER_NOT_FOUND": "Esa dirección no está registrada en AutoScheduler.",
-                "UNIVERSITY_NOT_FOUND": "No se encontró la universidad solicitada debido a un error del servidor.",
+                "UNIVERSITY_NOT_FOUND": "No se encontró la institución solicitada debido a un error del servidor.",
                 "STUDENT_NOT_FOUND": "No se encontró al estudiante solicitado debido a un error del servidor."
             },
-            "gettingUniversitiesData": "Ocurrió un error al buscar datos de universidades.",
+            "gettingUniversitiesData": "Ocurrió un error al buscar datos de instituciones.",
             "email": {
                 "maxLength": "Su email no puede contener más de 100 caracteres.",
                 "invalidEmail": "Ingrese una dirección de email válida.",
@@ -51,8 +51,8 @@
                 "passwordsMismatch": "Las contraseñas no coinciden."
             },
             "name": {
-                "requiredLength": "El nombre de su universidad debe contener al menos 4 caracteres.",
-                "maxLength": "El nombre de su universidad no debe exceder los 100 caracteres.",
+                "requiredLength": "El nombre de su institución debe contener al menos 4 caracteres.",
+                "maxLength": "El nombre de su institución no debe exceder los 100 caracteres.",
                 "isRequired": "Este campo es obligatorio."
             },
             "studentName": {
@@ -60,7 +60,7 @@
                 "isRequired": "Este campo es obligatorio."
             },
             "school": {
-                "programNotSelected": "Seleccione la universidad y carrera en la que esté inscripto."
+                "programNotSelected": "Seleccione la institución y carrera en la que esté inscripto."
             }
         }
     },
@@ -80,7 +80,7 @@
         "courseLog": "MATERIAS APROBADAS",
         "findSchedule": "BUSCAR CRONOGRAMAS",
         "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
-        "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
+        "iAmUniversty": "REGISTRARSE COMO INSTITUCIÓN",
         "login": "Iniciar Sesión",
         "programs": "CARRERAS",
         "terms": "PERÍODOS",
@@ -118,11 +118,13 @@
         "term": "Período",
         "hoursPerWeek": "Horas semanales",
         "prioritizeUnlocks": "Priorizar correlativas",
+        "prioritizeUnlocksTooltip": "Marque esta casilla para priorizar cronogramas que contengan materias de las que muchas materias futuras dependan.\nÚtil si quiere ampliar su rango de opciones el próximo término.",
         "reduceDays": "Reducir días",
+        "reduceDaysTooltip": "Marque esta casilla para priorizar cronogramas que concentren las cursadas en la menor cantidad de días posibles.\nMuy útil si vive lejos de su institución.",
         "unavailableSlots": "Horarios a evitar",
         "programError":"Por favor seleccione una carrera.",
         "invalidParams":"Se recibieron parámetros inválidos.",
-        "noTermsFromUniversity": "Su universidad no tiene períodos públicamente disponibles ahora, por lo cual no podemos ofrecerle propuestas de cronogramas."
+        "noTermsFromUniversity": "Su institución no tiene períodos públicamente disponibles ahora, por lo cual no podemos ofrecerle propuestas de cronogramas."
     },
     "days": {
         "M": "Lunes",
@@ -143,11 +145,11 @@
         "newSearch": "Realizar una nueva búsqueda"
     },
     "home": {
-        "welcomeAdmin": "Bienvenido, administrator. Por favor lea la documentación oficial sobre cómo verificar universidades a través de la API.",
-        "search": "Busque una universidad",
+        "welcomeAdmin": "Bienvenido, administrator. Por favor lea la documentación oficial sobre cómo verificar instituciones a través de la API.",
+        "search": "Busque una institución",
         "verify": "Marcar como verificado",
         "unverify": "Revocar verificación",
-        "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la universidad a nuestra lista.\n\nPuede continuar usando AutoScheduler con normalidad para cargar información sobre sus sedes, períodos próximos, materias y carreras.\nSin embargo, los estudiantes no podrán registrarse como alumnos de su institución hasta completar el proceso de verificación.",
+        "getVerified": "Su institución aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la institución a nuestra lista.\n\nPuede continuar usando AutoScheduler con normalidad para cargar información sobre sus sedes, períodos próximos, materias y carreras.\nSin embargo, los estudiantes no podrán registrarse como alumnos de su institución hasta completar el proceso de verificación.",
         "whatIsTermPublish": "Los estudiantes solo pueden buscar cronogramas de períodos que usted haya publicado."
     },
     "terms": {

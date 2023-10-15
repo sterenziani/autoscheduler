@@ -219,7 +219,11 @@ function SearchForm(props) {
                 </Form.Group>
 
                 <Form.Group controlId="prioritize" className="mt-4 row mx-auto form-row">
-                    <FormInputLabel label="search.prioritizeUnlocks" columnWidth={4}/>
+                    <FormInputLabel
+                        label="search.prioritizeUnlocks" columnWidth={4}
+                        tooltipIconColor="primary" tooltipBgColor="white"
+                        tooltipMessage="search.prioritizeUnlocksTooltip"
+                    />
                     <div className="col-md-8 d-flex align-items-start align-items-center">
                         <Form.Check
                             checked={params.prioritizeUnlocks}
@@ -230,7 +234,11 @@ function SearchForm(props) {
                 </Form.Group>
 
                 <Form.Group controlId="reduceDays" className="mt-4 row mx-auto form-row">
-                    <FormInputLabel label="search.reduceDays" columnWidth={4}/>
+                    <FormInputLabel
+                        label="search.reduceDays" columnWidth={4}
+                        tooltipIconColor="primary" tooltipBgColor="white"
+                        tooltipMessage="search.reduceDaysTooltip"
+                    />
                     <div className="col-md-8 d-flex align-items-start align-items-center">
                         <Form.Check
                             checked={params.reduceDays}
