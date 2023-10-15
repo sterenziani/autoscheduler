@@ -13,6 +13,7 @@ import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_PROGRAM_ERROR = "PROGRAM_ALREADY_EXISTS"
+const INVALID_NAME_ERROR = "INVALID_NAME"
 
 function EditProgramPage(props) {
     const ProgramSchema = Yup.object().shape({
@@ -163,7 +164,7 @@ function EditProgramPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error !== EXISTING_PROGRAM_ERROR)
+    if (error && error !== EXISTING_PROGRAM_ERROR && error !== INVALID_NAME_ERROR)
         return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
@@ -172,7 +173,9 @@ function EditProgramPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editProgram':'forms.createProgram')}</h2>
-                {error && (<p className="form-error">{t('forms.errors.program.codeAlreadyTaken')}</p>)}
+                {error && error === EXISTING_PROGRAM_ERROR && (<p className="form-error">{t('forms.errors.program.codeAlreadyTaken')}</p>)}
+                {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
+
                 <Formik initialValues={{ programName: program.name, programCode: program.internalId, programOptionalCredits: program.optionalCourseCredits }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
@@ -198,32 +201,32 @@ function EditProgramPage(props) {
                         touched={touched.programOptionalCredits} onChange={handleChange} onBlur={handleBlur}
                     />
                     <Row>
-                    <Col>
-                        <Row className="mx-auto form-row">
-                            <div className="text-center my-3 text-break">
-                                <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
-                            </div>
-                            <div className="align-items-start align-items-center">
-                            <CourseListForm editCreditRequirements
-                                    listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
-                                    onClickTrashCan={onClickMandatoryTrashCan} addCourse={addMandatoryCourse}
-                                />
-                            </div>
-                        </Row>
-                    </Col>
-                    <Col>
-                        <Row className="mx-auto form-row">
-                            <div className="text-center my-3 text-break">
-                                <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
-                            </div>
-                            <div className="align-items-start align-items-center">
+                        <Col>
+                            <Row className="mx-auto form-row">
+                                <div className="text-center my-3 text-break">
+                                    <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
+                                </div>
+                                <div className="align-items-start align-items-center">
                                 <CourseListForm editCreditRequirements
-                                    listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
-                                    onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
-                                />
-                            </div>
-                        </Row>
-                    </Col>
+                                        listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
+                                        onClickTrashCan={onClickMandatoryTrashCan} addCourse={addMandatoryCourse}
+                                    />
+                                </div>
+                            </Row>
+                        </Col>
+                        <Col>
+                            <Row className="mx-auto form-row">
+                                <div className="text-center my-3 text-break">
+                                    <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
+                                </div>
+                                <div className="align-items-start align-items-center">
+                                    <CourseListForm editCreditRequirements
+                                        listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
+                                        onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
+                                    />
+                                </div>
+                            </Row>
+                        </Col>
                     </Row>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>

@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 import FormInputField from '../Common/FormInputField';
+import FormInputLabel from '../Common/FormInputLabel';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 
 const SignUpSchema = Yup.object().shape({
@@ -192,12 +193,11 @@ function SignUpStudentForm(props) {
 
                     {!(error && error !== EXISTING_USER_ERROR) && (
                         <>
-                            <Row className="mb-0 mx-auto form-row">
-                                <div className="col-3 text-end my-auto text-break ">
-                                    <h5 className="my-0"><strong> {t('register.school')}</strong></h5>
-                                </div>
-                                <div className="col-9 text-center">
+                            <Row className='mx-auto form-row text-center'>
+                                <FormInputLabel label="register.school"/>
+                                <div className="col-md-9">
                                     <FormAsyncSelect
+                                        id="input-university"
                                         aria-label="school-select"
                                         className="text-black text-start"
                                         placeholder={t('register.school')}
@@ -211,13 +211,12 @@ function SignUpStudentForm(props) {
                                     />
                                 </div>
                             </Row>
+
                             {
                                 selectedSchool && (
-                                <Row className="mb-0 mx-auto form-row">
-                                    <div className="col-3 text-end my-auto text-break">
-                                        <h5 className="my-0"><strong>{t('register.program')}</strong></h5>
-                                    </div>
-                                    <div className="col-9 text-center">
+                                <Row className='mx-auto form-row text-center'>
+                                    <FormInputLabel label="register.program"/>
+                                    <div className="col-md-9">
                                         <FormAsyncSelect key={selectedSchool}
                                             aria-label="program-select"
                                             className="text-black text-start"
@@ -234,14 +233,14 @@ function SignUpStudentForm(props) {
                                 </Row>
                             )}
                             {!selectedProgram && programError && (
-                                <div className="my-0 row mx-auto form-row">
+                                <Row className="my-0 mx-auto form-row">
                                     <div className="col-3 text-center"></div>
                                     <div className="col-9 text-center">
                                         <p key="program-error" className="form-error text-start my-0">
                                             {t('register.errors.school.programNotSelected')}
                                         </p>
                                     </div>
-                                </div>
+                                </Row>
                             )}
                         </>
                     )}

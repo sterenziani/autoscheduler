@@ -19,7 +19,7 @@ function HomePageUniversity(props) {
         const readTabInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            if (requestedTab === "buildings" || requestedTab === "courses" || requestedTab === "terms")
+            if (requestedTab === "buildings" || requestedTab === "terms" || requestedTab === "courses" || requestedTab === "programs")
                 return requestedTab
             return startingTab
         }

@@ -9,6 +9,7 @@ import ApiService from '../../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
+import FormInputLabel from '../Common/FormInputLabel';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../../services/SystemConstants";
@@ -16,6 +17,7 @@ import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_CLASS_ERROR = "COURSE_CLASS_ALREADY_EXISTS"
+const INVALID_NAME_ERROR = "INVALID_NAME"
 
 function EditCourseClassPage(props) {
     const CourseClassSchema = Yup.object().shape({
@@ -277,7 +279,7 @@ function EditCourseClassPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error !== EXISTING_CLASS_ERROR)
+    if (error && error !== EXISTING_CLASS_ERROR && error !== INVALID_NAME_ERROR)
         return <ErrorMessage status={error}/>
 
     if(!terms || terms.length < 1 || !buildings || buildings.length < 1)
@@ -300,19 +302,21 @@ function EditCourseClassPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
-                {error && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
+                {error && error === EXISTING_CLASS_ERROR && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
+                {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
                 {selectionError && (<p className="form-error">{t('forms.errors.courseClass.noCourseSelected')}</p>)}
                 { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
+
+
                 <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
-                    <Row className="mx-auto form-row">
-                        <div className="col-3 text-end my-auto text-break">
-                            <h5 className="my-0"><strong>{t('forms.course')}</strong></h5>
-                        </div>
-                        <div className="col-9 text-start">
+
+                    <div className='row mx-auto form-row text-center'>
+                        <FormInputLabel label="forms.course"/>
+                        <div className="col-md-9">
                         {
-                            id && <p className="my-auto text-center text-gray fw-normal">{courseClass.course.name}</p>
+                            id && <p className="my-auto mx-2 text-start text-gray fw-normal">{courseClass.course.name}</p>
                         }
                         {
                             !id && selectedCourse &&
@@ -343,23 +347,19 @@ function EditCourseClassPage(props) {
                             />
                         }
                         </div>
-                    </Row>
+                    </div>
+
                     <Form.Group controlId="term" className="row mx-auto form-row">
-                        <div className="col-3 text-end my-auto text-break">
-                            <Form.Label className="my-0">
-                                <h5 className="my-0"><strong>{t('forms.term')}</strong></h5>
-                            </Form.Label>
-                        </div>
-                        <div className="col-9 text-center">
-                        {
+                        <FormInputLabel label="forms.term"/>
+                        <div className="col-md-9 text-center">
                             <Form.Select value={selectedTermId} onChange={onChangeTerm}>
                                 {terms && terms.map((c) => (
                                     <option key={c.id} value={c.id}> {c.internalId + ' - ' + c.name}</option>
                                 ))}
                             </Form.Select>
-                        }
                         </div>
                     </Form.Group>
+
                     <Form.Group controlId="class">
                         <FormInputField
                             label="forms.className" name="className"
@@ -368,12 +368,12 @@ function EditCourseClassPage(props) {
                             touched={touched.className} onChange={handleChange} onBlur={handleBlur}
                         />
                     </Form.Group>
+
                     <Form.Group className="row mx-auto form-row">
-                        <div className="col-3 text-end text-break my-4">
-                            <h5 className=""><strong>{t('forms.lectures')}</strong></h5>
-                        </div>
-                        <div className="col-9 my-auto align-items-start">
-                            {lectures.map((entry, index) => (
+                        <FormInputLabel label="forms.lectures"/>
+                        <div className="col-md-9 my-auto align-items-start">
+                            {
+                                lectures.map((entry, index) => (
                                 <Row key={'timerow-' + index} xs={1} md={6} className="list-row pb-2 pt-3 ms-1 justify-content-center">
                                     <Form.Select id={'day-' + index} className="w-auto mx-3" value={lectures[index].day} onChange={onChangeDay}>
                                         {DAYS.map((p) => (<option key={p} value={p}>{t('days.' + p)}</option>))}
@@ -396,12 +396,14 @@ function EditCourseClassPage(props) {
                                         id={'trash-' + index} onClick={onClickTrashCan}
                                     ></i>
                                 </Row>
-                            ))}
+                                ))
+                            }
                             <div className="mx-auto align-items-center plus-button-container clickable">
                                 <i className="me-3 bi bi-plus-circle-fill btn btn-lg color-primary" onClick={onClickPlusSign}></i>
                             </div>
                         </div>
                     </Form.Group>
+
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

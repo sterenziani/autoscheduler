@@ -248,7 +248,8 @@
                 "nameIsRequired":"The building must have a name.",
                 "codeAlreadyTaken":"A building with that code already exists."
             },
-            "timeRange": "Please make sure your time ranges end at a time after they start."
+            "timeRange": "Please make sure your time ranges end at a time after they start.",
+            "invalidName": "That name is invalid. Avoid non-alphanumeric symbols as many of them are not supported."
         }
     },
     "changePassword": {

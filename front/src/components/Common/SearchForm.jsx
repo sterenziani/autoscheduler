@@ -3,6 +3,7 @@ import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
+import FormInputLabel from '../Common/FormInputLabel';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
@@ -176,11 +177,9 @@ function SearchForm(props) {
     return (
         <React.Fragment>
             <Form className="p-3 mx-auto text-center color-white">
-                <Row className="mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <h5 className="my-0"><strong>{t('search.program')}</strong></h5>
-                    </div>
-                    <div className="col-8 text-center">
+                <div className='row mx-auto form-row text-center'>
+                    <FormInputLabel label="search.program" columnWidth={4}/>
+                    <div className="col-md-8 text-center">
                         <FormAsyncSelect
                             className="text-black text-start"
                             placeholder={t('search.program')}
@@ -195,19 +194,11 @@ function SearchForm(props) {
                         />
                         { programError && <p key="program-error" className="form-error text-start my-0">{t('search.programError')}</p>}
                     </div>
-                </Row>
+                </div>
 
                 <Form.Group controlId="term" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.term')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8 text-center">
+                    <FormInputLabel label="search.term" columnWidth={4}/>
+                    <div className="col-md-8 text-center">
                         <Form.Select value={params.term} onChange={onChangeTerms}>
                             {terms.map((p) => (
                                 <option key={p.id} value={p.id}>{p.name}</option>
@@ -217,35 +208,19 @@ function SearchForm(props) {
                 </Form.Group>
 
                 <Form.Group controlId="hours" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="col text-end my-auto">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.hoursPerWeek')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8">
+                    <FormInputLabel label="search.hoursPerWeek" columnWidth={4}/>
+                    <div className="col-md-8">
                         <Form.Control
-                            type="number"
+                            type="number" min="0"
                             value={params.hours}
                             onChange={onChangeHours}
                         />
                     </div>
                 </Form.Group>
 
-                <Form.Group controlId="prioritize" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.prioritizeUnlocks')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8 d-flex align-items-start align-items-center">
+                <Form.Group controlId="prioritize" className="mt-4 row mx-auto form-row">
+                    <FormInputLabel label="search.prioritizeUnlocks" columnWidth={4}/>
+                    <div className="col-md-8 d-flex align-items-start align-items-center">
                         <Form.Check
                             checked={params.prioritizeUnlocks}
                             className="color-secondary m-0"
@@ -254,17 +229,9 @@ function SearchForm(props) {
                     </div>
                 </Form.Group>
 
-                <Form.Group controlId="reduceDays" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.reduceDays')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8 d-flex align-items-start align-items-center">
+                <Form.Group controlId="reduceDays" className="mt-4 row mx-auto form-row">
+                    <FormInputLabel label="search.reduceDays" columnWidth={4}/>
+                    <div className="col-md-8 d-flex align-items-start align-items-center">
                         <Form.Check
                             checked={params.reduceDays}
                             className="m-0"
@@ -273,11 +240,9 @@ function SearchForm(props) {
                     </div>
                 </Form.Group>
 
-                <Row className="row mx-auto form-row">
-                    <div className="col-4 text-end my-3 text-break">
-                        <h5 className="my-0"><strong>{t('search.unavailableSlots')}</strong></h5>
-                    </div>
-                    <div className="col-8 align-items-start align-items-center">
+                <div className='row mx-auto form-row'>
+                    <FormInputLabel label="search.unavailableSlots" columnWidth={4}/>
+                    <div className="col-md-8 align-items-start">
                         { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
                         {params.unavailableTimeSlots.map((entry, index) => (
                             <Row
@@ -329,7 +294,8 @@ function SearchForm(props) {
                             ></i>
                         </div>
                     </div>
-                </Row>
+                </div>
+
                 <div className="row">
                     <div className="col text-center">
                         <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit()}>{t("search.submit")}</Button>

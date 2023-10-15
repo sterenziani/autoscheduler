@@ -7,11 +7,13 @@ import ApiService from '../../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
+import FormInputLabel from '../Common/FormInputLabel';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_BUILDING_ERROR = "BUILDING_ALREADY_EXISTS"
+const INVALID_NAME_ERROR = "INVALID_NAME"
 const DEFAULT_DISTANCE = 45
 
 function EditBuildingPage(props) {
@@ -137,7 +139,7 @@ function EditBuildingPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error !== EXISTING_BUILDING_ERROR)
+    if (error && error !== EXISTING_BUILDING_ERROR && error !== INVALID_NAME_ERROR)
         return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
@@ -146,7 +148,9 @@ function EditBuildingPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editBuilding':'forms.createBuilding')}</h2>
-                {error && (<p className="form-error">{t('forms.errors.building.codeAlreadyTaken')}</p>)}
+                {error && error === EXISTING_BUILDING_ERROR && (<p className="form-error">{t('forms.errors.building.codeAlreadyTaken')}</p>)}
+                {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
+
                 <Formik initialValues={{ buildingName: building.name, buildingInternalId: building.internalId }} validationSchema={BuildingSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
@@ -166,11 +170,9 @@ function EditBuildingPage(props) {
                     />
                     {
                         Object.keys(distances).length > 0 &&
-                        <Row className="mx-auto form-row">
-                            <div className="col-3 text-break my-auto text-end">
-                                <h5><strong>{t('forms.timeToDestination')}</strong></h5>
-                            </div>
-                            <div className="col-9 text-center my-auto">
+                        <Row className='mx-auto form-row text-center'>
+                            <FormInputLabel label="forms.timeToDestination"/>
+                            <div className="col-md-9">
                             {
                                 Object.values(distances).sort((a,b) => a.building.internalId.localeCompare(b.building.internalId)).map((entry, index) => (
                                     <Form.Group controlId={"distance-"+entry.building.id} key={"time-input-"+index} className={'row mx-auto form-row'}>

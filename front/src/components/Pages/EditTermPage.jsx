@@ -12,6 +12,7 @@ import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_TERM_ERROR = "TERM_ALREADY_EXISTS"
+const INVALID_NAME_ERROR = "INVALID_NAME"
 
 function EditTermPage(props) {
     const TermSchema = Yup.object().shape({
@@ -104,7 +105,7 @@ function EditTermPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error !== EXISTING_TERM_ERROR)
+    if (error && error !== EXISTING_TERM_ERROR && error !== INVALID_NAME_ERROR)
         return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
@@ -113,43 +114,36 @@ function EditTermPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editTerm':'forms.createTerm')}</h2>
-                {error && (<p className="form-error">{t('forms.errors.term.codeAlreadyTaken')}</p>)}
+                {error && error === EXISTING_TERM_ERROR && (<p className="form-error">{t('forms.errors.term.codeAlreadyTaken')}</p>)}
+                {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
+
                 <Formik initialValues={{ termName: term.name, code: term.internalId }} validationSchema={TermSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
-                <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
-                    <FormInputField
-                        id="term-code"
-                        label="forms.termCode" name="code"
-                        placeholder="forms.placeholders.termCode"
-                        value={values.code} error={errors.code}
-                        touched={touched.code} onChange={handleChange} onBlur={handleBlur}
-                    />
-                    <FormInputField
-                        id="term-name"
-                        label="forms.termName" name="termName"
-                        placeholder="forms.placeholders.termName"
-                        value={values.termName} error={errors.termName}
-                        touched={touched.termName} onChange={handleChange} onBlur={handleBlur}
-                    />
-                    <Form.Group controlId="term-startdate" className="row mx-auto form-row">
-                        <div className="col-3 text-end my-auto text-break">
-                            <Form.Label className="my-0">
-                                <h5 className="my-0"><strong>{t('forms.startDate')}</strong></h5>
-                            </Form.Label>
-                        </div>
-                        <div className="col-9 text-center">
-                        {
-                            <Form.Control
-                                type="date" className="w-auto timepicker"
-                                value={startDate} onChange={onChangeStartDate}
-                            />
-                        }
-                        </div>
+                    <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                        <FormInputField
+                            id="term-code"
+                            label="forms.termCode" name="code"
+                            placeholder="forms.placeholders.termCode"
+                            value={values.code} error={errors.code}
+                            touched={touched.code} onChange={handleChange} onBlur={handleBlur}
+                        />
+                        <FormInputField
+                            id="term-name"
+                            label="forms.termName" name="termName"
+                            placeholder="forms.placeholders.termName"
+                            value={values.termName} error={errors.termName}
+                            touched={touched.termName} onChange={handleChange} onBlur={handleBlur}
+                        />
+                        <FormInputField
+                            id="term-date" label="forms.startDate"
+                            type="date" className="w-100 text-start timepicker"
+                            value={startDate} onChange={onChangeStartDate}
+                        />
                         {!startDate && (<p className="form-error">{t('forms.errors.term.dateIsRequired')}</p>)}
-                    </Form.Group>
-                    <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
-                </Form>
-            )}
+
+                        <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
+                    </Form>
+                )}
             </Formik>
             </div>
         </React.Fragment>

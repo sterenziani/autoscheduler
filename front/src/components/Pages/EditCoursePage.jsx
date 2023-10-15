@@ -7,6 +7,7 @@ import ApiService from '../../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
+import FormInputLabel from '../Common/FormInputLabel';
 import CourseListForm from '../Lists/CourseListForm';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import Roles from '../../resources/RoleConstants';
@@ -14,6 +15,7 @@ import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_COURSE_ERROR = "COURSE_ALREADY_EXISTS"
+const INVALID_NAME_ERROR = "INVALID_NAME"
 
 function EditCoursePage(props) {
     const CourseSchema = Yup.object().shape({
@@ -191,7 +193,7 @@ function EditCoursePage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error !== EXISTING_COURSE_ERROR)
+    if (error && error !== EXISTING_COURSE_ERROR && error !== INVALID_NAME_ERROR)
         return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
@@ -200,7 +202,9 @@ function EditCoursePage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editCourse':'forms.createCourse')}</h2>
-                {error && (<p className="form-error">{t('forms.errors.course.codeAlreadyTaken')}</p>)}
+                {error && error === EXISTING_COURSE_ERROR && (<p className="form-error">{t('forms.errors.course.codeAlreadyTaken')}</p>)}
+                {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
+
                 <Formik initialValues={{ courseName: course.name, courseCode: course.internalId, courseCredits: course.creditValue  }} validationSchema={CourseSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
@@ -223,44 +227,43 @@ function EditCoursePage(props) {
                         id="program-optional-credits"
                         type="number"
                         label="forms.creditsEarned" name="courseCredits"
-                        placeholder="0"
+                        placeholder="0" min="0"
                         value={values.courseCredits} error={errors.courseCredits}
                         touched={touched.courseCredits} onChange={handleChange} onBlur={handleBlur}
                     />
                     {
                         (id && programs && programs.length > 0)? [
-                        <Row key="requirements-row" className="mx-auto form-row">
-                            <div className="col-3 text-end my-3 text-break">
-                                <h5 className="my-0"><strong>{t('forms.requirements')}</strong></h5>
-                            </div>
-                            <div className="col-9 my-2 align-items-start align-items-center">
-                                <FormAsyncSelect
-                                    className="text-black text-start w-75 m-auto"
-                                    placeholder={t('register.program')}
-                                    cacheOptions
-                                    defaultOptions
-                                    noOptionsMessage={() => t('selectNoResults')}
-                                    getOptionLabel={e => e.internalId+' - '+e.name}
-                                    getOptionValue={e => e.id}
-                                    loadOptions={loadProgramOptions}
-                                    onChange={opt => onChangePrograms(opt)}
-                                />
-                                {
-                                    selectedProgram &&
-                                    <CourseListForm
-                                        listedCourses={requirements[selectedProgram.id]}
-                                        unavailableCourses={
-                                            (requirements[selectedProgram.id])? [...requirements[selectedProgram.id], course] : [course]
-                                        }
-                                        addCourseOptions={coursesOfSelectedProgram??[]}
-                                        onClickTrashCan={onClickTrashCan} addCourse={addRequiredCourse}
+                            <Row key="requirements-group" className='mx-auto form-row text-center'>
+                                <FormInputLabel label="forms.requirements"/>
+                                <div className="col-md-9">
+                                    <FormAsyncSelect
+                                        className="text-black text-start w-75 m-auto"
+                                        placeholder={t('register.program')}
+                                        cacheOptions
+                                        defaultOptions
+                                        noOptionsMessage={() => t('selectNoResults')}
+                                        getOptionLabel={e => e.internalId+' - '+e.name}
+                                        getOptionValue={e => e.id}
+                                        loadOptions={loadProgramOptions}
+                                        onChange={opt => onChangePrograms(opt)}
                                     />
-                                }
-                                {
-                                    !selectedProgram && <div>{t('forms.selectProgram')}</div>
-                                }
-                            </div>
-                        </Row>] : [
+                                    {
+                                        selectedProgram &&
+                                        <CourseListForm
+                                            listedCourses={requirements[selectedProgram.id]}
+                                            unavailableCourses={
+                                                (requirements[selectedProgram.id])? [...requirements[selectedProgram.id], course] : [course]
+                                            }
+                                            addCourseOptions={coursesOfSelectedProgram??[]}
+                                            onClickTrashCan={onClickTrashCan} addCourse={addRequiredCourse}
+                                        />
+                                    }
+                                    {
+                                        !selectedProgram && <div>{t('forms.selectProgram')}</div>
+                                    }
+                                </div>
+                            </Row>
+                        ] : [
                             <p key="no-requirements-message" className="mt-5">{t('errors.notPartOfAnyPrograms')}</p>
                         ]
                     }

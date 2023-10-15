@@ -248,7 +248,8 @@
                 "nameIsRequired":"La sede debe tener un nombre.",
                 "codeAlreadyTaken":"Ya existe una sede con ese código."
             },
-            "timeRange": "Asegúrese de que los rangos horarios que definió finalicen después de iniciar."
+            "timeRange": "Asegúrese de que los rangos horarios que definió finalicen después de iniciar.",
+            "invalidName": "El nombre no es válido. Evite usar símbolos no-alfanuméricos ya que muchos de ellos no son aceptados."
         }
     },
     "changePassword": {
