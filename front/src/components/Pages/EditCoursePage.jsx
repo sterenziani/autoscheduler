@@ -10,7 +10,7 @@ import FormInputField from '../Common/FormInputField';
 import CourseListForm from '../Lists/CourseListForm';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import Roles from '../../resources/RoleConstants';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_COURSE_ERROR = "COURSE_ALREADY_EXISTS"
@@ -219,7 +219,9 @@ function EditCoursePage(props) {
                         touched={touched.courseName} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
+                        tooltipMessage="forms.creditsEarnedTooltip"
                         id="program-optional-credits"
+                        type="number"
                         label="forms.creditsEarned" name="courseCredits"
                         placeholder="0"
                         value={values.courseCredits} error={errors.courseCredits}
@@ -232,7 +234,7 @@ function EditCoursePage(props) {
                                 <h5 className="my-0"><strong>{t('forms.requirements')}</strong></h5>
                             </div>
                             <div className="col-9 my-2 align-items-start align-items-center">
-                                <AsyncSelect
+                                <FormAsyncSelect
                                     className="text-black text-start w-75 m-auto"
                                     placeholder={t('register.program')}
                                     cacheOptions

@@ -12,7 +12,7 @@ const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS?? 'auto.s
 
 function HomePageUniversity(props) {
     const { t } = useTranslation()
-    const startingTab = "programs";
+    const startingTab = "courses"
     const search = useLocation().search
 
     useEffect(() => {
@@ -28,12 +28,12 @@ function HomePageUniversity(props) {
         const tabs = document.getElementsByClassName("nav-item")
         if (requestedTab === "buildings")
             tabs[0].children[0].click()
+        else if (requestedTab === "terms")
+            tabs[1].children[0].click()
         else if (requestedTab === "courses")
             tabs[2].children[0].click()
-        else if (requestedTab === "terms")
-            tabs[3].children[0].click()
         else
-            tabs[1].children[0].click()
+            tabs[3].children[0].click()
     }, [search])
 
     return (
@@ -42,7 +42,7 @@ function HomePageUniversity(props) {
                 <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
             {props.user && !JSON.parse(props.user.verified) && (
-                <Alert className="m-5 text-center" variant="danger">
+                <Alert className="m-5 text-center display-newlines" variant="danger">
                     {t('home.getVerified', { email: CONTACT_EMAIL, universityName: props.user.name })}
                 </Alert>
             )}
@@ -57,11 +57,11 @@ function HomePageUniversity(props) {
                         </div>
                     </Tab>
                     <Tab
-                        className="text-center" eventKey="programs"
-                        title={t('tabs.programs')} id="programs-tab"
+                        className="text-center" eventKey="terms"
+                        title={t('tabs.terms')} id="terms-tab"
                     >
                         <div className="bg-primary rounded-bottom">
-                            <UniversityProgramsList user={props.user} />
+                            <UniversityTermsList user={props.user} />
                         </div>
                     </Tab>
                     <Tab
@@ -73,11 +73,11 @@ function HomePageUniversity(props) {
                         </div>
                     </Tab>
                     <Tab
-                        className="text-center" eventKey="terms"
-                        title={t('tabs.terms')} id="terms-tab"
+                        className="text-center" eventKey="programs"
+                        title={t('tabs.programs')} id="programs-tab"
                     >
                         <div className="bg-primary rounded-bottom">
-                            <UniversityTermsList user={props.user} />
+                            <UniversityProgramsList user={props.user} />
                         </div>
                     </Tab>
                 </Tabs>

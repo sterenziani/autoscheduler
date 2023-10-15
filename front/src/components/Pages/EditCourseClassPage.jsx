@@ -9,10 +9,10 @@ import ApiService from '../../services/ApiService';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
 import { DAYS, DEFAULT_DATE } from "../../services/SystemConstants";
 import Roles from '../../resources/RoleConstants';
-import AsyncSelect from 'react-select/async'
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_CLASS_ERROR = "COURSE_CLASS_ALREADY_EXISTS"
@@ -66,7 +66,7 @@ function EditCourseClassPage(props) {
                     } else {
                         setSelectedCourse(resp.data)
                     }
-                });
+                })
             } else {
                 setSelectedCourse()
             }
@@ -316,7 +316,7 @@ function EditCourseClassPage(props) {
                         }
                         {
                             !id && selectedCourse &&
-                            <AsyncSelect
+                            <FormAsyncSelect
                                 className="text-black" cacheOptions defaultOptions
                                 defaultValue = {{value:selectedCourse.id, internalId: selectedCourse.internalId, name: selectedCourse.name}}
                                 getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
@@ -330,7 +330,7 @@ function EditCourseClassPage(props) {
                         }
                         {
                             !id && !selectedCourse &&
-                            <AsyncSelect
+                            <FormAsyncSelect
                                 className="text-black" cacheOptions defaultOptions
                                 placeholder={t("forms.course")}
                                 getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}

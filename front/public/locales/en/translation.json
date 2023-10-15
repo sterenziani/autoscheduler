@@ -147,7 +147,8 @@
         "search": "Search for a university",
         "verify": "Mark as verified",
         "unverify": "Revoke verification",
-        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with {{universityName}} so we can verify the account and add your school to our list."
+        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with {{universityName}} so we can verify the account and add your school to our list.\nYou can continue using AutoScheduler normally, but students won't be able to register as students of your school until the verification process is complete.",
+        "whatIsTermPublish": "Students will only be able to search schedules for terms you have published."
     },
     "terms": {
         "hide": "Hide",
@@ -169,7 +170,8 @@
         "createCourse":"Create Course",
         "courseName":"Course name",
         "courseCode":"Course code/ID",
-        "creditsEarned":"Credits earned",
+        "creditsEarned":"Credits awarded",
+        "creditsEarnedTooltip":"Amount of creadits the student is awarded for completing this course.",
         "requirements":"Required courses",
         "editProgram":"Edit Program",
         "createProgram":"Create Program",

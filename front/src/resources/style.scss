@@ -110,7 +110,7 @@ $theme-colors: (
     background-color: $light !important;
 }
 
-.tooltip-inner {
+.tooltip-inner, .display-newlines {
     white-space: pre-wrap;
 }
 

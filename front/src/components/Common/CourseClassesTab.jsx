@@ -33,6 +33,11 @@ function CourseClassesTab(props) {
                 setLoading(false)
             });
         }
+        if(terms && !loading){
+            const params = new URLSearchParams(search)
+            const requestedTerm = terms.find(t => t.id === params.get('termId'))
+            setSelectedTerm(requestedTerm? requestedTerm:terms[0])
+        }
     }, [search, user.id, terms, loading])
 
     const onChangeTerms = (e) => {

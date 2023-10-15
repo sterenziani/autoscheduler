@@ -10,7 +10,7 @@ import CourseClassesTab from '../Common/CourseClassesTab';
 import Roles from '../../resources/RoleConstants';
 import LinkButton from '../Common/LinkButton';
 import ErrorMessage from '../Common/ErrorMessage';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 
 function CoursePage(props) {
     const {t} = useTranslation()
@@ -86,7 +86,7 @@ function CoursePage(props) {
                         title={t('tabs.requiredCourses')}
                     >
                         <div className="bg-primary rounded-bottom py-4">
-                            <AsyncSelect
+                            <FormAsyncSelect
                                 className="text-black text-start w-75 m-auto"
                                 placeholder={t('register.program')}
                                 cacheOptions

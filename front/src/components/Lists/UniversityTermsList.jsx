@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Spinner, Row } from 'react-bootstrap';
+import { Button, Modal, Spinner, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
@@ -119,60 +119,51 @@ function UniversityTermsList(props) {
             <div className="pt-4">
                 {terms && terms.length > 0
                     ? [
-                          terms.map((entry, index) => (
-                              <Row key={'row-' + index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
-                                  <div className="m-auto">{entry.internalId}</div>
-                                  <div className="m-auto">{entry.name}</div>
-                                  <div className="m-auto">{convertDateFormat(entry.startDate)}</div>
-                                  <div className="d-flex m-auto justify-content-center">
-                                      <i
-                                          className="bi bi-pencil-fill btn btn-lg text-white"
-                                          id={'edit-' + index}
-                                          onClick={() => redirectToEdit(entry.id)}
-                                      ></i>
-                                      <i
-                                          className="bi bi-trash-fill btn btn-lg text-white"
-                                          id={'trash-' + index}
-                                          onClick={() => openDeleteModal(entry)}
-                                      ></i>
-                                  </div>
-                                  <div className="m-auto d-flex justify-content-center">
-                                      {changingPublishStatus[index]
-                                          ? [
-                                                <div key={'spinner-' + index} className="mx-auto">
-                                                    <Spinner animation="border" />
-                                                </div>,
-                                            ]
-                                          : [
-                                                entry.published
-                                                    ? [
-                                                          <Button
-                                                              key={'button-hide-' + index}
-                                                              className="btn-wrap-text"
-                                                              variant="success"
-                                                              onClick={() => switchTermStatus(index)}
-                                                          >
-                                                              {t('terms.hide')}
-                                                          </Button>,
-                                                      ]
-                                                    : [
-                                                          <Button
-                                                              key={'button-publish-' + index}
-                                                              className="btn-wrap-text"
-                                                              variant="warning"
-                                                              onClick={() => switchTermStatus(index)}
-                                                          >
-                                                              {t('terms.publish')}
-                                                          </Button>,
-                                                      ],
-                                            ]}
-                                  </div>
-                              </Row>
-                          )),
-                      ]
+                        terms.map((entry, index) => (
+                            <Row key={'row-' + index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
+                                <div className="m-auto">{entry.internalId}</div>
+                                <div className="m-auto">{entry.name}</div>
+                                <div className="m-auto">{convertDateFormat(entry.startDate)}</div>
+                                <div className="d-flex m-auto justify-content-center">
+                                    <i
+                                        className="bi bi-pencil-fill btn btn-lg text-white"
+                                        id={'edit-' + index}
+                                        onClick={() => redirectToEdit(entry.id)}
+                                    ></i>
+                                    <i
+                                        className="bi bi-trash-fill btn btn-lg text-white"
+                                        id={'trash-' + index}
+                                        onClick={() => openDeleteModal(entry)}
+                                    ></i>
+                                </div>
+                                <div className="m-auto d-flex justify-content-center">
+                                {
+                                    changingPublishStatus[index]
+                                    ? [
+                                        <div key={'spinner-' + index} className="mx-auto">
+                                            <Spinner animation="border" />
+                                        </div>,
+                                    ] : [
+                                        <OverlayTrigger key={'overlay-'+index} overlay={(props) => (<Tooltip id="tooltip" {...props}>{t('home.whatIsTermPublish')}</Tooltip>)}>
+                                            <Button
+                                                key={'term-button-'+index}
+                                                className="btn-wrap-text"
+                                                variant={entry.published?"success":"warning"}
+                                                onClick={() => switchTermStatus(index)}
+                                            >
+                                                {t(entry.published?'terms.hide':'terms.publish')}
+                                            </Button>
+                                        </OverlayTrigger>,
+                                    ]
+                                }
+                                </div>
+                            </Row>
+                        )),
+                    ]
                     : [
-                          <div key="empty-list">{t('emptyList')}</div>,
-                      ]}
+                        <div key="empty-list">{t('emptyList')}</div>,
+                    ]
+                }
             </div>
             <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">

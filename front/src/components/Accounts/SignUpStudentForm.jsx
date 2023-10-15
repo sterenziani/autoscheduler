@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
 import { OK, CREATED } from '../../services/ApiConstants';
 import FormInputField from '../Common/FormInputField';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 
 const SignUpSchema = Yup.object().shape({
     name: Yup.string()
@@ -197,7 +197,7 @@ function SignUpStudentForm(props) {
                                     <h5 className="my-0"><strong> {t('register.school')}</strong></h5>
                                 </div>
                                 <div className="col-9 text-center">
-                                    <AsyncSelect
+                                    <FormAsyncSelect
                                         aria-label="school-select"
                                         className="text-black text-start"
                                         placeholder={t('register.school')}
@@ -218,7 +218,7 @@ function SignUpStudentForm(props) {
                                         <h5 className="my-0"><strong>{t('register.program')}</strong></h5>
                                     </div>
                                     <div className="col-9 text-center">
-                                        <AsyncSelect key={selectedSchool}
+                                        <FormAsyncSelect key={selectedSchool}
                                             aria-label="program-select"
                                             className="text-black text-start"
                                             placeholder={t('register.program')}

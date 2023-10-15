@@ -164,13 +164,14 @@ function EditBuildingPage(props) {
                         value={values.buildingName} error={errors.buildingName}
                         touched={touched.buildingName} onChange={handleChange} onBlur={handleBlur}
                     />
-                    <Row className="mx-auto form-row">
-                        <div className="col-3 text-break my-1 text-end">
-                            <h5><strong>{t('forms.timeToDestination')}</strong></h5>
-                        </div>
-                        <div className="col-9 text-center my-auto">
-                        {
-                            Object.keys(distances).length > 0? [
+                    {
+                        Object.keys(distances).length > 0 &&
+                        <Row className="mx-auto form-row">
+                            <div className="col-3 text-break my-auto text-end">
+                                <h5><strong>{t('forms.timeToDestination')}</strong></h5>
+                            </div>
+                            <div className="col-9 text-center my-auto">
+                            {
                                 Object.values(distances).sort((a,b) => a.building.internalId.localeCompare(b.building.internalId)).map((entry, index) => (
                                     <Form.Group controlId={"distance-"+entry.building.id} key={"time-input-"+index} className={'row mx-auto form-row'}>
                                         <Col className="my-auto text-end text-break" xs={3} md={2}>
@@ -184,10 +185,10 @@ function EditBuildingPage(props) {
                                         </Col>
                                     </Form.Group>
                                 ))
-                            ] : [<div key="no-buildings-msg">{t("forms.onlyBuilding")}</div>]
-                        }
-                        </div>
-                    </Row>
+                            }
+                            </div>
+                        </Row>
+                    }
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

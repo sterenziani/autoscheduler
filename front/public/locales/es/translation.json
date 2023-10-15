@@ -147,7 +147,8 @@
         "search": "Busque una universidad",
         "verify": "Marcar como verificado",
         "unverify": "Revocar verificación",
-        "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la universidad a nuestra lista."
+        "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la universidad a nuestra lista.\nPuede continuar usando AutoScheduler con normalidad, pero los estudiantes no podrán registrarse como alumnos de su institución hasta completar el proceso de verificación.",
+        "whatIsTermPublish": "Los estudiantes solo pueden buscar cronogramas de períodos que usted haya publicado."
     },
     "terms": {
         "hide": "Ocultar",
@@ -170,6 +171,7 @@
         "courseName":"Nombre de materia",
         "courseCode":"Código/ID de la materia",
         "creditsEarned":"Créditos otorgados",
+        "creditsEarnedTooltip":"Cantidad de créditos que el alumno recibe al aprobar este curso.",
         "requirements":"Correlativas",
         "editProgram":"Editar Carrera",
         "createProgram":"Crear Carrera",

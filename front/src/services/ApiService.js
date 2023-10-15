@@ -578,8 +578,10 @@ const deleteCourse = async (courseId) => {
 /////////////////////////////// TERM FUNCTIONS ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-const getTerms = async (page=1) => {
-    const endpoint = getEndpointForActiveUser(`${universityTermsEndpoint}?page=${page}`)
+const getTerms = async (page=1, publishedStatus) => {
+    let endpoint = getEndpointForActiveUser(`${universityTermsEndpoint}?page=${page}`)
+    if(publishedStatus !== undefined)
+        endpoint = endpoint + `&published=${publishedStatus}`
     return simpleApiGetRequest(endpoint)
 }
 

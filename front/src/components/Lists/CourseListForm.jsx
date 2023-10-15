@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Row, Modal, Form, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ApiService from '../../services/ApiService';
 import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
@@ -102,7 +102,7 @@ function CourseListForm(props) {
             </Modal.Header>
             <Modal.Body>
                 {
-                    <AsyncSelect key="course-select"
+                    <FormAsyncSelect key="course-select"
                         className="text-black m-2"
                         placeholder={t('forms.course')}
                         cacheOptions

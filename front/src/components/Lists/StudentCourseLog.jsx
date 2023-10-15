@@ -5,7 +5,7 @@ import { Button, Modal, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK } from '../../services/ApiConstants';
 import CourseList from './CourseList';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 
@@ -144,7 +144,7 @@ function StudentCourseLog(props) {
                             <Modal.Title>{t('modal.addCourse')}</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <AsyncSelect
+                            <FormAsyncSelect
                                 aria-label="program-select"
                                 className="text-black m-2"
                                 placeholder={t('search.program')}
@@ -158,7 +158,7 @@ function StudentCourseLog(props) {
                             />
                             {
                                 selectedProgramId &&
-                                <AsyncSelect key={selectedProgramId}
+                                <FormAsyncSelect key={selectedProgramId}
                                     aria-label="course-select"
                                     className="text-black m-2"
                                     placeholder={t('forms.course')}

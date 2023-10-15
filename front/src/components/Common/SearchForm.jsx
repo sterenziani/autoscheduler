@@ -3,7 +3,7 @@ import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
 import { OK } from '../../services/ApiConstants';
 import { DAYS, INSTANT_DATE } from "../../services/SystemConstants";
@@ -124,7 +124,7 @@ function SearchForm(props) {
         // Load terms once
         if(!terms && loading)
         {
-            ApiService.getTerms().then((resp) => {
+            ApiService.getTerms(1, true).then((resp) => {
                 if (resp && resp.status && resp.status !== OK)
                     setError(resp.status)
                 else {
@@ -181,7 +181,7 @@ function SearchForm(props) {
                         <h5 className="my-0"><strong>{t('search.program')}</strong></h5>
                     </div>
                     <div className="col-8 text-center">
-                        <AsyncSelect
+                        <FormAsyncSelect
                             className="text-black text-start"
                             placeholder={t('search.program')}
                             cacheOptions
