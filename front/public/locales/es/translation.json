@@ -97,15 +97,15 @@
         "deleteTerm": "Eliminando período",
         "addCourse": "Añadiendo materia",
         "creditsRequired":"Créditos requeridos:",
-        "creditsRequiredHint":"Si desea que este curso sólo sea recomendado a sus estudiantes una vez que hayan aprobado una cierta cantidad de créditos, puede especificarla aquí.\n\nSi los estudiantes pueden inscribirse al mismo sólo con aprobar las materias correlativas, sin importar sus créditos totales, ignore este campo.",
+        "creditsRequiredHint":"Si desea que esta materia sólo sea recomendada a sus estudiantes una vez que hayan aprobado una cierta cantidad de créditos, puede especificarla aquí.\n\nSi los estudiantes pueden inscribirse a la misma sólo con aprobar las materias correlativas, sin importar sus créditos totales, ignore este campo.",
         "areYouSureCourse": "¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?",
         "areYouSureProgram": "¿Seguro que desea eliminar la carrera '{{code}} - {{name}}'?",
         "areYouSureClass": "¿Seguro que desea eliminar la comisión {{class}} de la materia '{{code}} - {{name}}' del período {{term}}?",
         "areYouSureBuilding": "¿Seguro que desea eliminar la sede '{{code}} - {{name}}'? Cualquier clase que se de en esta sede también será removida de su comisión correspondiente.",
-        "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'? Todas las comisiones creadas para este período también serán eliminadas, sin importar su curso asociado.",
+        "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'? Todas las comisiones creadas para este período también serán eliminadas, sin importar su materia asociada.",
         "noRemainingCoursesProgram": "No quedan materias correspondientes a este plan.",
         "noRemainingCourses": "No quedan más materias.",
-        "inputTextToSearch": "Escriba el nombre o código de un curso para buscarlo.",
+        "inputTextToSearch": "Escriba el nombre o código de una materia para buscarla.",
         "cancel": "Cancelar",
         "delete": "Eliminar",
         "add": "Añadir",
@@ -147,14 +147,18 @@
         "search": "Busque una universidad",
         "verify": "Marcar como verificado",
         "unverify": "Revocar verificación",
-        "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la universidad a nuestra lista.\nPuede continuar usando AutoScheduler con normalidad, pero los estudiantes no podrán registrarse como alumnos de su institución hasta completar el proceso de verificación.",
+        "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la universidad a nuestra lista.\n\nPuede continuar usando AutoScheduler con normalidad para cargar información sobre sus sedes, períodos próximos, materias y carreras.\nSin embargo, los estudiantes no podrán registrarse como alumnos de su institución hasta completar el proceso de verificación.",
         "whatIsTermPublish": "Los estudiantes solo pueden buscar cronogramas de períodos que usted haya publicado."
     },
     "terms": {
         "hide": "Ocultar",
         "publish": "Publicar"
     },
+    "course":{
+        "pickAProgram":"Seleccione una carrera para ver las materias correlativas definidas para esta materia bajo ese plan de estudios."
+    },
     "forms":{
+        "courseClasses":"Comisiones",
         "createClass":"Crear comisión",
         "editClass":"Editar comisión",
         "course":"Materia",
@@ -171,7 +175,7 @@
         "courseName":"Nombre de materia",
         "courseCode":"Código/ID de la materia",
         "creditsEarned":"Créditos otorgados",
-        "creditsEarnedTooltip":"Cantidad de créditos que el alumno recibe al aprobar este curso.",
+        "creditsEarnedTooltip":"Cantidad de créditos que el alumno recibe al aprobar esta materia.",
         "requirements":"Correlativas",
         "editProgram":"Editar Carrera",
         "createProgram":"Crear Carrera",
@@ -181,18 +185,19 @@
         "courseRequiresCredits":"(Requiere {{credits}} créditos)",
         "mandatoryCourses":"Materias obligatorias",
         "optionalCourses":"Materias electivas",
+        "optionalCoursesTooltip":"Para graduarse de esta carrera, un estudiante debe no solo aprobar todas las materias obligatorias listadas debajo, sino también ganar esta cantidad de créditos aprobando materias electivas para esta carrera.",
         "editBuilding": "Editar Sede",
         "createBuilding": "Crear Sede",
         "buildingCode": "Código/ID de sede",
         "buildingName": "Nombre de la sede",
-        "timeToDestination": "Distancia a destinos",
+        "timeToDestination": "Distancia a otras sedes",
         "minutes":"mins.",
         "onlyBuilding": "This is your only building.",
-        "selectProgram": "Seleccione una carrera para ver sus correlativas para este curso.",
+        "selectProgram": "Seleccione una carrera para ver las correlativas para esta materia bajo ese plan de estudios.",
         "save":"Guardar",
         "placeholders":{
             "className":"Grupo X",
-            "termName": "Período X",
+            "termName": "Semestre X, Año Y",
             "termCode":"2024-C1",
             "courseName":"Ejemplos I",
             "courseCode":"01.01",
@@ -206,8 +211,8 @@
                 "minLength":"La comisión debe tener un nombre.",
                 "maxLength":"El nombre de la comisión no puede superar los 25 characters.",
                 "isRequired":"La comisión debe tener un nombre.",
-                "codeAlreadyTaken":"Ya existe una comisión con ese nombre para este curso y período.",
-                "noCourseSelected": "Seleccione un curso para esta comisión."
+                "codeAlreadyTaken":"Ya existe una comisión con ese nombre para esta materia y período.",
+                "noCourseSelected": "Seleccione una materia para esta comisión."
             },
             "term":{
                 "minLength":"El nombre del período debe tener al menos 3 caracteres.",
@@ -227,7 +232,7 @@
                 "maxNameLength":"El nombre de la materia no puede superar los 50 characters.",
                 "nameIsRequired":"La materia debe tener un nombre.",
                 "codeAlreadyTaken":"Ya existe una materia con ese código.",
-                "positiveZeroOptionalCredits":"Aprobar este curso debería otorgar 0 o más créditos."
+                "positiveZeroOptionalCredits":"Aprobar esta materia debería otorgar 0 o más créditos."
             },
             "program":{
                 "minCodeLength":"El plan de carrera debe tener un código con el cual la identifique.",
@@ -276,13 +281,16 @@
         "503": "No pudimos conectarnos con el servidor de AutoScheduler.",
         "noTerms": "No se encontraron períodos. Cree al menos uno para crear comisiones.",
         "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones.",
-        "notPartOfAnyPrograms": "Este curso no está asociado a ningún programa. Añádalo a un programa para definir sus correlativas bajo el mismo."
+        "notPartOfAnyPrograms": "Esta materia no está asociada a ninguna carrera.\nAñádala a una carrera para definir sus correlativas bajo el plan de estudios de la misma."
     },
     "noSchedulesFound": "No hubo planes encontrados para su búsqueda.",
     "noDefinedRequirements": "No hay correlativas definidas.",
     "selectNoOptions": "Ingrese un caracter para buscar.",
     "selectNoResults": "No se hallaron resultados para su búsqueda.",
     "goHome": "Volver al inicio",
+    "seePrograms": "Click aquí para ver sus carreras",
+    "seeClasses": "Click aquí para ver las comisiones de esta materia",
+    "seeTerms": "Click aquí para crear un período",
     "pagination": {
         "page": "Página {{page}}",
         "popover": "Haga click aquí para seleccionar una página.",

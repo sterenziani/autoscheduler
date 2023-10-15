@@ -194,6 +194,7 @@ function EditProgramPage(props) {
                         touched={touched.programName} onChange={handleChange} onBlur={handleBlur}
                     />
                     <FormInputField
+                        tooltipMessage="forms.optionalCoursesTooltip"
                         id="program-optional-credits"
                         label="forms.programOptionalCredits" name="programOptionalCredits"
                         placeholder="0"

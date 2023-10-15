@@ -147,14 +147,18 @@
         "search": "Search for a university",
         "verify": "Mark as verified",
         "unverify": "Revoke verification",
-        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with {{universityName}} so we can verify the account and add your school to our list.\nYou can continue using AutoScheduler normally, but students won't be able to register as students of your school until the verification process is complete.",
+        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with {{universityName}} so we can verify the account and add your school to our list.\n\nYou can continue using AutoScheduler normally to set up your school's buildings, upcoming terms, courses and programs.\nHowever, students won't be able to register as students of your school until the verification process is complete.",
         "whatIsTermPublish": "Students will only be able to search schedules for terms you have published."
     },
     "terms": {
         "hide": "Hide",
         "publish": "Publish"
     },
+    "course":{
+        "pickAProgram":"Choose a program to see the required courses defined for this course under that program."
+    },
     "forms":{
+        "courseClasses":"Classes",
         "createClass":"Create class",
         "editClass":"Edit class",
         "course":"Course",
@@ -181,18 +185,19 @@
         "courseRequiresCredits":"(Requires {{credits}} credits)",
         "mandatoryCourses":"Mandatory courses",
         "optionalCourses":"Optional courses",
+        "optionalCoursesTooltip":"To graduate from this program, a student must not only pass all mandatory courses listed below, but also earn this amount of credits from this program's optional courses.",
         "editBuilding": "Edit Building",
         "createBuilding": "Create Building",
         "buildingCode": "Building Code/ID",
         "buildingName": "Building name",
-        "timeToDestination": "Time to destination",
+        "timeToDestination": "Time to other buildings",
         "minutes":"mins",
         "onlyBuilding": "This is your only building.",
         "selectProgram": "Please select a program to view its requirements for this course.",
         "save":"Save",
         "placeholders":{
             "className":"Group X",
-            "termName": "Term X",
+            "termName": "Semester X, Year Y",
             "termCode":"2024-S1",
             "courseName":"Example 101",
             "courseCode":"01.01",
@@ -276,13 +281,16 @@
         "503": "Could not connect to the AutoScheduler server.",
         "noTerms": "No terms have been found. Create at least one term to define classes for a course.",
         "noBuildings": "No buildings have been found. Create at least one building to define classes for a course.",
-        "notPartOfAnyPrograms": "This course is not associated with any program yet. Add it to a program's list of courses to define course requirements under that program."
+        "notPartOfAnyPrograms": "This course is not associated with any program yet.\nAdd it to a program's list of courses to define course requirements under that program."
     },
     "noSchedulesFound": "Could not find any recommended schedules for your search.",
     "noDefinedRequirements": "No requirements defined.",
     "selectNoOptions": "Please type in a character to search for options.",
     "selectNoResults": "No results found for the given query.",
     "goHome": "Go home",
+    "seePrograms": "Click here to see your programs",
+    "seeClasses": "Click here to see this course's classes",
+    "seeTerms": "Click here to create a term",
     "pagination": {
         "page": "Page {{page}}",
         "popover": "Click here for page selection.",

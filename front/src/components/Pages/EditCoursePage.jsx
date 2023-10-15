@@ -13,6 +13,7 @@ import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstant
 import Roles from '../../resources/RoleConstants';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
+import LinkButton from '../Common/LinkButton';
 
 const EXISTING_COURSE_ERROR = "COURSE_ALREADY_EXISTS"
 const INVALID_NAME_ERROR = "INVALID_NAME"
@@ -232,6 +233,15 @@ function EditCoursePage(props) {
                         touched={touched.courseCredits} onChange={handleChange} onBlur={handleBlur}
                     />
                     {
+                        id &&
+                        <Row key="requirements-group" className='py-0 mx-auto form-row text-center'>
+                            <FormInputLabel label="forms.courseClasses"/>
+                            <div className="col-md-9 text-start">
+                                <LinkButton variant="link" className="m-0 p-0" textKey="seeClasses" href={`/courses/${id}`}/>
+                            </div>
+                        </Row>
+                    }
+                    {
                         (id && programs && programs.length > 0)? [
                             <Row key="requirements-group" className='mx-auto form-row text-center'>
                                 <FormInputLabel label="forms.requirements"/>
@@ -264,7 +274,13 @@ function EditCoursePage(props) {
                                 </div>
                             </Row>
                         ] : [
-                            <p key="no-requirements-message" className="mt-5">{t('errors.notPartOfAnyPrograms')}</p>
+                                id &&
+                                <div key="no-requirements-message" className="my-5">
+                                    <p className="mb-0">{t('errors.notPartOfAnyPrograms')}</p>
+                                    <div className="text-center">
+                                        <LinkButton variant="link" textKey="seePrograms" href={'/?tab=programs'}/>
+                                    </div>
+                                </div>
                         ]
                     }
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>

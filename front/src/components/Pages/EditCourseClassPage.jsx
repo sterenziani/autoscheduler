@@ -312,9 +312,9 @@ function EditCourseClassPage(props) {
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
 
-                    <div className='row mx-auto form-row text-center'>
+                    <div className='row mx-auto form-row'>
                         <FormInputLabel label="forms.course"/>
-                        <div className="col-md-9">
+                        <div className="col-md-9 text-start">
                         {
                             id && <p className="my-auto mx-2 text-start text-gray fw-normal">{courseClass.course.name}</p>
                         }

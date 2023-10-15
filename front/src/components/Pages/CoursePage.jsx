@@ -22,7 +22,8 @@ function CoursePage(props) {
 
     const [user] = useState(ApiService.getActiveUser())
     const [course, setCourse] = useState()
-    const [selectedProgram, setSelectedProgram] = useState(null);
+    const [selectedProgram, setSelectedProgram] = useState(null)
+    const [noProgramsWarning, setNoProgramsWarning] = useState(false)
 
     useEffect(() => {
         if(!user)
@@ -39,6 +40,17 @@ function CoursePage(props) {
         })
     }, [id])
 
+/*
+    useEffect( () => {
+        ApiService.isCourseInAnyPrograms(id).then((resp) => {
+            console.log(resp.data)
+            if (resp && resp.status && resp.status !== OK)
+                setError(resp.status)
+            else
+                setNoProgramsWarning(!resp.data)
+        })
+    }, [])
+*/
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
             ApiService.getProgramsCourseIsIn(id, inputValue).then((resp) => {
@@ -46,6 +58,8 @@ function CoursePage(props) {
                     setError(resp.status)
                     callback([])
                 } else {
+                    if(resp.data.length === 0)
+                        setNoProgramsWarning(true)
                     callback(resp.data)
                 }
             })
@@ -86,21 +100,41 @@ function CoursePage(props) {
                         title={t('tabs.requiredCourses')}
                     >
                         <div className="bg-primary rounded-bottom py-4">
-                            <FormAsyncSelect
-                                className="text-black text-start w-75 m-auto"
-                                placeholder={t('register.program')}
-                                cacheOptions
-                                defaultOptions
-                                noOptionsMessage={() => t('selectNoResults')}
-                                getOptionLabel={e => e.internalId+' - '+e.name}
-                                getOptionValue={e => e.id}
-                                loadOptions={loadProgramOptions}
-                                onChange={opt => onChangePrograms(opt)}
-                            />
-                            {
-                                selectedProgram && <CourseRequirementsList course={course} program={selectedProgram}/>
-                            }
-                            <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit'} textKey="edit"/>
+                        {
+                            noProgramsWarning &&
+                                <div className="mx-5 display-newlines py-2 text-center">
+                                    <p className="mb-0">{t('errors.notPartOfAnyPrograms')}</p>
+                                    <LinkButton variant="link" textKey="seePrograms" className="text-white" href={'/?tab=programs'}/>
+                                </div>
+                        }
+                        {
+                            !noProgramsWarning &&
+                            <>
+                                {
+                                    !selectedProgram &&
+                                    <div className="mx-5 display-newlines py-2 text-center">
+                                        <p className="mb-0">{t('course.pickAProgram')}</p>
+                                    </div>
+                                }
+                                <FormAsyncSelect
+                                    className="text-black text-start w-75 m-auto"
+                                    placeholder={t('register.program')}
+                                    cacheOptions
+                                    defaultOptions
+                                    noOptionsMessage={() => t('selectNoResults')}
+                                    getOptionLabel={e => e.internalId+' - '+e.name}
+                                    getOptionValue={e => e.id}
+                                    loadOptions={loadProgramOptions}
+                                    onChange={opt => onChangePrograms(opt)}
+                                />
+                                {selectedProgram &&
+                                    <>
+                                        <CourseRequirementsList course={course} program={selectedProgram}/>
+                                        <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit'} textKey="edit"/>
+                                    </>
+                                }
+                            </>
+                        }
                         </div>
                     </Tab>
                     <Tab className="text-center" eventKey="classes" title={t('tabs.courseClasses')}>
@@ -109,6 +143,9 @@ function CoursePage(props) {
                         </div>
                     </Tab>
                 </Tabs>
+                <div className="mt-5 text-center">
+                    <LinkButton variant="primary" textKey="goHome" href={'/'}/>
+                </div>
             </div>
         </React.Fragment>
     );

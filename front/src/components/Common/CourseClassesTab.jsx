@@ -5,6 +5,7 @@ import ApiService from '../../services/ApiService';
 import { OK } from '../../services/ApiConstants';
 import CourseClassesList from '../Lists/CourseClassesList';
 import ErrorMessage from '../Common/ErrorMessage';
+import LinkButton from '../Common/LinkButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function CourseClassesTab(props) {
@@ -50,7 +51,14 @@ function CourseClassesTab(props) {
     if (error)
         return <ErrorMessage status={error}/>
     if(!terms || terms.length < 1)
-        return <React.Fragment><div className="mx-5 py-4"><p>{t('errors.noTerms')}</p></div></React.Fragment>
+        return (
+            <React.Fragment>
+                <div className="py-5 text-center">
+                    <p className="mb-0">{t('errors.noTerms')}</p>
+                    <LinkButton variant="link" textKey="seeTerms" className="text-white" href={'/terms/new'}/>
+                </div>
+            </React.Fragment>
+        )
     return (
         <React.Fragment>
             <div className="mx-5 py-4">
