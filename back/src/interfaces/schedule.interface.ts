@@ -20,6 +20,8 @@ export interface IScheduleInputData {
 
     lectureBuilding: Map<string, string>                // lectureId -> buildingId
     distances: Map<string, Map<string, number>>         // buildingId 1 -> buildingId 2 -> distance between 1-2
+
+    remainingOptionalCredits: number                    // Remaining optional course credits needed to graduate
 }
 
 export interface ISchedule {

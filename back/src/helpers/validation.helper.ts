@@ -192,6 +192,11 @@ export const isValidName = (name: string): boolean => {
     return isValidText(name);
 };
 
+export const isValidCourseClassName = (name: string): boolean => {
+    if (name.length < 1 || name.length > 80) return false;
+    return isValidText(name);
+};
+
 export const isValidFilter = (filter?: string): boolean => {
     if (filter === undefined) return true;
     if (filter.length > 180) return false;

@@ -48,10 +48,12 @@ export default class ScheduleService {
         targetHours: number,
         reduceDays: boolean,
         prioritizeUnlocks: boolean,
-        unavailableTimeSlots: TimeRange[]
+        unavailableTimeSlots: TimeRange[],
+        amountToReturn: number=10
     ): Promise<IScheduleWithScore[]> {
-        // TODO: Calculate maxOptionalCourseCredits properly
-        const maxOptionalCourseCredits = 12;
+        /*
+        const startTimestamp = new Date();
+        */
 
         // STEPS 1-4 - Get all information needed
         const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId);
@@ -59,8 +61,8 @@ export default class ScheduleService {
         // STEP 5 - Remove courseClasses that fall inside unavailableTimeSlots (done inside getCourseClassCombinations)
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
-        const deadline = new Date(Date.now() + MINUTE_IN_MS)
-        const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, maxOptionalCourseCredits, deadline);
+        const deadline = new Date(Date.now() + MINUTE_IN_MS);
+        const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, deadline);
 
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
@@ -71,8 +73,14 @@ export default class ScheduleService {
             schedules.push({schedule: schedule, score: score});
         }
 
+        /*
+        const endTimestamp = new Date();
+        const secondsElapsed = (endTimestamp.getTime()-startTimestamp.getTime())/1000;
+        console.log("Processed " +courseClassCombinations.length +" in " +secondsElapsed +" seconds.\n");
+        */
+
         // STEP 10 - Return sorted list of schedules by score
-        return schedules.sort((a, b) =>  b.score-a.score).slice(0, 10);
+        return schedules.sort((a, b) =>  b.score-a.score).slice(0, amountToReturn);
     }
 
     private areTimeRangesCompatible(timeRangeA: TimeRange[], timeRangeB: TimeRange[]): boolean {
@@ -113,6 +121,7 @@ export default class ScheduleService {
         // Sort course IDs by their importance (in case of a draw, mandatory courses take proirity)
         const mandatoryIds = inputData.mandatoryCourseIds;
         const importance = inputData.indirectCorrelativesAmount;
+
         viableCourseIds.sort((c1,c2) => {
             const importance1 = importance.get(c1);
             const importance2 = importance.get(c2);
@@ -139,6 +148,9 @@ export default class ScheduleService {
                 if(classes.length > 0)
                     viableCourseClassesArray.push(classes);
             }
+
+            const course = inputData.courses.get(courseId);
+            if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
         }
         return viableCourseClassesArray;
     }
@@ -147,7 +159,7 @@ export default class ScheduleService {
     // Since getting all combinations takes too long, the following sacrifices have been made:
     // -- When deadline is passed, the function will return all valid combinations found so far
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
-    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, maxOptionalCourseCredits: number, deadline: Date): CourseClass[][] {
+    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date): CourseClass[][] {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
         let index = viableCourseClassesArray.length-1;
         let validCombos: CourseClass[][] = [];
@@ -162,6 +174,10 @@ export default class ScheduleService {
             if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             const courseOptionalCredits = inputData.optionalCourseIds.includes(courseId)? course.creditValue : 0;
 
+            /*
+            console.log("\tConsidering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
+            */
+
             const newValidCombos: CourseClass[][] = [];
             const newValidCombosOptionalCredits: number[] = [];
 
@@ -175,8 +191,8 @@ export default class ScheduleService {
                 const combo = validCombos[i];
                 const comboOptionalCredits = validCombosOptionalCredits[i];
 
-                // Skip this course if adding it makes the combo exceed the max amount of optional credits we can suggest
-                if(courseOptionalCredits > 0 && comboOptionalCredits > maxOptionalCourseCredits)
+                // Skip this course if this combo already exceeds the max amount of optional credits we can suggest
+                if(courseOptionalCredits > 0 && comboOptionalCredits > inputData.remainingOptionalCredits)
                     continue;
 
                 // If adding a class belonging to the current course to an existing combo is valid, push it to the array

@@ -44,6 +44,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_NAME',
             message: 'Provided name is invalid. It must have a length between 3 and 80 characters and not contain any weird characters.',
         },
+        INVALID_COURSE_CLASS_NAME: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_NAME',
+            message: 'Provided name is invalid. It must have a length between 1 and 80 characters and not contain any weird characters.',
+        },
         INVALID_FILTER: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_FILTER',

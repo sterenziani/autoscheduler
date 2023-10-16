@@ -34,7 +34,7 @@ import TermService from '../services/term.service';
 import StudentService from '../services/student.service';
 import Student from '../models/abstract/student.model';
 import { removeDuplicates } from '../helpers/collection.helper';
-import { DEFAULT_PRIORITIZE_UNLOCKS, DEFAULT_REDUCE_DAYS, DEFAULT_TARGET_HOURS } from '../constants/schedule.constants';
+import { DEFAULT_PRIORITIZE_UNLOCKS, DEFAULT_REDUCE_DAYS, DEFAULT_TARGET_HOURS, DEFAULT_RETURNED_AMOUNT } from '../constants/schedule.constants';
 import ScheduleService from '../services/schedule.service';
 import { IScheduleWithScore } from '../interfaces/schedule.interface';
 
@@ -645,12 +645,13 @@ export class StudentController {
         const prioritizeUnlocks = validateBoolean(req.query.prioritizeUnlocks) ?? DEFAULT_PRIORITIZE_UNLOCKS;
         const unavailableTimesStrings = validateElemOrElemArray(req.query.unavailable, validateString);
         const unavailableTimes = validateTimes(unavailableTimesStrings) ?? [];
+        const amountToReturn = validateInt(req.query.count) ?? DEFAULT_RETURNED_AMOUNT;
 
         if (!termId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
         if (!isValidTimes(unavailableTimes, true)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
 
         try {
-            const schedules: IScheduleWithScore[] = await this.schedulesService.getSchedules(studentId, universityId, programId, termId, hours, reduceDays, prioritizeUnlocks, unavailableTimes);
+            const schedules: IScheduleWithScore[] = await this.schedulesService.getSchedules(studentId, universityId, programId, termId, hours, reduceDays, prioritizeUnlocks, unavailableTimes, amountToReturn);
             res.status(HTTP_STATUS.OK).send(ScheduleDto.schedulesToDto(schedules))
         } catch (e) {
             next(e);

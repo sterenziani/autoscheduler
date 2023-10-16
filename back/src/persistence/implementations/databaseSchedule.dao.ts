@@ -1,6 +1,6 @@
 import ScheduleDao from '../abstract/schedule.dao';
 import { IScheduleInputData } from '../../interfaces/schedule.interface';
-import { deglobalizeField, getFromIdFromRelId, getNodes, getToIdFromRelId, graphDriver, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
+import { deglobalizeField, getFromIdFromRelId, getValue, getNodes, getToIdFromRelId, graphDriver, parseErrors } from '../../helpers/persistence/graphPersistence.helper';
 import { QueryResult, RecordShape } from 'neo4j-driver';
 import Course from '../../models/abstract/course.model';
 import DatabaseCourse from '../../models/implementations/databaseCourse.model';
@@ -28,6 +28,15 @@ export default class DatabaseScheduleDao extends ScheduleDao {
     async getScheduleInfo(universityId: string, programId: string, termId: string, studentId: string): Promise<IScheduleInputData> {
         const session = graphDriver.session();
         try {
+            // We get optional credits remaining to graduate
+            const remainingOptionalCreditsResult = await session.run(
+                'MATCH (s:Student {id:$studentId})-[:FOLLOWS]->(p:Program {id:$programId}) '+
+                'OPTIONAL MATCH (s)-[:COMPLETED]->(c:Course)-[:IN {optional:true}]->(p) WITH p, SUM(c.creditValue) AS finishedOptionalCredits '+
+                'RETURN p.optionalCourseCredits-finishedOptionalCredits AS remainingOptionalCredits',
+                {programId, studentId}
+            );
+            const remainingOptionalCredits = getValue<number>(remainingOptionalCreditsResult, 'remainingOptionalCredits');
+
             // We get enabled courses
             const coursesResult = await session.run(
                 'MATCH (s:Student {id: $studentId})-[:COMPLETED]->(c:Course) ' +
@@ -48,7 +57,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
                 'MATCH (c:Course {id: courseId})<-[:OF]-(cc:CourseClass)-[:HAPPENS_IN]->(:Term {id: $termId}) ' +
                 'MATCH (cc)<-[:OF]-(l: Lecture) ' +
                 'WITH cc, c.id AS cId, sum(duration.between(l.startTime, l.endTime)) AS duration ' +
-                'RETURN {properties: cc{.*, courseId:cId, termId:$termId, weeklyClassTimeInMinutes: (duration.hours*60+duration.minutes)}}',
+                'RETURN {properties: cc{.*, courseId:cId, termId:$termId, weeklyClassTimeInMinutes: duration.minutes}}',
                 {courseIds, termId}
             );
             const courseClassInfo = this.parseCourseClasses(courseClassResult);
@@ -83,7 +92,8 @@ export default class DatabaseScheduleDao extends ScheduleDao {
                 courseOfCourseClass: courseClassInfo.courseOfCourseClass,
                 lecturesOfCourseClass: lectureInfo.lecturesOfCourseClass,
                 lectureBuilding: lectureInfo.lectureBuilding,
-                distances: distanceMap
+                distances: distanceMap,
+                remainingOptionalCredits: remainingOptionalCredits
             }
         } catch (err) {
             throw parseErrors(err, '[ScheduleDao:getScheduleInfo]');

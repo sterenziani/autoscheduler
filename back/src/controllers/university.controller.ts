@@ -13,7 +13,7 @@ import { API_SCOPE, DEFAULT_LOCALE, RESOURCES } from '../constants/general.const
 import University from '../models/abstract/university.model';
 import GenericException from '../exceptions/generic.exception';
 import { ERRORS } from '../constants/error.constants';
-import { isValidDay, isValidEmail, isValidFilter, isValidInternalId, isValidName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateNumber, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateStringToNumberObject, validateString, validateTimes } from '../helpers/validation.helper';
+import { isValidDay, isValidEmail, isValidFilter, isValidInternalId, isValidName, isValidCourseClassName, isValidPassword, isValidTime, isValidTimeRange, isValidTimes, validateArray, validateNumber, validateBoolean, validateBuildingDistances, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateStringToNumberObject, validateString, validateTimes } from '../helpers/validation.helper';
 import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
@@ -520,9 +520,9 @@ export class UniversityController {
         const internalId = validateString(req.body.internalId);
 
         if (!termId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
-        if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (!isValidCourseClassName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_COURSE_CLASS_NAME));
         if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
-        
+
         try {
             const courseClass: CourseClass = await this.courseClassService.createCourseClass(universityId, courseId, termId, name, internalId);
             res.status(HTTP_STATUS.CREATED)
@@ -543,9 +543,9 @@ export class UniversityController {
         const internalId = validateString(req.body.internalId);
 
         if (!termId && !name && !internalId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
-        if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (name && !isValidCourseClassName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_COURSE_CLASS_NAME));
         if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
-        
+
         try {
             const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, courseId, termId, name, internalId);
             res.status(HTTP_STATUS.OK)
@@ -998,9 +998,9 @@ export class UniversityController {
         const internalId = validateString(req.body.internalId);
 
         if (!termId && !name && !internalId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
-        if (name && !isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+        if (name && !isValidCourseClassName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_COURSE_CLASS_NAME));
         if (internalId && !isValidInternalId(internalId)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_INTERNAL_ID));
-        
+
         try {
             const courseClass: CourseClass = await this.courseClassService.modifyCourseClass(courseClassId, universityId, undefined, termId, name, internalId);
             res.status(HTTP_STATUS.OK)
