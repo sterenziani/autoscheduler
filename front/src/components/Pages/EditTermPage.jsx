@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
@@ -24,6 +24,8 @@ function EditTermPage(props) {
             .min(1, 'forms.errors.term.minCodeLength')
             .max(25, 'forms.errors.term.maxCodeLength')
             .required('forms.errors.term.codeIsRequired'),
+        startDate: Yup.string()
+            .required('forms.errors.term.dateIsRequired'),
     });
 
     const navigate = useNavigate()
@@ -35,7 +37,6 @@ function EditTermPage(props) {
 
     const [user] = useState(ApiService.getActiveUser())
     const [term, setTerm] = useState(null)
-    const [startDate, setStartDate] = useState()
 
     useEffect(() => {
         if(!user)
@@ -50,7 +51,7 @@ function EditTermPage(props) {
                 }
                 else{
                     const date = new Date(resp.data.startDate)
-                    setStartDate(date.toISOString().split('T')[0])
+                    resp.data.startDate = date.toISOString().split('T')[0]
                     setTerm(resp.data)
                 }
                 setLoading(false)
@@ -64,8 +65,7 @@ function EditTermPage(props) {
             }
             else{
                 if(!term){
-                    setTerm({"name": t("forms.placeholders.termName"), "internalId": t("forms.placeholders.termCode")})
-                    setStartDate(new Date().toISOString().slice(0, 10))
+                    setTerm({"name": t("forms.placeholders.termName"), "internalId": t("forms.placeholders.termCode"), "startDate": new Date().toISOString().slice(0, 10)})
                     setLoading(false)
                 }
             }
@@ -73,16 +73,24 @@ function EditTermPage(props) {
         if(user) execute()
     },[user, term, id, t])
 
-    const onChangeStartDate = (e) => {
-        setStartDate(e.target.value)
+    const [unsavedForm, setUnsavedForm] = useState(false)
+    const FormObserver = () => {
+        const { values } = useFormikContext()
+        useEffect(() => {
+            const nameChanged = (term && values.termName !== term.name)
+            const internalIdChanged = (term && values.code !== term.internalId)
+            const startDateChanged = (term && values.startDate !== term.startDate)
+            setUnsavedForm(nameChanged || internalIdChanged || startDateChanged)
+        }, [values]);
+        return null;
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
-        setSubmitting(true);
-        if (startDate && values.termName && values.code)
+        setSubmitting(true)
+        if (values.termName && values.code && values.startDate)
         {
             const published = id? term.published : false
-            const browserDate = new Date(startDate)
+            const browserDate = new Date(values.startDate)
             const gmtTime = new Date(browserDate.getTime() + browserDate.getTimezoneOffset()*60000)
             const resp = await ApiService.saveTerm(term?(term.id):undefined, values.termName, values.code, gmtTime, published)
             if(resp.status === OK || resp.status === CREATED)
@@ -93,7 +101,7 @@ function EditTermPage(props) {
             }
         }
         else {
-            setSubmitting(false);
+            setSubmitting(false)
         }
     };
 
@@ -117,9 +125,10 @@ function EditTermPage(props) {
                 {error && error === EXISTING_TERM_ERROR && (<p className="form-error">{t('forms.errors.term.codeAlreadyTaken')}</p>)}
                 {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
 
-                <Formik initialValues={{ termName: term.name, code: term.internalId }} validationSchema={TermSchema} onSubmit={onSubmit}>
+                <Formik initialValues={{ termName: term.name, code: term.internalId, startDate: term.startDate }} validationSchema={TermSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                     <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                        <FormObserver/>
                         <FormInputField
                             id="term-code"
                             label="forms.termCode" name="code"
@@ -135,12 +144,12 @@ function EditTermPage(props) {
                             touched={touched.termName} onChange={handleChange} onBlur={handleBlur}
                         />
                         <FormInputField
-                            id="term-date" label="forms.startDate"
+                            id="term-date"
+                            label="forms.startDate" name="startDate"
                             type="date" className="w-100 text-start timepicker"
-                            value={startDate} onChange={onChangeStartDate}
+                            value={values.startDate} error={errors.startDate}
+                            touched={touched.startDate} onChange={handleChange} onBlur={handleBlur}
                         />
-                        {!startDate && (<p className="form-error">{t('forms.errors.term.dateIsRequired')}</p>)}
-
                         <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                     </Form>
                 )}
