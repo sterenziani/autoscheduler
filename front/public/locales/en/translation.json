@@ -197,6 +197,10 @@
         "onlyBuilding": "This is your only building.",
         "selectProgram": "Please select a program to view its requirements for this course.",
         "save":"Save",
+        "changesNotSaved": "Unsaved changes",
+        "areYouSureLeave": "Are you sure you want to leave? Changes you made may not be saved.",
+        "cancel": "Cancel",
+        "leave": "Leave",
         "placeholders":{
             "className":"Group X",
             "termName": "Semester X, Year Y",

@@ -197,6 +197,10 @@
         "onlyBuilding": "This is your only building.",
         "selectProgram": "Seleccione una carrera para ver las correlativas para esta materia bajo ese plan de estudios.",
         "save":"Guardar",
+        "changesNotSaved": "Cambios sin guardar",
+        "areYouSureLeave": "¿Está seguro de que quiere salir? Los cambios que ha hecho no se guardarán.",
+        "cancel": "Cancelar",
+        "leave": "Salir",
         "placeholders":{
             "className":"Grupo X",
             "termName": "Semestre X, Año Y",

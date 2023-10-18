@@ -5,6 +5,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { Formik, useFormikContext } from 'formik';
+import LeavePagePrompt from '../Common/LeavePagePrompt'
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
@@ -35,7 +36,7 @@ function EditTermPage(props) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState()
 
-    const [user] = useState(ApiService.getActiveUser())
+    const user = ApiService.getActiveUser()
     const [term, setTerm] = useState(null)
 
     useEffect(() => {
@@ -61,7 +62,7 @@ function EditTermPage(props) {
         async function execute() {
             if(id){
                 if(!term) await Promise.all([loadTerm()]);
-                else setLoading(false)
+                else if(loading) setLoading(false)
             }
             else{
                 if(!term){
@@ -71,7 +72,7 @@ function EditTermPage(props) {
             }
         }
         if(user) execute()
-    },[user, term, id, t])
+    },[user, term, id, t, loading])
 
     const [unsavedForm, setUnsavedForm] = useState(false)
     const FormObserver = () => {
@@ -128,6 +129,7 @@ function EditTermPage(props) {
                 <Formik initialValues={{ termName: term.name, code: term.internalId, startDate: term.startDate }} validationSchema={TermSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                     <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                        <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
                         <FormObserver/>
                         <FormInputField
                             id="term-code"
