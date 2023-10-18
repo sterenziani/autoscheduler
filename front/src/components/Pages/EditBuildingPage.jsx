@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner, Row, Col } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
+import LeavePagePrompt from '../Common/LeavePagePrompt'
+import structuredClone from '@ungap/structured-clone';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import FormInputLabel from '../Common/FormInputLabel';
@@ -35,7 +37,7 @@ function EditBuildingPage(props) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState()
 
-    const [user] = useState(ApiService.getActiveUser())
+    const user = ApiService.getActiveUser()
     const [building, setBuilding] = useState(null)
     const [buildings, setBuildings] = useState()
     const [distances, setDistances] = useState()
@@ -71,7 +73,7 @@ function EditBuildingPage(props) {
                     // Set defined distances
                     resp.data.distances.forEach((d) => {
                         if(d.distancedBuildingId !== id){
-                            dist[d.distancedBuildingId] = {building: buildings[d.distancedBuildingId], time: d.distance}
+                            dist[d.distancedBuildingId] = {building: buildings[d.distancedBuildingId], time: Number(d.distance)}
                         }
                     })
 
@@ -104,13 +106,31 @@ function EditBuildingPage(props) {
             if(building && buildings)
                 setLoading(false)
         }
-        if(user) execute();
-    },[user, buildings, id, t, building])
+        execute();
+    },[buildings, id, t, building])
 
     const onChangeTime = (e, entry) => {
-        const distancesCopy = Object.assign([], distances)
-        distancesCopy[entry.building.id].time = Number(e.target.value);
+        const distancesCopy = structuredClone(distances)
+        distancesCopy[entry.building.id].time = Number(e.target.value)
         setDistances(distancesCopy)
+    }
+
+    const [unsavedForm, setUnsavedForm] = useState(false)
+    const FormObserver = () => {
+        const { values } = useFormikContext()
+        useEffect(() => {
+            const nameChanged = (building && values.buildingName !== building.name)
+            const internalIdChanged = (building && values.buildingInternalId !== building.internalId)
+            let distancesChanged = false
+            if(distances && building.distances){
+                for(const b of building.distances){
+                    if(!distancesChanged && b.buildingId !== b.distancedBuildingId && Number(b.distance) !== distances[b.distancedBuildingId].time)
+                        distancesChanged = true
+                }
+            }
+            setUnsavedForm(nameChanged || internalIdChanged || distancesChanged)
+        }, [values]);
+        return null;
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
@@ -150,10 +170,12 @@ function EditBuildingPage(props) {
                 <h2 className="mt-3">{t(id?'forms.editBuilding':'forms.createBuilding')}</h2>
                 {error && error === EXISTING_BUILDING_ERROR && (<p className="form-error">{t('forms.errors.building.codeAlreadyTaken')}</p>)}
                 {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
-
                 <Formik initialValues={{ buildingName: building.name, buildingInternalId: building.internalId }} validationSchema={BuildingSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                    <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
+                    <FormObserver/>
+
                     <FormInputField
                         id="building-code"
                         label="forms.buildingCode" name="buildingInternalId"
@@ -180,7 +202,7 @@ function EditBuildingPage(props) {
                                             <Form.Label className="my-auto"><h6 className="my-auto">{entry.building.internalId}</h6></Form.Label>
                                         </Col>
                                         <Col className="pe-0" xs={6} md={8}>
-                                            <Form.Control type="number" value={entry.time} onChange={(e) => onChangeTime(e, entry)}/>
+                                            <Form.Control type="number" min={0} value={entry.time} onChange={(e) => onChangeTime(e, entry)}/>
                                         </Col>
                                         <Col className="my-auto text-start mx-0" xs={3} md={2}>
                                             {t("forms.minutes")}

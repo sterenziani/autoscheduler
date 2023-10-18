@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Row, Button, Form, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
+import LeavePagePrompt from '../Common/LeavePagePrompt'
+import structuredClone from '@ungap/structured-clone';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import FormInputLabel from '../Common/FormInputLabel';
@@ -38,7 +40,7 @@ function EditCoursePage(props) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState()
 
-    const [user] = useState(ApiService.getActiveUser())
+    const user = ApiService.getActiveUser()
     const [course, setCourse] = useState()
     const [programs, setPrograms] = useState()
     const [requirements, setRequirements] = useState()
@@ -86,11 +88,12 @@ function EditCoursePage(props) {
                 }
             }
         }
-        if(user) execute()
-    },[course, id, t, user, programs])
+        execute()
+    },[course, id, t, programs])
 
     useEffect( () => {
-        if(requirements && programs && (!selectedProgram || coursesOfSelectedProgram)) setLoading(false)
+        if(requirements && programs && (!selectedProgram || coursesOfSelectedProgram))
+            setLoading(false)
     },[requirements, coursesOfSelectedProgram, programs, selectedProgram])
 
     const loadRequirements = async(courseId, programId) => {
@@ -100,7 +103,7 @@ function EditCoursePage(props) {
                 setError(resp.status)
             }
             else{
-                const requirementsCopy = Object.assign([], requirements)
+                const requirementsCopy = structuredClone(requirements)
                 requirementsCopy[programId] = resp.data
                 setRequirements(requirementsCopy)
             }
@@ -123,6 +126,21 @@ function EditCoursePage(props) {
         mandatoryCoursesResp.data.forEach((item, i) => delete item['requiredCredits']);
         optionalCoursesResp.data.forEach((item, i) => delete item['requiredCredits']);
         setCoursesOfSelectedProgram([...mandatoryCoursesResp.data, ...optionalCoursesResp.data])
+    }
+
+    const [modifiedRequirements, setModifiedRequirements] = useState(false)
+    const [unsavedForm, setUnsavedForm] = useState(false)
+    const FormObserver = () => {
+        const { values } = useFormikContext()
+
+        useEffect(() => {
+            const internalIdChanged = (course && values.courseCode !== course.internalId)
+            const nameChanged = (course && values.courseName !== course.name)
+            const creditsChanged = (course && values.courseCredits !== course.creditValue)
+
+            setUnsavedForm(internalIdChanged || nameChanged || creditsChanged || modifiedRequirements)
+        }, [values]);
+        return null;
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
@@ -149,19 +167,21 @@ function EditCoursePage(props) {
     };
 
     const onClickTrashCan = (e) => {
-        const requirementsCopy = Object.assign([], requirements);
-        requirementsCopy[selectedProgram.id].splice(requirements[selectedProgram.id].indexOf(e), 1);
+        const requirementsCopy = Object.assign([], requirements)
+        requirementsCopy[selectedProgram.id].splice(requirements[selectedProgram.id].indexOf(e), 1)
         setRequirements(requirementsCopy)
+        setModifiedRequirements(true) // Easier than processing whole requirements map every time
     }
 
     const addRequiredCourse = (courseToAdd) => {
         if (!courseToAdd)
             return;
-        const requirementsCopy = Object.assign({}, requirements)
+        const requirementsCopy = structuredClone(requirements)
         if(!requirementsCopy[selectedProgram.id])
             requirementsCopy[selectedProgram.id] = []
         requirementsCopy[selectedProgram.id].push(courseToAdd)
         setRequirements(requirementsCopy)
+        setModifiedRequirements(true) // Easier than processing whole requirements map every time
     }
 
     const onChangePrograms = (program) => {
@@ -171,7 +191,7 @@ function EditCoursePage(props) {
                 loadRequirements(course.id, program.id)
             }
             else {
-                const requirementsCopy = Object.assign({}, requirements)
+                const requirementsCopy = structuredClone(requirements)
                 requirementsCopy[program.id] = []
                 setRequirements(requirementsCopy)
             }
@@ -209,6 +229,9 @@ function EditCoursePage(props) {
                 <Formik initialValues={{ courseName: course.name, courseCode: course.internalId, courseCredits: course.creditValue  }} validationSchema={CourseSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                    <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
+                    <FormObserver/>
+
                     <FormInputField
                         id="course-code"
                         label="forms.courseCode" name="courseCode"
@@ -226,9 +249,8 @@ function EditCoursePage(props) {
                     <FormInputField
                         tooltipMessage="forms.creditsEarnedTooltip"
                         id="program-optional-credits"
-                        type="number"
                         label="forms.creditsEarned" name="courseCredits"
-                        placeholder="0" min="0"
+                        type="number" placeholder="0" min="0"
                         value={values.courseCredits} error={errors.courseCredits}
                         touched={touched.courseCredits} onChange={handleChange} onBlur={handleBlur}
                     />
@@ -275,13 +297,19 @@ function EditCoursePage(props) {
                             </Row>
                         ] : [
                                 id &&
-                                <div key="no-requirements-message" className="my-5">
+                                <div key="no-requirements-message" className="mt-5 mb-3">
                                     <p className="mb-0">{t('errors.notPartOfAnyPrograms')}</p>
                                     <div className="text-center">
                                         <LinkButton variant="link" textKey="seePrograms" href={'/?tab=programs'}/>
                                     </div>
                                 </div>
                         ]
+                    }
+                    {
+                        !id &&
+                        <div key="new-course-message" className="mt-5 mb-3 display-newlines">
+                            <p className="mb-0">{t('forms.requirementsReturnLater')}</p>
+                        </div>
                     }
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>

@@ -71,8 +71,8 @@ function EditTermPage(props) {
                 }
             }
         }
-        if(user) execute()
-    },[user, term, id, t, loading])
+        execute()
+    },[term, id, t, loading])
 
     const [unsavedForm, setUnsavedForm] = useState(false)
     const FormObserver = () => {

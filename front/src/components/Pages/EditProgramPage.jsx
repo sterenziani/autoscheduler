@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner, Row, Col } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
+import LeavePagePrompt from '../Common/LeavePagePrompt'
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import CourseListForm from '../Lists/CourseListForm';
@@ -35,7 +36,7 @@ function EditProgramPage(props) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState()
 
-    const [user] = useState(ApiService.getActiveUser())
+    const user = ApiService.getActiveUser()
     const [program, setProgram] = useState()
     const [mandatoryCourses, setMandatoryCourses] = useState()
     const [optionalCourses, setOptionalCourses] = useState()
@@ -99,9 +100,23 @@ function EditProgramPage(props) {
             if(program && mandatoryCourses && optionalCourses)
                 setLoading(false)
         }
-        if(user) execute()
-    },[program, mandatoryCourses, optionalCourses, id, t, user])
+        execute()
+    },[program, mandatoryCourses, optionalCourses, id, t])
 
+    const [modifiedCourses, setModifiedCourses] = useState(false)
+    const [unsavedForm, setUnsavedForm] = useState(false)
+    const FormObserver = () => {
+        const { values } = useFormikContext()
+
+        useEffect(() => {
+            const internalIdChanged = (program && values.programCode !== program.internalId)
+            const nameChanged = (program && values.programName !== program.name)
+            const creditsChanged = (program && values.programOptionalCredits !== program.optionalCourseCredits)
+
+            setUnsavedForm(internalIdChanged || nameChanged || creditsChanged || modifiedCourses)
+        }, [values]);
+        return null;
+    }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true);
@@ -132,12 +147,14 @@ function EditProgramPage(props) {
         const mandatoriesCopy = Object.assign([], mandatoryCourses);
         mandatoriesCopy.splice(mandatoryCourses.indexOf(e), 1);
         setMandatoryCourses(mandatoriesCopy)
+        setModifiedCourses(true)
     }
 
     const onClickOptTrashCan = (e) => {
         const optionalsCopy = Object.assign([], optionalCourses);
         optionalsCopy.splice(optionalCourses.indexOf(e), 1);
         setOptionalCourses(optionalsCopy)
+        setModifiedCourses(true)
     }
 
     const addMandatoryCourse = (courseToAdd) => {
@@ -146,6 +163,7 @@ function EditProgramPage(props) {
         const mandatoriesCopy = Object.assign([], mandatoryCourses)
         mandatoriesCopy.push(courseToAdd)
         setMandatoryCourses(mandatoriesCopy)
+        setModifiedCourses(true)
     }
 
     const addOptionalCourse = (courseToAdd) => {
@@ -154,6 +172,7 @@ function EditProgramPage(props) {
         const optionalsCopy = Object.assign([], optionalCourses)
         optionalsCopy.push(courseToAdd)
         setOptionalCourses(optionalsCopy)
+        setModifiedCourses(true)
     }
 
     if(!user)
@@ -179,6 +198,9 @@ function EditProgramPage(props) {
                 <Formik initialValues={{ programName: program.name, programCode: program.internalId, programOptionalCredits: program.optionalCourseCredits }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                    <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
+                    <FormObserver/>
+
                     <FormInputField
                         id="program-code"
                         label="forms.programCode" name="programCode"
@@ -197,7 +219,7 @@ function EditProgramPage(props) {
                         tooltipMessage="forms.optionalCoursesTooltip"
                         id="program-optional-credits"
                         label="forms.programOptionalCredits" name="programOptionalCredits"
-                        placeholder="0"
+                        type="number" placeholder="0" min="0"
                         value={values.programOptionalCredits} error={errors.programOptionalCredits}
                         touched={touched.programOptionalCredits} onChange={handleChange} onBlur={handleBlur}
                     />

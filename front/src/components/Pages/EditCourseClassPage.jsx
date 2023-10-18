@@ -6,7 +6,9 @@ import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import Alert from 'react-bootstrap/Alert';
 import LinkButton from '../Common/LinkButton';
 import ApiService from '../../services/ApiService';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
+import LeavePagePrompt from '../Common/LeavePagePrompt'
+import structuredClone from '@ungap/structured-clone';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import FormInputLabel from '../Common/FormInputLabel';
@@ -35,7 +37,7 @@ function EditCourseClassPage(props) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState()
 
-    const [user] = useState(ApiService.getActiveUser())
+    const user = ApiService.getActiveUser()
     const [buildings, setBuildings] = useState()
     const [buildingDictionary, setBuildingDictionary] = useState()
     const [terms, setTerms] = useState()
@@ -43,7 +45,7 @@ function EditCourseClassPage(props) {
     const [courseClass, setCourseClass] = useState(null)
     const [selectedCourse, setSelectedCourse] = useState()
     const [selectedTermId, setselectedTermId] = useState()
-    const [oldLectures, setOldLectures] = useState([])
+    const [oldLectures, setOldLectures] = useState()
     const [lectures, setLectures] = useState([])
     const [selectionError, setSelectionError] = useState()
     const [timeError, setTimeError] = useState()
@@ -107,7 +109,7 @@ function EditCourseClassPage(props) {
                         lecturesWithBuilding.push(l)
                     }
                     setLectures(lecturesWithBuilding)
-                    setOldLectures(JSON.parse(JSON.stringify(lecturesWithBuilding)))
+                    setOldLectures(structuredClone(lecturesWithBuilding))
                 }
             });
         }
@@ -115,7 +117,8 @@ function EditCourseClassPage(props) {
         async function execute() {
             // 1. Load terms and buildings
             if(!terms && !buildings && !buildingDictionary)
-                await Promise.all([loadTerms()], loadBuildings());
+                await Promise.all([loadTerms()], loadBuildings())
+
             if(terms && buildings && buildingDictionary) {
                 // 2. Load courseClass or set placeholder
                 if(!courseClass){
@@ -126,17 +129,17 @@ function EditCourseClassPage(props) {
                 // 3. Initialize new class values and end loading
                 else {
                     if(!id && buildings.length > 0) {
-                        const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
+                        const firstLecture = structuredClone(DEFAULT_DATE)
                         setLectures([{...firstLecture, building: buildings[0]}])
                         await Promise.all([readCourseAndTerm()])
                     }
-                    else
+                    else if(loading)
                         setLoading(false)
                 }
             }
         }
-        if(user) execute();
-    },[courseClass, terms, buildings, buildingDictionary, id, t, user, search])
+        execute();
+    },[courseClass, terms, buildings, buildingDictionary, id, t, search, loading])
 
     const loadCourseOptions = (inputValue, callback) => {
         setTimeout(() => {
@@ -188,14 +191,14 @@ function EditCourseClassPage(props) {
 
     const onChangeDay = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy[index].day = e.target.value;
         setLectures(lecturesCopy)
     }
 
     const onChangeStartTime = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy[index].startTime = e.target.value;
         setLectures(lecturesCopy)
         setTimeError(false)
@@ -203,7 +206,7 @@ function EditCourseClassPage(props) {
 
     const onChangeEndTime = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy[index].endTime = e.target.value;
         setLectures(lecturesCopy)
         setTimeError(false)
@@ -211,37 +214,65 @@ function EditCourseClassPage(props) {
 
     const onChangeBuilding = (e) => {
         const index = e.target.id.match(/\d/g)[0]
-        const lecturesCopy = Object.assign([], lectures)
+        const lecturesCopy = structuredClone(lectures)
         lecturesCopy[index].building = buildingDictionary[e.target.value]
         setLectures(lecturesCopy)
     }
 
     const onClickTrashCan = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy.splice(index, 1);
         setLectures(lecturesCopy)
     }
 
     const onClickPlusSign = (e) => {
-        const lecturesCopy = Object.assign([], lectures)
-        const newLecture = JSON.parse(JSON.stringify(DEFAULT_DATE)) // Clone DEFAULT_DATE
+        const lecturesCopy = structuredClone(lectures)
+        const newLecture = structuredClone(DEFAULT_DATE)
         lecturesCopy.push({...newLecture, building: buildings[0]})
         setLectures(lecturesCopy)
     }
 
     const categorizeLectures = (oldLectures, newLectures) => {
         const categories = { post: [], put: [], delete: []}
-        for(const oldL of oldLectures){
-            const newL = newLectures.find(x => x.id === oldL.id)
-            if(!newL) categories.delete.push(oldL)  // removed from list, DELETE old
-            else if( JSON.stringify(oldL) !== JSON.stringify(newL) ) categories.put.push(newL) // values changed, PUT new
+
+        if(oldLectures){
+            for(const oldL of oldLectures){
+                const newL = newLectures.find(x => x.id === oldL.id)
+                if(!newL) categories.delete.push(oldL)  // removed from list, DELETE old
+                else if( JSON.stringify(oldL) !== JSON.stringify(newL) ) categories.put.push(newL) // values changed, PUT new
+            }
         }
+
         for(const newL of newLectures){
-            const oldL = oldLectures.find(x => x.id === newL.id)
+            const oldL = oldLectures?.find(x => x.id === newL.id)
             if(!oldL) categories.post.push(newL)  // new in list, POST new
         }
         return categories
+    }
+
+    const [unsavedForm, setUnsavedForm] = useState(false)
+    const FormObserver = () => {
+        const { values } = useFormikContext()
+
+        useEffect(() => {
+            const courseChanged = (courseClass.course && courseClass.course.id !== selectedCourse.id)
+            const termChanged = (courseClass.term && courseClass.term.id !== selectedTermId)
+            const nameChanged = (courseClass && values.className !== courseClass.name)
+
+            let lecturesChanged = false
+            if(oldLectures){
+                const categorizedLectures = categorizeLectures(oldLectures, lectures)
+                lecturesChanged = (categorizedLectures.delete.length > 0 || categorizedLectures.put.length > 0 || categorizedLectures.post.length > 0)
+            } else {
+                const defaultLectures = [{...structuredClone(DEFAULT_DATE), building: buildings[0]}]
+                lecturesChanged = (JSON.stringify(defaultLectures) !== JSON.stringify(lectures))
+            }
+
+            setUnsavedForm(courseChanged || termChanged || nameChanged || lecturesChanged)
+
+        }, [values]);
+        return null;
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
@@ -286,12 +317,23 @@ function EditCourseClassPage(props) {
         return (
         <Alert variant="danger" className="text-center m-5">
             {
-                (!buildings || buildings.length < 1) && <p className="mx-4">{t("errors.noBuildings")}</p>
+                (!buildings || buildings.length < 1) &&
+                <div className="mt-4 mb-3">
+                    <p className="mb-0">{t("errors.noBuildings")}</p>
+                    <div className="text-center">
+                        <LinkButton variant="link" textKey="seeBuildings" href={'/?tab=buildings'}/>
+                    </div>
+                </div>
             }
             {
-                (!terms || terms.length < 1) && <p className="mx-4">{t("errors.noTerms")}</p>
+                (!terms || terms.length < 1) &&
+                <div className="mt-4 mb-3">
+                    <p className="mb-0">{t("errors.noTerms")}</p>
+                    <div className="text-center">
+                        <LinkButton variant="link" textKey="seeTerms" href={'/?tab=terms'}/>
+                    </div>
+                </div>
             }
-            <LinkButton variant="primary" textKey="goHome" href="/"/>
         </Alert>
     )
 
@@ -307,10 +349,11 @@ function EditCourseClassPage(props) {
                 {selectionError && (<p className="form-error">{t('forms.errors.courseClass.noCourseSelected')}</p>)}
                 { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
 
-
                 <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                    <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
+                    <FormObserver/>
 
                     <div className='row mx-auto form-row'>
                         <FormInputLabel label="forms.course"/>
