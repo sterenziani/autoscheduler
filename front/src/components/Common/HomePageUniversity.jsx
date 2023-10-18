@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
@@ -12,29 +13,26 @@ const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS?? 'auto.s
 
 function HomePageUniversity(props) {
     const { t } = useTranslation()
-    const startingTab = "courses"
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const startingTab = "courses"
+    const [activeTab, setActiveTab] = useState(startingTab)
 
     useEffect(() => {
         const readTabInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            if (requestedTab === "buildings" || requestedTab === "terms" || requestedTab === "courses" || requestedTab === "programs")
+            if(requestedTab === "buildings" || requestedTab === "terms" || requestedTab === "courses" || requestedTab === "programs")
                 return requestedTab
             return startingTab
         }
 
         const requestedTab = readTabInSearchParams()
-        const tabs = document.getElementsByClassName("nav-item")
-        if (requestedTab === "buildings")
-            tabs[0].children[0].click()
-        else if (requestedTab === "terms")
-            tabs[1].children[0].click()
-        else if (requestedTab === "courses")
-            tabs[2].children[0].click()
-        else
-            tabs[3].children[0].click()
-    }, [search])
+        if (activeTab !== requestedTab)
+            setActiveTab(requestedTab)
+    }, [search, activeTab])
+
 
     return (
         <React.Fragment>
@@ -47,7 +45,7 @@ function HomePageUniversity(props) {
                 </Alert>
             )}
             <div className="container my-5">
-                <Tabs className="borderless-tabs" aria-label="home-tabs" defaultActiveKey={startingTab} fill>
+                <Tabs className="borderless-tabs" aria-label="home-tabs" defaultActiveKey={startingTab} activeKey={activeTab} onSelect={(k) => navigate("?tab="+k)} fill>
                     <Tab
                         className="text-center" eventKey="buildings"
                         title={t('tabs.buildings')} id="buildings-tab"
