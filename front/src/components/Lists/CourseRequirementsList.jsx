@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Spinner, Row, Col } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseRequirementsList(props) {

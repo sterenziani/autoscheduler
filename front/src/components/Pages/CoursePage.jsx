@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
+import { OK, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import CourseRequirementsList from '../Lists/CourseRequirementsList';
 import CourseClassesTab from '../Common/CourseClassesTab';
 import Roles from '../../resources/RoleConstants';

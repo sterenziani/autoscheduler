@@ -13,7 +13,7 @@ import EditProgramPage from './components/Pages/EditProgramPage';
 import EditBuildingPage from './components/Pages/EditBuildingPage';
 import ResetPasswordPage from './components/Accounts/ResetPasswordPage';
 import ErrorMessage from './components/Common/ErrorMessage';
-import { NOT_FOUND } from './services/ApiConstants';
+import { NOT_FOUND } from './resources/ApiConstants';
 import './resources/style.scss';
 
 function App() {

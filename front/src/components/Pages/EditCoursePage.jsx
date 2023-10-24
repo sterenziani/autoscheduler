@@ -11,7 +11,7 @@ import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import FormInputLabel from '../Common/FormInputLabel';
 import CourseListForm from '../Lists/CourseListForm';
-import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
+import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';

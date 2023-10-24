@@ -7,7 +7,7 @@ import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 import FormInputLabel from '../Common/FormInputLabel';
 import FormAsyncSelect from '../Common/FormAsyncSelect';

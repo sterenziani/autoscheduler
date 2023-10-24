@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import SearchForm from './SearchForm';
 import StudentCourseLog from '../Lists/StudentCourseLog';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function HomePageStudent(props) {

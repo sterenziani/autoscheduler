@@ -9,7 +9,7 @@ import LeavePagePrompt from '../Common/LeavePagePrompt'
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import CourseListForm from '../Lists/CourseListForm';
-import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
+import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 

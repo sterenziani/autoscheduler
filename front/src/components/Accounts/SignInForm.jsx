@@ -8,7 +8,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 import SignInRecoverPasswordForm from './SignInRecoverPasswordForm';
 

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK, NO_CONTENT } from '../../services/ApiConstants';
+import { OK, NO_CONTENT } from '../../resources/ApiConstants';
 
 function UniversityProgramsList(props){
     const { t } = useTranslation()

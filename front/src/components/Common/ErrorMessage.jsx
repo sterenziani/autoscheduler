@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleExclamation, faQuestionCircle, faPlugCircleXmark, faHand } from '@fortawesome/free-solid-svg-icons';
-import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND, SERVICE_UNAVAILABLE } from '../../services/ApiConstants';
+import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND, SERVICE_UNAVAILABLE } from '../../resources/ApiConstants';
 
 function ErrorMessage(props){
     const { t } = useTranslation()

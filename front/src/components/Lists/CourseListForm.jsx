@@ -4,7 +4,7 @@ import { Button, Row, Modal, Form, Col, OverlayTrigger, Tooltip } from 'react-bo
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ApiService from '../../services/ApiService';
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 
 function CourseListForm(props) {
     const { t } = useTranslation();

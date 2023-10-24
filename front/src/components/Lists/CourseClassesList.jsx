@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 

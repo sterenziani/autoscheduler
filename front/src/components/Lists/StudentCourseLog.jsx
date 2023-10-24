@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import CourseList from './CourseList';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import Pagination from '../Common/Pagination'

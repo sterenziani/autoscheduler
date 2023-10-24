@@ -6,7 +6,7 @@ import ApiService from '../../services/ApiService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRecycle } from '@fortawesome/free-solid-svg-icons';
 import FormInputField from '../Common/FormInputField';
-import { OK, NOT_FOUND } from '../../services/ApiConstants';
+import { OK, NOT_FOUND } from '../../resources/ApiConstants';
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';

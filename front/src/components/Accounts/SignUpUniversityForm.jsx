@@ -7,7 +7,7 @@ import { faBuildingColumns } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 
 const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS?? 'auto.scheduler.contact@gmail.com';

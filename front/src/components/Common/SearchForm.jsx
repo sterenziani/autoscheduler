@@ -6,8 +6,8 @@ import ApiService from '../../services/ApiService';
 import FormInputLabel from '../Common/FormInputLabel';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK } from '../../services/ApiConstants';
-import { DAYS, INSTANT_DATE } from "../../services/SystemConstants";
+import { OK } from '../../resources/ApiConstants';
+import { DAYS, INSTANT_DATE } from "../../resources/SystemConstants";
 
 
 function SearchForm(props) {

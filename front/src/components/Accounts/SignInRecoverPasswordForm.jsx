@@ -4,7 +4,7 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { CREATED } from '../../services/ApiConstants';
+import { CREATED } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 
 const EmailSchema = Yup.object().shape({

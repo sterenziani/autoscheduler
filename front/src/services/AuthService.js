@@ -1,6 +1,6 @@
 import api from './api';
 import Roles from '../resources/RoleConstants';
-import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, INTERNAL_ERROR, CREATED, TIMEOUT_ERROR } from './ApiConstants';
+import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, INTERNAL_ERROR, CREATED, TIMEOUT_ERROR } from '../resources/ApiConstants';
 
 const logInEndpoint = '/';
 const getActiveUserEndpoint = '/user';

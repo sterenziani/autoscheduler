@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function UniversityBuildingsList(props) {
