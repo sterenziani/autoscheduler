@@ -8,10 +8,10 @@ import { Form } from 'react-bootstrap';
 function HomePageAdmin(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const [inputText, setInputText] = useState("");
+    const [inputText, setInputText] = useState("")
 
     const handleSubmit = (e) => {
-        e.preventDefault();
+        e.preventDefault()
         const filter = inputText
         setInputText("")
         navigate('/?filter='+filter)

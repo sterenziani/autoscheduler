@@ -83,6 +83,7 @@ function UniversityUsersList(props) {
         return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
+            { filter && <p className="pt-2">{t("search.showingResultsFor", {searchTerm:filter})}</p> }
             <div className="pt-4">
                 {universities && universities.length > 0
                     ? [
