@@ -124,7 +124,8 @@
         "unavailableSlots": "Timeslots to avoid",
         "programError":"Please select a program.",
         "invalidParams":"Received invalid params.",
-        "noTermsFromUniversity": "Your school has no publicly available terms right now, so you can't search for schedule proposals."
+        "noTermsFromUniversity": "Your school has no publicly available terms right now, so you can't search for schedule proposals.",
+        "showingResultsFor": "Showing results for '{{searchTerm}}'"
     },
     "days": {
         "M": "Monday",

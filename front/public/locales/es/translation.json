@@ -124,7 +124,8 @@
         "unavailableSlots": "Horarios a evitar",
         "programError":"Por favor seleccione una carrera.",
         "invalidParams":"Se recibieron parámetros inválidos.",
-        "noTermsFromUniversity": "Su institución no tiene períodos públicamente disponibles ahora, por lo cual no podemos ofrecerle propuestas de cronogramas."
+        "noTermsFromUniversity": "Su institución no tiene períodos públicamente disponibles ahora, por lo cual no podemos ofrecerle propuestas de cronogramas.",
+        "showingResultsFor": "Mostrando resultados para '{{searchTerm}}'"
     },
     "days": {
         "M": "Lunes",

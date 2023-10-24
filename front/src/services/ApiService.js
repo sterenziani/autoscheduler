@@ -524,7 +524,9 @@ const getCourses = async (inputText) => {
 }
 
 const getCoursesPage = async (page, inputText) => {
-    const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}?page=${page}`)
+    let endpoint = `${universityCoursesEndpoint}?page=${page}`
+    if(inputText) endpoint += `&filter=${inputText}`
+    endpoint = getEndpointForActiveUser(endpoint)
     return simpleApiGetRequest(endpoint)
 }
 
