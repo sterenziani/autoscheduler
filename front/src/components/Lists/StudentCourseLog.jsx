@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import CourseList from './CourseList';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 
@@ -16,9 +15,8 @@ function StudentCourseLog(props) {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const [courses, setCourses] = useState(null)
-    const [error, setError] = useState(false)
-    const [status, setStatus] = useState(null)
-    const student = props.student;
+    const [error, setError] = useState()
+    const student = props.student
 
     const [paginationLinks, setPaginationLinks] = useState(null)
     const [page, setPage] = useState(1)
@@ -32,19 +30,19 @@ function StudentCourseLog(props) {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            const requestedPage = Number(params.get('page'))
+            const requestedPage = Number(params.get('page')??1)
             if(!requestedTab || requestedTab !== "finished_courses" || !requestedPage)
                 return 1
             return requestedPage
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!courses || requestedPage !== page){
+        if(!loading && !error && !courses || requestedPage !== page){
+            setLoading(false)
             setPage(requestedPage)
             loadCourses(requestedPage)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search, courses, page])
+    }, [search, courses, page, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -54,16 +52,11 @@ function StudentCourseLog(props) {
 
     const loadCourses = (page) => {
         setLoading(true)
-        ApiService.getFinishedCourses(student.id, page).then((resp) => {
-            let findError = null;
+        ApiService.getFinishedCourses(page).then((resp) => {
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setCourses(resp.data)
             }
@@ -88,7 +81,7 @@ function StudentCourseLog(props) {
         if (!courseToAdd)
             return;
         setLoading(true)
-        ApiService.addFinishedCourse(student.id, courseToAdd).then((data) => {
+        ApiService.addFinishedCourse(courseToAdd).then((data) => {
             switchAddModal()
             setCourseToAdd()
             loadCourses(page)
@@ -98,13 +91,9 @@ function StudentCourseLog(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(student.university.id, inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
+            ApiService.getPrograms(inputValue).then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                     callback([])
                 } else {
                     callback(resp.data)
@@ -118,13 +107,9 @@ function StudentCourseLog(props) {
             if(!inputValue){
                 callback([])
             } else {
-                ApiService.getRemainingCoursesProgram(student.id, selectedProgramId, inputValue).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK)
-                        findError = resp.status;
-                    if (findError) {
-                        setError(true)
-                        setStatus(findError)
+                ApiService.getRemainingCoursesProgram(selectedProgramId, inputValue).then((resp) => {
+                    if (resp && resp.status && resp.status !== OK){
+                        setError(resp.status)
                         callback([])
                     } else {
                         callback(resp.data)
@@ -137,7 +122,7 @@ function StudentCourseLog(props) {
     if (loading === true || student === null)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             {
@@ -159,21 +144,21 @@ function StudentCourseLog(props) {
                             <Modal.Title>{t('modal.addCourse')}</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <AsyncSelect
+                            <FormAsyncSelect
                                 aria-label="program-select"
                                 className="text-black m-2"
                                 placeholder={t('search.program')}
                                 defaultOptions
-                                getOptionLabel={e => e.code+' - '+e.name}
+                                getOptionLabel={e => e.internalId+' - '+e.name}
                                 getOptionValue={e => e.id}
                                 noOptionsMessage={() => t('selectNoResults')}
-                                defaultValue = {student.program? {value:student.program.id, code: student.program.code, name: student.program.name}:undefined}
+                                defaultValue = {student.program? {value:student.program.id, internalId: student.program.internalId, name: student.program.name}:undefined}
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}
                             />
                             {
                                 selectedProgramId &&
-                                <AsyncSelect key={selectedProgramId}
+                                <FormAsyncSelect key={selectedProgramId}
                                     aria-label="course-select"
                                     className="text-black m-2"
                                     placeholder={t('forms.course')}
@@ -184,7 +169,7 @@ function StudentCourseLog(props) {
                                             return t('selectNoResults')
                                         return t('modal.inputTextToSearch')
                                     }}
-                                    getOptionLabel={e => e.code+' - '+e.name}
+                                    getOptionLabel={e => e.internalId+' - '+e.name}
                                     getOptionValue={e => e.id}
                                     loadOptions={loadRemainingCoursesOptions}
                                     onChange={opt => onChangeCourseToAdd(opt.id)}

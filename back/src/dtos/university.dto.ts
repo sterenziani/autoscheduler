@@ -1,103 +1,52 @@
 import University from '../models/abstract/university.model';
-import * as UserDto from './user.dto';
-import { ROLE } from '../constants/general.constants';
-import { getUserUrl } from './user.dto';
-import { queryParamsStringBuilder } from '../helpers/url.helper';
-import { getDateISO } from '../helpers/time.helper';
+import { applyPathToBase, getPaginatedLinks, getResourceUrl, queryParamsStringBuilder } from '../helpers/url.helper';
+import { API_SCOPE, RESOURCES } from '../constants/general.constants';
+import { PaginatedCollection } from '../interfaces/paging.interface';
+import { booleanToString } from '../helpers/string.helper';
 
-export const universityToDto = (university: University): IUniversityDto => {
-    const userDto: UserDto.IUserDto = UserDto.userToDto(university);
+export const universityToDto = (university: University, scope: API_SCOPE): IUniversityDto => {
+    const url = getResourceUrl(RESOURCES.UNIVERSITY, scope, university.id);
     return {
-        ...userDto,
+        id: university.id,
         name: university.name,
         verified: university.verified,
-        coursesUrl: getUniversityCoursesUrl(university.id),
-        programsUrl: getUniversityProgramsUrl(university.id),
-        buildingsUrl: getUniversityBuildingsUrl(university.id),
-        termsUrl: getUniversityTermsUrl(university.id),
+        url,
+        coursesUrl: applyPathToBase(url, 'courses'),
+        programsUrl: applyPathToBase(url, 'programs'),
+        buildingsUrl: applyPathToBase(url, 'buildings'),
+        termsUrl: applyPathToBase(url, 'terms'),
+        studentsUrl: applyPathToBase(url, 'students'),
+        courseClassesUrl: applyPathToBase(url, 'course-classes')
     };
 };
 
-export const getUniversityBuildingsUrl = (
-    universityId: string,
-    filter?: string,
-    page?: number,
-    perPage?: number,
-): string => {
+export const paginatedUniversitiesToDto = (paginatedUniversities: PaginatedCollection<University>, scope: API_SCOPE): IUniversityDto[] => {
+    return paginatedUniversities.collection.map(u => universityToDto(u, scope));
+};
+
+export const paginatedUniversitiesToLinks = (paginatedUniversities: PaginatedCollection<University>, basePath: string, limit: number, filter?: string, verified?: boolean): Record<string, string> => {
+    return getPaginatedLinks(paginatedUniversities, paginatedUniversitiesUrlBuilder, basePath, limit, filter, verified);
+};
+
+const paginatedUniversitiesUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, verified?: boolean): string => {
     const params = {
+        page,
+        limit,
         filter,
-        page: page ? page.toString() : undefined,
-        per_page: perPage ? perPage.toString() : undefined,
+        verified: booleanToString(verified)
     };
-    return queryParamsStringBuilder(`${getUserUrl(universityId, ROLE.UNIVERSITY)}/buildings`, params);
+    return queryParamsStringBuilder(basePath, params);
 };
 
-export const getUniversityCoursesUrl = (
-    universityId: string,
-    filter?: string,
-    page?: number,
-    perPage?: number,
-): string => {
-    const params = {
-        filter,
-        page: page ? page.toString() : undefined,
-        per_page: perPage ? perPage.toString() : undefined,
-    };
-    return queryParamsStringBuilder(`${getUserUrl(universityId, ROLE.UNIVERSITY)}/courses`, params);
-};
-
-export const getUniversityProgramsUrl = (
-    universityId: string,
-    filter?: string,
-    page?: number,
-    perPage?: number,
-): string => {
-    const params = {
-        filter,
-        page: page ? page.toString() : undefined,
-        per_page: perPage ? perPage.toString() : undefined,
-    };
-    return queryParamsStringBuilder(`${getUserUrl(universityId, ROLE.UNIVERSITY)}/programs`, params);
-};
-
-export const getUniversityTermsUrl = (
-    universityId: string,
-    filter?: string,
-    published?: boolean,
-    from?: Date,
-    to?: Date,
-    page?: number,
-    perPage?: number,
-): string => {
-    const params = {
-        filter,
-        published: published !== undefined ? published.toString() : undefined,
-        from: from ? getDateISO(from) : undefined,
-        to: to ? getDateISO(to) : undefined,
-        page: page ? page.toString() : undefined,
-        per_page: perPage ? perPage.toString() : undefined,
-    };
-    return queryParamsStringBuilder(`${getUserUrl(universityId, ROLE.UNIVERSITY)}/terms`, params);
-};
-
-export const getUniversitiesUrl = (filter?: string, page?: number, perPage?: number): string => {
-    const params = {
-        filter,
-        page: page ? page.toString() : undefined,
-        per_page: perPage ? perPage.toString() : undefined,
-    };
-    return queryParamsStringBuilder('universities', params);
-};
-
-export const getUniversityUrl = (universityId: string): string => {
-    return getUserUrl(universityId, ROLE.UNIVERSITY);
-};
-
-type IUniversityDto = UserDto.IUserDto & {
+interface IUniversityDto {
+    id: string;
     name: string;
     verified: boolean;
+    url: string;
     programsUrl: string;
     coursesUrl: string;
     buildingsUrl: string;
     termsUrl: string;
-};
+    studentsUrl: string;
+    courseClassesUrl: string;
+}

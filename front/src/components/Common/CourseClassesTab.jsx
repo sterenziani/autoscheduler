@@ -2,41 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Spinner, Form } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import CourseClassesList from '../Lists/CourseClassesList';
 import ErrorMessage from '../Common/ErrorMessage';
+import LinkButton from '../Common/LinkButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function CourseClassesTab(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [terms, setTerms] = useState(null);
-    const [selectedTerm, setSelectedTerm] = useState(null);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
+    const search = useLocation().search
     const user = props.user;
     const course = props.course;
-    const search = useLocation().search
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+    const [terms, setTerms] = useState(null)
+    const [selectedTerm, setSelectedTerm] = useState(null)
 
     useEffect( () => {
-        ApiService.getTerms(user.id).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                const params = new URLSearchParams(search)
-                const requestedTerm = resp.data.find(t => t.id === params.get('termId'))
-                setTerms(resp.data)
-                setSelectedTerm(requestedTerm? requestedTerm:resp.data[0])
-            }
-            setLoading(false)
-        });
-    }, [search, user.id])
+        if(!terms && loading){
+            ApiService.getTerms().then((resp) => {
+                if (resp && resp.status && resp.status !== OK)
+                    setError(resp.status)
+                else{
+                    const params = new URLSearchParams(search)
+                    const requestedTerm = resp.data.find(t => t.id === params.get('termId'))
+                    setTerms(resp.data)
+                    setSelectedTerm(requestedTerm? requestedTerm:resp.data[0])
+                }
+                setLoading(false)
+            });
+        }
+        if(terms && !loading){
+            const params = new URLSearchParams(search)
+            const requestedTerm = terms.find(t => t.id === params.get('termId'))
+            setSelectedTerm(requestedTerm? requestedTerm:terms[0])
+        }
+    }, [search, user.id, terms, loading])
 
     const onChangeTerms = (e) => {
         navigate("/courses/"+course.id+"?termId="+e.target.value)
@@ -46,14 +49,21 @@ function CourseClassesTab(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     if(!terms || terms.length < 1)
-        return <React.Fragment><div className="mx-5 py-4"><p>{t('errors.noTerms')}</p></div></React.Fragment>
+        return (
+            <React.Fragment>
+                <div className="py-5 text-center">
+                    <p className="mb-0">{t('errors.noTerms')}</p>
+                    <LinkButton variant="link" textKey="seeTerms" className="text-white" href={'/terms/new'}/>
+                </div>
+            </React.Fragment>
+        )
     return (
         <React.Fragment>
             <div className="mx-5 py-4">
                 <Form.Select id="course-class-term-select" className="w-75 m-auto" value={selectedTerm.id} onChange={onChangeTerms}>
-                    { terms.map((p) => ( <option key={p.id} value={p.id}> {p.code + ' - ' + p.name} </option>)) }
+                    { terms.map((p) => ( <option key={p.id} value={p.id}> {p.internalId + ' - ' + p.name} </option>)) }
                 </Form.Select>
                 <CourseClassesList
                     user={user}

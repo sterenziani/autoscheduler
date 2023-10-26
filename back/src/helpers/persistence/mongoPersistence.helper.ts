@@ -1,6 +1,9 @@
 import mongoose, { Model, ClientSession, FilterQuery, UpdateQuery, AnyKeys, Document } from 'mongoose';
+import { MongoError } from 'mongodb';
 import GenericException from '../../exceptions/generic.exception';
 import { ERRORS } from '../../constants/error.constants';
+import { IErrorData } from '../../interfaces/error.interface';
+import { MONGO_CONSTRAINT_ERROR_CODE } from '../../constants/persistence/mongoPersistence.constants';
 
 export const initializeMongoConnection = async (): Promise<void> => {
     // Mongo connection
@@ -14,6 +17,17 @@ export const initializeMongoConnection = async (): Promise<void> => {
         },
     );
     return;
+};
+
+export const parseErrors = (err: unknown, logPrefix: string, constraintError?: IErrorData): GenericException => {
+    if (err instanceof GenericException) return err;
+    if (constraintError && err instanceof MongoError && err.code == MONGO_CONSTRAINT_ERROR_CODE) return new GenericException(constraintError);
+    logErrors(err, logPrefix);
+    return new GenericException(ERRORS.INTERNAL_SERVER_ERROR.DATABASE);
+};
+
+export const logErrors = (err: unknown, logPrefix: string): void => {
+    console.log(`${logPrefix}. Unknown error: ${JSON.stringify(err)}`);
 };
 
 export const validateObjectId = (maybeId: string): void => {
@@ -54,12 +68,9 @@ const executePaginatedQuery = async (
     page: number,
     limit: number,
     lean: boolean,
-    sort: boolean,
     session: ClientSession | null = null,
 ) => {
     let query = docQuery.limit(limit).skip((page - 1) * limit);
-
-    if (sort) query = query.sort('-creationTime');
 
     return await executeQuery(query, lean, session);
 };
@@ -131,11 +142,11 @@ export const getPaginatedDocumentsByQuery = async <T extends Document>(
     query: FilterQuery<T>,
     page: number,
     limit: number,
-    lean = false,
-    sort = false,
+    sortBy: string,
+    ascending = true,
     session: ClientSession | null = null,
 ): Promise<T[]> => {
-    return await executePaginatedQuery(model.find(query), page, limit, lean, sort, session);
+    return await executePaginatedQuery(model.find(query).sort((ascending ? '' : '-') + sortBy), page, limit, true, session);
 };
 
 export const updateDocument = async <T extends Document>(

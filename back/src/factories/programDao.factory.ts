@@ -1,17 +1,9 @@
-import { PERSISTENCE } from '../constants/persistence/persistence.contants';
 import ProgramDao from '../persistence/abstract/program.dao';
-import MemoryProgramDao from '../persistence/implementations/memory/memoryProgram.dao';
-import GenericDaoFactory from './genericDao.factory';
+import DatabaseProgramDao from '../persistence/implementations/databaseProgram.dao';
 
-export default class ProgramDaoFactory extends GenericDaoFactory {
+export default class ProgramDaoFactory {
     // Static Getters
     public static get(): ProgramDao {
-        const persistence = this.getPersistence();
-        switch (persistence) {
-            case PERSISTENCE.DATABASE:
-                throw new Error('Not implemented');
-            case PERSISTENCE.MEMORY:
-                return MemoryProgramDao.getInstance();
-        }
+        return DatabaseProgramDao.getInstance();
     }
 }

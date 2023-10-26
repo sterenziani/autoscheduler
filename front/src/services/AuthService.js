@@ -1,10 +1,12 @@
 import api from './api';
 import Roles from '../resources/RoleConstants';
-import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT } from './ApiConstants';
+import { OK, BAD_REQUEST, NOT_FOUND, TIMEOUT, INTERNAL_ERROR, CREATED, TIMEOUT_ERROR } from '../resources/ApiConstants';
 
 const logInEndpoint = '/';
-const signUpUniversityEndpoint = '/university';
-const signUpStudentEndpoint = '/student';
+const getActiveUserEndpoint = '/user';
+const universityEndpoint = '/university';
+const studentEndpoint = '/student';
+const setProgramEndpoint = "student/program";
 
 const TokenStore = {
     setToken: token => localStorage.setItem('token', token),
@@ -90,16 +92,25 @@ const logIn = async (email, password) => {
             return { status: OK }
         }
 
-        const endpoint = tokenUserData.role.toLowerCase() +'/'+ tokenUserData.id
-        const userData = await api.get(endpoint, getRequestHeaders())
+        const userData = await api.get(getActiveUserEndpoint, getRequestHeaders())
+        if(userData.data.role === Roles.UNIVERSITY){
+            const universityData = await api.get(universityEndpoint, getRequestHeaders())
+            if(universityData.status === OK)
+                userData.data = {...userData.data, name: universityData.data.name, verified: universityData.data.verified, locale: universityData.data.locale}
+        }
+        if(userData.data.role === Roles.STUDENT){
+            const studentData = await api.get(studentEndpoint, getRequestHeaders())
+            if(studentData.status === OK)
+                userData.data = {...userData.data, name: studentData.data.name, locale: studentData.data.locale}
+        }
+
         UserStore.setUser(userData.data)
         return { status: OK }
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status, data: e.response.data}
-        else
-            return { status: TIMEOUT }
+        if (e.response) return { status: e.response.status, data: e.response.data}
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -108,16 +119,27 @@ const signUpStudent = async (name, email, password, universityId, programId) => 
         const payload = {
             'email': email,
             'password': password,
+            "name": name,
+            "universityId": universityId,
             "programId": programId,
-            "name": name
+            "locale": navigator.language
         }
-        return await api.post(signUpStudentEndpoint, payload, getRequestHeaders())
+
+        const createResponse = await api.post(studentEndpoint, payload, getRequestHeaders())
+        if(createResponse.status !== CREATED) return createResponse
+
+        const authenticateResponse = await logIn(email, password)
+        if(authenticateResponse.status !== OK) return authenticateResponse
+
+        const endpoint = `${setProgramEndpoint}`
+        await api.put(endpoint, {"programId": programId}, getRequestHeaders())
+
+        return createResponse
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status, data: e.response.data}
-        else
-            return { status: TIMEOUT }
+        if (e.response) return { status: e.response.status, data: e.response.data}
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -126,15 +148,15 @@ const signUpUniversity = async (email, password, name) => {
         const payload = {
             'email': email,
             'password': password,
+            "locale": navigator.language,
             'name': name,
         }
-        return await api.post(signUpUniversityEndpoint, payload, getRequestHeaders())
+        return await api.post(universityEndpoint, payload, getRequestHeaders())
     }
     catch(e) {
-        if (e.response)
-            return { status: e.response.status, data: e.response.data}
-        else
-            return { status: TIMEOUT }
+        if (e.response) return { status: e.response.status, data: e.response.data}
+        if (e.code && e.code === TIMEOUT_ERROR) return { status: TIMEOUT }
+        else return { status: INTERNAL_ERROR }
     }
 }
 
@@ -146,38 +168,6 @@ const parseUserFromJwt = (token) => {
     }).join(''));
     return JSON.parse(jsonPayload);
 };
-
-// Calls the login endpoint with its current token in header instead of user:pass as body
-const logInWithStore = async () => {
-    const savedToken = TokenStore.getToken()
-    const savedUser  = UserStore.getUser()
-    if(!savedToken && !savedUser)
-        return { status : OK }
-    try {
-        const response = await api.get(logInEndpoint, {
-            headers : { authorization : savedToken }
-        })
-        if(response.status === BAD_REQUEST)
-            return { status: BAD_REQUEST }
-        token = response.headers.authorization
-        TokenStore.setToken(token)
-        UserStore.setUser(response.data)
-
-        const expirationDate = new Date(0)
-        expirationDate.setUTCSeconds(parseUserFromJwt(token).exp)
-        ExpStore.setExp(expirationDate)
-
-        return { status: OK }
-    }
-    catch(e) {
-        logOut();
-        if (e.response) {
-            return { status: e.response.status }
-        } else {
-            return { status: TIMEOUT }
-        }
-    }
-}
 
 const logOut = async () => {
     deleteUserInStore();
@@ -200,9 +190,15 @@ const logOutIfExpiredJwt = async () => {
     return false
 }
 
+const isActiveUserStudent = () => {
+    const user = getUserStore()
+    if(user && user.role && user.role === Roles.STUDENT)
+        return true
+    return false
+}
+
 const AuthService   = {
     logIn          : logIn,
-    logInWithStore : logInWithStore,
     signUpStudent  : signUpStudent,
     signUpUniversity: signUpUniversity,
     logOut         : logOut,
@@ -210,7 +206,8 @@ const AuthService   = {
     getToken       : getToken,
     getExp         : getExp,
     getRequestHeaders: getRequestHeaders,
-    logOutIfExpiredJwt: logOutIfExpiredJwt
+    logOutIfExpiredJwt: logOutIfExpiredJwt,
+    isActiveUserStudent: isActiveUserStudent
 }
 
 export default AuthService;

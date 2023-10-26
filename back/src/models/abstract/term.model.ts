@@ -1,6 +1,4 @@
-import CourseClass from './courseClass.model';
 import GenericModel from './generic.model';
-import University from './university.model';
 
 export default abstract class Term extends GenericModel {
     // Properties
@@ -19,6 +17,4 @@ export default abstract class Term extends GenericModel {
     }
 
     // Methods
-    public abstract getCourseClasses(): Promise<CourseClass[]>;
-    public abstract getUniversity(): Promise<University>;
 }

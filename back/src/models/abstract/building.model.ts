@@ -1,5 +1,4 @@
 import GenericModel from './generic.model';
-import University from './university.model';
 
 export default abstract class Building extends GenericModel {
     // Properties
@@ -13,9 +12,6 @@ export default abstract class Building extends GenericModel {
         this.name = name;
     }
 
-    // Methods
-    public abstract setDistanceInMinutesTo(buildingId: string, distance: number): Promise<void>;
-    public abstract deleteDistanceInMinutesTo(buildingId: string): Promise<void>;
-    public abstract getDistanceInMinutesTo(buildingId: string): Promise<number | undefined>;
-    public abstract getUniversity(): Promise<University>;
+    // Abstract Methods
+    public abstract getDistanceInMinutesTo(other: Building): Promise<number | undefined>;
 }

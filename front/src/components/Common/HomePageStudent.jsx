@@ -6,17 +6,16 @@ import { useLocation } from 'react-router-dom';
 import SearchForm from './SearchForm';
 import StudentCourseLog from '../Lists/StudentCourseLog';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function HomePageStudent(props) {
     const { t } = useTranslation()
     const startingTab = "schedule_form"
     const search = useLocation().search
-    const [status, setStatus] = useState(null)
     const [loading, setLoading] = useState(false)
     const [student, setStudent] = useState(null)
-    const [error, setError] = useState(false)
+    const [error, setError] = useState()
 
     useEffect(() => {
         if(student){
@@ -40,16 +39,10 @@ function HomePageStudent(props) {
     useEffect(() => {
         setLoading(true)
         ApiService.getStudent(props.user.id).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setStudent(resp)
-            }
+                setError(resp.status)
+            else
+                setStudent(resp.data)
             setLoading(false)
         });
     }, [props.user.id])
@@ -57,7 +50,7 @@ function HomePageStudent(props) {
     if (loading === true || student === null)
         return <div className="text-center m-auto mt-5 color-secondary"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>

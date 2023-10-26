@@ -30,3 +30,7 @@ export const getNowDateTime = (): DateTime => {
 export const getDateISO = (date?: Date): string => {
     return (date ? DateTime.fromJSDate(date, opts).toISO() : getNowDateTime().toISO())!;
 };
+
+export const maybeDateToISO = (date?: Date): string | undefined => {
+    return date ? getDateISO(date) : undefined;
+}

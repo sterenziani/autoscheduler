@@ -4,12 +4,7 @@ import cors from 'cors';
 import UserAuthMiddleware from './middlewares/userAuth.middleware';
 import ErrorHandlerMiddleware from './middlewares/errorHandler.middleware';
 import { HomeRoutes } from './routes/home.routes';
-import { BuildingRoutes } from './routes/building.routes';
-import { CourseRoutes } from './routes/course.routes';
-import { CourseClassRoutes } from './routes/courseClass.routes';
-import { ProgramRoutes } from './routes/program.routes';
-import { StudentRoutes } from './routes/student.routes';
-import { TermRoutes } from './routes/term.routes';
+import { StudentsRoutes } from './routes/students.routes';
 import { UniversityRoutes } from './routes/university.routes';
 import { UniversitiesRoutes } from './routes/universities.routes';
 import { UsersRoutes } from './routes/users.routes';
@@ -25,6 +20,22 @@ import UniversityService from './services/university.service';
 import UserService from './services/user.service';
 import { initializeMongoConnection } from './helpers/persistence/mongoPersistence.helper';
 import { initializeGraphConnection } from './helpers/persistence/graphPersistence.helper';
+import { UserRoutes } from './routes/user.routes';
+import { AuthRoutes } from './routes/auth.routes';
+import LectureService from './services/lecture.service';
+import { StudentRoutes } from './routes/student.routes';
+import { ProgramsRoutes } from './routes/programs.routes';
+import UserDaoFactory from './factories/userDao.factory';
+import UniversityDaoFactory from './factories/universityDao.factory';
+import TermDaoFactory from './factories/termDao.factory';
+import StudentDaoFactory from './factories/studentDao.factory';
+import ScheduleDaoFactory from './factories/scheduleDao.factory';
+import ProgramDaoFactory from './factories/programDao.factory';
+import PasswordRecoveryTokenDaoFactory from './factories/passwordRecoveryTokenDao.factory';
+import LectureDaoFactory from './factories/lectureDao.factory';
+import CourseClassDaoFactory from './factories/courseClassDao.factory';
+import CourseDaoFactory from './factories/courseDao.factory';
+import BuildingDaoFactory from './factories/buildingDao.factory';
 
 class App {
     public app: Application;
@@ -48,14 +59,16 @@ class App {
     }
 
     private initializeDatabases() {
-        if (process.env.PERSISTENCE === 'MEMORY') return;
         // Mongo connection
         initializeMongoConnection()
             .then(() => console.log(`[Initialization] Connected to MongoDB`))
             .catch((err) => console.log(JSON.stringify(err)));
         // Neo4j connection
         initializeGraphConnection()
-            .then(() => console.log(`[Initialization] Connected to Graph Database`))
+            .then(() => {
+                console.log(`[Initialization] Connected to Graph Database`);
+                this.initializeDaos();
+            })
             .catch((err) => console.log(JSON.stringify(err)));
     }
 
@@ -65,6 +78,7 @@ class App {
         BuildingService.getInstance().init();
         CourseService.getInstance().init();
         CourseClassService.getInstance().init();
+        LectureService.getInstance().init();
         ProgramService.getInstance().init();
         ScheduleService.getInstance().init();
         StudentService.getInstance().init();
@@ -83,15 +97,28 @@ class App {
 
     private setRoutes() {
         this.app.use('/api', new HomeRoutes().router);
-        this.app.use('/api/building', new BuildingRoutes().router);
-        this.app.use('/api/course', new CourseRoutes().router);
-        this.app.use('/api/course-class', new CourseClassRoutes().router);
-        this.app.use('/api/program', new ProgramRoutes().router);
-        this.app.use('/api/student', new StudentRoutes().router);
-        this.app.use('/api/term', new TermRoutes().router);
-        this.app.use('/api/university', new UniversityRoutes().router);
-        this.app.use('/api/universities', new UniversitiesRoutes().router);
-        this.app.use('/api/users', new UsersRoutes().router);
+        this.app.use('/api/auth/', new AuthRoutes().router);
+        this.app.use('/api/user/', new UserRoutes().router);
+        this.app.use('/api/users/', new UsersRoutes().router);
+        this.app.use('/api/university/', new UniversityRoutes().router);
+        this.app.use('/api/universities/', new UniversitiesRoutes().router);
+        this.app.use('/api/programs', new ProgramsRoutes().router);
+        this.app.use('/api/student/', new StudentRoutes().router);
+        this.app.use('/api/students/', new StudentsRoutes().router);
+    }
+
+    private initializeDaos() {
+        UserDaoFactory.get().init().catch((_) => {});
+        UniversityDaoFactory.get().init().catch((_) => {});
+        TermDaoFactory.get().init().catch((_) => {});
+        StudentDaoFactory.get().init().catch((_) => {});
+        ScheduleDaoFactory.get().init().catch((_) => {});
+        ProgramDaoFactory.get().init().catch((_) => {});
+        PasswordRecoveryTokenDaoFactory.get().init().catch((_) => {});
+        LectureDaoFactory.get().init().catch((_) => {});
+        CourseClassDaoFactory.get().init().catch((_) => {});
+        CourseDaoFactory.get().init().catch((_) => {});
+        BuildingDaoFactory.get().init().catch((_) => {});
     }
 }
 

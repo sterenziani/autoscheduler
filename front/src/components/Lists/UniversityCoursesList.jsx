@@ -1,65 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { Spinner } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import { Spinner, Form, Button } from 'react-bootstrap';
 import CourseList from './CourseList';
-import { useNavigate } from "react-router-dom";
-import { useLocation } from 'react-router-dom';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { useLocation, useNavigate } from "react-router-dom";
+import { OK } from '../../resources/ApiConstants';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 
 function StudentCoursesList(props){
+    const { t } = useTranslation()
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(true);
-    const [courses,setCourses] = useState(props.course);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const user = props.user;
-
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [courses,setCourses] = useState(props.course)
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
+    const [filter, setFilter] = useState()
 
     useEffect(() => {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            const requestedPage = Number(params.get('page'))
+            const requestedPage = Number(params.get('page')??1)
             if(!requestedTab || requestedTab !== "courses" || !requestedPage)
                 return 1
             return requestedPage
         }
 
-        const requestedPage = readPageInSearchParams()
-        if(!courses || requestedPage !== page){
-            setPage(requestedPage)
-            loadCourses(requestedPage)
+        const readFilterInSearchParams = () => {
+            const params = new URLSearchParams(search)
+            return params.get('filter')
         }
-        // eslint-disable-next-line
-    }, [search, courses, page])
+
+        const requestedPage = readPageInSearchParams()
+        const requestedFilter = readFilterInSearchParams()
+        if(!loading && !error && !courses || requestedPage !== page || requestedFilter !== filter){
+            setLoading(true)
+            setPage(requestedPage)
+            setFilter(requestedFilter)
+            loadCourses(requestedPage, requestedFilter)
+        }
+    }, [search, courses, page, loading, error, filter])
 
     const changePage = (newPage) => {
         setPage(newPage)
-        loadCourses(newPage)
-        navigate("?tab=courses&page="+newPage)
+        loadCourses(newPage, filter)
+        navigate("?tab=courses&page="+newPage +(filter?"&filter="+filter:""))
     }
 
     const redirectToCreate = () => {
-        navigate('/courses/new');
+        navigate('/courses/new')
     }
 
-    const loadCourses = (page) => {
+    const filterList = e => {
+        e.preventDefault()
+        navigate('/?tab=courses&filter='+e.target.textFilter.value)
+    }
+
+    const loadCourses = (page, textFilter) => {
         setLoading(true)
-        ApiService.getCoursesPage(user.id, page).then(resp => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+        ApiService.getCoursesPage(page, textFilter).then(resp => {
+            if (resp && resp.status && resp.status !== OK)
+                setError(resp.status)
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setCourses(resp.data)
             }
@@ -70,9 +79,22 @@ function StudentCoursesList(props){
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
+            <div className="pt-5 px-5">
+                <Form className="d-flex" onSubmit={filterList}>
+                    <Form.Control
+                      type="search"
+                      name="textFilter"
+                      placeholder={t("search.search")}
+                      className="me-2"
+                      aria-label="Search"
+                    />
+                    <Button variant="outline-secondary" type="submit">{t("search.submit")}</Button>
+                </Form>
+                { filter && <p className="pt-2">{t("search.showingResultsFor", {searchTerm:filter})}</p> }
+            </div>
             <CourseList key="course-list" reloadCourses={() => loadCourses(page)} courses={courses}/>
             <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">

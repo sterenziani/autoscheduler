@@ -6,7 +6,7 @@ import ApiService from '../../services/ApiService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRecycle } from '@fortawesome/free-solid-svg-icons';
 import FormInputField from '../Common/FormInputField';
-import { OK } from '../../services/ApiConstants';
+import { OK, NOT_FOUND } from '../../resources/ApiConstants';
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -33,30 +33,26 @@ function ResetPasswordPage(props) {
     const {t} = useTranslation()
     const navigate = useNavigate()
     const {token} = useParams()
-    const [user, setUser] = useState(false)
-    const [invalidToken, setInvalidToken] = useState(false)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if(!token){
-            setInvalidToken(true)
+            setError(NOT_FOUND)
             setLoading(false)
         }
         ApiService.getPasswordChangeToken(token).then((resp) => {
-            if (resp && resp.status && resp.status === OK)
-                setUser(resp.data)
-            else
-                setInvalidToken(true)
+            if (!resp || !resp.status || resp.status !== OK)
+                setError(resp.status)
             setLoading(false)
         })
     }, [token])
 
     const changePassword = async (values, setSubmitting, setFieldError) => {
-        const resp = await ApiService.changePassword(user.id, token, values.password)
+        const resp = await ApiService.changePassword(token, values.password)
         switch (resp.status) {
             case OK:
-                authenticate(values)
+                navigate("/")
                 break;
             default:
                 setSubmitting(false)
@@ -65,21 +61,8 @@ function ResetPasswordPage(props) {
         }
     }
 
-    const authenticate = async (values) => {
-        const { status } = await ApiService.login(values.email, values.password);
-        switch (status) {
-            case OK:
-                navigate("/")
-                break;
-            default:
-                navigate("/login")
-                break;
-        }
-    }
-
     const onSubmit = (values, { setSubmitting, setFieldError }) => {
         setSubmitting(true)
-        values.email = user.email
         changePassword(values, setSubmitting, setFieldError)
     };
 
@@ -90,7 +73,7 @@ function ResetPasswordPage(props) {
             </div>
         );
     }
-    if(invalidToken)
+    if(error && error === NOT_FOUND)
         return(<React.Fragment>
             <HelmetProvider>
                 <Helmet><title>{t('changePassword.title')}</title></Helmet>
@@ -108,7 +91,6 @@ function ResetPasswordPage(props) {
                 <Helmet><title>{t('changePassword.title')}</title></Helmet>
             </HelmetProvider>
             <div className="container my-5 bg-primary rounded">
-                {error && (<p className="form-error">{t('register.errors.codes.'+error)}</p>)}
                 <Formik
                     initialValues={{ password: '', repeat_password: '' }}
                     validationSchema={ChangePasswordSchema} onSubmit={onSubmit}
@@ -117,9 +99,8 @@ function ResetPasswordPage(props) {
                         <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
                             <FontAwesomeIcon size="3x" icon={faRecycle} />
                             <h4>{t('changePassword.title')}</h4>
-                            <p className="mb-3">{t('changePassword.forUser', { email: user.email })}</p>
                             <input id="browser-warning-fix" type="text" autoComplete="username" ng-hide="true" className="invisible"></input>
-
+                            {error && (<p className="text-center pt-3 form-error">{t('register.errors.codes.'+error)}</p>)}
                             <FormInputField
                                 id="new-password"
                                 type="password"

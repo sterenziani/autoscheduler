@@ -1,45 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Spinner, Row } from 'react-bootstrap';
-import { useNavigate } from "react-router-dom";
+import { Button, Modal, Spinner, Row, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 
 function UniversityTermsList(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const user = props.user;
-    const [terms, setTerms] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const [changingPublishStatus, setChangingPublishStatus] = useState([]);
-    const [termToDelete, setTermToDelete] = useState();
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [terms, setTerms] = useState(null)
+    const [changingPublishStatus, setChangingPublishStatus] = useState([])
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [termToDelete, setTermToDelete] = useState()
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            const requestedPage = Number(params.get('page'))
+            const requestedPage = Number(params.get('page')??1)
             if(!requestedTab || requestedTab !== "terms" || !requestedPage)
                 return 1
             return requestedPage
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!terms || requestedPage !== page){
+        if(!loading && !error && !terms || requestedPage !== page){
+            setLoading(true)
             setPage(requestedPage)
             loadTerms(requestedPage)
         }
-        // eslint-disable-next-line
-    }, [search, page, terms])
+    }, [search, page, terms, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -49,16 +49,11 @@ function UniversityTermsList(props) {
 
     const loadTerms = (page) => {
         setLoading(true)
-        ApiService.getTerms(user.id, page).then((resp) => {
-            let findError = null;
+        ApiService.getTerms(page).then((resp) => {
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setTerms(resp.data)
                 setChangingPublishStatus(new Array(resp.data.length).fill(false))
@@ -87,15 +82,13 @@ function UniversityTermsList(props) {
             resp = await ApiService.publishTerm(term)
         if (resp.status === OK)
             loadTerms(page)
-        else{
-            setError(true)
-            setStatus(resp.status)
-        }
+        else
+            setError(resp.status)
     }
 
-    const deleteTerm = () => {
+    const deleteTerm = async () => {
         if (!termToDelete) return;
-        ApiService.deleteTerm(termToDelete.id);
+        await ApiService.deleteTerm(termToDelete.id);
         closeDeleteModal()
         loadTerms(page)
     }
@@ -120,66 +113,57 @@ function UniversityTermsList(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <div className="pt-4">
                 {terms && terms.length > 0
                     ? [
-                          terms.map((entry, index) => (
-                              <Row key={'row-' + index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
-                                  <div className="m-auto">{entry.code}</div>
-                                  <div className="m-auto">{entry.name}</div>
-                                  <div className="m-auto">{convertDateFormat(entry.startDate)}</div>
-                                  <div className="d-flex m-auto justify-content-center">
-                                      <i
-                                          className="bi bi-pencil-fill btn btn-lg text-white"
-                                          id={'edit-' + index}
-                                          onClick={() => redirectToEdit(entry.id)}
-                                      ></i>
-                                      <i
-                                          className="bi bi-trash-fill btn btn-lg text-white"
-                                          id={'trash-' + index}
-                                          onClick={() => openDeleteModal(entry)}
-                                      ></i>
-                                  </div>
-                                  <div className="m-auto d-flex justify-content-center">
-                                      {changingPublishStatus[index]
-                                          ? [
-                                                <div key={'spinner-' + index} className="mx-auto">
-                                                    <Spinner animation="border" />
-                                                </div>,
-                                            ]
-                                          : [
-                                                entry.published
-                                                    ? [
-                                                          <Button
-                                                              key={'button-hide-' + index}
-                                                              className="btn-wrap-text"
-                                                              variant="success"
-                                                              onClick={() => switchTermStatus(index)}
-                                                          >
-                                                              {t('terms.hide')}
-                                                          </Button>,
-                                                      ]
-                                                    : [
-                                                          <Button
-                                                              key={'button-publish-' + index}
-                                                              className="btn-wrap-text"
-                                                              variant="warning"
-                                                              onClick={() => switchTermStatus(index)}
-                                                          >
-                                                              {t('terms.publish')}
-                                                          </Button>,
-                                                      ],
-                                            ]}
-                                  </div>
-                              </Row>
-                          )),
-                      ]
+                        terms.map((entry, index) => (
+                            <Row key={'row-' + index} xs={1} md={6} className="border-bottom border-grey list-row pb-3 my-3 justify-content-center">
+                                <div className="m-auto">{entry.internalId}</div>
+                                <div className="m-auto">{entry.name}</div>
+                                <div className="m-auto">{convertDateFormat(entry.startDate)}</div>
+                                <div className="d-flex m-auto justify-content-center">
+                                    <i
+                                        className="bi bi-pencil-fill btn btn-lg text-white"
+                                        id={'edit-' + index}
+                                        onClick={() => redirectToEdit(entry.id)}
+                                    ></i>
+                                    <i
+                                        className="bi bi-trash-fill btn btn-lg text-white"
+                                        id={'trash-' + index}
+                                        onClick={() => openDeleteModal(entry)}
+                                    ></i>
+                                </div>
+                                <div className="m-auto d-flex justify-content-center">
+                                {
+                                    changingPublishStatus[index]
+                                    ? [
+                                        <div key={'spinner-' + index} className="mx-auto">
+                                            <Spinner animation="border" />
+                                        </div>,
+                                    ] : [
+                                        <OverlayTrigger key={'overlay-'+index} overlay={(props) => (<Tooltip id="tooltip" {...props}>{t('home.whatIsTermPublish')}</Tooltip>)}>
+                                            <Button
+                                                key={'term-button-'+index}
+                                                className="btn-wrap-text"
+                                                variant={entry.published?"success":"warning"}
+                                                onClick={() => switchTermStatus(index)}
+                                            >
+                                                {t(entry.published?'terms.hide':'terms.publish')}
+                                            </Button>
+                                        </OverlayTrigger>,
+                                    ]
+                                }
+                                </div>
+                            </Row>
+                        )),
+                    ]
                     : [
-                          <div key="empty-list">{t('emptyList')}</div>,
-                      ]}
+                        <div key="empty-list">{t('emptyList')}</div>,
+                    ]
+                }
             </div>
             <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
@@ -200,7 +184,7 @@ function UniversityTermsList(props) {
                         {
                             termToDelete &&
                             t('modal.areYouSureTerm', {
-                                code: termToDelete.code,
+                                code: termToDelete.internalId,
                                 name: termToDelete.name,
                             })
                         }
@@ -209,7 +193,7 @@ function UniversityTermsList(props) {
                     <Button variant="grey" onClick={() => closeDeleteModal()}>
                         {t('modal.cancel')}
                     </Button>
-                    <Button variant="danger" onClick={() => deleteTerm(termToDelete)}>
+                    <Button variant="danger" onClick={() => deleteTerm()}>
                         {t('modal.delete')}
                     </Button>
                 </Modal.Footer>

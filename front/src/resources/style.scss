@@ -110,6 +110,10 @@ $theme-colors: (
     background-color: $light !important;
 }
 
+.tooltip-inner, .display-newlines {
+    white-space: pre-wrap;
+}
+
 .form-row {
     max-width: 120vh;
     margin: 1%;

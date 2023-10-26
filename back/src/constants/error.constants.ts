@@ -14,10 +14,100 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'INVALID_OBJECT_ID',
             message: 'Given value does not match a valid mongo ObjectId.',
         },
+        MISSING_PARAMS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'MISSING_PARAMS',
+            message: 'Missing at least one required param.',
+        },
         INVALID_PASSWORD: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'INVALID_PASSWORD',
             message: 'Provided password is invalid.',
+        },
+        INVALID_EMAIL: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_EMAIL',
+            message: 'Provided email is invalid.',
+        },
+        INVALID_LOCALE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_LOCALE',
+            message: 'Provided locale is invalid or unsupported.',
+        },
+        INVALID_ROLE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_ROLE',
+            message: 'Provided role is invalid.',
+        },
+        INVALID_NAME: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_NAME',
+            message: 'Provided name is invalid. It must have a length between 3 and 80 characters and not contain any weird characters.',
+        },
+        INVALID_COURSE_CLASS_NAME: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_NAME',
+            message: 'Provided name is invalid. It must have a length between 1 and 80 characters and not contain any weird characters.',
+        },
+        INVALID_FILTER: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_FILTER',
+            message: 'Provided filter is invalid. It must not contain any weird characters and cannot be longer than 180 characters.',
+        },
+        INVALID_INTERNAL_ID: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_INTERNAL_ID',
+            message: 'Provided internalId is invalid. It must have a length between 1 and 100 characters.',
+        },
+        INVALID_CREDIT_VALUE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_CREDIT_VALUE',
+            message: 'Provided credit value amount is invalid. It must be equal or greater than zero.',
+        },
+        INVALID_CREDIT_REQUIREMENT: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_CREDIT_REQUIREMENT',
+            message: 'Provided amount of required credits is invalid. It must be equal or greater than zero.',
+        },
+        COURSES_INTERSECT: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSES_INTERSECT',
+            message: 'There is a conflict between values in mandatory courses and values in optional courses.',
+        },
+        INVALID_CREDIT_REQUIREMENT_MAP: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_CREDIT_REQUIREMENT_MAP',
+            message: 'Provided map of credit requirements for courses contains course IDs that are not courses declared in the provided mandatory or optional courses for this request.',
+        },
+        INVALID_TIMES: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_TIMES',
+            message: 'Provided times are not valid times. It needs to follow d-hh:mm-hh:mm format, with start before end. And entries in array cannot overlap.',
+        },
+        INVALID_DAY: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_DAY',
+            message: 'Day number is invalid. It should be a integer from 0 (Sun) to 6 (Sat).',
+        },
+        INVALID_TIME_OF_DAY: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_TIME_RANGE',
+            message: 'Given time of day is not valid. It should follow format hh:mm in 24hs',
+        },
+        INVALID_TIME_RANGE: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_TIME_RANGE',
+            message: 'Format of the time is invalid. It should follow.',
+        },
+        INVALID_FROM_AND_TO: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_FROM_AND_TO',
+            message: 'Privded from and to dates are invalid. to date needs to be after from date.',
+        },
+        INVALID_BUILDING_DISTANCES: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'INVALID_BUILDING_DISTANCES',
+            message: 'Provided ditances are not valid. It should be an object where the keys are the target building ids and the value of each key is the integer distance in minutes.',
         },
         INVALID_PARAMS: {
             status: HTTP_STATUS.BAD_REQUEST,
@@ -34,6 +124,11 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             code: 'BUILDING_ALREADY_EXISTS',
             message: 'A building with provided internalId already exists.',
         },
+        BUILDING_DISTANCE_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'BUILDING_DISTANCE_ALREADY_EXISTS',
+            message: 'A distance between given buildings already exist. Use the modify or bulk replace endpoint to update the distance.',
+        },
         COURSE_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'COURSE_ALREADY_EXISTS',
@@ -42,7 +137,7 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         COURSE_CLASS_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'COURSE_CLASS_ALREADY_EXISTS',
-            message: 'A class with provided name already exists for this course and term.',
+            message: 'A class with provided internalId already exists.',
         },
         PROGRAM_ALREADY_EXISTS: {
             status: HTTP_STATUS.BAD_REQUEST,
@@ -63,6 +158,26 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
             status: HTTP_STATUS.BAD_REQUEST,
             code: 'UNIVERSITY_ALREADY_EXISTS',
             message: 'An university with provided params already exists.',
+        },
+        STUDENT_ALREADY_EXISTS: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'STUDENT_ALREADY_EXISTS',
+            message: 'A student with provided params already exists.',
+        },
+        COURSE_ALREADY_IN_PROGRAM: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_IN_PROGRAM',
+            message: 'Course is already in the program.',
+        },
+        COURSE_ALREADY_REQUIRED_IN_PROGRAM: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_REQUIRED_IN_PROGRAM',
+            message: 'Required course is already set as required in the program.',
+        },
+        COURSE_ALREADY_COMPLETED_BY_STUDENT: {
+            status: HTTP_STATUS.BAD_REQUEST,
+            code: 'COURSE_ALREADY_COMPLETED_BY_STUDENT',
+            message: 'Course already marked as completed by student.',
         },
     },
     UNAUTHORIZED: {
@@ -94,26 +209,31 @@ export const ERRORS: { [category: string]: { [subcategory: string]: IErrorData }
         TERM: { status: HTTP_STATUS.NOT_FOUND, code: 'TERM_NOT_FOUND', message: 'Term not found.' },
         COURSE: { status: HTTP_STATUS.NOT_FOUND, code: 'COURSE_NOT_FOUND', message: 'Course not found.' },
         BUILDING: { status: HTTP_STATUS.NOT_FOUND, code: 'BUILDING_NOT_FOUND', message: 'Building not found.' },
+        BUILDING_DISTANCE: { status: HTTP_STATUS.NOT_FOUND, code: 'BUILDING_DISTANCE_NOT_FOUND', message: 'Building distance not found.' },
+        CREDIT_REQUIREMENT: { status: HTTP_STATUS.NOT_FOUND, code: 'CREDIT_REQUIREMENT_NOT_FOUND', message: 'Credit requirement not found.' },
         COURSE_CLASS: {
             status: HTTP_STATUS.NOT_FOUND,
             code: 'COURSE_CLASS_NOT_FOUND',
             message: 'Course class not found.',
         },
         PROGRAM: { status: HTTP_STATUS.NOT_FOUND, code: 'PROGRAM_NOT_FOUND', message: 'Program not found.' },
+        COURSE_REQUIREMENT: { status: HTTP_STATUS.NOT_FOUND, code: 'COURSE_REQUIREMENT_NOT_FOUND', message: 'Course requirement not found.' },
         LECTURE: { status: HTTP_STATUS.NOT_FOUND, code: 'LECTURE_NOT_FOUND', message: 'Lecture not found.' },
         SCHEDULE: { status: HTTP_STATUS.NOT_FOUND, code: 'SCHEDULE_NOT_FOUND', message: 'Schedule not found.' },
-        RESET_TOKEN: { status: HTTP_STATUS.NOT_FOUND, code: 'RESET_TOKEN_NOT_FOUND', message: 'Reset token not found.' },
+        PASSWORD_RECOVERY_TOKEN: { status: HTTP_STATUS.NOT_FOUND, code: 'PASSWORD_RECOVERY_TOKEN_NOT_FOUND', message: 'Password recovery token not found.' },
     },
     CONFLICT: {
         GENERAL: { status: HTTP_STATUS.CONFLICT, code: 'CONFLICT', message: 'Conflict.' },
-        USER_EXISTS: {
+        CANNOT_DELETE: {
             status: HTTP_STATUS.CONFLICT,
-            code: 'USER_EXISTS',
-            message: 'User with same email exists already.',
+            code: 'CANNOT_DELETE',
+            message: 'Cannot delete due to pre-existing constraints like relationships that need to be deleted first.',
         },
     },
     INTERNAL_SERVER_ERROR: {
         GENERAL: { status: HTTP_STATUS.SERVER_ERROR, code: 'INTERNAL_SERVER_ERROR', message: 'Internal Server Error.' },
+        DATABASE: { status: HTTP_STATUS.SERVER_ERROR, code: 'DATABASE_ERROR', message: 'Unknown database error.' },
+        EMPTY_NODE: { status: HTTP_STATUS.SERVER_ERROR, code: 'EMPTY_NODE', message: 'Graph database returned an unexpected empty node.'},
         DATABASE_CONNECTION: {
             status: HTTP_STATUS.SERVER_ERROR,
             code: 'DATABASE_CONNECTION',

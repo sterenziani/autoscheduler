@@ -4,9 +4,8 @@ import UniversityDao from '../persistence/abstract/university.dao';
 import UserService from './user.service';
 import EmailService from './email.service';
 import { ROLE } from '../constants/general.constants';
-import GenericException from '../exceptions/generic.exception';
-import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
+import { cleanMaybeText } from '../helpers/string.helper';
 
 export default class UniversityService {
     private static instance: UniversityService;
@@ -38,35 +37,28 @@ export default class UniversityService {
         return await this.dao.getById(id);
     }
 
-    async createUniversity(email: string, password: string, name: string, locale: string): Promise<University> {
-        // validate name
-        if (await this.dao.findByName(name)) throw new GenericException(ERRORS.BAD_REQUEST.UNIVERSITY_ALREADY_EXISTS);
+    async getUniversities(page: number, limit: number, textSearch?: string, verified?: boolean): Promise<PaginatedCollection<University>> {
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), verified);
+    }
 
+    async createUniversity(email: string, password: string, locale: string, name: string): Promise<University> {
         // create user
-        const user = await this.userService.createUser(email, password, ROLE.UNIVERSITY, locale);
-        // create University
+        const user = await this.userService.createUser(email, password, locale, ROLE.UNIVERSITY);
+        // create university
         const university = await this.dao.create(user.id, name, this.universityDefaultVerified);
-        this.emailService.sendUniversityWelcomeEmail(university);
+        // send welcome email
+        this.emailService.sendUniversityWelcomeEmail(user.email, user.locale, university)
+            .catch((err) => console.log(`[UniversityService:createUniversity] Failed to send university welcome email. ${JSON.stringify(err)}`));
         return university;
     }
 
-    async setUniversityVerificationStatus(id: string, verified: boolean): Promise<University> {
-        const university: University = await this.getUniversity(id);
-        const oldStatus = university.verified;
-
-        university.verified = verified;
-        await this.dao.set(university);
-
-        if(!oldStatus && verified)
-            this.emailService.sendUniversityVerifiedEmail(university);
+    async modifyUniversity(id: string, name?: string, verified?: boolean): Promise<University> {
+        const university = await this.dao.modify(id, name, verified);
+        if (verified === true) {
+            this.userService.getUser(university.id)
+                .then((u) => {return this.emailService.sendUniversityVerifiedEmail(u, university)})
+                .catch((err) => console.log(`[UniversityService:modifyUniversity] Failed to send university verified email. ${JSON.stringify(err)}`))
+        }
         return university;
-    }
-
-    async getUniversitiesByText(
-        text?: string,
-        limit?: number,
-        offset?: number,
-    ): Promise<PaginatedCollection<University>> {
-        return await this.dao.findByText(text, limit, offset);
     }
 }

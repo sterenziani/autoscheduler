@@ -1,9 +1,8 @@
 import React, { useState, useEffect} from 'react';
-import { useLocation, useNavigate } from "react-router-dom";
-import { Col, Container, Navbar as BootstrapNavbar } from 'react-bootstrap';
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { Col, Navbar as BootstrapNavbar } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import AuthService from '../../services/AuthService';
-import { Link } from 'react-router-dom';
 import LinkButton from './LinkButton';
 import { ReactComponent as Logo } from '../../resources/logoBauhaus93.svg';
 
@@ -40,10 +39,11 @@ function Navbar(props){
                                     <p className="my-auto me-2 text-end fw-bold">{user.name}</p>
                                     <p className="my-auto me-2 text-end fst-italic">{user.email}</p>
                                 </Col>
+                            </div>
+                            <div className="d-flex text-end flex-wrap">
                                 <Col className="mx-auto d-flex justify-content-end">
                                     <LinkButton variant="secondary" textKey="logout" onClick={logOut}/>
                                 </Col>
-
                             </div>
                         </Col>)
             }

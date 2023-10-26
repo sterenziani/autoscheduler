@@ -1,4 +1,5 @@
 import { DAY } from '../../constants/time.constants';
+import { validateEnum } from '../validation.helper';
 import Time from './time.class';
 
 const DAY_LENGTH_IN_MINUTES = 60*24;
@@ -19,6 +20,43 @@ export default class TimeRange {
     }
 
     /**
+     * Creates a new TimeRange object from a string in d-hh:mm-hh:mm format.
+     * If string does not match format it returns undefined
+     * @param timeString
+     */
+    static parseString(timeString: string): TimeRange | undefined {
+        const splitTime = timeString.split('-');
+        if (splitTime.length !== 3) return undefined;
+        const maybeDay = splitTime[0];
+        const maybeStartTime = splitTime[1];
+        const maybeEndTime = splitTime[2];
+
+        const day = validateEnum<DAY>(Number(maybeDay), DAY);
+        if (day === undefined) return undefined;
+
+        const startTime = Time.parseString(maybeStartTime);
+        if (startTime === undefined) return undefined;
+
+        const endTime = Time.parseString(maybeEndTime);
+        if (endTime === undefined) return undefined;
+
+        if (endTime.compareTo(startTime) <= 0) return undefined;
+
+        return new TimeRange(day, startTime, endTime);
+    }
+
+    /**
+     * Creates a new TimeRange object from a string in d-hh:mm-hh:mm format.
+     * @param timeString
+     */
+    static fromString(timeString: string): TimeRange {
+        const maybeTimeRange = TimeRange.parseString(timeString);
+        if (maybeTimeRange === undefined) throw new Error('Invalid time range format, timeString should have d-hh:mm-hh:mm format with start time earlier than end time.');
+        return maybeTimeRange;
+    }
+
+    // Methods
+    /**
      * Returns positive number if this is greater than other
      * Returns negative number if this is lesser than other
      * Returns 0 if this is equal to other
@@ -36,10 +74,10 @@ export default class TimeRange {
 
     /**
      * returns timeRange in string format
-     * d hh:mm
+     * d-hh:mm-hh:mm
      */
     toString(): string {
-        return `${this.dayOfWeek} ${this.startTime}-${this.endTime}`;
+        return `${this.dayOfWeek}-${this.startTime.toString()}-${this.endTime.toString()}`;
     }
 
     /**
@@ -47,9 +85,11 @@ export default class TimeRange {
      * @param other
      */
     overlaps(other: TimeRange): boolean {
+        if (this.compareTo(other) === 0) return true;
         if (this.dayOfWeek === other.dayOfWeek) {
-            if (this.startTime <= other.startTime && other.startTime < this.endTime) return true;
-            if (other.startTime <= this.startTime && this.startTime < other.endTime) return true;
+            const earliestAndSmallest = this.compareTo(other) < 0 ? this : other;
+            const latestOrBiggest = this.compareTo(other) < 0 ? other : this;
+            return earliestAndSmallest.endTime.compareTo(latestOrBiggest.startTime) > 0;
         }
         return false;
     }

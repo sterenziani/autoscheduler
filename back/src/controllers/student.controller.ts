@@ -1,207 +1,658 @@
 import { RequestHandler } from 'express';
-import * as UserDto from '../dtos/user.dto';
 import * as StudentDto from '../dtos/student.dto';
-import { ERRORS } from '../constants/error.constants';
-import GenericException from '../exceptions/generic.exception';
-import UserService from '../services/user.service';
-import ScheduleService from '../services/schedule.service';
+import * as UniversityDto from '../dtos/university.dto';
+import * as ProgramDto from '../dtos/program.dto';
+import * as CourseDto from '../dtos/course.dto';
+import * as CourseClassDto from '../dtos/courseClass.dto';
+import * as BuildingDto from '../dtos/building.dto';
+import * as LectureDto from '../dtos/lecture.dto';
+import * as TermDto from '../dtos/term.dto';
+import * as ScheduleDto from '../dtos/schedule.dto';
 import { HTTP_STATUS } from '../constants/http.constants';
-import StudentService from '../services/student.service';
-import { ROLE } from '../constants/general.constants';
-import Student from '../models/abstract/student.model';
+import UniversityService from '../services/university.service';
+import { API_SCOPE, DEFAULT_LOCALE, RESOURCES } from '../constants/general.constants';
 import University from '../models/abstract/university.model';
+import GenericException from '../exceptions/generic.exception';
+import { ERRORS } from '../constants/error.constants';
+import { isValidEmail, isValidFilter, isValidName, isValidPassword, isValidTimes, validateArray, validateBoolean, validateDate, validateElemOrElemArray, validateInt, validateLocale, validateString, validateTimes } from '../helpers/validation.helper';
+import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
+import { PaginatedCollection } from '../interfaces/paging.interface';
 import Program from '../models/abstract/program.model';
+import ProgramService from '../services/program.service';
+import { getReqPath, getResourceUrl } from '../helpers/url.helper';
 import Course from '../models/abstract/course.model';
-import { ISchedule } from '../interfaces/schedule.interface';
-import { courseToDto } from '../dtos/course.dto';
-import { scheduleToDto } from '../dtos/schedule.dto';
-import { getUserUrl } from '../dtos/user.dto';
-import { validateArray, validateUnavailableTime } from '../helpers/validation.helper';
+import CourseService from '../services/course.service';
+import CourseClassService from '../services/courseClass.service';
+import CourseClass from '../models/abstract/courseClass.model';
+import BuildingService from '../services/building.service';
+import Building from '../models/abstract/building.model';
+import LectureService from '../services/lecture.service';
+import Lecture from '../models/abstract/lecture.model';
+import { IBuildingDistance } from '../interfaces/building.interface';
+import Term from '../models/abstract/term.model';
+import TermService from '../services/term.service';
+import StudentService from '../services/student.service';
+import Student from '../models/abstract/student.model';
+import { removeDuplicates } from '../helpers/collection.helper';
+import { DEFAULT_PRIORITIZE_UNLOCKS, DEFAULT_REDUCE_DAYS, DEFAULT_TARGET_HOURS, DEFAULT_RETURNED_AMOUNT } from '../constants/schedule.constants';
+import ScheduleService from '../services/schedule.service';
+import { IScheduleWithScore } from '../interfaces/schedule.interface';
 
 export class StudentController {
-    private userService: UserService;
-    private scheduleService: ScheduleService;
+    private universityService: UniversityService;
+    private programService: ProgramService;
+    private courseService: CourseService;
+    private courseClassService: CourseClassService;
+    private buildingService: BuildingService;
+    private lectureService: LectureService;
+    private termService: TermService;
     private studentService: StudentService;
+    private schedulesService: ScheduleService;
 
     constructor() {
-        this.userService = UserService.getInstance();
-        this.scheduleService = ScheduleService.getInstance();
+        this.universityService = UniversityService.getInstance();
+        this.programService = ProgramService.getInstance();
+        this.courseService = CourseService.getInstance();
+        this.courseClassService = CourseClassService.getInstance();
+        this.buildingService = BuildingService.getInstance();
+        this.lectureService = LectureService.getInstance();
+        this.termService = TermService.getInstance();
         this.studentService = StudentService.getInstance();
+        this.schedulesService = ScheduleService.getInstance();
     }
 
-    public getActiveStudent: RequestHandler = async (req, res) => {
-        res.redirect(UserDto.getUserUrl(req.user.id, ROLE.STUDENT));
-    };
-
     public getStudent: RequestHandler = async (req, res, next) => {
-        const userId = req.params.userId;
-        const userInfo = req.user;
-
-        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
+        const studentId = req.user.id;
 
         try {
-            const student: Student = await this.studentService.getStudent(userId);
-            const university: University = await student.getUniversity();
-            const program: Program | undefined = await student.getProgram();
-            res.status(HTTP_STATUS.OK).send(StudentDto.studentToDto(student, university, program));
+            const student: Student = await this.studentService.getStudent(studentId);
+            res.status(HTTP_STATUS.OK).send(StudentDto.studentToDto(student, API_SCOPE.STUDENT));
         } catch (e) {
             next(e);
         }
     };
 
     public createStudent: RequestHandler = async (req, res, next) => {
-        const email = req.body.email as string;
-        const password = req.body.password as string;
-        const programId = req.body.programId as string;
-        const name = req.body.name as string;
-        const locale = req.headers['accept-language'];
+        const email = validateString(req.body.email);
+        const password = validateString(req.body.password);
+        const locale = validateLocale(req.headers['accept-language']) ?? DEFAULT_LOCALE;
+        const universityId = validateString(req.body.universityId);
+        const programId = validateString(req.body.programId);
+        const name = validateString(req.body.name);
 
-        if (!email || !password || !name || !programId) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+        if (!email || !password || !universityId || !programId || !name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidEmail(email)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_EMAIL));
+        if (!isValidPassword(password)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PASSWORD));
+        if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
 
         try {
-            const student: Student = await this.studentService.createStudent(
-                email,
-                password,
-                programId,
-                name,
-                locale??"en"
-            );
-            res.status(HTTP_STATUS.CREATED).location(getUserUrl(student.id, ROLE.STUDENT)).send();
+            const student: Student = await this.studentService.createStudent(email, password, locale, universityId, programId, name);
+            res.status(HTTP_STATUS.CREATED)
+                .location(getResourceUrl(RESOURCES.STUDENT, API_SCOPE.STUDENT, student.id))
+                .send(StudentDto.studentToDto(student, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyStudent: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const name = validateString(req.body.name);
+
+        if (!name) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidName(name)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_NAME));
+
+        try {
+            const student: Student = await this.studentService.modifyStudent(studentId, undefined, name);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.STUDENT, API_SCOPE.STUDENT, student.id))
+                .send(StudentDto.studentToDto(student, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversity: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+
+        try {
+            const university: University = await this.universityService.getUniversity(universityId);
+            res.status(HTTP_STATUS.OK).send(UniversityDto.universityToDto(university, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityPrograms: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedPrograms: PaginatedCollection<Program> = await this.programService.getPrograms(page, limit, filter, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(ProgramDto.paginatedProgramsToLinks(paginatedPrograms, getReqPath(req), limit, filter))
+                .send(ProgramDto.paginatedProgramsToDto(paginatedPrograms, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityProgram: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const programId = req.params.programId;
+
+        try {
+            const program: Program = await this.programService.getProgram(programId, universityId);
+            res.status(HTTP_STATUS.OK).send(ProgramDto.programToDto(program, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityProgramRemainingCourses: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const programId = req.params.programId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const optional = validateBoolean(req.query.optional);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getRemainingCourses(page, limit, studentId, programId, universityId, filter, optional);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, optional))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityProgramCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const programId = req.params.programId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const optional = validateBoolean(req.query.optional);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCourses(page, limit, filter, programId, optional, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, optional))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityProgramCourseRequiredCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const programId = req.params.programId;
+        const courseId = req.params.courseId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getRequiredCourses(page, limit, courseId, filter, programId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const optional = validateBoolean(req.query.optional);
+        const programId = validateString(req.query.programId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCourses(page, limit, filter, programId, optional, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, optional, programId))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourse: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseId = req.params.courseId;
+
+        try {
+            const course: Course = await this.courseService.getCourse(courseId, universityId);
+            res.status(HTTP_STATUS.OK).send(CourseDto.courseToDto(course, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourseCourseClasses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseId = req.params.courseId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const termId = validateString(req.query.termId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, termId))
+                .send(CourseClassDto.paginatedCourseClassesToDto(paginatedCourseClasses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    // Duplicate
+    public getStudentUniversityCourseCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseId = req.params.courseId;
+        const courseClassId = req.params.courseClassId;
+
+        try {
+            const courseClass: CourseClass = await this.courseClassService.getCourseClass(courseClassId, universityId, courseId);
+            res.status(HTTP_STATUS.OK).send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourseRequiredCourses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseId = req.params.courseId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const programId = validateString(req.query.programId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getRequiredCourses(page, limit, courseId, filter, programId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, undefined, programId))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityBuildings: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedBuildings: PaginatedCollection<Building> = await this.buildingService.getBuildings(page, limit, filter, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(BuildingDto.paginatedBuildingsToLinks(paginatedBuildings, getReqPath(req), limit, filter))
+                .send(BuildingDto.paginatedBuildingsToDto(paginatedBuildings, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityBuilding: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const buildingId = req.params.buildingId;
+
+        try {
+            const building: Building = await this.buildingService.getBuilding(buildingId, universityId);
+            res.status(HTTP_STATUS.OK).send(BuildingDto.buildingToDto(building, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityBuildingLectures: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const buildingId = req.params.buildingId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const timesStrings = validateElemOrElemArray(req.query.times, validateString);
+        const times = validateTimes(timesStrings);
+        const courseClassId = validateString(req.query.courseClassId);
+
+        if ((times && !isValidTimes(times)) || (timesStrings && !times)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
+
+        try {
+            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, times, courseClassId, buildingId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, timesStrings, undefined, courseClassId))
+                .send(LectureDto.paginatedLecturesToDto(paginatedLectures, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityBuildingDistances: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const buildingId = req.params.buildingId;
+
+        try {
+            const distances: IBuildingDistance[] = await this.buildingService.getDistances(buildingId, universityId);
+            res.status(HTTP_STATUS.OK).send(BuildingDto.distancesToDto(distances, API_SCOPE.STUDENT, buildingId));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityBuildingDistance: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const buildingId = req.params.buildingId;
+        const distancedBuildingId = req.params.distancedBuildingId;
+
+        try {
+            const distance: IBuildingDistance = await this.buildingService.getDistance(buildingId, distancedBuildingId, universityId);
+            res.status(HTTP_STATUS.OK).send(BuildingDto.distanceToDto(distance, API_SCOPE.STUDENT, buildingId));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityTerms: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const from = validateDate(req.query.from);
+        const to = validateDate(req.query.to);
+        const published = validateBoolean(req.query.published);
+
+        if (from && to && to < from) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FROM_AND_TO));
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedTerms: PaginatedCollection<Term> = await this.termService.getTerms(page, limit, filter, from, to, published, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(TermDto.paginatedTermsToLinks(paginatedTerms, getReqPath(req), limit, filter, from, to, published))
+                .send(TermDto.paginatedTermsToDto(paginatedTerms, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityTerm: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const termId = req.params.termId;
+
+        try {
+            const term: Term = await this.termService.getTerm(termId, universityId);
+            res.status(HTTP_STATUS.OK).send(TermDto.termToDto(term, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityTermCourseClasses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const termId = req.params.termId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const courseId = validateString(req.query.courseId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, undefined, courseId))
+                .send(CourseClassDto.paginatedCourseClassesToDto(paginatedCourseClasses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourseClasses: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const courseId = validateString(req.query.courseId);
+        const termId = validateString(req.query.termId);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourseClasses: PaginatedCollection<CourseClass> = await this.courseClassService.getCourseClasses(page, limit, filter, courseId, termId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseClassDto.paginatedCourseClassesToLinks(paginatedCourseClasses, getReqPath(req), limit, filter, termId, courseId))
+                .send(CourseClassDto.paginatedCourseClassesToDto(paginatedCourseClasses, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourseClass: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseClassId = req.params.courseClassId;
+
+        try {
+            const courseClass: CourseClass = await this.courseClassService.getCourseClass(courseClassId, universityId);
+            res.status(HTTP_STATUS.OK).send(CourseClassDto.courseClassToDto(courseClass, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourseClassLectures: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseClassId = req.params.courseClassId;
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const timesStrings = validateElemOrElemArray(req.query.times, validateString);
+        const times = validateTimes(timesStrings);
+        const buildingId = validateString(req.query.buildingId);
+
+        if ((times && !isValidTimes(times)) || (timesStrings && !times)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
+
+        try {
+            const paginatedLectures: PaginatedCollection<Lecture> = await this.lectureService.getLectures(page, limit, times, courseClassId, buildingId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(LectureDto.paginatedLecturesToLinks(paginatedLectures, getReqPath(req), limit, timesStrings, buildingId))
+                .send(LectureDto.paginatedLecturesToDto(paginatedLectures, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityCourseClassLecture: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseClassId = req.params.courseClassId;
+        const lectureId = req.params.lectureId;
+
+        try {
+            const lecture: Lecture = await this.lectureService.getLecture(lectureId, universityId, courseClassId);
+            res.status(HTTP_STATUS.OK).send(LectureDto.lectureToDto(lecture, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentUniversityLecture: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const lectureId = req.params.lectureId;
+
+        try {
+            const lecture: Lecture = await this.lectureService.getLecture(lectureId, universityId);
+            res.status(HTTP_STATUS.OK).send(LectureDto.lectureToDto(lecture, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentProgram: RequestHandler = async (req, res, next) => {
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const programId = req.user.programId!;          // Can assert only for user with student role
+
+        try {
+            const program: Program = await this.programService.getProgram(programId, universityId);
+            res.status(HTTP_STATUS.OK).send(ProgramDto.programToDto(program, API_SCOPE.STUDENT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyStudentProgram: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const oldProgramId = req.user.programId!;       // Can assert only for user with student role
+        const programId = validateString(req.body.programId);
+
+        if (!programId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+
+        try {
+            // If it's the same program we just pretend we did what was asked
+            if (programId != oldProgramId)
+                await this.studentService.modifyStudent(studentId, programId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentProgramRemainingCourses: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const programId = req.user.programId!;          // Can assert only for user with student role
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const optional = validateBoolean(req.query.optional);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
+
+        try {
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getRemainingCourses(page, limit, studentId, programId, universityId, filter, optional);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, optional))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.STUDENT));
         } catch (e) {
             next(e);
         }
     };
 
     public getStudentCompletedCourses: RequestHandler = async (req, res, next) => {
-        const userId = req.params.userId;
-        const userInfo = req.user;
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const optional = validateBoolean(req.query.optional);
+        const programId = validateString(req.query.programId);
 
-        const page = parseInt(req.query.page as string) ?? undefined;
-        const per_page = parseInt(req.query.per_page as string) ?? undefined;
-
-        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));
 
         try {
-            const completedCourses = await this.studentService.getStudentCompletedCourses(userId, per_page, page);
-            const links: Record<string, string> = {};
-            for (const [key, value] of Object.entries(completedCourses.pagingInfo)) {
-                links[key] = StudentDto.getCompletedCoursesUrl(userId, value, per_page);
-            }
-
-            // getting courses with their respective universities, see if we can cache universities
-            const coursesWithUniversity: { course: Course; university: University }[] = await Promise.all(
-                completedCourses.collection.map(async (course) => {
-                    return { course, university: await course.getUniversity() };
-                }),
-            );
-            res.status(HTTP_STATUS.OK).links(links).send(
-                coursesWithUniversity.map((cwu) => courseToDto(cwu.course, cwu.university.id)),
-            );
+            const paginatedCourses: PaginatedCollection<Course> = await this.courseService.getCompletedCourses(page, limit, studentId, filter, optional, programId, universityId);
+            res.status(HTTP_STATUS.OK)
+                .links(CourseDto.paginatedCoursesToLinks(paginatedCourses, getReqPath(req), limit, filter, optional, programId))
+                .send(CourseDto.paginatedCoursesToDto(paginatedCourses, API_SCOPE.STUDENT));
         } catch (e) {
             next(e);
         }
     };
 
-    public getRemainingCourses: RequestHandler = async (req, res, next) => {
-        const userId = req.params.userId;
-        const programId = req.params.programId;
-        const userInfo = req.user;
+    public addStudentCompletedCourse: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseId = validateString(req.body.courseId);
 
-        const filter = req.query.filter as string | undefined;
-        const page = parseInt(req.query.page as string) ?? undefined;
-        const per_page = parseInt(req.query.per_page as string) ?? undefined;
-
-        if (userId !== userInfo.id) throw new GenericException(ERRORS.FORBIDDEN.GENERAL);
+        if (!courseId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
 
         try {
-            const remainingCourses = await this.studentService.getStudentRemainingCoursesForProgram(userId, programId, filter, per_page, page);
-            const links: Record<string, string> = {};
-            for (const [key, value] of Object.entries(remainingCourses.pagingInfo)) {
-                links[key] = StudentDto.getRemainingCoursesUrl(userId, programId, value, per_page);
-            }
-
-            // getting courses with their respective universities, see if we can cache universities
-            const coursesWithUniversity: { course: Course; university: University }[] = await Promise.all(
-                remainingCourses.collection.map(async (course) => {
-                    return { course, university: await course.getUniversity() };
-                }),
-            );
-            res.status(HTTP_STATUS.OK).links(links).send(
-                coursesWithUniversity.map((cwu) => courseToDto(cwu.course, cwu.university.id)),
-            );
-        } catch (e) {
-            next(e);
-        }
-    };
-
-    public addStudentCompletedCourses: RequestHandler = async (req, res, next) => {
-        const userId = req.params.userId;
-        const userInfo = req.user;
-        const completedCourses = req.body.courseIds as string[];
-
-        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
-
-        try {
-            await this.studentService.addStudentCompletedCourses(userInfo.id, completedCourses);
+            await this.studentService.addCompletedCourse(studentId, universityId, courseId);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }
     };
 
-    public removeStudentCompletedCourses: RequestHandler = async (req, res, next) => {
-        const userId = req.params.userId;
-        const userInfo = req.user;
-        const completedCourses = req.body.courseIds as string[];
-
-        if (userId !== userInfo.id) return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
+    public removeStudentCompletedCourse: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseId = req.params.courseId;
 
         try {
-            await this.studentService.removeStudentCompletedCourses(userInfo.id, completedCourses);
+            await this.studentService.removeCompletedCourse(studentId, universityId, courseId);
             res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }
     };
 
-    public getSchedules: RequestHandler = async (req, res, next) => {
-        const userId = req.params.userId;
+    public bulkAddStudentCompletedCourses: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseIds = removeDuplicates(validateArray(req.body.courseIds, validateString) ?? []);
 
-        const programId = req.query.programId as string;
-        const termId = req.query.termId as string;
-        const targetHours = Number(req.query.hours);
-        const reduceDays = (req.query.reduceDays === 'true');
-        const prioritizeUnlocks = (req.query.prioritizeUnlocks === 'true');
-
-        let unavailableTimeSlots;
-        if(req.query.unavailable){
-            if(Array.isArray(req.query.unavailable)){
-                // Multiple items, pass as it is
-                unavailableTimeSlots = validateArray(req.query.unavailable, validateUnavailableTime);
-            } else{
-                // 1 item, must convert to array
-                unavailableTimeSlots = validateArray([req.query.unavailable], validateUnavailableTime);
-            }
-        } else {
-            // Empty array
-            unavailableTimeSlots = validateArray([], validateUnavailableTime);
-        }
-
-        if (!programId || !termId || !targetHours || !unavailableTimeSlots)
-            return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PARAMS));
+        if (courseIds.length === 0) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
 
         try {
-            const schedules: {schedule:ISchedule, score:number}[] = await this.scheduleService.getSchedules(
-                userId,
-                programId,
-                termId,
-                targetHours,
-                reduceDays,
-                prioritizeUnlocks,
-                unavailableTimeSlots
-            );
-            const scheduleDtos = schedules.map(s => scheduleToDto(s.schedule, s.score));
-            res.status(HTTP_STATUS.OK).send(scheduleDtos);
+            await this.studentService.bulkAddCompletedCourses(studentId, universityId, courseIds);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public bulkReplaceStudentCompletedCourses: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!;    // Can assert only for user with student role
+        const courseIds = removeDuplicates(validateArray(req.body.courseIds, validateString) ?? []);
+
+        try {
+            await this.studentService.bulkReplaceCompletedCourses(studentId, universityId, courseIds);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public getStudentSchedules: RequestHandler = async (req, res, next) => {
+        const studentId = req.user.id;
+        const universityId = req.user.universityId!     // Can assert only for user with student role
+        const programId = validateString(req.query.programId)??req.user.programId! // Accept alternate programs, but default to student's program
+        const termId = validateString(req.query.termId);
+        const hours = validateInt(req.query.hours) ?? DEFAULT_TARGET_HOURS;
+        const reduceDays = validateBoolean(req.query.reduceDays) ?? DEFAULT_REDUCE_DAYS;
+        const prioritizeUnlocks = validateBoolean(req.query.prioritizeUnlocks) ?? DEFAULT_PRIORITIZE_UNLOCKS;
+        const unavailableTimesStrings = validateElemOrElemArray(req.query.unavailable, validateString);
+        const unavailableTimes = validateTimes(unavailableTimesStrings) ?? [];
+        const amountToReturn = validateInt(req.query.count) ?? DEFAULT_RETURNED_AMOUNT;
+
+        if (!termId) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidTimes(unavailableTimes, true)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
+
+        try {
+            const schedules: IScheduleWithScore[] = await this.schedulesService.getSchedules(studentId, universityId, programId, termId, hours, reduceDays, prioritizeUnlocks, unavailableTimes, amountToReturn);
+            res.status(HTTP_STATUS.OK).send(ScheduleDto.schedulesToDto(schedules))
         } catch (e) {
             next(e);
         }

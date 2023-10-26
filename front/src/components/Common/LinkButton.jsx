@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button as BootstrapButton } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
+import { Link } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
 const LinkButton = (props) => {
@@ -8,11 +8,11 @@ const LinkButton = (props) => {
     const { href, text, textKey, ...other } = props;
 
     return href ? (
-        <LinkContainer to={href}>
+        <Link as={Link} to={href}>
             <BootstrapButton {...other}>
                 {text ? text : t(`${textKey}`)}
             </BootstrapButton>
-        </LinkContainer>
+        </Link>
     ) : (
         <BootstrapButton {...other}>
             {' '}

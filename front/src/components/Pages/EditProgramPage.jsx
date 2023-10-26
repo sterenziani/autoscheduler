@@ -4,15 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button, Form, Spinner, Row, Col } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
+import LeavePagePrompt from '../Common/LeavePagePrompt'
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import CourseListForm from '../Lists/CourseListForm';
-import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
+import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_PROGRAM_ERROR = "PROGRAM_ALREADY_EXISTS"
+const INVALID_NAME_ERROR = "INVALID_NAME"
 
 function EditProgramPage(props) {
     const ProgramSchema = Yup.object().shape({
@@ -24,21 +26,20 @@ function EditProgramPage(props) {
             .min(3, 'forms.errors.program.minNameLength')
             .max(50, 'forms.errors.program.maxNameLength')
             .required('forms.errors.program.nameIsRequired'),
+        programOptionalCredits: Yup.number().min(0, 'forms.errors.program.positiveZeroOptionalCredits'),
     });
 
-    const navigate = useNavigate();
-    const {t} = useTranslation();
+    const navigate = useNavigate()
+    const {t} = useTranslation()
     const {id} = useParams()
-    const [user] = useState(ApiService.getActiveUser())
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
 
-    const [program, setProgram] = useState(null);
-    const [mandatoryCourses, setMandatoryCourses] = useState();
-    const [optionalCourses, setOptionalCourses] = useState();
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
 
-    const [courses, setCourses] = useState(null);
+    const user = ApiService.getActiveUser()
+    const [program, setProgram] = useState()
+    const [mandatoryCourses, setMandatoryCourses] = useState()
+    const [optionalCourses, setOptionalCourses] = useState()
 
     useEffect(() => {
         if(!user)
@@ -48,13 +49,9 @@ function EditProgramPage(props) {
     useEffect( () => {
         const loadProgram = async () => {
             ApiService.getProgram(id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else
                   setProgram(resp.data)
@@ -62,14 +59,10 @@ function EditProgramPage(props) {
         }
 
         const loadMandatoryCourses = async (programId) => {
-            ApiService.getMandatoryCourses(programId).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+            ApiService.getMandatoryCourses(programId, true).then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setMandatoryCourses(resp.data)
@@ -78,14 +71,10 @@ function EditProgramPage(props) {
         }
 
         const loadOptionalCourses = async (programId) => {
-            ApiService.getOptionalCourses(programId).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+            ApiService.getOptionalCourses(programId, true).then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setOptionalCourses(resp.data)
@@ -95,41 +84,38 @@ function EditProgramPage(props) {
 
         async function execute() {
             if(id){
-                if(!program && !courses)
-                    await Promise.all([loadProgram(), loadCourses(user.id)])
-                else if(program && courses && !mandatoryCourses && !optionalCourses)
+                if(!program)
+                    await Promise.all([loadProgram()])
+                else if(program && !mandatoryCourses && !optionalCourses)
                     await Promise.all([loadMandatoryCourses(program.id), loadOptionalCourses(program.id)])
             }
             else{
-                if(!courses)
-                    await Promise.all([loadCourses(user.id)])
-                else if(!program && !mandatoryCourses && !optionalCourses){
+                if(!program && !mandatoryCourses && !optionalCourses){
                     setMandatoryCourses([])
                     setOptionalCourses([])
-                    setProgram({"name": t("forms.placeholders.programName"), "code": t("forms.placeholders.programCode")})
+                    setProgram({"name": t("forms.placeholders.programName"), "internalId": t("forms.placeholders.programCode"), "optionalCourseCredits": 0})
                 }
             }
 
-            if(program && courses && mandatoryCourses && optionalCourses)
+            if(program && mandatoryCourses && optionalCourses)
                 setLoading(false)
         }
-        if(user) execute()
-    },[program, courses, mandatoryCourses, optionalCourses, id, t, user])
+        execute()
+    },[program, mandatoryCourses, optionalCourses, id, t])
 
-    const loadCourses = async (universityId) => {
-        ApiService.getCourses(universityId).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else{
-                setCourses(resp.data)
-            }
-        });
+    const [modifiedCourses, setModifiedCourses] = useState(false)
+    const [unsavedForm, setUnsavedForm] = useState(false)
+    const FormObserver = () => {
+        const { values } = useFormikContext()
+
+        useEffect(() => {
+            const internalIdChanged = (program && values.programCode !== program.internalId)
+            const nameChanged = (program && values.programName !== program.name)
+            const creditsChanged = (program && values.programOptionalCredits !== program.optionalCourseCredits)
+
+            setUnsavedForm(internalIdChanged || nameChanged || creditsChanged || modifiedCourses)
+        }, [values]);
+        return null;
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
@@ -138,13 +124,17 @@ function EditProgramPage(props) {
         {
             const mandatoryCourseIDs = mandatoryCourses.map(a => a.id)
             const optionalCourseIDs = optionalCourses.map(a => a.id)
-            const resp = await ApiService.saveProgram(id, values.programName, values.programCode, mandatoryCourseIDs, optionalCourseIDs)
+
+            const creditRequirements = {}
+            mandatoryCourses.forEach((c) => {if(c.requiredCredits > 0) creditRequirements[c.id] = c.requiredCredits})
+            optionalCourses.forEach((c) => {if(c.requiredCredits > 0)  creditRequirements[c.id] = c.requiredCredits})
+
+            const resp = await ApiService.saveProgram(id, values.programName, values.programCode, values.programOptionalCredits, mandatoryCourseIDs, optionalCourseIDs, creditRequirements)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/?tab=programs")
             }
             else{
-                setError(resp.data.code)
-                setStatus(resp.status)
+                setError(resp.data?.code?? resp.status)
                 setSubmitting(false);
             }
         }
@@ -153,32 +143,36 @@ function EditProgramPage(props) {
         }
     };
 
-    const onClickReqTrashCan = (e) => {
+    const onClickMandatoryTrashCan = (e) => {
         const mandatoriesCopy = Object.assign([], mandatoryCourses);
         mandatoriesCopy.splice(mandatoryCourses.indexOf(e), 1);
         setMandatoryCourses(mandatoriesCopy)
+        setModifiedCourses(true)
     }
 
     const onClickOptTrashCan = (e) => {
         const optionalsCopy = Object.assign([], optionalCourses);
         optionalsCopy.splice(optionalCourses.indexOf(e), 1);
         setOptionalCourses(optionalsCopy)
+        setModifiedCourses(true)
     }
 
-    const addRequiredCourse = (courseToAdd) => {
+    const addMandatoryCourse = (courseToAdd) => {
         if(!courseToAdd)
-            return;
-        const mandatoriesCopy = Object.assign([], mandatoryCourses);
-        mandatoriesCopy.push(courseToAdd);
+            return
+        const mandatoriesCopy = Object.assign([], mandatoryCourses)
+        mandatoriesCopy.push(courseToAdd)
         setMandatoryCourses(mandatoriesCopy)
+        setModifiedCourses(true)
     }
 
     const addOptionalCourse = (courseToAdd) => {
         if(!courseToAdd)
-            return;
-        const optionalsCopy = Object.assign([], optionalCourses);
-        optionalsCopy.push(courseToAdd);
+            return
+        const optionalsCopy = Object.assign([], optionalCourses)
+        optionalsCopy.push(courseToAdd)
         setOptionalCourses(optionalsCopy)
+        setModifiedCourses(true)
     }
 
     if(!user)
@@ -189,8 +183,8 @@ function EditProgramPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-        if (error && error !== EXISTING_PROGRAM_ERROR)
-            return <ErrorMessage status={status}/>
+    if (error && error !== EXISTING_PROGRAM_ERROR && error !== INVALID_NAME_ERROR)
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>
@@ -198,10 +192,15 @@ function EditProgramPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editProgram':'forms.createProgram')}</h2>
-                {error && (<p className="form-error">{t('forms.errors.program.codeAlreadyTaken')}</p>)}
-                <Formik initialValues={{ programName: program.name, programCode: program.code }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
+                {error && error === EXISTING_PROGRAM_ERROR && (<p className="form-error">{t('forms.errors.program.codeAlreadyTaken')}</p>)}
+                {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
+
+                <Formik initialValues={{ programName: program.name, programCode: program.internalId, programOptionalCredits: program.optionalCourseCredits }} validationSchema={ProgramSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
+                    <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
+                    <FormObserver/>
+
                     <FormInputField
                         id="program-code"
                         label="forms.programCode" name="programCode"
@@ -216,33 +215,41 @@ function EditProgramPage(props) {
                         value={values.programName} error={errors.programName}
                         touched={touched.programName} onChange={handleChange} onBlur={handleBlur}
                     />
+                    <FormInputField
+                        tooltipMessage="forms.optionalCoursesTooltip"
+                        id="program-optional-credits"
+                        label="forms.programOptionalCredits" name="programOptionalCredits"
+                        type="number" placeholder="0" min="0"
+                        value={values.programOptionalCredits} error={errors.programOptionalCredits}
+                        touched={touched.programOptionalCredits} onChange={handleChange} onBlur={handleBlur}
+                    />
                     <Row>
-                    <Col>
-                        <Row className="mx-auto form-row">
-                            <div className="text-center my-3 text-break">
-                                <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
-                            </div>
-                            <div className="align-items-start align-items-center">
-                                <CourseListForm courses={courses}
-                                    listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
-                                    onClickTrashCan={onClickReqTrashCan} addCourse={addRequiredCourse}
-                                />
-                            </div>
-                        </Row>
-                    </Col>
-                    <Col>
-                        <Row className="mx-auto form-row">
-                            <div className="text-center my-3 text-break">
-                                <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
-                            </div>
-                            <div className="align-items-start align-items-center">
-                                <CourseListForm courses={courses}
-                                    listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
-                                    onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
-                                />
-                            </div>
-                        </Row>
-                    </Col>
+                        <Col>
+                            <Row className="mx-auto form-row">
+                                <div className="text-center my-3 text-break">
+                                    <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
+                                </div>
+                                <div className="align-items-start align-items-center">
+                                <CourseListForm editCreditRequirements
+                                        listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
+                                        onClickTrashCan={onClickMandatoryTrashCan} addCourse={addMandatoryCourse}
+                                    />
+                                </div>
+                            </Row>
+                        </Col>
+                        <Col>
+                            <Row className="mx-auto form-row">
+                                <div className="text-center my-3 text-break">
+                                    <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
+                                </div>
+                                <div className="align-items-start align-items-center">
+                                    <CourseListForm editCreditRequirements
+                                        listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
+                                        onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
+                                    />
+                                </div>
+                            </Row>
+                        </Col>
                     </Row>
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>

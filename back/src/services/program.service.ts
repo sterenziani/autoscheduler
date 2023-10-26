@@ -1,18 +1,11 @@
 import ProgramDao from '../persistence/abstract/program.dao';
 import ProgramDaoFactory from '../factories/programDao.factory';
 import Program from '../models/abstract/program.model';
-import CourseService from './course.service';
-import UniversityService from './university.service';
-import GenericException from '../exceptions/generic.exception';
-import { ERRORS } from '../constants/error.constants';
 import { PaginatedCollection } from '../interfaces/paging.interface';
-import { paginateCollection } from '../helpers/collection.helper';
-import Course from '../models/abstract/course.model';
+import { cleanMaybeText } from '../helpers/string.helper';
 
 export default class ProgramService {
     private static instance: ProgramService;
-    private courseService!: CourseService;
-    private universityService!: UniversityService;
 
     private dao: ProgramDao;
 
@@ -28,110 +21,64 @@ export default class ProgramService {
     }
 
     init() {
-        this.courseService = CourseService.getInstance();
-        this.universityService = UniversityService.getInstance();
+        // Do nothing
     }
 
-    async getProgram(id: string): Promise<Program> {
-        return await this.dao.getById(id);
+    // public methods
+
+    async getProgram(id: string, universityIdFilter?: string): Promise<Program> {
+        return await this.dao.getById(id, universityIdFilter);
     }
 
-    async createProgram(
-        universityId: string,
-        internalId: string,
-        name: string,
-        mandatoryCourses: string[] = [],
-        optionalCourses: string[] = [],
-    ): Promise<Program> {
-        // validate existence of university & courses
-        await this.universityService.getUniversity(universityId);
-        await Promise.all(
-            mandatoryCourses.concat(optionalCourses).map(async (cId) => {
-                const course = await this.courseService.getCourse(cId);
-                const university = await course.getUniversity();
-                if (university.id != universityId) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
-            }),
-        );
-        // check if a program with internalId already exists
-        if (await this.dao.findByInternalId(universityId, internalId))
-            throw new GenericException(ERRORS.BAD_REQUEST.PROGRAM_ALREADY_EXISTS);
-
-        // TODO add session logic for transactional operations
-        const program = await this.dao.create(universityId, internalId, name);
-        await Promise.all([
-            Promise.all(mandatoryCourses.map(async (cId) => await program.addCourse(cId, false))),
-            Promise.all(optionalCourses.map(async (cId) => await program.addCourse(cId, true))),
-        ]);
-
-        return program;
+    async getPrograms(page: number, limit: number, textSearch?: string, universityId?: string, courseId?:string): Promise<PaginatedCollection<Program>> {
+        return await this.dao.findPaginated(page, limit, cleanMaybeText(textSearch), universityId, courseId);
     }
 
-    async updateProgram(
-        programId: string,
-        internalId: string,
-        name: string,
-        mandatoryCourses: string[] = [],
-        optionalCourses: string[] = [],
-    ): Promise<Program> {
-        // validate existence of course and programIds
-        const program: Program = await this.getProgram(programId);
-        const programUniversity = await program.getUniversity();
-        await Promise.all(
-            mandatoryCourses.concat(optionalCourses).map(async (cId) => {
-                const course = await this.courseService.getCourse(cId);
-                const university = await course.getUniversity();
-                if (university.id != programUniversity.id) throw new GenericException(ERRORS.NOT_FOUND.COURSE);
-            }),
-        );
-
-        // check if a program with new internalId already exists
-        if (internalId != program.internalId) {
-            const programWithRequestedInternalId = await this.dao.findByInternalId(programUniversity.id, internalId);
-            if (programWithRequestedInternalId && programWithRequestedInternalId.id != program.id) {
-                throw new GenericException(ERRORS.BAD_REQUEST.PROGRAM_ALREADY_EXISTS);
-            }
-        }
-
-        program.internalId = internalId;
-        program.name = name;
-        await program.setMandatoryCourses(mandatoryCourses);
-        await program.setOptionalCourses(optionalCourses);
-        await this.dao.set(program);
-        return program;
+    async createProgram(universityId: string, internalId: string, name: string, optionalCourseCredits: number): Promise<Program> {
+        return await this.dao.create(universityId, internalId, name, optionalCourseCredits);
     }
 
-    async deleteProgram(id: string) {
-        await this.dao.delete(id);
+    async modifyProgram(id: string, universityIdFilter: string, internalId?: string, name?: string, optionalCourseCredits?: number): Promise<Program> {
+        return await this.dao.modify(id, universityIdFilter, internalId, name, optionalCourseCredits);
     }
 
-    async getProgramsByText(
-        universityId: string,
-        text?: string,
-        limit?: number,
-        offset?: number,
-    ): Promise<PaginatedCollection<Program>> {
-        return await this.dao.findByText(universityId, text, limit, offset);
+    async deleteProgram(id: string, universityIdFilter: string): Promise<void> {
+        return await this.dao.delete(id, universityIdFilter);
     }
 
-    async getProgramMandatoryCourses(
-        id: string,
-        limit?: number,
-        offset?: number,
-    ): Promise<PaginatedCollection<Course>> {
-        const program = await this.dao.getById(id);
-        if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
-
-        const mandatoryCourses = await program.getMandatoryCourses();
-        const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
-        return paginateCollection(mandatoryCourses, compareCourses);
+    async addCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean, requiredCredits: number): Promise<void> {
+        await this.dao.addCourse(id, universityIdFilter, courseId, optional, requiredCredits);
     }
 
-    async getProgramOptionalCourses(id: string, limit?: number, offset?: number): Promise<PaginatedCollection<Course>> {
-        const program = await this.dao.getById(id);
-        if (!program) throw new GenericException(ERRORS.NOT_FOUND.PROGRAM);
+    async modifyCourse(id: string, universityIdFilter: string, courseId: string, optional: boolean, requiredCredits?: number): Promise<void> {
+        await this.dao.modifyCourse(id, universityIdFilter, courseId, optional, requiredCredits);
+    }
 
-        const optionalCourses = await program.getOptionalCourses();
-        const compareCourses = ((c1: Course, c2: Course) => c1.internalId.localeCompare(c2.internalId));
-        return paginateCollection(optionalCourses, compareCourses);
+    async removeCourse(id: string, universityIdFilter: string, courseId: string): Promise<void> {
+        await this.dao.removeCourse(id, universityIdFilter, courseId);
+    }
+
+    async bulkAddCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}): Promise<void> {
+        await this.dao.bulkAddCourses(id, universityIdFilter, mandatoryCoursesIds, optionalCoursesIds, requiredCredits);
+    }
+
+    async bulkReplaceCourses(id: string, universityIdFilter: string, mandatoryCoursesIds: string[], optionalCoursesIds: string[], requiredCredits: {[key:string]: number}): Promise<void> {
+        await this.dao.bulkReplaceCourses(id, universityIdFilter, mandatoryCoursesIds, optionalCoursesIds, requiredCredits);
+    }
+
+    async addCourseRequiredCourse(id: string, universityIdFilter: string, courseId: string, requiredCourseId: string): Promise<void> {
+        await this.dao.addCourseRequiredCourse(id, universityIdFilter, courseId, requiredCourseId);
+    }
+
+    async removeCourseRequiredCourse(id: string, universityIdFilter: string, courseId: string, requiredCourseId: string): Promise<void> {
+        await this.dao.removeCourseRequiredCourse(id, universityIdFilter, courseId, requiredCourseId);
+    }
+
+    async bulkAddCourseRequiredCourses(id: string, universityIdFilter: string, courseId: string, requirements: string[]): Promise<void> {
+        await this.dao.bulkAddCourseRequiredCourses(id, universityIdFilter, courseId, requirements);
+    }
+
+    async bulkReplaceCourseRequiredCourses(id: string, universityIdFilter: string, courseId: string, requirements: string[]): Promise<void> {
+        await this.dao.bulkReplaceCourseRequiredCourses(id, universityIdFilter, courseId, requirements);
     }
 }

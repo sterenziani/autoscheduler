@@ -21,12 +21,18 @@
         "errors": {
             "codes": {
                 "401": "Failed to make request to AutoScheduler service with permissions error.",
-                "408": "Could not connect to the AutoScheduler server.",
+                "408": "Did not receive a response from the AutoScheduler server.",
+                "503": "Could not connect to the AutoScheduler server.",
                 "TIMEOUT": "Could not connect to AutoScheduler service.",
                 "USER_ALREADY_EXISTS": "A user with that email address already exists.",
-                "UNIVERSITY_ALREADY_EXISTS": "A university with that name is already registered.",
+                "UNIVERSITY_ALREADY_EXISTS": "A school with that name is already registered.",
                 "INVALID_PASSWORD": "Invalid password. Please make it longer and ensure it has a mix of numbers, uppercase and lowercase letters.",
-                "INVALID_PARAMS": "The form was not completed correctly. Please make sure all fields have been filled in."
+                "INVALID_PARAMS": "The form was not completed correctly. Please make sure all fields have been filled in.",
+                "INVALID_NAME": "The name is invalid. Our only supported non-standard characters at the moment are Ñ, ü and á/é/í/ó/ú.",
+                "INVALID_LOGIN": "Incorrect email and/or password.",
+                "USER_NOT_FOUND": "The provided address is not registered in AutoScheduler.",
+                "UNIVERSITY_NOT_FOUND": "We could not find the requested school because of a server error.",
+                "STUDENT_NOT_FOUND": "We could not find the requested student because of a server error."
             },
             "gettingUniversitiesData": "There was an error fetching universities data.",
             "email": {
@@ -71,10 +77,10 @@
         }
     },
     "tabs": {
-        "courseLog": "COURSE LOG",
+        "courseLog": "COMPLETED COURSES",
         "findSchedule": "FIND A SCHEDULE",
         "iAmStudent": "REGISTER AS A STUDENT",
-        "iAmUniversty": "REGISTER AS A UNIVERSITY",
+        "iAmUniversty": "REGISTER AS A SCHOOL",
         "login": "Sign In",
         "programs": "PROGRAMS",
         "terms": "TERMS",
@@ -90,10 +96,12 @@
         "deleteBuilding": "Deleting building",
         "deleteTerm": "Deleting term",
         "addCourse": "Adding course",
+        "creditsRequired":"Required credits:",
+        "creditsRequiredHint":"If you want this course to only be suggested to students once they have earned a certain amount of credits, you can set it here.\n\nIf students can sign up for this course just by completing its required courses for this program, with no credits threshold, you may ignore this field.",
         "areYouSureCourse": "Are you sure you want to delete course '{{code}} - {{name}}'?",
         "areYouSureProgram": "Are you sure you want to delete the program '{{code}} - {{name}}'?",
         "areYouSureClass": "Are you sure you want to delete class {{class}} for course '{{code}} - {{name}}' in term {{term}}?",
-        "areYouSureBuilding": "Are you sure you want to delete the building '{{code}} - {{name}}'?",
+        "areYouSureBuilding": "Are you sure you want to delete the building '{{code}} - {{name}}'? Any lectures that lake place in this building will also be removed from their corresponding class.",
         "areYouSureTerm": "Are you sure you want to delete the term '{{code}} - {{name}}'? All classes created for this term will also be deleted, regardless of their associated course.",
         "noRemainingCoursesProgram": "This program has no remaining courses available.",
         "noRemainingCourses": "No remaining courses available.",
@@ -110,11 +118,14 @@
         "term": "Term",
         "hoursPerWeek": "Weekly hours",
         "prioritizeUnlocks": "Prioritize unlockables",
+        "prioritizeUnlocksTooltip": "Check this box to prioritize schedules that contain more courses that many other courses depend on.\nUseful if you'd like to broaden your range of options next term.",
         "reduceDays": "Reduce days",
+        "reduceDaysTooltip": "Check this box to prioritize schedules where classes are concentrated across fewer days.\nVery useful if you have a long commute to your school.",
         "unavailableSlots": "Timeslots to avoid",
         "programError":"Please select a program.",
         "invalidParams":"Received invalid params.",
-        "noTermsFromUniversity": "Your university has no publicly available terms right now, so you can't search for schedule proposals."
+        "noTermsFromUniversity": "Your school has no publicly available terms right now, so you can't search for schedule proposals.",
+        "showingResultsFor": "Showing results for '{{searchTerm}}'"
     },
     "days": {
         "M": "Monday",
@@ -136,13 +147,21 @@
     },
     "home": {
         "welcomeAdmin": "Welcome, administrator. Please refer to the official documentation on how to verify universities through the AutoScheduler API.",
-        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with this school so we can verify the account and add your school to our list."
+        "search": "Search for a school",
+        "verify": "Mark as verified",
+        "unverify": "Revoke verification",
+        "getVerified": "Your school has not yet been verified. If you haven't started your application yet, remember to contact us at {{email}} with proof of your association with {{universityName}} so we can verify the account and add your school to our list.\n\nYou can continue using AutoScheduler normally to set up your school's buildings, upcoming terms, courses and programs.\nHowever, students won't be able to register as students of your school until the verification process is complete.",
+        "whatIsTermPublish": "Students will only be able to search schedules for terms you have published."
     },
     "terms": {
         "hide": "Hide",
         "publish": "Publish"
     },
+    "course":{
+        "pickAProgram":"Choose a program to see the required courses defined for this course under that program."
+    },
     "forms":{
+        "courseClasses":"Classes",
         "createClass":"Create class",
         "editClass":"Edit class",
         "course":"Course",
@@ -158,26 +177,36 @@
         "createCourse":"Create Course",
         "courseName":"Course name",
         "courseCode":"Course code/ID",
+        "creditsEarned":"Credits awarded",
+        "creditsEarnedTooltip":"Amount of creadits the student is awarded for completing this course.",
         "requirements":"Required courses",
+        "requirementsReturnLater": "Make sure to add this course to a program later.\nThen return here to define the required courses for this course under that program.",
         "editProgram":"Edit Program",
         "createProgram":"Create Program",
         "programCode":"Program code/ID",
         "programName":"Program name",
+        "programOptionalCredits": "Optional Credits",
+        "courseRequiresCredits":"(Requires {{credits}} credits)",
         "mandatoryCourses":"Mandatory courses",
         "optionalCourses":"Optional courses",
+        "optionalCoursesTooltip":"To graduate from this program, a student must not only pass all mandatory courses listed below, but also earn this amount of credits from this program's optional courses.",
         "editBuilding": "Edit Building",
         "createBuilding": "Create Building",
         "buildingCode": "Building Code/ID",
         "buildingName": "Building name",
-        "timeToDestination": "Time to destination",
+        "timeToDestination": "Time to other buildings",
         "minutes":"mins",
         "onlyBuilding": "This is your only building.",
         "selectProgram": "Please select a program to view its requirements for this course.",
         "save":"Save",
+        "changesNotSaved": "Unsaved changes",
+        "areYouSureLeave": "Are you sure you want to leave? Changes you made may not be saved.",
+        "cancel": "Cancel",
+        "leave": "Leave",
         "placeholders":{
             "className":"Group X",
-            "termName": "Term X",
-            "termCode":"2022-S1",
+            "termName": "Semester X, Year Y",
+            "termCode":"2024-S1",
             "courseName":"Example 101",
             "courseCode":"01.01",
             "programCode": "2B",
@@ -210,7 +239,8 @@
                 "minNameLength":"The course's code must be at least 3 characters long.",
                 "maxNameLength":"The course's name can't exceed 50 characters.",
                 "nameIsRequired":"The course must have a name.",
-                "codeAlreadyTaken":"A course with that code already exists."
+                "codeAlreadyTaken":"A course with that code already exists.",
+                "positiveZeroOptionalCredits":"The amount of earned credits from this course must be 0 or greater."
             },
             "program":{
                 "minCodeLength":"The program must have a code you identify it with.",
@@ -219,7 +249,8 @@
                 "minNameLength":"The program's code must be at least 3 characters long.",
                 "maxNameLength":"The program's name can't exceed 50 characters.",
                 "nameIsRequired":"The program must have a name.",
-                "codeAlreadyTaken":"A program with that code already exists."
+                "codeAlreadyTaken":"A program with that code already exists.",
+                "positiveZeroOptionalCredits":"The amount of required optional course credits must be 0 or greater."
             },
             "building":{
                 "minCodeLength":"The building must have a code you identify it with.",
@@ -230,7 +261,8 @@
                 "nameIsRequired":"The building must have a name.",
                 "codeAlreadyTaken":"A building with that code already exists."
             },
-            "timeRange": "Please make sure your time ranges end at a time after they start."
+            "timeRange": "Please make sure your time ranges end at a time after they start.",
+            "invalidName": "That name is invalid. Avoid non-alphanumeric symbols as many of them are not supported."
         }
     },
     "changePassword": {
@@ -252,15 +284,22 @@
         "403": "You do not have permission to view this page.",
         "404": "The requested resource could not be found.",
         "408": "Received no response from server.",
+        "409": "Conflict encountered. This object could not be deleted because others depend on it.\nFor example, programs may not be deleted if a student is enrolled in it.",
         "500": "The AutoScheduler server had an internal error.",
+        "503": "Could not connect to the AutoScheduler server.",
         "noTerms": "No terms have been found. Create at least one term to define classes for a course.",
-        "noBuildings": "No buildings have been found. Create at least one building to define classes for a course."
+        "noBuildings": "No buildings have been found. Create at least one building to define classes for a course.",
+        "notPartOfAnyPrograms": "This course is not associated with any program yet.\nAdd it to a program's list of courses to define course requirements under that program."
     },
     "noSchedulesFound": "Could not find any recommended schedules for your search.",
-    "noDefinedRequirements": "No requirements defined. It is possible this course does not belong to the selected program.",
+    "noDefinedRequirements": "No requirements defined.",
     "selectNoOptions": "Please type in a character to search for options.",
     "selectNoResults": "No results found for the given query.",
     "goHome": "Go home",
+    "seeBuildings": "Click here to see your buildings",
+    "seePrograms": "Click here to see your programs",
+    "seeClasses": "Click here to see this course's classes",
+    "seeTerms": "Click here to create a term",
     "pagination": {
         "page": "Page {{page}}",
         "popover": "Click here for page selection.",

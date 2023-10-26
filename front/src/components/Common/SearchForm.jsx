@@ -3,34 +3,30 @@ import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
-import AsyncSelect from 'react-select/async'
+import FormInputLabel from '../Common/FormInputLabel';
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK } from '../../services/ApiConstants';
-import { DAYS, INSTANT_DATE } from "../../services/SystemConstants";
+import { OK } from '../../resources/ApiConstants';
+import { DAYS, INSTANT_DATE } from "../../resources/SystemConstants";
 
 
 function SearchForm(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const student = props.student
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [programError, setProgramError] = useState();
-    const [timeError, setTimeError] = useState();
-    const [terms, setTerms] = useState();
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const [programError, setProgramError] = useState()
+    const [timeError, setTimeError] = useState()
+
+    const [terms, setTerms] = useState()
     const [params, setParams] = useState({
         programId: (student.program? student.program.id:undefined),
         termId: undefined, hours: 24,
         reduceDays: true, prioritizeUnlocks: true,
         unavailableTimeSlots: [JSON.parse(JSON.stringify(INSTANT_DATE))]
     });
-
-    const onChangeTerms = (e) => {
-        const paramsCopy = Object.assign({}, params);
-        paramsCopy.term = e.target.value;
-        setParams(paramsCopy)
-    }
 
     const onChangeHours = (e) => {
         const newValue = e.target.value? e.target.value : 0
@@ -126,37 +122,31 @@ function SearchForm(props) {
     useEffect( () => {
         if(!student)
             navigate("/register")
-        // Load terms
-        ApiService.getTerms(student.university.id).then((respTerm) => {
-            let findError = null
-            if (respTerm && respTerm.status && respTerm.status !== OK)
-                findError = respTerm.status
-            if (findError) {
-                setError(true)
-                setStatus(findError)
-            }
-            else {
-                if(params && !params.termId){
-                    const paramsCopy = Object.assign({}, params)
-                    if(respTerm.data.length > 0)
-                        paramsCopy.termId = respTerm.data[0].id
-                    setParams(paramsCopy)
+        // Load terms once
+        if(!terms && loading)
+        {
+            ApiService.getTerms(1, true).then((resp) => {
+                if (resp && resp.status && resp.status !== OK)
+                    setError(resp.status)
+                else {
+                    if(params && !params.termId){
+                        const paramsCopy = Object.assign({}, params)
+                        if(resp.data.length > 0)
+                            paramsCopy.termId = resp.data[0].id
+                        setParams(paramsCopy)
+                    }
+                    setTerms(resp.data)
                 }
-                setTerms(respTerm.data)
-            }
-            setLoading(false)
-        })
-    }, [navigate, params, student])
+                setLoading(false)
+            })
+        }
+    }, [navigate, params, student, loading, terms])
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(student.university.id, inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true)
-                    setStatus(findError)
+            ApiService.getPrograms(inputValue).then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                     callback([])
                 } else {
                     callback(resp.data)
@@ -166,53 +156,49 @@ function SearchForm(props) {
     }
 
     const onChangePrograms = (programId) => {
-        const paramsCopy = Object.assign({}, params);
-        paramsCopy.programId = programId;
+        const paramsCopy = Object.assign({}, params)
+        paramsCopy.programId = programId
         setParams(paramsCopy)
         setProgramError(false)
+    }
+
+    const onChangeTerms = (e) => {
+        const paramsCopy = Object.assign({}, params)
+        paramsCopy.termId = e.target.value
+        setParams(paramsCopy)
     }
 
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     if(terms.length === 0)
         return <React.Fragment><div className="bg-primary rounded-bottom mx-5 py-4"><p>{t('search.noTermsFromUniversity')}</p></div></React.Fragment>
     return (
         <React.Fragment>
             <Form className="p-3 mx-auto text-center color-white">
-                <Row className="mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <h5 className="my-0"><strong>{t('search.program')}</strong></h5>
-                    </div>
-                    <div className="col-8 text-center">
-                        <AsyncSelect
+                <div className='row mx-auto form-row text-center'>
+                    <FormInputLabel label="search.program" columnWidth={4}/>
+                    <div className="col-md-8 text-center">
+                        <FormAsyncSelect
                             className="text-black text-start"
                             placeholder={t('search.program')}
                             cacheOptions
                             defaultOptions
-                            defaultValue = {student.program? {value:student.program.id, code: student.program.code, name: student.program.name}:undefined}
+                            defaultValue = {student.program? {value:student.program.id, internalId: student.program.internalId, name: student.program.name}:undefined}
                             noOptionsMessage={() => t('selectNoResults')}
-                            getOptionLabel={e => e.code+' - '+e.name}
+                            getOptionLabel={e => e.internalId+' - '+e.name}
                             getOptionValue={e => e.id}
                             loadOptions={loadProgramOptions}
                             onChange={opt => onChangePrograms(opt.id)}
                         />
                         { programError && <p key="program-error" className="form-error text-start my-0">{t('search.programError')}</p>}
                     </div>
-                </Row>
+                </div>
 
                 <Form.Group controlId="term" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.term')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8 text-center">
+                    <FormInputLabel label="search.term" columnWidth={4}/>
+                    <div className="col-md-8 text-center">
                         <Form.Select value={params.term} onChange={onChangeTerms}>
                             {terms.map((p) => (
                                 <option key={p.id} value={p.id}>{p.name}</option>
@@ -222,35 +208,23 @@ function SearchForm(props) {
                 </Form.Group>
 
                 <Form.Group controlId="hours" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="col text-end my-auto">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.hoursPerWeek')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8">
+                    <FormInputLabel label="search.hoursPerWeek" columnWidth={4}/>
+                    <div className="col-md-8">
                         <Form.Control
-                            type="number"
+                            type="number" min="0"
                             value={params.hours}
                             onChange={onChangeHours}
                         />
                     </div>
                 </Form.Group>
 
-                <Form.Group controlId="prioritize" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.prioritizeUnlocks')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8 d-flex align-items-start align-items-center">
+                <Form.Group controlId="prioritize" className="mt-4 row mx-auto form-row">
+                    <FormInputLabel
+                        label="search.prioritizeUnlocks" columnWidth={4}
+                        tooltipIconColor="primary" tooltipBgColor="white"
+                        tooltipMessage="search.prioritizeUnlocksTooltip"
+                    />
+                    <div className="col-md-8 d-flex align-items-start align-items-center">
                         <Form.Check
                             checked={params.prioritizeUnlocks}
                             className="color-secondary m-0"
@@ -259,17 +233,13 @@ function SearchForm(props) {
                     </div>
                 </Form.Group>
 
-                <Form.Group controlId="reduceDays" className="row mx-auto form-row">
-                    <div className="col-4 text-end my-auto text-break">
-                        <Form.Label className="my-0">
-                            <h5 className="my-0">
-                                <strong>
-                                    {t('search.reduceDays')}
-                                </strong>
-                            </h5>
-                        </Form.Label>
-                    </div>
-                    <div className="col-8 d-flex align-items-start align-items-center">
+                <Form.Group controlId="reduceDays" className="mt-4 row mx-auto form-row">
+                    <FormInputLabel
+                        label="search.reduceDays" columnWidth={4}
+                        tooltipIconColor="primary" tooltipBgColor="white"
+                        tooltipMessage="search.reduceDaysTooltip"
+                    />
+                    <div className="col-md-8 d-flex align-items-start align-items-center">
                         <Form.Check
                             checked={params.reduceDays}
                             className="m-0"
@@ -278,11 +248,9 @@ function SearchForm(props) {
                     </div>
                 </Form.Group>
 
-                <Row className="row mx-auto form-row">
-                    <div className="col-4 text-end my-3 text-break">
-                        <h5 className="my-0"><strong>{t('search.unavailableSlots')}</strong></h5>
-                    </div>
-                    <div className="col-8 align-items-start align-items-center">
+                <div className='row mx-auto form-row'>
+                    <FormInputLabel label="search.unavailableSlots" columnWidth={4}/>
+                    <div className="col-md-8 align-items-start">
                         { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
                         {params.unavailableTimeSlots.map((entry, index) => (
                             <Row
@@ -334,7 +302,8 @@ function SearchForm(props) {
                             ></i>
                         </div>
                     </div>
-                </Row>
+                </div>
+
                 <div className="row">
                     <div className="col text-center">
                         <Button className="btn btn-secondary mt-3" onClick={() => onButtonSubmit()}>{t("search.submit")}</Button>

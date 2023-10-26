@@ -1,11 +1,10 @@
-import { ISchedule } from '../interfaces/schedule.interface';
-import Time from '../helpers/classes/time.class';
-import CourseClass from '../models/abstract/courseClass.model';
-import * as CourseClassDto from './courseClass.dto';
+import { ISchedule, IScheduleWithScore } from '../interfaces/schedule.interface';
+import { getResourceUrl } from '../helpers/url.helper';
+import { API_SCOPE, RESOURCES } from '../constants/general.constants';
 
 export const scheduleToDto = (schedule: ISchedule, score: number): IScheduleDto => {
     const courseClassDtos = schedule.courseClasses.map(cc => {
-        return {courseClassId: cc.id, courseClassUrl: CourseClassDto.getCourseClassUrl(cc.id)}
+        return {courseClassId: cc.id, courseClassUrl: getResourceUrl(RESOURCES.COURSE_CLASS, API_SCOPE.STUDENT, cc.id)}
     });
     const stats = {
         totalHours: schedule.totalHours,
@@ -20,6 +19,10 @@ export const scheduleToDto = (schedule: ISchedule, score: number): IScheduleDto 
         score: score
     };
 };
+
+export const schedulesToDto = (schedules: IScheduleWithScore[]): IScheduleDto[] => {
+    return schedules.map(s => scheduleToDto(s.schedule, s.score));
+}
 
 type IScheduleDto = {
     courseClasses: ICourseClassDto[];

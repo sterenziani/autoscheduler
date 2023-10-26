@@ -1,47 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 
 function CourseClassesList(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-
-
-    const [showDeleteModal,setShowDeleteModal] = useState(false);
-    const course = props.course;
-    const term = props.term;
-    const [termClasses,setTermClasses] = useState(null);
-    const [courseClassToDelete,setCourseClassToDelete] = useState({});
-
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
     const search = useLocation().search
+    const course = props.course
+    const term = props.term
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [showDeleteModal,setShowDeleteModal] = useState(false)
+    const [termClasses,setTermClasses] = useState(null)
+    const [courseClassToDelete,setCourseClassToDelete] = useState({})
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
+    const [buildingCache] = useState({})
 
     useEffect(() => {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
-            const requestedPage = Number(params.get('page'))
+            const requestedPage = Number(params.get('page')??1)
             if(!requestedPage)
                 return 1
             return requestedPage
         }
 
         const requestedPage = readPageInSearchParams()
-        if(!termClasses || requestedPage !== page){
+        if(!loading && !error && !termClasses || requestedPage !== page){
+            setLoading(true)
             setPage(requestedPage)
             loadClasses(requestedPage)
         }
         // eslint-disable-next-line
-    }, [search, page, termClasses])
+    }, [search, page, termClasses, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -51,16 +51,11 @@ function CourseClassesList(props) {
 
     const loadClasses = (page) => {
         setLoading(true)
-        ApiService.getCourseClassesForTerm(course.id, term.id, page).then((resp) => {
-            let findError = null;
+        ApiService.getCourseClassesForTerm(course.id, term.id, page, false, false, true, {}, buildingCache).then((resp) => {
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setTermClasses(resp.data)
             }
@@ -76,19 +71,17 @@ function CourseClassesList(props) {
         navigate("/classes/new?course="+course.id+"&term="+term.id);
     }
 
-    const deleteCourseClass = () => {
+    const deleteCourseClass = async () => {
         if (!courseClassToDelete)
-            return;
-        ApiService.deleteCourseClass(courseClassToDelete.id).then(() => {
-            loadClasses()
-            closeDeleteModal()
-            setCourseClassToDelete({})
-        })
+            return
+        await ApiService.deleteCourseClass(courseClassToDelete.id)
+        closeDeleteModal()
+        loadClasses(page)
     }
 
     const closeDeleteModal = () => {
         setShowDeleteModal(false)
-        setCourseClassToDelete({})
+        setCourseClassToDelete(undefined)
     }
 
     const openDeleteModal = (e) => {
@@ -99,7 +92,7 @@ function CourseClassesList(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <div className="pt-4">
@@ -134,7 +127,7 @@ function CourseClassesList(props) {
                                             entry.lectures.map((l, lidx) => (
                                                 <Row key={'row-' + index + '-' + lidx}>
                                                     <Col className="text-start">
-                                                        <b>{t('days.' + l.day)}:</b>{' '} {l.startTime} - {l.endTime} ({l.building && l.building.code})
+                                                        <b>{t('days.' + l.day)}:</b>{' '} {l.startTime} - {l.endTime} ({l.building && l.building.internalId})
                                                     </Col>
                                                 </Row>
                                             ))
@@ -165,8 +158,9 @@ function CourseClassesList(props) {
                 </Modal.Header>
                 <Modal.Body>
                         {
+                            courseClassToDelete &&
                             t('modal.areYouSureClass', {
-                                code: course.code,
+                                code: course.internalId,
                                 name: course.name,
                                 class: courseClassToDelete.name,
                                 term: term.name,

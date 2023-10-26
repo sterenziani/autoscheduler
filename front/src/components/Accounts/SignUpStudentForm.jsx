@@ -7,9 +7,10 @@ import { faMortarBoard } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, BAD_REQUEST } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
-import AsyncSelect from 'react-select/async'
+import FormInputLabel from '../Common/FormInputLabel';
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 
 const SignUpSchema = Yup.object().shape({
     name: Yup.string()
@@ -44,7 +45,7 @@ function SignUpStudentForm(props) {
 
     const [selectedSchool, setSelectedSchool] = useState()
     const [selectedProgram, setSelectedProgram] = useState()
-    const [error, setError] = useState(null)
+    const [error, setError] = useState()
     const [programError, setProgramError] = useState(false)
 
     const onChangeSchools = (schoolId) => {
@@ -64,13 +65,9 @@ function SignUpStudentForm(props) {
             case CREATED:
                 authenticate(values)
                 break;
-            case BAD_REQUEST:
-                setSubmitting(false)
-                setError(data.code)
-                break;
             default:
                 setSubmitting(false)
-                setError("TIMEOUT")
+                setError(data?.code?? status)
                 break;
         }
     }
@@ -115,7 +112,7 @@ function SignUpStudentForm(props) {
 
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(selectedSchool, inputValue).then(resp => {
+            ApiService.getProgramsOfUniversity(selectedSchool, inputValue).then(resp => {
                 let findError = null;
                 if (resp && resp.status && resp.status !== OK)
                     findError = resp.status;
@@ -196,12 +193,11 @@ function SignUpStudentForm(props) {
 
                     {!(error && error !== EXISTING_USER_ERROR) && (
                         <>
-                            <Row className="mb-0 mx-auto form-row">
-                                <div className="col-3 text-end my-auto text-break ">
-                                    <h5 className="my-0"><strong> {t('register.school')}</strong></h5>
-                                </div>
-                                <div className="col-9 text-center">
-                                    <AsyncSelect
+                            <Row className='mx-auto form-row text-center'>
+                                <FormInputLabel label="register.school"/>
+                                <div className="col-md-9">
+                                    <FormAsyncSelect
+                                        id="input-university"
                                         aria-label="school-select"
                                         className="text-black text-start"
                                         placeholder={t('register.school')}
@@ -215,20 +211,19 @@ function SignUpStudentForm(props) {
                                     />
                                 </div>
                             </Row>
+
                             {
                                 selectedSchool && (
-                                <Row className="mb-0 mx-auto form-row">
-                                    <div className="col-3 text-end my-auto text-break">
-                                        <h5 className="my-0"><strong>{t('register.program')}</strong></h5>
-                                    </div>
-                                    <div className="col-9 text-center">
-                                        <AsyncSelect key={selectedSchool}
+                                <Row className='mx-auto form-row text-center'>
+                                    <FormInputLabel label="register.program"/>
+                                    <div className="col-md-9">
+                                        <FormAsyncSelect key={selectedSchool}
                                             aria-label="program-select"
                                             className="text-black text-start"
                                             placeholder={t('register.program')}
                                             cacheOptions
                                             defaultOptions
-                                            getOptionLabel={e => e.code+' - '+e.name}
+                                            getOptionLabel={e => e.internalId+' - '+e.name}
                                             getOptionValue={e => e.id}
                                             noOptionsMessage={() => t('selectNoResults')}
                                             loadOptions={loadProgramOptions}
@@ -238,14 +233,14 @@ function SignUpStudentForm(props) {
                                 </Row>
                             )}
                             {!selectedProgram && programError && (
-                                <div className="my-0 row mx-auto form-row">
+                                <Row className="my-0 mx-auto form-row">
                                     <div className="col-3 text-center"></div>
                                     <div className="col-9 text-center">
                                         <p key="program-error" className="form-error text-start my-0">
                                             {t('register.errors.school.programNotSelected')}
                                         </p>
                                     </div>
-                                </div>
+                                </Row>
                             )}
                         </>
                     )}

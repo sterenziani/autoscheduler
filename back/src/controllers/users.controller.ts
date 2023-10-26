@@ -1,10 +1,15 @@
 import { RequestHandler } from 'express';
-import UserAuthService from '../services/auth.service';
 import UserService from '../services/user.service';
-import GenericException from '../exceptions/generic.exception';
 import * as UserDto from '../dtos/user.dto';
-import { ERRORS } from '../constants/error.constants';
 import { HTTP_STATUS } from '../constants/http.constants';
+import User from '../models/abstract/user.model';
+import { API_SCOPE, DEFAULT_LOCALE, RESOURCES, ROLE } from '../constants/general.constants';
+import GenericException from '../exceptions/generic.exception';
+import { ERRORS } from '../constants/error.constants';
+import { isValidEmail, isValidFilter, isValidLocale, isValidPassword, validateEnum, validateInt, validateString } from '../helpers/validation.helper';
+import { DEFAULT_PAGE_SIZE } from '../constants/paging.constants';
+import { PaginatedCollection } from '../interfaces/paging.interface';
+import { getReqPath, getResourceUrl } from '../helpers/url.helper';
 
 export class UsersController {
     private userService: UserService;
@@ -13,45 +18,83 @@ export class UsersController {
         this.userService = UserService.getInstance();
     }
 
-    public createResetToken: RequestHandler = async (req, res, next) => {
-        const email = req.body.email;
-        const locale = req.headers['accept-language'];
+    public getUsers: RequestHandler = async (req, res, next) => {
+        const page = validateInt(req.query.page) ?? 1;
+        const limit = validateInt(req.query.limit ?? req.query.per_page) ?? DEFAULT_PAGE_SIZE;
+        const filter = validateString(req.query.filter);
+        const role = validateEnum<ROLE>(req.query.role, ROLE);
+
+        if (!isValidFilter(filter)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_FILTER));       // TODO: I think for users we are fine since it just searchs on email
 
         try {
-            if (!email) return next(new GenericException(ERRORS.BAD_REQUEST.GENERAL));
-            await this.userService.createResetToken(email, locale);
-            res.status(HTTP_STATUS.CREATED).send();
+            const paginatedUsers: PaginatedCollection<User> = await this.userService.getUsers(page, limit, filter, role);
+
+            res.status(HTTP_STATUS.OK)
+                .links(UserDto.paginatedUsersToLinks(paginatedUsers, getReqPath(req), limit, filter, role))
+                .send(UserDto.paginatedUsersToDto(paginatedUsers, API_SCOPE.ROOT));
         } catch (e) {
             next(e);
         }
     };
 
-    public getUserWithResetToken: RequestHandler = async (req, res, next) => {
-        const token = req.params.token;
-        try {
-            if (!token) return next(new GenericException(ERRORS.BAD_REQUEST.GENERAL));
-            const resetToken = await this.userService.getResetToken(token);
-            const user = await this.userService.getUserWithResetToken(token);
-            res.status(HTTP_STATUS.OK).send(UserDto.userToDto(user));
-        } catch (e) {
-            next(e);
-        }
-    };
-
-    public changeUserPassword: RequestHandler = async (req, res, next) => {
+    public getUser: RequestHandler = async (req, res, next) => {
         const userId = req.params.userId;
-        const token = req.body.token as string;
-        const password = req.body.password as string;
 
         try {
-            if (!token || !password) return next(new GenericException(ERRORS.BAD_REQUEST.GENERAL));
+            const user: User = await this.userService.getUser(userId);
+            res.status(HTTP_STATUS.OK).send(UserDto.userToDto(user, API_SCOPE.ROOT));
+        } catch (e) {
+            next(e);
+        }
+    };
 
-            const resetToken = await this.userService.getResetToken(token);
-            const user = await this.userService.getUserWithResetToken(token);
-            if(user.id !== userId)
-                return next(new GenericException(ERRORS.FORBIDDEN.GENERAL));
-            const updatedUser = await this.userService.changePassword(userId, password)
-            res.status(HTTP_STATUS.OK).location(UserDto.getUserUrl(user.id, user.role)).send();
+    public createAdminUser: RequestHandler = async (req, res, next) => {
+        const email = req.body.email as string | undefined;
+        const password = validateString(req.body.password);
+        const locale = validateString(req.body.locale) ?? DEFAULT_LOCALE;
+
+        if (!email || !password) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (!isValidEmail(email)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_EMAIL));
+        if (!isValidPassword(password)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PASSWORD));
+        if (!isValidLocale(locale)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_LOCALE));
+
+        try {
+            const user: User = await this.userService.createUser(email, password, locale, ROLE.ADMIN);
+            res.status(HTTP_STATUS.CREATED)
+                .location(getResourceUrl(RESOURCES.USER, API_SCOPE.ROOT, user.id))
+                .send(UserDto.userToDto(user, API_SCOPE.ROOT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public modifyUser: RequestHandler = async (req, res, next) => {
+        const userId = req.user.id;
+        const email = validateString(req.body.email);
+        const password = validateString(req.body.password);
+        const locale = validateString(req.body.locale) ?? DEFAULT_LOCALE;
+
+        if (!email && !password && !locale) return next(new GenericException(ERRORS.BAD_REQUEST.MISSING_PARAMS));
+        if (email && !isValidEmail(email)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_EMAIL));
+        if (password && !isValidPassword(password)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_PASSWORD));
+        if (locale && !isValidLocale(locale)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_LOCALE));
+
+        try {
+            const user: User = await this.userService.modifyUser(userId, password, locale, email);
+            res.status(HTTP_STATUS.OK)
+                .location(getResourceUrl(RESOURCES.USER, API_SCOPE.ROOT, user.id))
+                .send(UserDto.userToDto(user, API_SCOPE.ROOT));
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    public deleteUser: RequestHandler = async (req, res, next) => {
+        const userId = req.params.userId;
+
+        try {
+            await this.userService.deleteUser(userId);
+            res.status(HTTP_STATUS.NO_CONTENT).send();
         } catch (e) {
             next(e);
         }

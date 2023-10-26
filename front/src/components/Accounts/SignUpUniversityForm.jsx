@@ -7,7 +7,7 @@ import { faBuildingColumns } from '@fortawesome/free-solid-svg-icons';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { OK, CREATED, BAD_REQUEST } from '../../services/ApiConstants';
+import { OK, CREATED } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 
 const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS?? 'auto.scheduler.contact@gmail.com';
@@ -41,7 +41,7 @@ const SignUpSchema = Yup.object().shape({
 function SignUpUniversityForm(props) {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const [error, setError] = useState(null)
+    const [error, setError] = useState()
 
     const register = async (values, setSubmitting, setFieldError) => {
         const { status, data } = await ApiService.registerUniversity(values.email, values.password, values.name);
@@ -49,13 +49,9 @@ function SignUpUniversityForm(props) {
             case CREATED:
                 authenticate(values)
                 break;
-            case BAD_REQUEST:
-                setSubmitting(false)
-                setError(data.code)
-                break;
             default:
                 setSubmitting(false)
-                setError("TIMEOUT")
+                setError(data?.code?? status)
                 break;
         }
     };

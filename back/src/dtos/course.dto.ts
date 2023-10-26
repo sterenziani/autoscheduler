@@ -1,70 +1,82 @@
 import Course from '../models/abstract/course.model';
-import { getUserUrl } from './user.dto';
-import { getProgramUrl } from './program.dto';
-import { ROLE } from '../constants/general.constants';
+import { API_SCOPE, RESOURCES } from '../constants/general.constants';
+import { applyPathToBase, getPaginatedLinks, getResourceUrl, queryParamsStringBuilder } from '../helpers/url.helper';
+import { IProgramRequiredCredits } from '../interfaces/course.interface';
+import { PaginatedCollection } from '../interfaces/paging.interface';
+import { booleanToString } from '../helpers/string.helper';
 
-export const courseToDto = (course: Course, universityId: string): ICourseDto => {
+export const courseToDto = (course: Course, scope: API_SCOPE): ICourseDto => {
+    const url = getResourceUrl(RESOURCES.COURSE, scope, course.id);
     return {
         id: course.id,
-        url: getCourseUrl(course.id),
+        internalId: course.internalId,
         name: course.name,
-        code: course.internalId,
-        requirements: getCourseRequirementsUrl(course.id),
-        courseClasses: getCourseCourseClassesUrl(course.id),
-        universityId: universityId,
-        universityUrl: getUserUrl(universityId, ROLE.UNIVERSITY),
+        creditValue: course.creditValue,
+        url,
+        courseClassesUrl: applyPathToBase(url, 'course-classes'),
+        requiredCoursesUrl: applyPathToBase(url, 'required-courses'),
+        requiredCreditsUrl: applyPathToBase(url, 'required-credits')
     };
 };
 
-export const programToRequirementsForProgramDto = (course: Course, programId: string): IRequirementsForProgramDto => {
-    return {
-        programId: programId,
-        programUrl: getProgramUrl(programId),
-        programRequirementsUrl: getCourseRequirementsForProgramUrl(course.id, programId),
-    };
+export const paginatedCoursesToDto = (paginatedCourses: PaginatedCollection<Course>, scope: API_SCOPE): ICourseDto[] => {
+    return paginatedCourses.collection.map(t => courseToDto(t, scope));
 };
 
-export const getCourseUrl = (courseId: string): string => {
-    return `course/${courseId}`;
+export const paginatedCoursesToLinks = (paginatedCourses: PaginatedCollection<Course>, basePath: string, limit: number, filter?: string, optional?: boolean, programId?: string, universityId?: string): Record<string, string> => {
+    return getPaginatedLinks(paginatedCourses, paginatedCoursesUrlBuilder, basePath, limit, filter, optional, programId, universityId);
 };
 
-export const getCourseRequirementsUrl = (courseId: string): string => {
-    return `${getCourseUrl(courseId)}/requirements`;
-};
-
-export const getCourseRequirementsForProgramUrl = (courseId: string, programId: string): string => {
-    return `${getCourseRequirementsUrl(courseId)}/${programId}`;
-};
-
-export const getCourseCourseClassesUrl = (
-    courseId: string,
-    termId?: string,
-    filter?: string,
-    page?: number,
-    perPage?: number,
-): string => {
+const paginatedCoursesUrlBuilder = (basePath: string, page: string, limit: string, filter?: string, optional?: boolean, programId?: string, universityId?: string): string => {
     const params = {
-        termId,
+        page,
+        limit,
         filter,
-        page: page ? page.toString() : undefined,
-        per_page: perPage ? perPage.toString() : undefined,
+        optional: booleanToString(optional),
+        programId,
+        universityId
     };
-    return `${getCourseUrl(courseId)}/course-classes`;
+    return queryParamsStringBuilder(basePath, params);
 };
 
 interface ICourseDto {
     id: string;
-    url: string;
+    internalId: string;
     name: string;
-    code: string;
-    requirements: string;
-    courseClasses: string;
-    universityId: string;
-    universityUrl: string;
+    creditValue: number;
+    url: string;
+    courseClassesUrl: string;
+    requiredCoursesUrl: string;
+    requiredCreditsUrl: string;
 }
 
-interface IRequirementsForProgramDto {
+/////////////////// Credits stuff ///////////////////
+
+export const requiredCreditsToDto = (requiredCredits: IProgramRequiredCredits, scope: API_SCOPE, courseId: string): IBuildingDistanceDto => {
+    const url = getRequiredCreditsResourceUrl(courseId, requiredCredits.programId, scope);
+    return {
+        courseId,
+        programId: requiredCredits.programId,
+        requiredCredits: requiredCredits.requiredCredits.toString(),
+        url,
+        courseUrl: getResourceUrl(RESOURCES.COURSE, scope, courseId),
+        programUrl: getResourceUrl(RESOURCES.PROGRAM, scope, requiredCredits.programId)
+    }
+};
+
+export const requiredCreditsListToDto = (requiredCredits: IProgramRequiredCredits[], scope: API_SCOPE, courseId: string): IBuildingDistanceDto[] => {
+    return requiredCredits.map(p => requiredCreditsToDto(p, scope, courseId));
+};
+
+export const getRequiredCreditsResourceUrl = (courseId: string, programId: string, scope: API_SCOPE): string => {
+    return applyPathToBase(getResourceUrl(RESOURCES.COURSE, scope, courseId), `/required-credits/${programId}`);
+};
+
+interface IBuildingDistanceDto {
+    courseId: string;
     programId: string;
+    requiredCredits: string;
+    url: string;
+    courseUrl: string;
     programUrl: string;
-    programRequirementsUrl: string;
 }

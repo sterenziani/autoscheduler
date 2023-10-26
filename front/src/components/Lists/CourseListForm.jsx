@@ -1,22 +1,23 @@
 import React, {useState} from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Row, Modal } from 'react-bootstrap';
-import AsyncSelect from 'react-select/async'
+import { Button, Row, Modal, Form, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ApiService from '../../services/ApiService';
 import ErrorMessage from '../Common/ErrorMessage';
-import { OK, CREATED } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 
 function CourseListForm(props) {
     const { t } = useTranslation();
-    const user = ApiService.getActiveUser();
     const listedCourses = props.listedCourses
+    const addCourseOptions = props.addCourseOptions
     const unavailableCourses = props.unavailableCourses
     const onClickTrashCan = props.onClickTrashCan
     const addCourseToParent = props.addCourse
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [courseToAdd, setCourseToAdd] = useState();
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
+    const editCreditRequirements = props.editCreditRequirements
+    const [showAddModal, setShowAddModal] = useState(false)
+    const [courseToAdd, setCourseToAdd] = useState()
+    const [creditRequirementToAdd, setCreditRequirementToAdd] = useState(0)
+    const [error, setError] = useState()
 
     const switchAddModal = () => {
         setShowAddModal(!showAddModal)
@@ -24,6 +25,8 @@ function CourseListForm(props) {
     }
 
     const addCourse = () => {
+        if(editCreditRequirements)
+            courseToAdd.requiredCredits = creditRequirementToAdd
         addCourseToParent(courseToAdd)
         setCourseToAdd(undefined)
         switchAddModal()
@@ -39,24 +42,26 @@ function CourseListForm(props) {
                 callback([])
             }
             else{
-                ApiService.getCoursesNotInList(user.id, inputValue, unavailableCourses).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK && resp.status !== CREATED)
-                        findError = resp.status;
-                    if (findError) {
-                        setError(true)
-                        setStatus(findError)
-                        callback([])
-                    } else {
-                        callback(resp.data)
-                    }
-                })
+                if(addCourseOptions){
+                    const result = addCourseOptions.filter( (c) => !unavailableCourses.find((u) => u.id === c.id) && (c.name.toLowerCase().includes(inputValue.toLowerCase()) || c.internalId.includes(inputValue.toLowerCase())) )
+                    callback(result)
+                }
+                else{
+                    ApiService.getCoursesNotInList(inputValue, unavailableCourses).then((resp) => {
+                        if (resp && resp.status && resp.status !== OK){
+                            setError(resp.status)
+                            callback([])
+                        } else {
+                            callback(resp.data)
+                        }
+                    })
+                }
             }
         })
     }
 
     if(error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return(
         <React.Fragment>
         {
@@ -66,13 +71,18 @@ function CourseListForm(props) {
                             key={'row-' + index} xs={1} md={4}
                             className="border-bottom border-primary list-row px-5 pb-2 pt-3 justify-content-center"
                         >
-                            <div className="my-auto">{entry.code}</div>
-                            <div className="my-auto w-min-50">
-                                <a key={'link-' + entry.id} href={'/courses/' + entry.id}>
-                                    {entry.name}
-                                </a>
+                            <div className="my-auto">{entry.internalId}</div>
+                            <div className="my-auto w-min-50 justify-content-center">
+                                <Col>
+                                    <Row className="justify-content-center">
+                                        <a key={'link-' + entry.id} href={'/courses/' + entry.id}>{entry.name}</a>
+                                    </Row>
+                                    <Row className="justify-content-center">
+                                        { (editCreditRequirements && entry.requiredCredits > 0) && t('forms.courseRequiresCredits', {credits:entry.requiredCredits}) }
+                                    </Row>
+                                </Col>
                             </div>
-                            <div className="d-flexmy-auto justify-content-center">
+                            <div className="d-flex my-auto justify-content-center">
                                 <i
                                     className="bi bi-trash-fill btn btn-lg text-primary"
                                     id={'trash-' + index}
@@ -92,7 +102,7 @@ function CourseListForm(props) {
             </Modal.Header>
             <Modal.Body>
                 {
-                    <AsyncSelect key="course-select"
+                    <FormAsyncSelect key="course-select"
                         className="text-black m-2"
                         placeholder={t('forms.course')}
                         cacheOptions
@@ -102,11 +112,34 @@ function CourseListForm(props) {
                                 return t('selectNoResults')
                             return t('modal.inputTextToSearch')
                         }}
-                        getOptionLabel={e => e.code+' - '+e.name}
+                        getOptionLabel={e => e.internalId+' - '+e.name}
                         getOptionValue={e => e.id}
                         loadOptions={loadRemainingCoursesOptions}
                         onChange={opt => onChangeCourseToAdd(opt)}
                     />
+                }
+                {
+                    editCreditRequirements &&
+                    <div>
+                        <Form.Group controlId="requirement" className="row mx-auto form-row">
+                            <Col className="col-6 text-end my-auto text-break">
+                                <Form.Label className="col text-end my-auto">
+                                    <h6 className="my-0">{t('modal.creditsRequired')}</h6>
+                                </Form.Label>
+                            </Col>
+                            <Col className="col-4 my-auto">
+                                <Form.Control
+                                    type="number" min="0" value={creditRequirementToAdd}
+                                    onChange={(e) => setCreditRequirementToAdd(e.target.value)}
+                                />
+                            </Col>
+                            <Col className="col-2 my-auto text-center">
+                                <OverlayTrigger data-bs-html="true" placement="bottom" overlay={(props) => (<Tooltip id="tooltip" className="popover" {...props}>{t('modal.creditsRequiredHint')}</Tooltip>)}>
+                                    <h6 className="col my-auto"><span role="button"><i className="bi bi-question bg-primary text-white rounded-circle"></i></span></h6>
+                                </OverlayTrigger>
+                            </Col>
+                        </Form.Group>
+                    </div>
                 }
             </Modal.Body>
             <Modal.Footer>

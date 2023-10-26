@@ -9,22 +9,18 @@ export default abstract class CourseClassDao extends GenericDao<CourseClass> {
         super(ERRORS.NOT_FOUND.COURSE_CLASS);
     }
 
+    // Abstract Methods Signature Override
+    public abstract create(universityId: string, courseId: string, termId: string, internalId: string, name: string): Promise<CourseClass>;
+    public abstract modify(id: string, universityIdFilter: string, courseIdFilter?: string, termId?: string, internalId?: string, name?: string): Promise<CourseClass>;
+    public abstract delete(id: string, universityIdFilter: string, courseIdFilter?: string): Promise<void>;
+
+    public abstract findById(id: string, universityIdFilter?: string, courseIdFilter?: string): Promise<CourseClass | undefined>;
+    public abstract findPaginated(page: number, limit: number, textSearch?: string, courseId?: string, termId?: string, universityId?: string): Promise<PaginatedCollection<CourseClass>>;
+
     // Abstract Methods
-    public abstract create(courseId: string, termId: string, name: string): Promise<CourseClass>;
-    public abstract findByCourseId(
-        courseId: string,
-        termId?: string,
-        text?: string,
-        limit?: number,
-        offset?: number,
-    ): Promise<PaginatedCollection<CourseClass>>;
-    public abstract findAllByCourseId(
-        courseId: string,
-        text?: string,
-    ): Promise<CourseClass[]>;
-    public abstract findAllByTermId(
-        termId: string,
-        text?: string,
-    ): Promise<CourseClass[]>;
-    public abstract delete(courseClassId: string): Promise<void>;
+    
+    // Public Methods Override
+    public override async getById(id: string, universityIdFilter?: string, courseIdFilter?: string): Promise<CourseClass> {
+        return await super.getById(id, universityIdFilter, courseIdFilter);
+    }
 }

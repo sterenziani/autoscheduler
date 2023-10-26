@@ -5,9 +5,9 @@
         "password": "Contraseña",
         "repeatPassword": "Repetir contraseña",
         "name": "Nombre",
-        "school": "Universidad",
+        "school": "Institución",
         "program": "Carrera",
-        "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de universidades.",
+        "pleaseContact": "Tras registrarse, contáctenos en {{email}} con evidencia para que podamos procesar su solicitud y añadirlo a nuestra lista de instituciones.",
         "submit": "Crear cuenta",
         "placeholders": {
             "nameStudent": "John Johnson",
@@ -21,14 +21,20 @@
         "errors": {
             "codes": {
                 "401": "Ocurrió un error de permisos al enviar solicitud a AutoScheduler.",
-                "408": "No pudimos conectarnos al servicio de AutoScheduler.",
+                "408": "No obtuvimos respuesta del servicio de AutoScheduler.",
+                "503": "Could not connect to the AutoScheduler server.",
                 "TIMEOUT": "No pudimos conectarnos al servicio de AutoScheduler",
                 "USER_ALREADY_EXISTS": "Ya existe un usuario con ese email.",
-                "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una universidad con ese nombre.",
+                "UNIVERSITY_ALREADY_EXISTS": "Ya se ha registrado una institución con ese nombre.",
                 "INVALID_PASSWORD": "Contraseña inválida. Intente hacerla más larga y asegúrese de que contenga números, minúsculas y mayúsculas.",
-                "INVALID_PARAMS": "El formulario no se completó correctamente. Revise que no haya campos vacíos."
+                "INVALID_PARAMS": "El formulario no se completó correctamente. Revise que no haya campos vacíos.",
+                "INVALID_NAME": "El nombre no es válido. Actualmente sólo se aceptan como caracteres no-estándar Ñ, ü y vocales con tilde.",
+                "INVALID_LOGIN": "Email y/o contraseña incorrecto.",
+                "USER_NOT_FOUND": "Esa dirección no está registrada en AutoScheduler.",
+                "UNIVERSITY_NOT_FOUND": "No se encontró la institución solicitada debido a un error del servidor.",
+                "STUDENT_NOT_FOUND": "No se encontró al estudiante solicitado debido a un error del servidor."
             },
-            "gettingUniversitiesData": "Ocurrió un error al buscar datos de universidades.",
+            "gettingUniversitiesData": "Ocurrió un error al buscar datos de instituciones.",
             "email": {
                 "maxLength": "Su email no puede contener más de 100 caracteres.",
                 "invalidEmail": "Ingrese una dirección de email válida.",
@@ -45,8 +51,8 @@
                 "passwordsMismatch": "Las contraseñas no coinciden."
             },
             "name": {
-                "requiredLength": "El nombre de su universidad debe contener al menos 4 caracteres.",
-                "maxLength": "El nombre de su universidad no debe exceder los 100 caracteres.",
+                "requiredLength": "El nombre de su institución debe contener al menos 4 caracteres.",
+                "maxLength": "El nombre de su institución no debe exceder los 100 caracteres.",
                 "isRequired": "Este campo es obligatorio."
             },
             "studentName": {
@@ -54,7 +60,7 @@
                 "isRequired": "Este campo es obligatorio."
             },
             "school": {
-                "programNotSelected": "Seleccione la universidad y carrera en la que esté inscripto."
+                "programNotSelected": "Seleccione la institución y carrera en la que esté inscripto."
             }
         }
     },
@@ -74,7 +80,7 @@
         "courseLog": "MATERIAS APROBADAS",
         "findSchedule": "BUSCAR CRONOGRAMAS",
         "iAmStudent": "REGISTRARSE COMO ESTUDIANTE",
-        "iAmUniversty": "REGISTRARSE COMO UNIVERSIDAD",
+        "iAmUniversty": "REGISTRARSE COMO INSTITUCIÓN",
         "login": "Iniciar Sesión",
         "programs": "CARRERAS",
         "terms": "PERÍODOS",
@@ -90,14 +96,16 @@
         "deleteBuilding": "Eliminando sede",
         "deleteTerm": "Eliminando período",
         "addCourse": "Añadiendo materia",
+        "creditsRequired":"Créditos requeridos:",
+        "creditsRequiredHint":"Si desea que esta materia sólo sea recomendada a sus estudiantes una vez que hayan aprobado una cierta cantidad de créditos, puede especificarla aquí.\n\nSi los estudiantes pueden inscribirse a la misma sólo con aprobar las materias correlativas, sin importar sus créditos totales, ignore este campo.",
         "areYouSureCourse": "¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?",
         "areYouSureProgram": "¿Seguro que desea eliminar la carrera '{{code}} - {{name}}'?",
         "areYouSureClass": "¿Seguro que desea eliminar la comisión {{class}} de la materia '{{code}} - {{name}}' del período {{term}}?",
-        "areYouSureBuilding": "¿Seguro que desea eliminar la sede '{{code}} - {{name}}'?",
-        "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'? Todas las comisiones creadas para este período también serán eliminadas, sin importar su curso asociado.",
+        "areYouSureBuilding": "¿Seguro que desea eliminar la sede '{{code}} - {{name}}'? Cualquier clase que se de en esta sede también será removida de su comisión correspondiente.",
+        "areYouSureTerm": "¿Seguro que desea eliminar el período '{{code}} - {{name}}'? Todas las comisiones creadas para este período también serán eliminadas, sin importar su materia asociada.",
         "noRemainingCoursesProgram": "No quedan materias correspondientes a este plan.",
         "noRemainingCourses": "No quedan más materias.",
-        "inputTextToSearch": "Escriba el nombre o código de un curso para buscarlo.",
+        "inputTextToSearch": "Escriba el nombre o código de una materia para buscarla.",
         "cancel": "Cancelar",
         "delete": "Eliminar",
         "add": "Añadir",
@@ -110,11 +118,14 @@
         "term": "Período",
         "hoursPerWeek": "Horas semanales",
         "prioritizeUnlocks": "Priorizar correlativas",
+        "prioritizeUnlocksTooltip": "Marque esta casilla para priorizar cronogramas que contengan materias de las que muchas materias futuras dependan.\nÚtil si quiere ampliar su rango de opciones el próximo término.",
         "reduceDays": "Reducir días",
+        "reduceDaysTooltip": "Marque esta casilla para priorizar cronogramas que concentren las cursadas en la menor cantidad de días posibles.\nMuy útil si vive lejos de su institución.",
         "unavailableSlots": "Horarios a evitar",
         "programError":"Por favor seleccione una carrera.",
         "invalidParams":"Se recibieron parámetros inválidos.",
-        "noTermsFromUniversity": "Su universidad no tiene períodos públicamente disponibles ahora, por lo cual no podemos ofrecerle propuestas de cronogramas."
+        "noTermsFromUniversity": "Su institución no tiene períodos públicamente disponibles ahora, por lo cual no podemos ofrecerle propuestas de cronogramas.",
+        "showingResultsFor": "Mostrando resultados para '{{searchTerm}}'"
     },
     "days": {
         "M": "Lunes",
@@ -135,14 +146,22 @@
         "newSearch": "Realizar una nueva búsqueda"
     },
     "home": {
-        "welcomeAdmin": "Bienvenido, administrator. Por favor lea la documentación oficial sobre cómo verificar universidades a través de la API.",
-        "getVerified": "Su universidad aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con la universidad para que podamos verificar su cuenta y añadir la universidad a nuestra lista."
+        "welcomeAdmin": "Bienvenido, administrator. Por favor lea la documentación oficial sobre cómo verificar instituciones a través de la API.",
+        "search": "Busque una institución",
+        "verify": "Marcar como verificado",
+        "unverify": "Revocar verificación",
+        "getVerified": "Su institución aún no ha sido verificada. Si aún no inició la solicitud, no olvide contactarnos en {{email}} con pruebas de su vínculo con {{universityName}} para que podamos verificar su cuenta y añadir la institución a nuestra lista.\n\nPuede continuar usando AutoScheduler con normalidad para cargar información sobre sus sedes, períodos próximos, materias y carreras.\nSin embargo, los estudiantes no podrán registrarse como alumnos de su institución hasta completar el proceso de verificación.",
+        "whatIsTermPublish": "Los estudiantes solo pueden buscar cronogramas de períodos que usted haya publicado."
     },
     "terms": {
         "hide": "Ocultar",
         "publish": "Publicar"
     },
+    "course":{
+        "pickAProgram":"Seleccione una carrera para ver las materias correlativas definidas para esta materia bajo ese plan de estudios."
+    },
     "forms":{
+        "courseClasses":"Comisiones",
         "createClass":"Crear comisión",
         "editClass":"Editar comisión",
         "course":"Materia",
@@ -158,26 +177,36 @@
         "createCourse":"Crear Materia",
         "courseName":"Nombre de materia",
         "courseCode":"Código/ID de la materia",
+        "creditsEarned":"Créditos otorgados",
+        "creditsEarnedTooltip":"Cantidad de créditos que el alumno recibe al aprobar esta materia.",
+        "requirementsReturnLater": "Asegúrese de añadir este curso a una carrera más tarde.\nLuego, regrese aquí para definir la lista de correlativas bajo esa carrera.",
         "requirements":"Correlativas",
         "editProgram":"Editar Carrera",
         "createProgram":"Crear Carrera",
         "programCode":"Código/ID del plan",
         "programName":"Nombre del plan",
+        "programOptionalCredits": "Créditos electivos",
+        "courseRequiresCredits":"(Requiere {{credits}} créditos)",
         "mandatoryCourses":"Materias obligatorias",
         "optionalCourses":"Materias electivas",
+        "optionalCoursesTooltip":"Para graduarse de esta carrera, un estudiante debe no solo aprobar todas las materias obligatorias listadas debajo, sino también ganar esta cantidad de créditos aprobando materias electivas para esta carrera.",
         "editBuilding": "Editar Sede",
         "createBuilding": "Crear Sede",
         "buildingCode": "Código/ID de sede",
         "buildingName": "Nombre de la sede",
-        "timeToDestination": "Distancia a destinos",
+        "timeToDestination": "Distancia a otras sedes",
         "minutes":"mins.",
         "onlyBuilding": "This is your only building.",
-        "selectProgram": "Seleccione una carrera para ver sus correlativas para este curso.",
+        "selectProgram": "Seleccione una carrera para ver las correlativas para esta materia bajo ese plan de estudios.",
         "save":"Guardar",
+        "changesNotSaved": "Cambios sin guardar",
+        "areYouSureLeave": "¿Está seguro de que quiere salir? Los cambios que ha realizado no se guardarán.",
+        "cancel": "Cancelar",
+        "leave": "Salir",
         "placeholders":{
             "className":"Grupo X",
-            "termName": "Período X",
-            "termCode":"2022-C1",
+            "termName": "Semestre X, Año Y",
+            "termCode":"2024-C1",
             "courseName":"Ejemplos I",
             "courseCode":"01.01",
             "programCode": "2B",
@@ -190,8 +219,8 @@
                 "minLength":"La comisión debe tener un nombre.",
                 "maxLength":"El nombre de la comisión no puede superar los 25 characters.",
                 "isRequired":"La comisión debe tener un nombre.",
-                "codeAlreadyTaken":"Ya existe una comisión con ese nombre para este curso y período.",
-                "noCourseSelected": "Seleccione un curso para esta comisión."
+                "codeAlreadyTaken":"Ya existe una comisión con ese nombre para esta materia y período.",
+                "noCourseSelected": "Seleccione una materia para esta comisión."
             },
             "term":{
                 "minLength":"El nombre del período debe tener al menos 3 caracteres.",
@@ -210,7 +239,8 @@
                 "minNameLength":"El nombre de la materia debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre de la materia no puede superar los 50 characters.",
                 "nameIsRequired":"La materia debe tener un nombre.",
-                "codeAlreadyTaken":"Ya existe una materia con ese código."
+                "codeAlreadyTaken":"Ya existe una materia con ese código.",
+                "positiveZeroOptionalCredits":"Aprobar esta materia debería otorgar 0 o más créditos."
             },
             "program":{
                 "minCodeLength":"El plan de carrera debe tener un código con el cual la identifique.",
@@ -219,7 +249,8 @@
                 "minNameLength":"El nombre del plan de carrera debe tener al menos 3 caracteres.",
                 "maxNameLength":"El nombre del plan de carrera no puede superar los 50 characters.",
                 "nameIsRequired":"El plan de carrera debe tener un nombre.",
-                "codeAlreadyTaken":"Ya existe un plan de carrera con ese código."
+                "codeAlreadyTaken":"Ya existe un plan de carrera con ese código.",
+                "positiveZeroOptionalCredits":"La cantidad de créditos de materias electivas requeridos debe ser un número igual o mayor que 0."
             },
             "building":{
                 "minCodeLength":"La sede debe tener un código con el cual la identifique.",
@@ -230,7 +261,8 @@
                 "nameIsRequired":"La sede debe tener un nombre.",
                 "codeAlreadyTaken":"Ya existe una sede con ese código."
             },
-            "timeRange": "Asegúrese de que los rangos horarios que definió finalicen después de iniciar."
+            "timeRange": "Asegúrese de que los rangos horarios que definió finalicen después de iniciar.",
+            "invalidName": "El nombre no es válido. Evite usar símbolos no-alfanuméricos ya que muchos de ellos no son aceptados."
         }
     },
     "changePassword": {
@@ -252,15 +284,22 @@
         "403": "No cuenta con permisos para ver esta página.",
         "404": "El recurso solicitado no fue encontrado.",
         "408": "No se recibió respuesta del servidor.",
+        "409": "Se encontró un conflicto. Este objeto no pudo ser eliminado porque otros dependen de él.\nPor ejemplo, no se puede eliminar una carrera si un estudiante está inscripto en ella.",
         "500": "El servidor de AutoScheduler tuvo un error interno.",
+        "503": "No pudimos conectarnos con el servidor de AutoScheduler.",
         "noTerms": "No se encontraron períodos. Cree al menos uno para crear comisiones.",
-        "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones."
+        "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones.",
+        "notPartOfAnyPrograms": "Esta materia no está asociada a ninguna carrera.\nAñádala a una carrera para definir sus correlativas bajo el plan de estudios de la misma."
     },
     "noSchedulesFound": "No hubo planes encontrados para su búsqueda.",
-    "noDefinedRequirements": "No hay correlativas definidas. Es posible que esta materia no sea parte del plan seleccionado.",
+    "noDefinedRequirements": "No hay correlativas definidas.",
     "selectNoOptions": "Ingrese un caracter para buscar.",
     "selectNoResults": "No se hallaron resultados para su búsqueda.",
     "goHome": "Volver al inicio",
+    "seeBuildings": "Click aquí para ver sus sedes",
+    "seePrograms": "Click aquí para ver sus carreras",
+    "seeClasses": "Click aquí para ver las comisiones de esta materia",
+    "seeTerms": "Click aquí para crear un período",
     "pagination": {
         "page": "Página {{page}}",
         "popover": "Haga click aquí para seleccionar una página.",

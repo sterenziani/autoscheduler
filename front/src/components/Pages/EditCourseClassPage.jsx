@@ -6,16 +6,20 @@ import { Button, Form, Spinner, Row } from 'react-bootstrap';
 import Alert from 'react-bootstrap/Alert';
 import LinkButton from '../Common/LinkButton';
 import ApiService from '../../services/ApiService';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
+import LeavePagePrompt from '../Common/LeavePagePrompt'
+import structuredClone from '@ungap/structured-clone';
 import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
-import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../../services/SystemConstants";
+import FormInputLabel from '../Common/FormInputLabel';
+import FormAsyncSelect from '../Common/FormAsyncSelect';
+import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
+import { DAYS, DEFAULT_DATE } from "../../resources/SystemConstants";
 import Roles from '../../resources/RoleConstants';
-import AsyncSelect from 'react-select/async'
 import ErrorMessage from '../Common/ErrorMessage';
 
 const EXISTING_CLASS_ERROR = "COURSE_CLASS_ALREADY_EXISTS"
+const INVALID_NAME_ERROR = "INVALID_NAME"
 
 function EditCourseClassPage(props) {
     const CourseClassSchema = Yup.object().shape({
@@ -23,25 +27,28 @@ function EditCourseClassPage(props) {
             .min(1, 'forms.errors.courseClass.minLength')
             .max(25, 'forms.errors.courseClass.maxLength')
             .required('forms.errors.courseClass.isRequired'),
-    });
+    })
 
-    const navigate = useNavigate();
-    const {t} = useTranslation();
+    const navigate = useNavigate()
+    const {t} = useTranslation()
     const {id} = useParams()
-    const [user] = useState(ApiService.getActiveUser())
     const search = useLocation().search
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [courseClass, setCourseClass] = useState(null);
-    const [terms, setTerms] = useState();
-    const [buildings, setBuildings] = useState();
 
-    const [selectedCourse, setSelectedCourse] = useState();
-    const [selectedTermId, setselectedTermId] = useState();
-    const [lectures, setLectures] = useState([]);
-    const [selectionError, setSelectionError] = useState();
-    const [timeError, setTimeError] = useState();
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const user = ApiService.getActiveUser()
+    const [buildings, setBuildings] = useState()
+    const [buildingDictionary, setBuildingDictionary] = useState()
+    const [terms, setTerms] = useState()
+
+    const [courseClass, setCourseClass] = useState(null)
+    const [selectedCourse, setSelectedCourse] = useState()
+    const [selectedTermId, setselectedTermId] = useState()
+    const [oldLectures, setOldLectures] = useState()
+    const [lectures, setLectures] = useState([])
+    const [selectionError, setSelectionError] = useState()
+    const [timeError, setTimeError] = useState()
 
     useEffect(() => {
         if(!user)
@@ -57,33 +64,23 @@ function EditCourseClassPage(props) {
 
             if(courseId) {
                 ApiService.getCourse(courseId).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK)
-                        findError = resp.status;
-                    if (findError){
+                    if (resp && resp.status && resp.status !== OK){
                         setLoading(false)
-                        setError(true)
-                        setStatus(findError)
+                        setError(resp.status)
+                    } else {
+                        setSelectedCourse(resp.data)
                     }
-                    else{
-                      setSelectedCourse(resp.data)
-                    }
-                });
+                })
             } else {
                 setSelectedCourse()
             }
             if(termId) {
                 ApiService.getTerm(termId).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK)
-                        findError = resp.status;
-                    if (findError){
+                    if (resp && resp.status && resp.status !== OK){
                         setLoading(false)
-                        setError(true)
-                        setStatus(findError)
-                    }
-                    else{
-                      setselectedTermId(resp.data.id)
+                        setError(resp.status)
+                    } else {
+                        setselectedTermId(resp.data.id)
                     }
                 })
             } else {
@@ -93,14 +90,10 @@ function EditCourseClassPage(props) {
         }
 
         const loadCourseClass = async () => {
-            ApiService.getCourseClass(id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
+            ApiService.getCourseClass(id, true, true, true, buildingDictionary).then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
                     setLoading(false)
-                    setError(true)
-                    setStatus(findError)
+                    setError(resp.status)
                 }
                 else{
                     setCourseClass(resp.data)
@@ -112,20 +105,21 @@ function EditCourseClassPage(props) {
                     for(const l of resp.data.lectures){
                         if(!l.building && buildings && buildings.length > 0){
                             l.building = buildings[0]
-                            l.buildingId = buildings[0].id
                         }
                         lecturesWithBuilding.push(l)
                     }
                     setLectures(lecturesWithBuilding)
+                    setOldLectures(structuredClone(lecturesWithBuilding))
                 }
             });
         }
 
         async function execute() {
             // 1. Load terms and buildings
-            if(!terms && !buildings)
-                await Promise.all([loadTerms(user.id)], loadBuildings(user.id));
-            if(terms && buildings) {
+            if(!terms && !buildings && !buildingDictionary)
+                await Promise.all([loadTerms()], loadBuildings())
+
+            if(terms && buildings && buildingDictionary) {
                 // 2. Load courseClass or set placeholder
                 if(!courseClass){
                     if(id) await Promise.all([loadCourseClass()])
@@ -135,29 +129,26 @@ function EditCourseClassPage(props) {
                 // 3. Initialize new class values and end loading
                 else {
                     if(!id && buildings.length > 0) {
-                        const firstLecture = JSON.parse(JSON.stringify(DEFAULT_DATE))
-                        setLectures([{...firstLecture, buildingId: buildings[0].id}])
+                        const firstLecture = structuredClone(DEFAULT_DATE)
+                        setLectures([{...firstLecture, building: buildings[0]}])
                         await Promise.all([readCourseAndTerm()])
                     }
-                    else
+                    else if(loading)
                         setLoading(false)
                 }
             }
         }
-        if(user) execute();
-    },[courseClass, terms, buildings, id, t, user, search])
+        execute();
+    },[courseClass, terms, buildings, buildingDictionary, id, t, search, loading])
 
     const loadCourseOptions = (inputValue, callback) => {
         setTimeout(() => {
             if(!inputValue){
                 callback([])
             } else {
-                ApiService.getCourses(user.id, inputValue).then((resp) => {
-                    let findError = null;
-                    if (resp && resp.status && resp.status !== OK) findError = resp.status
-                    if (findError) {
-                        setError(true)
-                        setStatus(findError)
+                ApiService.getCourses(inputValue).then((resp) => {
+                    if (resp && resp.status && resp.status !== OK){
+                        setError(resp.status)
                         callback([])
                     } else {
                         callback(resp.data)
@@ -167,33 +158,26 @@ function EditCourseClassPage(props) {
         })
     }
 
-    const loadTerms = async (universityId) => {
-        ApiService.getTerms(universityId).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+    const loadTerms = async () => {
+        ApiService.getTerms().then((resp) => {
+            if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
+                setError(resp.status)
             }
             else
               setTerms(resp.data)
         });
     }
 
-    const loadBuildings = async (universityId) => {
-        ApiService.getAllBuildings(universityId).then((resp) => {
-            let findError = null;
-            if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
+    const loadBuildings = async () => {
+        ApiService.getBuildingDictionary().then((resp) => {
+            if (resp && resp.status && resp.status !== OK){
                 setLoading(false)
-                setError(true)
-                setStatus(findError)
+                setError(resp.status)
+            } else {
+                setBuildingDictionary(resp.data)
+                setBuildings(Object.values(resp.data))
             }
-            else
-              setBuildings(resp.data)
         });
     }
 
@@ -207,14 +191,14 @@ function EditCourseClassPage(props) {
 
     const onChangeDay = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy[index].day = e.target.value;
         setLectures(lecturesCopy)
     }
 
     const onChangeStartTime = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy[index].startTime = e.target.value;
         setLectures(lecturesCopy)
         setTimeError(false)
@@ -222,31 +206,73 @@ function EditCourseClassPage(props) {
 
     const onChangeEndTime = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy[index].endTime = e.target.value;
         setLectures(lecturesCopy)
         setTimeError(false)
     }
 
     const onChangeBuilding = (e) => {
-        const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
-        lecturesCopy[index].buildingId = e.target.value;
+        const index = e.target.id.match(/\d/g)[0]
+        const lecturesCopy = structuredClone(lectures)
+        lecturesCopy[index].building = buildingDictionary[e.target.value]
         setLectures(lecturesCopy)
     }
 
     const onClickTrashCan = (e) => {
         const index = e.target.id.match(/\d/g)[0];
-        const lecturesCopy = Object.assign([], lectures);
+        const lecturesCopy = structuredClone(lectures);
         lecturesCopy.splice(index, 1);
         setLectures(lecturesCopy)
     }
 
     const onClickPlusSign = (e) => {
-        const lecturesCopy = Object.assign([], lectures)
-        const newLecture = JSON.parse(JSON.stringify(DEFAULT_DATE)) // Clone DEFAULT_DATE
-        lecturesCopy.push({...newLecture, buildingId: buildings[0].id})
+        const lecturesCopy = structuredClone(lectures)
+        const newLecture = structuredClone(DEFAULT_DATE)
+        lecturesCopy.push({...newLecture, building: buildings[0]})
         setLectures(lecturesCopy)
+    }
+
+    const categorizeLectures = (oldLectures, newLectures) => {
+        const categories = { post: [], put: [], delete: []}
+
+        if(oldLectures){
+            for(const oldL of oldLectures){
+                const newL = newLectures.find(x => x.id === oldL.id)
+                if(!newL) categories.delete.push(oldL)  // removed from list, DELETE old
+                else if( JSON.stringify(oldL) !== JSON.stringify(newL) ) categories.put.push(newL) // values changed, PUT new
+            }
+        }
+
+        for(const newL of newLectures){
+            const oldL = oldLectures?.find(x => x.id === newL.id)
+            if(!oldL) categories.post.push(newL)  // new in list, POST new
+        }
+        return categories
+    }
+
+    const [unsavedForm, setUnsavedForm] = useState(false)
+    const FormObserver = () => {
+        const { values } = useFormikContext()
+
+        useEffect(() => {
+            const courseChanged = (courseClass.course && courseClass.course.id !== selectedCourse.id)
+            const termChanged = (courseClass.term && courseClass.term.id !== selectedTermId)
+            const nameChanged = (courseClass && values.className !== courseClass.name)
+
+            let lecturesChanged = false
+            if(oldLectures){
+                const categorizedLectures = categorizeLectures(oldLectures, lectures)
+                lecturesChanged = (categorizedLectures.delete.length > 0 || categorizedLectures.put.length > 0 || categorizedLectures.post.length > 0)
+            } else {
+                const defaultLectures = [{...structuredClone(DEFAULT_DATE), building: buildings[0]}]
+                lecturesChanged = (JSON.stringify(defaultLectures) !== JSON.stringify(lectures))
+            }
+
+            setUnsavedForm(courseChanged || termChanged || nameChanged || lecturesChanged)
+
+        }, [values]);
+        return null;
     }
 
     const onSubmit = async (values, { setSubmitting, setFieldError }) => {
@@ -261,18 +287,18 @@ function EditCourseClassPage(props) {
 
         if (selectedCourse && selectedTermId && values.className)
         {
-            const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTermId, values.className, lectures)
+            const categorizedLectures = categorizeLectures(oldLectures, lectures)
+            const resp = await ApiService.saveCourseClass(id, selectedCourse.id, selectedTermId, values.className, categorizedLectures.post, categorizedLectures.put, categorizedLectures.delete)
             if(resp.status === OK || resp.status === CREATED)
-                navigate("/courses/"+selectedCourse.id+"?termId="+selectedTermId);
+                navigate("/courses/"+selectedCourse.id+"?termId="+selectedTermId)
             else{
-                setError(resp.data.code)
-                setStatus(resp.status)
-                setSubmitting(false);
+                setError(resp.data?.code?? resp.status)
+                setSubmitting(false)
             }
         }
         else {
-            setSelectionError(true);
-            setSubmitting(false);
+            setSelectionError(true)
+            setSubmitting(false)
         }
     };
 
@@ -284,19 +310,30 @@ function EditCourseClassPage(props) {
         return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
         </div>
-    if (error && error !== EXISTING_CLASS_ERROR)
-        return <ErrorMessage status={status}/>
+    if (error && error !== EXISTING_CLASS_ERROR && error !== INVALID_NAME_ERROR)
+        return <ErrorMessage status={error}/>
 
     if(!terms || terms.length < 1 || !buildings || buildings.length < 1)
         return (
         <Alert variant="danger" className="text-center m-5">
             {
-                (!buildings || buildings.length < 1) && <p className="mx-4">{t("errors.noBuildings")}</p>
+                (!buildings || buildings.length < 1) &&
+                <div className="mt-4 mb-3">
+                    <p className="mb-0">{t("errors.noBuildings")}</p>
+                    <div className="text-center">
+                        <LinkButton variant="link" textKey="seeBuildings" href={'/?tab=buildings'}/>
+                    </div>
+                </div>
             }
             {
-                (!terms || terms.length < 1) && <p className="mx-4">{t("errors.noTerms")}</p>
+                (!terms || terms.length < 1) &&
+                <div className="mt-4 mb-3">
+                    <p className="mb-0">{t("errors.noTerms")}</p>
+                    <div className="text-center">
+                        <LinkButton variant="link" textKey="seeTerms" href={'/?tab=terms'}/>
+                    </div>
+                </div>
             }
-            <LinkButton variant="primary" textKey="goHome" href="/"/>
         </Alert>
     )
 
@@ -307,23 +344,29 @@ function EditCourseClassPage(props) {
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
                 <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
-                {error && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
+                {error && error === EXISTING_CLASS_ERROR && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
+                {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
                 {selectionError && (<p className="form-error">{t('forms.errors.courseClass.noCourseSelected')}</p>)}
                 { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
+
                 <Formik initialValues={{ className: courseClass.name }} validationSchema={CourseClassSchema} onSubmit={onSubmit}>
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                 <Form className="p-3 mx-auto text-center text-primary" onSubmit={handleSubmit}>
-                    <Row className="mx-auto form-row">
-                        <div className="col-3 text-end my-auto text-break">
-                            <h5 className="my-0"><strong>{t('forms.course')}</strong></h5>
-                        </div>
-                        <div className="col-9 text-start">
+                    <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
+                    <FormObserver/>
+
+                    <div className='row mx-auto form-row'>
+                        <FormInputLabel label="forms.course"/>
+                        <div className="col-md-9 text-start">
                         {
-                            selectedCourse &&
-                            <AsyncSelect
+                            id && <p className="my-auto mx-2 text-start text-gray fw-normal">{courseClass.course.name}</p>
+                        }
+                        {
+                            !id && selectedCourse &&
+                            <FormAsyncSelect
                                 className="text-black" cacheOptions defaultOptions
-                                defaultValue = {{value:selectedCourse.id, code: selectedCourse.code, name: selectedCourse.name}}
-                                getOptionLabel={e => e.code+' - '+e.name} getOptionValue={e => e.id}
+                                defaultValue = {{value:selectedCourse.id, internalId: selectedCourse.internalId, name: selectedCourse.name}}
+                                getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
                                 noOptionsMessage={(inputValue) => {
                                     if(inputValue.inputValue.length > 0)
                                         return t('selectNoResults')
@@ -333,11 +376,11 @@ function EditCourseClassPage(props) {
                             />
                         }
                         {
-                            !selectedCourse &&
-                            <AsyncSelect
+                            !id && !selectedCourse &&
+                            <FormAsyncSelect
                                 className="text-black" cacheOptions defaultOptions
                                 placeholder={t("forms.course")}
-                                getOptionLabel={e => e.code+' - '+e.name} getOptionValue={e => e.id}
+                                getOptionLabel={e => e.internalId+' - '+e.name} getOptionValue={e => e.id}
                                 noOptionsMessage={(inputValue) => {
                                     if(inputValue.inputValue.length > 0)
                                         return t('selectNoResults')
@@ -347,23 +390,19 @@ function EditCourseClassPage(props) {
                             />
                         }
                         </div>
-                    </Row>
+                    </div>
+
                     <Form.Group controlId="term" className="row mx-auto form-row">
-                        <div className="col-3 text-end my-auto text-break">
-                            <Form.Label className="my-0">
-                                <h5 className="my-0"><strong>{t('forms.term')}</strong></h5>
-                            </Form.Label>
-                        </div>
-                        <div className="col-9 text-center">
-                        {
+                        <FormInputLabel label="forms.term"/>
+                        <div className="col-md-9 text-center">
                             <Form.Select value={selectedTermId} onChange={onChangeTerm}>
                                 {terms && terms.map((c) => (
-                                    <option key={c.id} value={c.id}> {c.code + ' - ' + c.name}</option>
+                                    <option key={c.id} value={c.id}> {c.internalId + ' - ' + c.name}</option>
                                 ))}
                             </Form.Select>
-                        }
                         </div>
                     </Form.Group>
+
                     <Form.Group controlId="class">
                         <FormInputField
                             label="forms.className" name="className"
@@ -372,12 +411,12 @@ function EditCourseClassPage(props) {
                             touched={touched.className} onChange={handleChange} onBlur={handleBlur}
                         />
                     </Form.Group>
+
                     <Form.Group className="row mx-auto form-row">
-                        <div className="col-3 text-end text-break my-4">
-                            <h5 className=""><strong>{t('forms.lectures')}</strong></h5>
-                        </div>
-                        <div className="col-9 align-items-start align-items-center">
-                            {lectures.map((entry, index) => (
+                        <FormInputLabel label="forms.lectures"/>
+                        <div className="col-md-9 my-auto align-items-start">
+                            {
+                                lectures.map((entry, index) => (
                                 <Row key={'timerow-' + index} xs={1} md={6} className="list-row pb-2 pt-3 ms-1 justify-content-center">
                                     <Form.Select id={'day-' + index} className="w-auto mx-3" value={lectures[index].day} onChange={onChangeDay}>
                                         {DAYS.map((p) => (<option key={p} value={p}>{t('days.' + p)}</option>))}
@@ -393,19 +432,21 @@ function EditCourseClassPage(props) {
                                         value={lectures[index].endTime}
                                         onChange={onChangeEndTime}
                                     />
-                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].buildingId} onChange={onChangeBuilding}>
-                                        {buildings.map((b) => (<option key={b.id} value={b.id}>{b.code}</option>))}
+                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].building?.id} onChange={onChangeBuilding}>
+                                        {buildings.map((b) => (<option key={b.id} value={b.id}>{b.internalId}</option>))}
                                     </Form.Select>
                                     <i className="bi bi-trash-fill btn color-primary w-auto my-auto"
                                         id={'trash-' + index} onClick={onClickTrashCan}
                                     ></i>
                                 </Row>
-                            ))}
+                                ))
+                            }
                             <div className="mx-auto align-items-center plus-button-container clickable">
                                 <i className="me-3 bi bi-plus-circle-fill btn btn-lg color-primary" onClick={onClickPlusSign}></i>
                             </div>
                         </div>
                     </Form.Group>
+
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

@@ -1,63 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Spinner, Row, Col, Card } from 'react-bootstrap';
-import { useNavigate } from "react-router-dom";
+import { Button, Modal, Spinner, Row } from 'react-bootstrap';
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import ApiService from '../../services/ApiService';
 import Pagination from '../Common/Pagination'
-import { OK } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
 function UniversityBuildingsList(props) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const user = props.user;
-    const [buildings, setBuildings] = useState(null);
-    const [buildingDictionary, setBuildingDictionary] = useState(null);
-    const [buildingToDelete, setBuildingToDelete] = useState();
-    const [paginationLinks, setPaginationLinks] = useState(null);
-    const [page, setPage] = useState(1);
+    const { t } = useTranslation()
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState()
+
+    const [buildings, setBuildings] = useState(null)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [buildingToDelete, setBuildingToDelete] = useState()
+
+    const [paginationLinks, setPaginationLinks] = useState(null)
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            const requestedPage = Number(params.get('page'))
+            const requestedPage = Number(params.get('page')??1)
             if(!requestedTab || requestedTab !== "buildings" || !requestedPage)
                 return 1
             return requestedPage
         }
 
-        const loadBuildingDictionary = () => {
-            setLoading(true)
-            ApiService.getBuildingDictionary(user.id).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError){
-                    setError(true)
-                    setStatus(findError)
-                }
-                else{
-                    setBuildingDictionary(resp.data)
-                }
-                setLoading(false)
-            });
-        }
-
         const requestedPage = readPageInSearchParams()
-        if((!buildings && !buildingDictionary) || requestedPage !== page){
+        if(!loading && !error && !buildings || requestedPage !== page){
+            setLoading(true)
             setPage(requestedPage)
             loadBuildings(requestedPage)
-            loadBuildingDictionary()
         }
-        // eslint-disable-next-line
-    }, [search, buildingDictionary, buildings, page, user.id])
+    }, [search, buildings, page, loading, error])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -67,16 +48,11 @@ function UniversityBuildingsList(props) {
 
     const loadBuildings = (page) => {
         setLoading(true)
-        ApiService.getBuildings(user.id, page).then((resp) => {
-            let findError = null;
+        ApiService.getBuildingsPage(page).then((resp) => {
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setError(true)
-                setStatus(findError)
-            }
+                setError(resp.status)
             else{
-                const links = ApiService.parsePagination(resp)
+                const links = ApiService.parsePagination(resp, page)
                 setPaginationLinks(links)
                 setBuildings(resp.data)
             }
@@ -92,12 +68,12 @@ function UniversityBuildingsList(props) {
         navigate("/buildings/new")
     }
 
-    const deleteBuilding = () => {
+    const deleteBuilding = async () => {
         if (!buildingToDelete)
             return;
-        ApiService.deleteBuilding(buildingToDelete.id);
         closeDeleteModal()
-        loadBuildings()
+        await ApiService.deleteBuilding(buildingToDelete.id)
+        loadBuildings(page)
     }
 
     const closeDeleteModal = () => {
@@ -113,49 +89,37 @@ function UniversityBuildingsList(props) {
     if (loading === true)
         return <div className="mx-auto py-3"><Spinner animation="border"/></div>
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <div className="pt-4">
-                {buildingDictionary && buildings && buildings.length > 0
+                {buildings && buildings.length > 0
                     ? [
-                          <div key="buildings-list" className="my-3 container">
-                              <Row xs={1} md={2} lg={3} className="g-4 m-auto justify-content-center">
-                                  {buildings.map((entry, index) => (
-                                      <Card key={'card-' + index} className="m-3 p-0">
-                                          <Card.Header className="bg-white text-primary text-start py-0 pe-0 me-0">
-                                              <div className="d-flex ms-1">
-                                                  <div className="text-start my-auto me-auto">
-                                                      <Card.Title className="m-0 h6">
-                                                          {entry.code + ' - ' + entry.name}
-                                                      </Card.Title>
-                                                  </div>
-                                                  <div className="d-flex my-auto text-center">
-                                                      <i
-                                                          className="bi bi-pencil-fill btn btn-lg"
-                                                          id={'edit-' + index}
-                                                          onClick={() => redirectToEdit(entry.id)}
-                                                      ></i>
-                                                      <i
-                                                          className="bi bi-trash-fill btn btn-lg"
-                                                          id={'trash-' + index}
-                                                          onClick={() => openDeleteModal(entry)}
-                                                      ></i>
-                                                  </div>
-                                              </div>
-                                          </Card.Header>
-                                          <Card.Body className="bg-grey text-black">
-                                              {entry.distances.map((b, bidx) => (
-                                                  <Row key={'row-' + index + '-' + bidx}>
-                                                        <Col className="text-end">{buildingDictionary[b.buildingId].code}</Col>
-                                                        <Col className="text-start">{t('minutes', { minutes: b.time })}</Col>
-                                                  </Row>
-                                              ))}
-                                          </Card.Body>
-                                      </Card>
-                                  ))}
-                              </Row>
-                          </div>,
+                          buildings.map((entry, index) => (
+                                    <Row
+                                        key={'row-' + index} xs={1} md={4}
+                                        className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"
+                                    >
+                                        <div className="my-auto">{entry.internalId}</div>
+                                        <div className="my-auto w-min-50 text-white">
+                                            {entry.name}
+                                        </div>
+                                        <div className="d-flexmy-auto justify-content-center">
+                                            <i
+                                                key={'pencil-' + index}
+                                                className="bi bi-pencil-fill btn btn-lg text-white"
+                                                id={'edit-' + index}
+                                                onClick={() => redirectToEdit(entry.id)}
+                                            ></i>
+                                            <i
+                                                className="bi bi-trash-fill btn btn-lg text-white"
+                                                id={'trash-' + index}
+                                                data-testid={'trash-' + index}
+                                                onClick={() => openDeleteModal(entry)}
+                                            ></i>
+                                        </div>
+                                    </Row>
+                                )),
                       ]
                     : [
                           <div key="empty-list">{t('emptyList')}</div>,
@@ -178,7 +142,7 @@ function UniversityBuildingsList(props) {
                     {
                         buildingToDelete &&
                         t('modal.areYouSureBuilding', {
-                            code: buildingToDelete.code,
+                            code: buildingToDelete.internalId,
                             name: buildingToDelete.name,
                         })
                     }
@@ -187,7 +151,7 @@ function UniversityBuildingsList(props) {
                     <Button variant="grey" onClick={() => closeDeleteModal()}>
                         {t('modal.cancel')}
                     </Button>
-                    <Button variant="danger" onClick={() => deleteBuilding(buildingToDelete)}>
+                    <Button variant="danger" onClick={() => deleteBuilding()}>
                         {t('modal.delete')}
                     </Button>
                 </Modal.Footer>

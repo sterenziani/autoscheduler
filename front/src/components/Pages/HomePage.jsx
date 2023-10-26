@@ -10,7 +10,7 @@ import Roles from '../../resources/RoleConstants';
 
 function HomePage(props)  {
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true)
     const user = ApiService.getActiveUser()
 
     useEffect( () => {

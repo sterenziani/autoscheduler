@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
@@ -12,29 +13,26 @@ const CONTACT_EMAIL = process.env.REACT_APP_EMAIL_VERIFICATION_ADDRESS?? 'auto.s
 
 function HomePageUniversity(props) {
     const { t } = useTranslation()
-    const startingTab = "programs";
+    const navigate = useNavigate()
     const search = useLocation().search
+
+    const startingTab = "courses"
+    const [activeTab, setActiveTab] = useState(startingTab)
 
     useEffect(() => {
         const readTabInSearchParams = () => {
             const params = new URLSearchParams(search)
             const requestedTab = params.get('tab')
-            if (requestedTab === "buildings" || requestedTab === "courses" || requestedTab === "terms")
+            if(requestedTab === "buildings" || requestedTab === "terms" || requestedTab === "courses" || requestedTab === "programs")
                 return requestedTab
             return startingTab
         }
 
         const requestedTab = readTabInSearchParams()
-        const tabs = document.getElementsByClassName("nav-item")
-        if (requestedTab === "buildings")
-            tabs[0].children[0].click()
-        else if (requestedTab === "courses")
-            tabs[2].children[0].click()
-        else if (requestedTab === "terms")
-            tabs[3].children[0].click()
-        else
-            tabs[1].children[0].click()
-    }, [search])
+        if (activeTab !== requestedTab)
+            setActiveTab(requestedTab)
+    }, [search, activeTab])
+
 
     return (
         <React.Fragment>
@@ -42,12 +40,12 @@ function HomePageUniversity(props) {
                 <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
             {props.user && !JSON.parse(props.user.verified) && (
-                <Alert className="m-5 text-center" variant="danger">
-                    {t('home.getVerified', { email: CONTACT_EMAIL })}
+                <Alert className="m-5 text-center display-newlines" variant="danger">
+                    {t('home.getVerified', { email: CONTACT_EMAIL, universityName: props.user.name })}
                 </Alert>
             )}
             <div className="container my-5">
-                <Tabs className="borderless-tabs" aria-label="home-tabs" defaultActiveKey={startingTab} fill>
+                <Tabs className="borderless-tabs" aria-label="home-tabs" defaultActiveKey={startingTab} activeKey={activeTab} onSelect={(k) => navigate("?tab="+k)} fill>
                     <Tab
                         className="text-center" eventKey="buildings"
                         title={t('tabs.buildings')} id="buildings-tab"
@@ -57,11 +55,11 @@ function HomePageUniversity(props) {
                         </div>
                     </Tab>
                     <Tab
-                        className="text-center" eventKey="programs"
-                        title={t('tabs.programs')} id="programs-tab"
+                        className="text-center" eventKey="terms"
+                        title={t('tabs.terms')} id="terms-tab"
                     >
                         <div className="bg-primary rounded-bottom">
-                            <UniversityProgramsList user={props.user} />
+                            <UniversityTermsList user={props.user} />
                         </div>
                     </Tab>
                     <Tab
@@ -73,11 +71,11 @@ function HomePageUniversity(props) {
                         </div>
                     </Tab>
                     <Tab
-                        className="text-center" eventKey="terms"
-                        title={t('tabs.terms')} id="terms-tab"
+                        className="text-center" eventKey="programs"
+                        title={t('tabs.programs')} id="programs-tab"
                     >
                         <div className="bg-primary rounded-bottom">
-                            <UniversityTermsList user={props.user} />
+                            <UniversityProgramsList user={props.user} />
                         </div>
                     </Tab>
                 </Tabs>

@@ -5,26 +5,28 @@ import { Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import ApiService from '../../services/ApiService';
-import { OK, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
-import { DAYS } from "../../services/SystemConstants";
+import { OK, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
+import { DAYS } from "../../resources/SystemConstants";
 import { useLocation } from 'react-router-dom';
 import LinkButton from '../Common/LinkButton';
 import ErrorMessage from '../Common/ErrorMessage';
 import Roles from '../../resources/RoleConstants';
 
 function SearchResults(props) {
-    const {t} = useTranslation();
+    const {t} = useTranslation()
     const navigate = useNavigate()
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
-    const [schedules, setSchedules] = useState([]);
-    const [scheduleIndex, setScheduleIndex] = useState(0);
-    const [tables, setTables] = useState();
-    const [params, setParams] = useState();
-    const [user] = useState(ApiService.getActiveUser())
     const search = useLocation().search
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
+    const [user] = useState(ApiService.getActiveUser())
+    const [schedules, setSchedules] = useState([])
+    const [scheduleIndex, setScheduleIndex] = useState(0)
+    const [tables, setTables] = useState()
+    const [params, setParams] = useState()
+
+
     const getTimeTable = (schedule, palette) => {
         var timeTable = {}
         DAYS.forEach((d) => timeTable[d] = Array.from({ length: 24 }))
@@ -77,10 +79,10 @@ function SearchResults(props) {
                                             >
                                                 <div>
                                                     <div className="col">
-                                                        <b> {c.courseClass.course.code} - {c.courseClass.course.name} </b>
+                                                        <b> {c.courseClass.course.internalId} - {c.courseClass.course.name} </b>
                                                         <i>&nbsp;({c.courseClass.name})</i>
                                                     </div>
-                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} ( {c.lecture.building.code} ) </div>
+                                                    <div className="col"> {c.lecture.startTime}-{c.lecture.endTime} ( {c.lecture.building.internalId} ) </div>
                                                 </div>
                                             </td>
                                         );
@@ -146,13 +148,9 @@ function SearchResults(props) {
         if(!params) readParams()
         else if(params === null) setLoading(false)
         else {
-            ApiService.getSchedules(user.id, params).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK)
-                    findError = resp.status;
-                if (findError) {
-                    setError(true);
-                    setStatus(findError);
+            ApiService.getSchedules(params).then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                 }
                 else {
                     var tables = []
@@ -195,7 +193,7 @@ function SearchResults(props) {
         )
     }
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     if (params == null)
         return <ErrorMessage message={"search.invalidParams"}/>
     if(schedules.length === 0 || schedules[0].courseClasses.length === 0)
@@ -274,16 +272,16 @@ function SearchResults(props) {
 
                 <div className="my-3 d-flex justify-content-center align-items-center">
                     <ul className="list-unstyled row container justify-content-center">
-                        {schedules[scheduleIndex].courseClasses.map((c, cidx) => {
+                        {schedules[scheduleIndex].courseClasses.sort((a, b) => a.course.internalId.localeCompare(b.course.internalId)).map((c, cidx) => {
                             return (
                                 <li key={'ci-' + cidx} className="list-item col border border-primary py-2">
-                                    {c.course.code} - {c.course.name} ({c.name})
+                                    {c.course.internalId} - {c.course.name} ({c.name})
                                     <ul>
                                         {c.lectures.map((l, lidx) => {
                                             return (
                                                 <li key={'li-' + lidx}>
                                                     <b> {t('days.' + l.day)}: </b>{' '}
-                                                    {l.startTime}-{l.endTime} ({l.building.code})
+                                                    {l.startTime}-{l.endTime} ({l.building.internalId})
                                                 </li>
                                             );
                                         })}

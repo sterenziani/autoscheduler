@@ -8,7 +8,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import ApiService from '../../services/ApiService';
-import { OK, BAD_REQUEST } from '../../services/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 import SignInRecoverPasswordForm from './SignInRecoverPasswordForm';
 
@@ -18,33 +18,26 @@ const SignInSchema = Yup.object().shape({
 });
 
 function SignInForm(props) {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
     const { t } = useTranslation()
-
-    const [correct, setCorrect] = useState(true);
-    const [badConnection, setBadConnection] = useState(false);
+    const [error, setError] = useState()
 
     const authenticate = async (values, setSubmitting) => {
-        const { status } = await ApiService.login(values.email, values.password);
+        const { status, data } = await ApiService.login(values.email, values.password);
         switch (status) {
             case OK:
                 navigate("/")
                 break;
-            case BAD_REQUEST:
-                setSubmitting(false)
-                setCorrect(false)
-                break;
             default:
-                setSubmitting(false);
-                setBadConnection(true)
+                setSubmitting(false)
+                setError(data?.code?? status)
                 break;
         }
     }
 
     const onSubmit = (values, { setSubmitting }) => {
         setSubmitting(true)
-        setCorrect(true)
-        setBadConnection(false)
+        setError()
         authenticate(values, setSubmitting)
     };
 
@@ -58,12 +51,7 @@ function SignInForm(props) {
                 {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
                     <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
                         <FontAwesomeIcon size="3x" icon={faKey} />
-                        {!correct && (
-                            <p className="form-error">{t('login.errors.loginFailed')}</p>
-                        )}
-                        {badConnection && (
-                            <p className="form-error">{t('login.errors.badConnection')}</p>
-                        )}
+                        {error && (<p className="form-error">{t('register.errors.codes.'+error)}</p>)}
                         <FormInputField
                             label="register.email"
                             name="email"

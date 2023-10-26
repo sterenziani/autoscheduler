@@ -4,7 +4,7 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import ApiService from '../../services/ApiService';
-import { CREATED, NOT_FOUND } from '../../services/ApiConstants';
+import { CREATED } from '../../resources/ApiConstants';
 import FormInputField from '../Common/FormInputField';
 
 const EmailSchema = Yup.object().shape({
@@ -15,31 +15,23 @@ const EmailSchema = Yup.object().shape({
 });
 
 function SignInRecoverPasswordForm(props) {
-    const { t } = useTranslation();
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [finished, setFinished] = useState(false);
-    const [badConnection, setBadConnection] = useState(false);
-    const [emailNotFound, setEmailNotFound] = useState(false);
+    const { t } = useTranslation()
+    const [showPasswordModal, setShowPasswordModal] = useState(false)
+    const [finished, setFinished] = useState(false)
+    const [error, setError] = useState(null)
 
-    const onSubmit = (values, { setSubmitting }) => {
-        ApiService.requestPasswordChangeToken(values.email).then((resp) => {
-            if (resp && resp.status === CREATED){
-                setEmailNotFound(false)
-                setBadConnection(false)
+    const onSubmit = async (values, { setSubmitting }) => {
+        const { status, data } = await ApiService.requestPasswordChangeToken(values.email)
+        switch (status) {
+            case CREATED:
+                setError()
                 setFinished(true)
-            }
-            else {
+                break;
+            default:
                 setSubmitting(false);
-                if (resp && resp.status === NOT_FOUND){
-                    setEmailNotFound(true)
-                    setBadConnection(false)
-                }
-                else{
-                    setEmailNotFound(false)
-                    setBadConnection(true)
-                }
-            }
-        })
+                setError(data?.code?? status)
+                break;
+        }
     }
 
     const switchPasswordModal = () => {
@@ -84,12 +76,7 @@ function SignInRecoverPasswordForm(props) {
                                   <Form className="p-3 mx-auto text-center color-white" onSubmit={handleSubmit}>
                                       <Modal.Body className="text-black">
                                         {t('login.recoverPasswordDescription')}
-                                          {emailNotFound && (
-                                            <p className="form-error">{t('login.emailNotFound')}</p>
-                                          )}
-                                          {badConnection && (
-                                              <p className="form-error">{t('login.errors.badConnection')}</p>
-                                          )}
+                                          {error && (<p className="form-error">{t('register.errors.codes.'+error)}</p>)}
                                           <FormInputField
                                               type="email"
                                               label="register.email"

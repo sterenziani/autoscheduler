@@ -4,24 +4,26 @@ import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Tabs, Tab, Spinner } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
-import { OK, UNAUTHORIZED, FORBIDDEN } from '../../services/ApiConstants';
+import { OK, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import CourseRequirementsList from '../Lists/CourseRequirementsList';
 import CourseClassesTab from '../Common/CourseClassesTab';
 import Roles from '../../resources/RoleConstants';
 import LinkButton from '../Common/LinkButton';
 import ErrorMessage from '../Common/ErrorMessage';
-import AsyncSelect from 'react-select/async'
+import FormAsyncSelect from '../Common/FormAsyncSelect';
 
 function CoursePage(props) {
-    const {t} = useTranslation();
-    const navigate = useNavigate();
+    const {t} = useTranslation()
+    const navigate = useNavigate()
     const {id} = useParams()
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    const [status, setStatus] = useState(null);
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState()
+
     const [user] = useState(ApiService.getActiveUser())
-    const [course, setCourse] = useState();
-    const [selectedProgram, setSelectedProgram] = useState(null);
+    const [course, setCourse] = useState()
+    const [selectedProgram, setSelectedProgram] = useState(null)
+    const [noProgramsWarning, setNoProgramsWarning] = useState(false)
 
     useEffect(() => {
         if(!user)
@@ -30,31 +32,34 @@ function CoursePage(props) {
 
     useEffect( () => {
         ApiService.getCourse(id).then((resp) => {
-            let findError = null;
             if (resp && resp.status && resp.status !== OK)
-                findError = resp.status;
-            if (findError){
-                setLoading(false)
-                setError(true)
-                setStatus(findError)
-            }
-            else {
+                setError(resp.status)
+            else
                 setCourse(resp.data)
-                setLoading(false)
-            }
+            setLoading(false)
         })
     }, [id])
 
+/*
+    useEffect( () => {
+        ApiService.isCourseInAnyPrograms(id).then((resp) => {
+            console.log(resp.data)
+            if (resp && resp.status && resp.status !== OK)
+                setError(resp.status)
+            else
+                setNoProgramsWarning(!resp.data)
+        })
+    }, [])
+*/
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
-            ApiService.getPrograms(user.id, inputValue).then((resp) => {
-                let findError = null;
-                if (resp && resp.status && resp.status !== OK) findError = resp.status;
-                if (findError) {
-                    setError(resp.data.code)
-                    setStatus(findError)
+            ApiService.getProgramsCourseIsIn(id, inputValue).then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
                     callback([])
                 } else {
+                    if(resp.data.length === 0)
+                        setNoProgramsWarning(true)
                     callback(resp.data)
                 }
             })
@@ -76,17 +81,17 @@ function CoursePage(props) {
             </div>
         )
     if (error)
-        return <ErrorMessage status={status}/>
+        return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
             <HelmetProvider>
                 <Helmet>
-                    <title>{course ? course.code : ''} - AutoScheduler</title>
+                    <title>{course ? course.internalId+" - "+course.name : ''} - AutoScheduler</title>
                 </Helmet>
             </HelmetProvider>
             <div className="container my-5">
                 <div className="mb-3 text-center text-primary">
-                    <h6 className="m-0">{course.code}</h6>
+                    <h6 className="m-0">{course.internalId}</h6>
                     <h2 className="">{course.name}</h2>
                 </div>
                 <Tabs className="borderless-tabs" defaultActiveKey={'classes'} fill>
@@ -95,21 +100,41 @@ function CoursePage(props) {
                         title={t('tabs.requiredCourses')}
                     >
                         <div className="bg-primary rounded-bottom py-4">
-                            <AsyncSelect
-                                className="text-black text-start w-75 m-auto"
-                                placeholder={t('register.program')}
-                                cacheOptions
-                                defaultOptions
-                                noOptionsMessage={() => t('selectNoResults')}
-                                getOptionLabel={e => e.code+' - '+e.name}
-                                getOptionValue={e => e.id}
-                                loadOptions={loadProgramOptions}
-                                onChange={opt => onChangePrograms(opt)}
-                            />
-                            {
-                                selectedProgram && <CourseRequirementsList course={course} program={selectedProgram}/>
-                            }
-                            <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit'} textKey="edit"/>
+                        {
+                            noProgramsWarning &&
+                                <div className="mx-5 display-newlines py-2 text-center">
+                                    <p className="mb-0">{t('errors.notPartOfAnyPrograms')}</p>
+                                    <LinkButton variant="link" textKey="seePrograms" className="text-white" href={'/?tab=programs'}/>
+                                </div>
+                        }
+                        {
+                            !noProgramsWarning &&
+                            <>
+                                {
+                                    !selectedProgram &&
+                                    <div className="mx-5 display-newlines py-2 text-center">
+                                        <p className="mb-0">{t('course.pickAProgram')}</p>
+                                    </div>
+                                }
+                                <FormAsyncSelect
+                                    className="text-black text-start w-75 m-auto"
+                                    placeholder={t('register.program')}
+                                    cacheOptions
+                                    defaultOptions
+                                    noOptionsMessage={() => t('selectNoResults')}
+                                    getOptionLabel={e => e.internalId+' - '+e.name}
+                                    getOptionValue={e => e.id}
+                                    loadOptions={loadProgramOptions}
+                                    onChange={opt => onChangePrograms(opt)}
+                                />
+                                {selectedProgram &&
+                                    <>
+                                        <CourseRequirementsList course={course} program={selectedProgram}/>
+                                        <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit'} textKey="edit"/>
+                                    </>
+                                }
+                            </>
+                        }
                         </div>
                     </Tab>
                     <Tab className="text-center" eventKey="classes" title={t('tabs.courseClasses')}>
@@ -118,6 +143,9 @@ function CoursePage(props) {
                         </div>
                     </Tab>
                 </Tabs>
+                <div className="mt-5 text-center">
+                    <LinkButton variant="primary" textKey="goHome" href={'/'}/>
+                </div>
             </div>
         </React.Fragment>
     );
