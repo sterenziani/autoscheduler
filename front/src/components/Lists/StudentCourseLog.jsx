@@ -144,7 +144,9 @@ function StudentCourseLog(props) {
                             <Modal.Title>{t('modal.addCourse')}</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
+                            <div data-testid="program-select">
                             <FormAsyncSelect
+                                data-testid="program-select"
                                 aria-label="program-select"
                                 className="text-black m-2"
                                 placeholder={t('search.program')}
@@ -156,24 +158,27 @@ function StudentCourseLog(props) {
                                 loadOptions={loadProgramOptions}
                                 onChange={opt => onChangePrograms(opt.id)}
                             />
+                            </div>
                             {
                                 selectedProgramId &&
-                                <FormAsyncSelect key={selectedProgramId}
-                                    aria-label="course-select"
-                                    className="text-black m-2"
-                                    placeholder={t('forms.course')}
-                                    cacheOptions
-                                    defaultOptions
-                                    noOptionsMessage={(inputValue) => {
-                                        if(inputValue.inputValue.length > 0)
-                                            return t('selectNoResults')
-                                        return t('modal.inputTextToSearch')
-                                    }}
-                                    getOptionLabel={e => e.internalId+' - '+e.name}
-                                    getOptionValue={e => e.id}
-                                    loadOptions={loadRemainingCoursesOptions}
-                                    onChange={opt => onChangeCourseToAdd(opt.id)}
-                                />
+                                <div data-testid="course-select">
+                                    <FormAsyncSelect key={selectedProgramId}
+                                        aria-label="course-select"
+                                        className="text-black m-2"
+                                        placeholder={t('forms.course')}
+                                        cacheOptions
+                                        defaultOptions
+                                        noOptionsMessage={(inputValue) => {
+                                            if(inputValue.inputValue.length > 0)
+                                                return t('selectNoResults')
+                                            return t('modal.inputTextToSearch')
+                                        }}
+                                        getOptionLabel={e => e.internalId+' - '+e.name}
+                                        getOptionValue={e => e.id}
+                                        loadOptions={loadRemainingCoursesOptions}
+                                        onChange={opt => onChangeCourseToAdd(opt.id)}
+                                    />
+                                </div>
                             }
                         </Modal.Body>
                         <Modal.Footer>
