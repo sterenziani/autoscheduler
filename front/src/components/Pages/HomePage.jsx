@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import HomePageUniversity from '../Common/HomePageUniversity';
 import HomePageStudent from '../Common/HomePageStudent';
 import HomePageAdmin from '../Common/HomePageAdmin';
+import LandingPage from '../Common/LandingPage';
 import ApiService from '../../services/ApiService';
 import Roles from '../../resources/RoleConstants';
 
@@ -14,8 +15,6 @@ function HomePage(props)  {
     const user = ApiService.getActiveUser()
 
     useEffect( () => {
-        if(!user)
-            navigate("/login")
         setLoading(false)
     }, [navigate, user])
 
@@ -30,6 +29,7 @@ function HomePage(props)  {
             <HelmetProvider>
                 <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
+            {!user && <LandingPage/>}
             {user && user.role === Roles.STUDENT && <HomePageStudent user={user}/>}
             {user && user.role === Roles.UNIVERSITY &&  (<HomePageUniversity user={user}/>)}
             {user && user.role === Roles.ADMIN && (<HomePageAdmin user={user}/>)}

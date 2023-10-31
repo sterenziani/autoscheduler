@@ -1,4 +1,22 @@
 {
+    "landing": {
+            "title":"¡Bienvenido a AutoScheduler!",
+            "subtitle":"¡La forma más fácil de elegir sus próximas cursadas!",
+            "joinToDiscover":"¡Únase a AutoScheduler para descubrir los posibles cronogramas del próximo período que mejor se ajusten a sus necesidades!",
+            "question1":"¿Odia viajar hasta su institución?",
+            "answer1":"¡Le econtraremos días libres!",
+            "question2":"¿Quiere ampliar sus opciones en cuatrimestres futuros?",
+            "answer2":"¡Priorizaremos materias correlativas!",
+            "question3":"¿Quiere baja presión?",
+            "answer3":"¡Elija su carga horaria ideal!",
+            "question4":"¿Tiene un compromiso recurrente?",
+            "answer4":"¡Obtenga cronogramas fuera de ese horario!",
+            "joinNow":"Olvídese de investigar sus opciones y dibujar sus cronogramas manualmente. ¡Únase a AutoScheduler ahora!",
+            "iAmStudent":"Soy estudiante",
+            "iAmUniversty":"Soy una institución",
+            "alreadyRegistered":"¿Ya es miembro?",
+            "signIn":"Iniciar Sesión"
+    },
     "register": {
         "register": "Registrarse",
         "email": "Email",
