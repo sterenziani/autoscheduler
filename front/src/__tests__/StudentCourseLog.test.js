@@ -824,7 +824,7 @@ test('Modal program select lists all programs if no input is provided', async ()
 })
 
 test('Modal program select filters programs if input matches name', async () => {
-    const {getByRole, getById, asFragment, getByLabelText, getByText, getByTestId, getElementsByClassName} = render(<Router><StudentCourseLog student={api.getActiveUser()}/></Router>)
+    const {getByRole, asFragment, getByLabelText, getByText, getByTestId, getElementsByClassName} = render(<Router><StudentCourseLog student={api.getActiveUser()}/></Router>)
     await waitFor(() => { expect(getByTestId("content")).toBeInTheDocument() })
     const plusButton = getByTestId("plus-button")
     await act(async() => {plusButton.click()})

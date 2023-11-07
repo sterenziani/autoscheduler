@@ -29,8 +29,8 @@ const FormInputField = (props) => {
                         />
                         {
                             isPasswordField &&
-                            <Button variant="link text-white" onClick={toggleVisibility}>
-                                <FontAwesomeIcon size="1x" icon={(passwordType === "password")? faEyeSlash:faEye} />
+                            <Button variant="link text-white" data-testid="password-eye" onClick={toggleVisibility}>
+                                <FontAwesomeIcon size="1x" data-testid="password-eye-icon" icon={(passwordType === "password")? faEyeSlash:faEye} />
                             </Button>
                         }
                     </div>
