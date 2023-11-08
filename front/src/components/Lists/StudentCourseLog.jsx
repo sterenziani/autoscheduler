@@ -146,7 +146,6 @@ function StudentCourseLog(props) {
                         <Modal.Body>
                             <div data-testid="program-select">
                             <FormAsyncSelect
-                                data-testid="program-select"
                                 aria-label="program-select"
                                 className="text-black m-2"
                                 placeholder={t('search.program')}

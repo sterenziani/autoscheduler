@@ -195,7 +195,7 @@ function SignUpStudentForm(props) {
                         <>
                             <Row className='mx-auto form-row text-center'>
                                 <FormInputLabel label="register.school"/>
-                                <div className="col-md-9">
+                                <div className="col-md-9" data-testid="school-select">
                                     <FormAsyncSelect
                                         id="input-university"
                                         aria-label="school-select"
@@ -216,7 +216,7 @@ function SignUpStudentForm(props) {
                                 selectedSchool && (
                                 <Row className='mx-auto form-row text-center'>
                                     <FormInputLabel label="register.program"/>
-                                    <div className="col-md-9">
+                                    <div className="col-md-9" data-testid="program-select">
                                         <FormAsyncSelect key={selectedSchool}
                                             aria-label="program-select"
                                             className="text-black text-start"
