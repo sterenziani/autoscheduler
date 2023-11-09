@@ -159,7 +159,7 @@ export default class DatabaseTermDao extends TermDao {
             // If not past last page, we query
             if (page <= lastPage) {
                 const result = await session.run(
-                    `${baseQuery} RETURN t ORDER BY t.name SKIP $skip LIMIT $limit`,
+                    `${baseQuery} RETURN t ORDER BY t.startDate DESC SKIP $skip LIMIT $limit`,
                     {regex, globalRegex, universityId, from: fromDate, to: toDate, published, skip: toGraphInt(getSkipFromPageLimit(page, limit)), limit: toGraphInt(limit)}
                 );
                 const nodes = getNodes(result);
