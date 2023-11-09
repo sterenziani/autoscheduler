@@ -12,6 +12,7 @@ import CourseListForm from '../Lists/CourseListForm';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
+import LinkButton from '../Common/LinkButton';
 
 const EXISTING_PROGRAM_ERROR = "PROGRAM_ALREADY_EXISTS"
 const INVALID_NAME_ERROR = "INVALID_NAME"
@@ -38,6 +39,7 @@ function EditProgramPage(props) {
 
     const user = ApiService.getActiveUser()
     const [program, setProgram] = useState()
+    const [areCoursesDefined, setAreCoursesDefined] = useState(false)
     const [mandatoryCourses, setMandatoryCourses] = useState()
     const [optionalCourses, setOptionalCourses] = useState()
 
@@ -82,6 +84,18 @@ function EditProgramPage(props) {
             });
         }
 
+        const checkIfCoursesDefined = async () => {
+            ApiService.getCoursesPage(1, "").then((resp) => {
+                if (resp && resp.status && resp.status !== OK){
+                    setLoading(false)
+                    setError(resp.status)
+                }
+                else{
+                    setAreCoursesDefined(resp.data.length > 0)
+                }
+            });
+        }
+
         async function execute() {
             if(id){
                 if(!program)
@@ -97,8 +111,11 @@ function EditProgramPage(props) {
                 }
             }
 
-            if(program && mandatoryCourses && optionalCourses)
-                setLoading(false)
+            if(program && mandatoryCourses && optionalCourses){
+                checkIfCoursesDefined().then(() => {
+                    setLoading(false)
+                })
+            }
         }
         execute()
     },[program, mandatoryCourses, optionalCourses, id, t])
@@ -223,34 +240,45 @@ function EditProgramPage(props) {
                         value={values.programOptionalCredits} error={errors.programOptionalCredits}
                         touched={touched.programOptionalCredits} onChange={handleChange} onBlur={handleBlur}
                     />
-                    <Row>
-                        <Col>
-                            <Row className="mx-auto form-row">
-                                <div className="text-center my-3 text-break">
-                                    <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
-                                </div>
-                                <div className="align-items-start align-items-center">
-                                <CourseListForm editCreditRequirements
-                                        listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
-                                        onClickTrashCan={onClickMandatoryTrashCan} addCourse={addMandatoryCourse}
-                                    />
-                                </div>
+                    {
+                        areCoursesDefined? [
+                            <Row key="program-courses-block">
+                                <Col>
+                                    <Row className="mx-auto form-row">
+                                        <div className="text-center my-3 text-break">
+                                            <h5 className="my-0"><strong>{t('forms.mandatoryCourses')}</strong></h5>
+                                        </div>
+                                        <div className="align-items-start align-items-center">
+                                        <CourseListForm editCreditRequirements
+                                                listedCourses={mandatoryCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
+                                                onClickTrashCan={onClickMandatoryTrashCan} addCourse={addMandatoryCourse}
+                                            />
+                                        </div>
+                                    </Row>
+                                </Col>
+                                <Col>
+                                    <Row className="mx-auto form-row">
+                                        <div className="text-center my-3 text-break">
+                                            <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
+                                        </div>
+                                        <div className="align-items-start align-items-center">
+                                            <CourseListForm editCreditRequirements
+                                                listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
+                                                onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
+                                            />
+                                        </div>
+                                    </Row>
+                                </Col>
                             </Row>
-                        </Col>
-                        <Col>
-                            <Row className="mx-auto form-row">
-                                <div className="text-center my-3 text-break">
-                                    <h5 className="my-0"><strong>{t('forms.optionalCourses')}</strong></h5>
+                        ] : [
+                            <div key="program-no-courses-warning" className="mt-5 mb-3">
+                                <p className="mb-0">{t('errors.noCoursesDefined')}</p>
+                                <div className="text-center">
+                                    <LinkButton variant="link" textKey="createCourse" href={'/courses/new'}/>
                                 </div>
-                                <div className="align-items-start align-items-center">
-                                    <CourseListForm editCreditRequirements
-                                        listedCourses={optionalCourses} unavailableCourses={[...optionalCourses, ...mandatoryCourses]}
-                                        onClickTrashCan={onClickOptTrashCan} addCourse={addOptionalCourse}
-                                    />
-                                </div>
-                            </Row>
-                        </Col>
-                    </Row>
+                            </div>
+                        ]
+                    }
                     <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

@@ -307,17 +307,19 @@
         "503": "Could not connect to the AutoScheduler server.",
         "noTerms": "No terms have been found. Create at least one term to define classes for a course.",
         "noBuildings": "No buildings have been found. Create at least one building to define classes for a course.",
-        "notPartOfAnyPrograms": "This course is not associated with any program yet.\nAdd it to a program's list of courses to define course requirements under that program."
+        "notPartOfAnyPrograms": "This course is not associated with any program yet.\nAdd it to a program's list of courses to define course requirements under that program.",
+        "noCoursesDefined": "You have not created any courses yet. You may add courses to this program once you have created at least one."
     },
     "noSchedulesFound": "Could not find any recommended schedules for your search.",
     "noDefinedRequirements": "No requirements defined.",
     "selectNoOptions": "Please type in a character to search for options.",
     "selectNoResults": "No results found for the given query.",
     "goHome": "Go home",
-    "seeBuildings": "Click here to see your buildings",
+    "createBuilding": "Click here to create a building",
+    "createCourse": "Click here to create a course",
     "seePrograms": "Click here to see your programs",
     "seeClasses": "Click here to see this course's classes",
-    "seeTerms": "Click here to create a term",
+    "createTerm": "Click here to create a term",
     "pagination": {
         "page": "Page {{page}}",
         "popover": "Click here for page selection.",

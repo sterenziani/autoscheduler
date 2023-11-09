@@ -55,7 +55,7 @@ function CourseClassesTab(props) {
             <React.Fragment>
                 <div className="py-5 text-center">
                     <p className="mb-0">{t('errors.noTerms')}</p>
-                    <LinkButton variant="link" textKey="seeTerms" className="text-white" href={'/terms/new'}/>
+                    <LinkButton variant="link" textKey="createTerm" className="text-white" href={'/terms/new'}/>
                 </div>
             </React.Fragment>
         )

@@ -321,7 +321,7 @@ function EditCourseClassPage(props) {
                 <div className="mt-4 mb-3">
                     <p className="mb-0">{t("errors.noBuildings")}</p>
                     <div className="text-center">
-                        <LinkButton variant="link" textKey="seeBuildings" href={'/?tab=buildings'}/>
+                        <LinkButton variant="link" textKey="createBuilding" href={'/buildings/new'}/>
                     </div>
                 </div>
             }
@@ -330,7 +330,7 @@ function EditCourseClassPage(props) {
                 <div className="mt-4 mb-3">
                     <p className="mb-0">{t("errors.noTerms")}</p>
                     <div className="text-center">
-                        <LinkButton variant="link" textKey="seeTerms" href={'/?tab=terms'}/>
+                        <LinkButton variant="link" textKey="createTerm" href={'/?terms/new'}/>
                     </div>
                 </div>
             }
