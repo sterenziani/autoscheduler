@@ -40,17 +40,6 @@ function CoursePage(props) {
         })
     }, [id])
 
-/*
-    useEffect( () => {
-        ApiService.isCourseInAnyPrograms(id).then((resp) => {
-            console.log(resp.data)
-            if (resp && resp.status && resp.status !== OK)
-                setError(resp.status)
-            else
-                setNoProgramsWarning(!resp.data)
-        })
-    }, [])
-*/
     const loadProgramOptions = (inputValue, callback) => {
         setTimeout(() => {
             ApiService.getProgramsCourseIsIn(id, inputValue).then((resp) => {
@@ -94,12 +83,12 @@ function CoursePage(props) {
                     <h6 className="m-0">{course.internalId}</h6>
                     <h2 className="">{course.name}</h2>
                 </div>
-                <Tabs className="borderless-tabs" defaultActiveKey={'classes'} fill>
+                <Tabs className="borderless-tabs course-page-tabs" defaultActiveKey={'classes'} fill>
                     <Tab
                         className="text-center" eventKey="required_courses"
                         title={t('tabs.requiredCourses')}
                     >
-                        <div className="bg-primary rounded-bottom py-4">
+                        <div className="bg-dark rounded-bottom py-4">
                         {
                             noProgramsWarning &&
                                 <div className="mx-5 display-newlines py-2 text-center">
@@ -138,7 +127,7 @@ function CoursePage(props) {
                         </div>
                     </Tab>
                     <Tab className="text-center" eventKey="classes" title={t('tabs.courseClasses')}>
-                        <div className="bg-primary rounded-bottom">
+                        <div className="bg-dark rounded-bottom">
                             <CourseClassesTab user={user} course={course} />
                         </div>
                     </Tab>

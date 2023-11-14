@@ -38,6 +38,11 @@ $nav-tabs-link-active-border-color: $primary;
 $nav-tabs-border-color: $primary;
 $nav-tabs-border-width: 0.1rem;
 $nav-tabs-border-radius: 0.5rem;
+$nav-link-font-size: 1.25em;
+
+.course-page-tabs > li > .nav-link.active {
+    background-color: $dark !important
+}
 
 $theme-colors: (
     primary: $primary,
