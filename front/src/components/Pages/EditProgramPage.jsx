@@ -242,6 +242,10 @@ function EditProgramPage(props) {
                     />
                     {
                         areCoursesDefined? [
+                            <>
+                            {
+                                (mandatoryCourses.length + optionalCourses.length > 0) && <p>{t('forms.programRequirements')}</p>
+                            }
                             <Row key="program-courses-block">
                                 <Col>
                                     <Row className="mx-auto form-row">
@@ -270,6 +274,7 @@ function EditProgramPage(props) {
                                     </Row>
                                 </Col>
                             </Row>
+                            </>
                         ] : [
                             <div key="program-no-courses-warning" className="mt-5 mb-3">
                                 <p className="mb-0">{t('errors.noCoursesDefined')}</p>
