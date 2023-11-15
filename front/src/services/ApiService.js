@@ -217,6 +217,14 @@ const getIdFromURL = (url, universityEndpoint) => {
     return url.replace(fullPrefixString, '')
 }
 
+const cleanInputText = (inputText) => {
+    inputText = inputText.replace('´', '')
+    inputText = inputText.replace('¨', '')
+    inputText = inputText.replace('^', '')
+    inputText = inputText.replace('``', '')
+    return inputText
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// USER FUNCTIONS ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -313,7 +321,7 @@ const deleteFinishedCourse = async (courseId) => {
 
 const getRemainingCoursesProgram = async (programId, inputText) => {
     const endpoint = `${studentUniversityProgramsEndpoint}/${programId}/remaining-courses`
-    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText}, MULTI_PAGE_SEARCH_LIMIT)
+    return simpleApiMultiPageGetRequest(endpoint, {filter: cleanInputText(inputText)}, MULTI_PAGE_SEARCH_LIMIT)
 }
 
 const getSchedules = async (params) => {
@@ -345,12 +353,12 @@ const getSchedules = async (params) => {
 //////////////////////////////////////////////////////////////////////////////
 
 const getUniversities = async (inputText) => {
-    return simpleApiMultiPageGetRequest(universitiesEndpoint, {filter: inputText, verified: true})
+    return simpleApiMultiPageGetRequest(universitiesEndpoint, {filter: cleanInputText(inputText), verified: true})
 }
 
 const getUniversityUsersPage = async (page, inputText) => {
     let endpoint = `${universitiesEndpoint}?page=${page}`
-    if(inputText && inputText.length > 0) endpoint += `&filter=${inputText}`
+    if(inputText && cleanInputText(inputText).length > 0) endpoint += `&filter=${cleanInputText(inputText)}`
     return simpleApiGetRequest(endpoint)
 }
 
@@ -440,12 +448,12 @@ const deleteBuilding = async (buildingId) => {
 //////////////////////////////////////////////////////////////////////////////
 
 const getProgramsOfUniversity = async (universityId, inputText) => {
-    return simpleApiMultiPageGetRequest(`${universitiesEndpoint}/${universityId}/programs`, {filter: inputText})
+    return simpleApiMultiPageGetRequest(`${universitiesEndpoint}/${universityId}/programs`, {filter: cleanInputText(inputText)})
 }
 
 const getPrograms = async (inputText) => {
     const endpoint = getEndpointForActiveUser(universityProgramsEndpoint)
-    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText})
+    return simpleApiMultiPageGetRequest(endpoint, {filter: cleanInputText(inputText)})
 }
 
 const getProgramsPage = async (page) => {
@@ -520,19 +528,19 @@ const deleteProgram = async (programId) => {
 
 const getCourses = async (inputText) => {
     const endpoint = getEndpointForActiveUser(`${universityCoursesEndpoint}`)
-    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText}, MULTI_PAGE_SEARCH_LIMIT)
+    return simpleApiMultiPageGetRequest(endpoint, {filter: cleanInputText(inputText)}, MULTI_PAGE_SEARCH_LIMIT)
 }
 
 const getCoursesPage = async (page, inputText) => {
     let endpoint = `${universityCoursesEndpoint}?page=${page}`
-    if(inputText) endpoint += `&filter=${inputText}`
+    if(inputText) endpoint += `&filter=${cleanInputText(inputText)}`
     endpoint = getEndpointForActiveUser(endpoint)
     return simpleApiGetRequest(endpoint)
 }
 
 const getCoursesNotInList = async (inputText, courseIDsToFilter) => {
     const endpoint = getEndpointForActiveUser(universityCoursesEndpoint)
-    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText}, MULTI_PAGE_SEARCH_LIMIT, courseIDsToFilter)
+    return simpleApiMultiPageGetRequest(endpoint, {filter: cleanInputText(inputText)}, MULTI_PAGE_SEARCH_LIMIT, courseIDsToFilter)
 }
 
 const getCourse = async (courseId) => {
@@ -547,7 +555,7 @@ const getRequiredCoursesForProgram = async (courseId, programId) => {
 
 const getProgramsCourseIsIn = async (courseId, inputText) => {
     const endpoint = getEndpointForActiveUser(universityProgramsEndpoint)
-    return simpleApiMultiPageGetRequest(endpoint, {filter: inputText, courseId: courseId})
+    return simpleApiMultiPageGetRequest(endpoint, {filter: cleanInputText(inputText), courseId: courseId})
 }
 
 const saveCourse = async (id, name, internalId, creditValue, requirementIDs) => {

@@ -218,7 +218,7 @@ function SearchForm(props) {
                     </div>
                 </Form.Group>
 
-                <Form.Group controlId="prioritize" className="mt-4 row mx-auto form-row">
+                <Form.Group controlId="prioritize" className="my-4 row mx-auto form-row">
                     <FormInputLabel
                         label="search.prioritizeUnlocks" columnWidth={4}
                         tooltipIconColor="primary" tooltipBgColor="white"
@@ -233,7 +233,7 @@ function SearchForm(props) {
                     </div>
                 </Form.Group>
 
-                <Form.Group controlId="reduceDays" className="mt-4 row mx-auto form-row">
+                <Form.Group controlId="reduceDays" className="pt-2 row mx-auto form-row">
                     <FormInputLabel
                         label="search.reduceDays" columnWidth={4}
                         tooltipIconColor="primary" tooltipBgColor="white"
