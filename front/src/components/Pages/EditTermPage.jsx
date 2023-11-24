@@ -122,7 +122,7 @@ function EditTermPage(props) {
                 <Helmet><title>{t(id?'forms.editTerm':'forms.createTerm')}</title></Helmet>
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
-                <h2 className="mt-3">{t(id?'forms.editTerm':'forms.createTerm')}</h2>
+                <h1 className="mt-3">{t(id?'forms.editTerm':'forms.createTerm')}</h1>
                 {error && error === EXISTING_TERM_ERROR && (<p className="form-error">{t('forms.errors.term.codeAlreadyTaken')}</p>)}
                 {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
 

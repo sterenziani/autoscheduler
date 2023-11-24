@@ -208,7 +208,7 @@ function EditProgramPage(props) {
                 <Helmet><title>{t(id?'forms.editProgram':'forms.createProgram')}</title></Helmet>
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
-                <h2 className="mt-3">{t(id?'forms.editProgram':'forms.createProgram')}</h2>
+                <h1 className="mt-3">{t(id?'forms.editProgram':'forms.createProgram')}</h1>
                 {error && error === EXISTING_PROGRAM_ERROR && (<p className="form-error">{t('forms.errors.program.codeAlreadyTaken')}</p>)}
                 {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
 

@@ -343,7 +343,7 @@ function EditCourseClassPage(props) {
                 <Helmet><title>{t(id?'forms.editClass':'forms.createClass')}</title></Helmet>
             </HelmetProvider>
             <div className="p-2 text-center container my-5 bg-grey text-primary rounded">
-                <h2 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h2>
+                <h1 className="mt-3">{t(id?'forms.editClass':'forms.createClass')}</h1>
                 {error && error === EXISTING_CLASS_ERROR && (<p className="form-error">{t('forms.errors.courseClass.codeAlreadyTaken')}</p>)}
                 {error && error === INVALID_NAME_ERROR && (<p className="form-error">{t('forms.errors.invalidName')}</p>)}
                 {selectionError && (<p className="form-error">{t('forms.errors.courseClass.noCourseSelected')}</p>)}
