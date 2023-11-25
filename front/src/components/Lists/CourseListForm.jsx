@@ -94,7 +94,7 @@ function CourseListForm(props) {
             ]:[<div className="mt-3" key="empty-list">{t('emptyList')}</div>]
         }
         <div className="mx-auto align-items-center plus-button-container clickable">
-            <i className="bi bi-plus-circle-fill btn btn-lg color-primary" onClick={switchAddModal}></i>
+            <i className="bi bi-plus-circle-fill btn btn-lg color-primary plus-button-md" onClick={switchAddModal}></i>
         </div>
         <Modal show={showAddModal} onHide={() => switchAddModal()} className="color-warning text-black">
             <Modal.Header closeButton>
