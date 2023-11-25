@@ -316,7 +316,7 @@ function EditCourseClassPage(props) {
 
     if(!terms || terms.length < 1 || !buildings || buildings.length < 1)
         return (
-        <Alert variant="danger" className="text-center m-5">
+        <Alert variant="primary" className="text-center m-5">
             {
                 (!buildings || buildings.length < 1) &&
                 <div className="mt-4 mb-3">
