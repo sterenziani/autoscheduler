@@ -114,6 +114,7 @@
         "deleteBuilding": "Deleting building",
         "deleteTerm": "Deleting term",
         "addCourse": "Adding course",
+        "creditsEarned":"Credits awarded:",
         "creditsRequired":"Required credits:",
         "creditsRequiredHint":"If you want this course to only be suggested to students once they have earned a certain amount of credits, you can set it here.\n\nIf students can sign up for this course just by completing its required courses for this program, with no credits threshold, you may ignore this field.",
         "areYouSureCourse": "Are you sure you want to delete course '{{code}} - {{name}}'?",

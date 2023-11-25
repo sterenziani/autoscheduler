@@ -114,6 +114,7 @@
         "deleteBuilding": "Eliminando sede",
         "deleteTerm": "Eliminando período",
         "addCourse": "Añadiendo materia",
+        "creditsEarned":"Créditos otorgados:",
         "creditsRequired":"Créditos requeridos:",
         "creditsRequiredHint":"Si desea que esta materia sólo sea recomendada a sus estudiantes una vez que hayan aprobado una cierta cantidad de créditos, puede especificarla aquí.\n\nSi los estudiantes pueden inscribirse a la misma sólo con aprobar las materias correlativas, sin importar sus créditos totales, ignore este campo.",
         "areYouSureCourse": "¿Seguro que desea eliminar la materia '{{code}} - {{name}}'?",

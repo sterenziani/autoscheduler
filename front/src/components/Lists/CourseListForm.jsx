@@ -119,6 +119,21 @@ function CourseListForm(props) {
                     />
                 }
                 {
+                    courseToAdd && editCreditRequirements &&
+                    <div>
+                        <Form.Group controlId="requirement" className="row mx-auto form-row">
+                            <Col className="col-6 text-end my-auto text-break">
+                                <Form.Label className="col text-end my-auto">
+                                    <h6 className="my-0">{t('modal.creditsEarned')}</h6>
+                                </Form.Label>
+                            </Col>
+                            <Col className="col-4 my-auto">
+                                <p className="my-auto mx-2 text-primary">{courseToAdd.creditValue}</p>
+                            </Col>
+                        </Form.Group>
+                    </div>
+                }
+                {
                     editCreditRequirements &&
                     <div>
                         <Form.Group controlId="requirement" className="row mx-auto form-row">
