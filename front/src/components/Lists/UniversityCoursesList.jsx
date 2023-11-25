@@ -22,6 +22,8 @@ function StudentCoursesList(props){
     const [page, setPage] = useState(1)
     const [filter, setFilter] = useState()
 
+    const MIN_DISPLAYED_COURSE_AMOUNT_FOR_SEARCH_ACTIVATION = 5
+
     useEffect(() => {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
@@ -82,19 +84,22 @@ function StudentCoursesList(props){
         return <ErrorMessage status={error}/>
     return (
         <React.Fragment>
-            <div className="pt-5 px-5">
-                <Form className="d-flex" onSubmit={filterList}>
-                    <Form.Control
-                      type="search"
-                      name="textFilter"
-                      placeholder={t("search.search")}
-                      className="me-2"
-                      aria-label="Search"
-                    />
-                    <Button variant="outline-secondary" type="submit">{t("search.submit")}</Button>
-                </Form>
-                { filter && <p className="pt-2">{t("search.showingResultsFor", {searchTerm:filter})}</p> }
-            </div>
+            {
+                courses && (courses.length > MIN_DISPLAYED_COURSE_AMOUNT_FOR_SEARCH_ACTIVATION || (paginationLinks && paginationLinks.last > 1)) &&
+                <div className="pt-5 px-5">
+                    <Form className="d-flex" onSubmit={filterList}>
+                        <Form.Control
+                          type="search"
+                          name="textFilter"
+                          placeholder={t("search.search")}
+                          className="me-2"
+                          aria-label="Search"
+                        />
+                        <Button variant="outline-secondary" type="submit">{t("search.submit")}</Button>
+                    </Form>
+                    { filter && <p className="pt-2">{t("search.showingResultsFor", {searchTerm:filter})}</p> }
+                </div>
+            }
             <CourseList key="course-list" reloadCourses={() => loadCourses(page)} courses={courses}/>
             <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
