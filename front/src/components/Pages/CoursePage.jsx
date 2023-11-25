@@ -119,7 +119,7 @@ function CoursePage(props) {
                                 {selectedProgram &&
                                     <>
                                         <CourseRequirementsList course={course} program={selectedProgram}/>
-                                        <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit'} textKey="edit"/>
+                                        <LinkButton className="my-3" variant="secondary" href={'/courses/' + course.id + '/edit?program='+selectedProgram.id} textKey="edit"/>
                                     </>
                                 }
                             </>

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Row, Button, Form, Spinner } from 'react-bootstrap';
@@ -11,7 +11,7 @@ import * as Yup from 'yup';
 import FormInputField from '../Common/FormInputField';
 import FormInputLabel from '../Common/FormInputLabel';
 import CourseListForm from '../Lists/CourseListForm';
-import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
+import { OK, NOT_FOUND, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
@@ -34,6 +34,7 @@ function EditCoursePage(props) {
     })
 
     const navigate = useNavigate()
+    const search = useLocation().search
     const {t} = useTranslation()
     const {id} = useParams()
 
@@ -47,6 +48,8 @@ function EditCoursePage(props) {
 
     const [selectedProgram, setSelectedProgram] = useState()
     const [coursesOfSelectedProgram, setCoursesOfSelectedProgram] = useState()
+    const [requestedProgram, setRequestedProgram] = useState()
+    const [paramsProcessed, setParamsProcessed] = useState(false)
 
     useEffect(() => {
         if(!user)
@@ -95,6 +98,36 @@ function EditCoursePage(props) {
         if(requirements && programs && (!selectedProgram || coursesOfSelectedProgram))
             setLoading(false)
     },[requirements, coursesOfSelectedProgram, programs, selectedProgram])
+
+    useEffect( () => {
+        if(!requestedProgram && course && requirements){
+            const params = new URLSearchParams(search)
+            const request = params.get('program')
+            if(!request){
+                setParamsProcessed(true)
+                return
+            }
+
+            ApiService.getProgram(request).then((resp) => {
+                if(resp && resp.status && resp.status === NOT_FOUND){
+                    setParamsProcessed(true)
+                    return
+                }
+                if(resp && resp.status && resp.status !== OK){
+                    setError(resp.status)
+                    setParamsProcessed(true)
+                    return
+                }
+                // Select that program
+                const program = resp.data
+                setRequestedProgram(program)
+                onChangePrograms(program)
+                setParamsProcessed(true)
+                return
+            })
+        }
+    // eslint-disable-next-line
+    },[search, course, requirements, requestedProgram])
 
     const loadRequirements = async(courseId, programId) => {
         ApiService.getRequiredCoursesForProgram(courseId, programId).then((resp) => {
@@ -216,6 +249,7 @@ function EditCoursePage(props) {
         </div>
     if (error && error !== EXISTING_COURSE_ERROR && error !== INVALID_NAME_ERROR)
         return <ErrorMessage status={error}/>
+
     return (
         <React.Fragment>
             <HelmetProvider>
@@ -264,7 +298,7 @@ function EditCoursePage(props) {
                         </Row>
                     }
                     {
-                        (id && programs && programs.length > 0)? [
+                        (id && programs && programs.length > 0 && paramsProcessed)? [
                             <Row key="requirements-group" className='mx-auto form-row text-center'>
                                 <FormInputLabel label="forms.requirements"/>
                                 <div className="col-md-9">
@@ -278,6 +312,7 @@ function EditCoursePage(props) {
                                         getOptionValue={e => e.id}
                                         loadOptions={loadProgramOptions}
                                         onChange={opt => onChangePrograms(opt)}
+                                        defaultValue = {requestedProgram? {value:requestedProgram.id, internalId: requestedProgram.internalId, name: requestedProgram.name}:undefined}
                                     />
                                     {
                                         selectedProgram &&
