@@ -14,7 +14,7 @@ import FormInputField from '../Common/FormInputField';
 import FormInputLabel from '../Common/FormInputLabel';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
-import { DAYS, DEFAULT_DATE } from "../../resources/SystemConstants";
+import { DAYS, DEFAULT_DATE, DEFAULT_DATE_2 } from "../../resources/SystemConstants";
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
 
@@ -130,7 +130,8 @@ function EditCourseClassPage(props) {
                 else {
                     if(!id && buildings.length > 0) {
                         const firstLecture = structuredClone(DEFAULT_DATE)
-                        setLectures([{...firstLecture, building: buildings[0]}])
+                        const secondLecture = structuredClone(DEFAULT_DATE_2)
+                        setLectures([{...firstLecture, building: buildings[0]}, {...secondLecture, building: buildings[0]}])
                         await Promise.all([readCourseAndTerm()])
                     }
                     else if(loading)
@@ -442,7 +443,7 @@ function EditCourseClassPage(props) {
                                 ))
                             }
                             <div className="mx-auto align-items-center plus-button-container clickable">
-                                <i className="me-3 bi bi-plus-circle-fill btn btn-lg color-primary" onClick={onClickPlusSign}></i>
+                                <i className="me-3 bi bi-plus-circle-fill btn btn-lg color-primary plus-button-md" onClick={onClickPlusSign}></i>
                             </div>
                         </div>
                     </Form.Group>
