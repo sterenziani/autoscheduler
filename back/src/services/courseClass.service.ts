@@ -39,7 +39,7 @@ export default class CourseClassService {
     }
 
     async modifyCourseClass(id: string, universityIdFilter: string, courseIdFilter?: string, termId?: string, name?: string, internalId?: string): Promise<CourseClass> {
-        return await this.dao.modify(id, universityIdFilter, courseIdFilter, termId, internalId, name);
+        return await this.dao.modify(id, universityIdFilter, courseIdFilter, termId, internalId ?? `${courseIdFilter}-${termId}-${cleanText(name?? "")}`, name);
     }
 
     async deleteCourseClass(id: string, universityIdFilter: string, courseIdFilter?: string): Promise<void> {
