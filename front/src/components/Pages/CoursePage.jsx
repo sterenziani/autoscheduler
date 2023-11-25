@@ -47,7 +47,7 @@ function CoursePage(props) {
                     setError(resp.status)
                     callback([])
                 } else {
-                    if(resp.data.length === 0)
+                    if(inputValue==="" && resp.data.length === 0)
                         setNoProgramsWarning(true)
                     callback(resp.data)
                 }
