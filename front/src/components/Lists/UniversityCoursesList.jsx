@@ -85,7 +85,7 @@ function StudentCoursesList(props){
     return (
         <React.Fragment>
             {
-                courses && (courses.length > MIN_DISPLAYED_COURSE_AMOUNT_FOR_SEARCH_ACTIVATION || (paginationLinks && paginationLinks.last > 1)) &&
+                courses && (courses.length > MIN_DISPLAYED_COURSE_AMOUNT_FOR_SEARCH_ACTIVATION || (paginationLinks && paginationLinks.last > 1 || filter)) &&
                 <div className="pt-5 px-5">
                     <Form className="d-flex" onSubmit={filterList}>
                         <Form.Control
