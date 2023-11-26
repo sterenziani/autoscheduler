@@ -44,7 +44,7 @@ function HomePageUniversity(props) {
                     {t('home.getVerified', { email: CONTACT_EMAIL, universityName: props.user.name })}
                 </Alert>
             )}
-            <div className="container my-5">
+            <div className="container my-5 pb-5">
                 <Tabs className="borderless-tabs" aria-label="home-tabs" defaultActiveKey={startingTab} activeKey={activeTab} onSelect={(k) => navigate("?tab="+k)} fill>
                     <Tab
                         className="text-center" eventKey="buildings"

@@ -23,7 +23,7 @@ function HomePageAdmin(props) {
                 <Helmet><title>AutoScheduler</title></Helmet>
             </HelmetProvider>
             {props.user && (
-                <div className="container my-5 text-center bg-primary rounded">
+                <div className="container my-5 text-center bg-primary rounded pb-5">
                     <Form className="pt-5 px-5 pb-3" onSubmit={handleSubmit}>
                         <Form.Control
                             type='text'

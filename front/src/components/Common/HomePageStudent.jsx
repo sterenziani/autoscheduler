@@ -57,7 +57,7 @@ function HomePageStudent(props) {
                 <Helmet><title>{t("search.search") +" - AutoScheduler"}</title></Helmet>
             </HelmetProvider>
 
-            <div className="container mt-5">
+            <div className="container mt-5 pb-5">
                 <Tabs className="borderless-tabs" defaultActiveKey="schedule_form" fill>
                     <Tab className="text-center" eventKey="finished_courses" title={t('tabs.courseLog')} id="finished_courses">
                         <div className="bg-primary rounded-bottom"><StudentCourseLog student={student}/></div>
