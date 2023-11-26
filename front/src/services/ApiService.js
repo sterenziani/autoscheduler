@@ -1,5 +1,5 @@
 import { CREATED, OK, NO_CONTENT, INTERNAL_ERROR, TIMEOUT, TIMEOUT_ERROR, CONNECTION_ERROR, SERVICE_UNAVAILABLE } from '../resources/ApiConstants';
-import { DAYS } from '../resources/SystemConstants';
+import { DAYS, EXTRA_SUPPORTED, SUPPORTED_LOWER_LIMIT, SUPPORTED_UPPER_LIMIT, UPPER_CASE_LOWER_LIMIT, UPPER_CASE_UPPER_LIMIT } from '../resources/SystemConstants';
 import api from './api'
 import AuthService from './AuthService'
 const MULTI_PAGE_SEARCH_LIMIT = 20;
@@ -218,11 +218,25 @@ const getIdFromURL = (url, universityEndpoint) => {
 }
 
 const cleanInputText = (inputText) => {
-    inputText = inputText.replace('´', '')
-    inputText = inputText.replace('¨', '')
-    inputText = inputText.replace('^', '')
-    inputText = inputText.replace('``', '')
+    const foundInvalidCharacters = new Set()
+    for (const c of inputText) {
+        if(!isValidCharacter(c))
+            foundInvalidCharacters.add(c)
+    }
+
+    // Ignore all non-supported characters
+    for(const c of foundInvalidCharacters)
+        inputText = inputText.replace(c, '')
     return inputText
+}
+
+const isValidCharacter = (c) => {
+    const charCode = c.charCodeAt(0)
+    if(charCode >= SUPPORTED_LOWER_LIMIT && charCode <= SUPPORTED_UPPER_LIMIT)
+        return true
+    if(EXTRA_SUPPORTED.includes(charCode))
+        return true
+    return false
 }
 
 //////////////////////////////////////////////////////////////////////////////
