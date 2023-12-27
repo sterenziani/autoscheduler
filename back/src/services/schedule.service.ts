@@ -12,8 +12,12 @@ import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
 import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
 
+const SECOND_IN_MS = 1000;
 const MINUTE_IN_MS = 60000;
 const TARGET_HOUR_EXCEED_RATE_LIMIT = 1.25;
+const SHUFFLE_FIXED_INDEXES = 3;
+const MAX_COURSE_COMBOS_TO_PROCESS = 500000;
+const MAX_MS_DEADLINE_TO_PROCESS = 5*SECOND_IN_MS;
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -49,7 +53,8 @@ export default class ScheduleService {
         reduceDays: boolean,
         prioritizeUnlocks: boolean,
         unavailableTimeSlots: TimeRange[],
-        amountToReturn: number=10
+        amountToReturn: number=10,
+        randomizeCourses: boolean=false
     ): Promise<IScheduleWithScore[]> {
         /*
         const startTimestamp = new Date();
@@ -61,8 +66,8 @@ export default class ScheduleService {
         // STEP 5 - Remove courseClasses that fall inside unavailableTimeSlots (done inside getCourseClassCombinations)
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
-        const deadline = new Date(Date.now() + MINUTE_IN_MS);
-        const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, deadline);
+        const deadline = new Date(Date.now() + MAX_MS_DEADLINE_TO_PROCESS);
+        const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, deadline, MAX_COURSE_COMBOS_TO_PROCESS, randomizeCourses);
 
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
@@ -92,6 +97,7 @@ export default class ScheduleService {
         return true;
     }
 
+    // Returns map of courseClasses that don't overlap unavailableTimeSlots
     private getViableCourseClassesMap(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[]): Map<string, string[]> {
         const viableCourseClassesMap: Map<string, string[]> = new Map<string, string[]>();
         for(const courseId of inputData.courses.keys()) {
@@ -142,14 +148,22 @@ export default class ScheduleService {
     // Since getting all combinations takes too long, the following sacrifices have been made:
     // -- When deadline is passed, the function will return all valid combinations found so far
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
-    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date): CourseClass[][] {
+    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date, combinationLimit: number, randomizeCourses: boolean): CourseClass[][] {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
-        let index = 0;
+        if(randomizeCourses){
+            for (let i = viableCourseClassesArray.length-1; i > SHUFFLE_FIXED_INDEXES; i--) {
+                const j = SHUFFLE_FIXED_INDEXES + Math.floor(Math.random() * (i + 1 - SHUFFLE_FIXED_INDEXES+1));
+                [viableCourseClassesArray[i], viableCourseClassesArray[j]] = [viableCourseClassesArray[j], viableCourseClassesArray[i]];
+            }
+        }
+
         let validCombos: CourseClass[][] = [];
         let validCombosOptionalCredits: number[] = []; // Each index contains the amount of optioanl course credits earned from the combination in the same index on validCombos
 
         // Start from most important course (at the end of array) and work our way to less important ones
-        while(index < viableCourseClassesArray.length  && new Date() < deadline) {
+        const startLoop = new Date().getTime()
+        let index = 0;
+        while(index < viableCourseClassesArray.length && new Date() < deadline && validCombos.length < combinationLimit) {
             // Calculate this course's impact on proposed combinations' optionalCourseCredits
             const courseId = inputData.courseOfCourseClass.get(viableCourseClassesArray[index][0].id);
             if(!courseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
@@ -157,9 +171,9 @@ export default class ScheduleService {
             if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             const courseOptionalCredits = inputData.optionalCourseIds.includes(courseId)? course.creditValue : 0;
 
-            /*
-            console.log("\tConsidering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
-            */
+
+            console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs of offset, have seen " +validCombos.length +" schedules so far. Considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
+
 
             const newValidCombos: CourseClass[][] = [];
             const newValidCombosOptionalCredits: number[] = [];
@@ -193,7 +207,7 @@ export default class ScheduleService {
                     }
                     const weeklyHours = weeklyMinutes/60;
 
-                    if(weeklyHours <= targetHours*1.25 && this.isClassCombinationValid(combinationProposal, inputData)){
+                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && this.isClassCombinationValid(combinationProposal, inputData)){
                         newValidCombos.push(combinationProposal);
                         newValidCombosOptionalCredits.push(comboOptionalCredits + courseOptionalCredits);
                     }
@@ -210,6 +224,7 @@ export default class ScheduleService {
         return validCombos;
     }
 
+    // Checks for lecture overlaps and building distances
     private isClassCombinationValid(courseClasses: CourseClass[], inputData: IScheduleInputData): boolean {
         for(let i=0; i < courseClasses.length-1; i++){
             for(let j=i+1; j < courseClasses.length; j++){

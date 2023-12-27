@@ -8,8 +8,8 @@ export interface IScheduleInputData {
     courseClasses: Map<string, CourseClass>,            // Course classes of the given courses, that happen in the given term
     lectures: Map<string, Lecture>,                     // Lectures of the given course classes
 
-    mandatoryCourseIds: string[],                       // Of the given courses, which are mandatory
-    optionalCourseIds: string[],                        // Of the given courses, which are optional
+    mandatoryCourseIds: string[],                       // Of the given courses, which are mandatory. Sorted by importance
+    optionalCourseIds: string[],                        // Of the given courses, which are optional. Sorted by importance
 
     indirectCorrelativesAmount: Map<string, number>,    // courseId -> number
     weeklyClassTimeInMinutes: Map<string, number>,      // courseClassId -> number
