@@ -45,7 +45,8 @@ export default class DatabaseScheduleDao extends ScheduleDao {
                 'OPTIONAL MATCH (fc)<-[:REQUIRES* {programId: $programId}]-(rq:Course) ' +
                 'WITH fc, r, completedCourses, completedCredits, count(rq) AS ica ' +
                 'WHERE NOT fc IN completedCourses AND NOT EXISTS {(fc)-[:REQUIRES]->(req) WHERE NOT req IN completedCourses} AND r.requiredCredits <= completedCredits ' +
-                'RETURN {properties: fc{.*, optional:r.optional, indirectCorrelativesAmount:ica}}',
+                'RETURN {properties: fc{.*, optional:r.optional, indirectCorrelativesAmount:ica}}' +
+                'ORDER BY r.optional, ica DESC, fc.creditValue DESC',
                 {programId, studentId}
             );
             const courseInfo = this.parseCourses(coursesResult);

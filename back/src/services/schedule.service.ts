@@ -116,24 +116,7 @@ export default class ScheduleService {
     // Returned groups of classes will be sorted by their course's correlatives in increasing order
     private getSortedViableCourseClassesArray(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[]): CourseClass[][] {
         const viableCourseClassesMap: Map<string, string[]> = this.getViableCourseClassesMap(inputData, unavailableTimeSlots);
-        const viableCourseIds: string[] = Array.from(viableCourseClassesMap.keys());
-
-        // Sort course IDs by their importance (in case of a draw, mandatory courses take proirity)
-        const mandatoryIds = inputData.mandatoryCourseIds;
-        const importance = inputData.indirectCorrelativesAmount;
-
-        viableCourseIds.sort((c1,c2) => {
-            const importance1 = importance.get(c1);
-            const importance2 = importance.get(c2);
-            if(importance1 == importance2) {
-                if(mandatoryIds.includes(c1) && !mandatoryIds.includes(c2)) return 1;
-                if(!mandatoryIds.includes(c1) && mandatoryIds.includes(c2)) return -1;
-                return 0;
-            }
-            if(importance1 === undefined || importance2 === undefined)
-                throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-            return importance1-importance2;
-        });
+        const viableCourseIds: string[] = inputData.mandatoryCourseIds.concat(inputData.optionalCourseIds);
 
         // Most important (or mandatory) courses go at the end of the array to ensure they're processed first in case of timeout
         const viableCourseClassesArray: CourseClass[][] = [];
@@ -161,12 +144,12 @@ export default class ScheduleService {
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
     private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date): CourseClass[][] {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
-        let index = viableCourseClassesArray.length-1;
+        let index = 0;
         let validCombos: CourseClass[][] = [];
         let validCombosOptionalCredits: number[] = []; // Each index contains the amount of optioanl course credits earned from the combination in the same index on validCombos
 
         // Start from most important course (at the end of array) and work our way to less important ones
-        while(index >= 0 && new Date() < deadline) {
+        while(index < viableCourseClassesArray.length  && new Date() < deadline) {
             // Calculate this course's impact on proposed combinations' optionalCourseCredits
             const courseId = inputData.courseOfCourseClass.get(viableCourseClassesArray[index][0].id);
             if(!courseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
@@ -221,7 +204,7 @@ export default class ScheduleService {
             // This is done outside the loop to avoid growing validCombos and iterating forever
             validCombos = validCombos.concat(newValidCombos);
             validCombosOptionalCredits = validCombosOptionalCredits.concat(newValidCombosOptionalCredits);
-            index -= 1;
+            index += 1;
         }
 
         return validCombos;
