@@ -87,7 +87,7 @@ export default class ScheduleService {
                 schedules.push({schedule: schedule, score: score});
         }
 
-        //console.log("Processed " +courseClassCombinations.length +"schedules (filtered down to " +shedules.length +") in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
+        //console.log("Processed " +courseClassCombinations.length +" schedules (filtered down to " +schedules.length +") in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
 
         // STEP 10 - Return sorted list of schedules by score
         return schedules.sort((a, b) =>  b.score-a.score).slice(0, amountToReturn);
