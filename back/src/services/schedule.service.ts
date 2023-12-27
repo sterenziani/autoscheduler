@@ -16,7 +16,7 @@ const SECOND_IN_MS = 1000;
 const MINUTE_IN_MS = 60000;
 const TARGET_HOUR_EXCEED_RATE_LIMIT = 1.25;
 const SHUFFLE_FIXED_INDEXES = 3;
-const MAX_COURSE_COMBOS_TO_PROCESS = 500000;
+const MAX_COURSE_COMBOS_TO_PROCESS = 1000000;
 const MAX_MS_DEADLINE_TO_PROCESS = 5*SECOND_IN_MS;
 
 export default class ScheduleService {
@@ -56,9 +56,7 @@ export default class ScheduleService {
         amountToReturn: number=10,
         randomizeCourses: boolean=false
     ): Promise<IScheduleWithScore[]> {
-        /*
         const startTimestamp = new Date();
-        */
 
         // STEPS 1-4 - Get all information needed
         const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId);
@@ -72,17 +70,24 @@ export default class ScheduleService {
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
         const schedules = [];
-        for(const combo of courseClassCombinations){
+        let lowestScore;
+
+        // Iterate backwards to process schedules with more courses (likely better score) first
+        for(let i=courseClassCombinations.length-1; i >= 0; i--){
+            const combo = courseClassCombinations[i];
             const schedule = this.createSchedule(combo, inputData);
             const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks);
-            schedules.push({schedule: schedule, score: score});
+
+            // lowestScore gets updated if we still don't have enough elements
+            if(!lowestScore || (schedules.length < amountToReturn && score < lowestScore))
+                lowestScore = score;
+
+            // If we don't have enough elements yet, or the score is better than the worst in the collection, add it
+            if(schedules.length < amountToReturn || score > lowestScore)
+                schedules.push({schedule: schedule, score: score});
         }
 
-        /*
-        const endTimestamp = new Date();
-        const secondsElapsed = (endTimestamp.getTime()-startTimestamp.getTime())/1000;
-        console.log("Processed " +courseClassCombinations.length +" in " +secondsElapsed +" seconds.\n");
-        */
+        //console.log("Processed " +courseClassCombinations.length +"schedules (filtered down to " +shedules.length +") in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
 
         // STEP 10 - Return sorted list of schedules by score
         return schedules.sort((a, b) =>  b.score-a.score).slice(0, amountToReturn);
@@ -173,7 +178,7 @@ export default class ScheduleService {
             const courseOptionalCredits = inputData.optionalCourseIds.includes(courseId)? course.creditValue : 0;
 
 
-            console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs of offset, have seen " +validCombos.length +" schedules so far. Considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
+            //console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs into loop, have processed " +validCombos.length +" combinations so far. Now considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
 
 
             const newValidCombos: CourseClass[][] = [];
@@ -321,8 +326,8 @@ export default class ScheduleService {
                 if (!l) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
                 totalMinutes += l.time.getDurationInMinutes();
                 totalDays.add(l.time.dayOfWeek);
-                if (!earliestLecture || l.time.startTime < earliestLecture) earliestLecture = l.time.startTime;;
-                if (!latestLecture || l.time.endTime > latestLecture) latestLecture = l.time.endTime;
+                if (l.time.startTime < earliestLecture) earliestLecture = l.time.startTime;;
+                if (l.time.endTime > latestLecture) latestLecture = l.time.endTime;
             }
         }
 
