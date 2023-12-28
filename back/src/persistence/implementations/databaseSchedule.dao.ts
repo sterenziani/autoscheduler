@@ -80,6 +80,26 @@ export default class DatabaseScheduleDao extends ScheduleDao {
             );
             const distanceMap = this.parseDistanceMap(distancesResult);
 
+            const combinations = await session.run(
+                'WITH $courseIds AS courseIds '+
+                'UNWIND courseIds AS courseId '+
+                'MATCH (c:Course {id: courseId})<-[:OF]-(cc:CourseClass)-[:HAPPENS_IN]->(:Term {id: $termId}) '+
+                'MATCH (cc)<-[:OF]-(l: Lecture) '+
+                'WITH cc, c, c.id AS cId, sum(duration.between(l.startTime, l.endTime)) AS duration, courseIds '+
+                'MATCH (cc)-[:HAPPENS_IN]->(t)<-[:HAPPENS_IN]-(cc2:CourseClass)-[:OF]->(c2:Course) '+
+                '   WHERE c2.id IN courseIds AND cId <> c2.id AND cc.id < cc2.id '+
+                'WITH c, c2, cc, cc2 '+
+                'MATCH (b:Building)<-[:TAKES_PLACE_IN]-(l:Lecture)-[:OF]->(cc) '+
+                'MATCH (b)-[d:DISTANCE_TO]->(b2:Building)<-[:TAKES_PLACE_IN]-(l2:Lecture)-[:OF]->(cc2) '+
+                '    WHERE (l.dayOfWeek = l2.dayOfWeek AND apoc.coll.max([l.startTime, l2.startTime]) < apoc.coll.min([l.endTime, l2.endTime])) '+
+                '    OR (l.dayOfWeek = l2.dayOfWeek AND l.endTime <= l2.startTime AND duration.inSeconds(l.endTime, l2.startTime).minutes < d.distance) '+
+                '    OR (l.dayOfWeek = l2.dayOfWeek AND l2.endTime <= l.startTime AND duration.inSeconds(l2.endTime, l.startTime).minutes < d.distance) '+
+                'RETURN DISTINCT {properties: {ccId1: cc.id, ccId2: cc2.id}}',
+                {courseIds, termId}
+            );
+            const incompatibilityCache = this.parseIdPairs(combinations)
+            console.log(incompatibilityCache)
+
             // We generate return object based on queried data
             return {
                 courses: courseInfo.courses,
@@ -94,8 +114,9 @@ export default class DatabaseScheduleDao extends ScheduleDao {
                 lecturesOfCourseClass: lectureInfo.lecturesOfCourseClass,
                 lectureBuilding: lectureInfo.lectureBuilding,
                 distances: distanceMap,
-                remainingOptionalCredits: remainingOptionalCredits
-            }
+                remainingOptionalCredits: remainingOptionalCredits,
+                incompatibilityCache: incompatibilityCache
+            };
         } catch (err) {
             throw parseErrors(err, '[ScheduleDao:getScheduleInfo]');
         } finally {
@@ -180,5 +201,17 @@ export default class DatabaseScheduleDao extends ScheduleDao {
             distanceMap.get(fromId)!.set(toId, distance);
         }
         return distanceMap;
+    }
+
+    private parseIdPairs(result: QueryResult<RecordShape>): Map<string, Set<string>> {
+        const nodes = getNodes(result);
+        const pairMap: Map<string, Set<string>> = new Map();
+        for (const node of nodes) {
+            const fromId = node.ccId1;
+            const toId = node.ccId2;
+            if (pairMap.get(fromId) === undefined) pairMap.set(fromId, new Set());
+            pairMap.get(fromId)!.add(toId);
+        }
+        return pairMap;
     }
 }
