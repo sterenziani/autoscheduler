@@ -158,7 +158,10 @@ export default class ScheduleService {
     // -- When deadline is passed, the function will return all valid combinations found so far
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
     private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date, combinationLimit: number, randomizeCourses: boolean): CourseClass[][] {
+        let startLoop = new Date().getTime()
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
+        console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs to build array");
+
         if(randomizeCourses){
             for (let i = viableCourseClassesArray.length-1; i > SHUFFLE_FIXED_INDEXES; i--) {
                 const j = SHUFFLE_FIXED_INDEXES + Math.floor(Math.random() * (i + 1 - SHUFFLE_FIXED_INDEXES+1));
@@ -170,7 +173,7 @@ export default class ScheduleService {
         let validCombosOptionalCredits: number[] = []; // Each index contains the amount of optioanl course credits earned from the combination in the same index on validCombos
 
         // Start from most important course (at the end of array) and work our way to less important ones
-        const startLoop = new Date().getTime()
+        startLoop = new Date().getTime()
         let index = 0;
         const initialFreemem = os.freemem()
         while(index < viableCourseClassesArray.length && new Date() < deadline && validCombos.length < combinationLimit) {
@@ -233,6 +236,7 @@ export default class ScheduleService {
 
         console.log("MB occupied: " +((initialFreemem-os.freemem())/1024/1024))
         console.log(process.memoryUsage())
+        console.log(process.cpuUsage())
         return validCombos;
     }
 
@@ -262,13 +266,13 @@ export default class ScheduleService {
             const classImportance = inputData.indirectCorrelativesAmount.get(courseId);
             if(classImportance === undefined) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             totalImportance += classImportance;
+            totalMinutes += inputData.weeklyClassTimeInMinutes.get(cc.id)?? 0;
 
             if(inputData.mandatoryCourseIds.includes(courseId)) amountOfMandatoryCourses++;
 
             for(const lectureId of lectures){
                 const l = inputData.lectures.get(lectureId);
                 if (!l) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-                totalMinutes += l.time.getDurationInMinutes();
                 totalDays.add(l.time.dayOfWeek);
                 if (l.time.startTime < earliestLecture) earliestLecture = l.time.startTime;;
                 if (l.time.endTime > latestLecture) latestLecture = l.time.endTime;
