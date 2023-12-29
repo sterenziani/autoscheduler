@@ -18,6 +18,7 @@ const TARGET_HOUR_EXCEED_RATE_LIMIT = 1.25;
 const SHUFFLE_FIXED_INDEXES = 3;
 const MAX_COURSE_COMBOS_TO_PROCESS = 10000000;
 const MAX_MS_DEADLINE_TO_PROCESS = 50*SECOND_IN_MS;
+const os = require('os');
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -171,6 +172,7 @@ export default class ScheduleService {
         // Start from most important course (at the end of array) and work our way to less important ones
         const startLoop = new Date().getTime()
         let index = 0;
+        const initialFreemem = os.freemem()
         while(index < viableCourseClassesArray.length && new Date() < deadline && validCombos.length < combinationLimit) {
             // Calculate this course's impact on proposed combinations' optionalCourseCredits
             const courseId = inputData.courseOfCourseClass.get(viableCourseClassesArray[index][0].id);
@@ -229,6 +231,8 @@ export default class ScheduleService {
             index += 1;
         }
 
+        console.log("MB occupied: " +((initialFreemem-os.freemem())/1024/1024))
+        console.log(process.memoryUsage())
         return validCombos;
     }
 
