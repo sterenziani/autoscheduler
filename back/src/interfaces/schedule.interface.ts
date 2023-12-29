@@ -2,14 +2,15 @@ import Time from '../helpers/classes/time.class';
 import Course from '../models/abstract/course.model';
 import Lecture from '../models/abstract/lecture.model';
 import CourseClass from '../models/abstract/courseClass.model';
+import { DAY } from '../constants/time.constants';
 
 export interface IScheduleInputData {
     courses: Map<string, Course>,                       // Courses that belong to program that student has enabled (aka not completed and fulfilled requirements)
     courseClasses: Map<string, CourseClass>,            // Course classes of the given courses, that happen in the given term
     lectures: Map<string, Lecture>,                     // Lectures of the given course classes
 
-    mandatoryCourseIds: string[],                       // Of the given courses, which are mandatory. Sorted by importance
-    optionalCourseIds: string[],                        // Of the given courses, which are optional. Sorted by importance
+    mandatoryCourseIds: Set<string>,                    // Of the given courses, which are mandatory. Sorted by importance
+    optionalCourseIds: Set<string>,                     // Of the given courses, which are optional. Sorted by importance
 
     indirectCorrelativesAmount: Map<string, number>,    // courseId -> number
     weeklyClassTimeInMinutes: Map<string, number>,      // courseClassId -> number
@@ -24,14 +25,24 @@ export interface IScheduleInputData {
     remainingOptionalCredits: number                    // Remaining optional course credits needed to graduate
 }
 
-export interface ISchedule {
-    courseClasses: CourseClass[];
+export interface IScheduleData {
     totalHours: number;
     totalDays: number;
     totalImportance: number;
     mandatoryRate: number;
     earliestLecture: Time;
     latestLecture: Time;
+}
+
+export type ISchedule = {courseClasses: CourseClass[];} & IScheduleData;
+
+export interface IScheduleDataCache {
+    courseClassIds: Set<string>;
+    courseIds: Set<string>;
+    totalMinutes: number;
+    totalDays: Set<DAY>;
+    optionalCourses: number;
+    totalImportance: number,
 }
 
 export interface IScheduleWithScore {

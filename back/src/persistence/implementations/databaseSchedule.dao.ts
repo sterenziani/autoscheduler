@@ -23,6 +23,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
     };
 
     async init(): Promise<void> {
+        // Fill with init methods
     }
 
     async getScheduleInfo(universityId: string, programId: string, termId: string, studentId: string): Promise<IScheduleInputData> {
@@ -103,16 +104,16 @@ export default class DatabaseScheduleDao extends ScheduleDao {
         }
     }
 
-    private parseCourses(result: QueryResult<RecordShape>): {courses: Map<string,Course>, mandatoryCourseIds: string[], optionalCourseIds: string[], indirectCorrelativesAmount: Map<string, number>,} {
+    private parseCourses(result: QueryResult<RecordShape>): {courses: Map<string,Course>, mandatoryCourseIds: Set<string>, optionalCourseIds: Set<string>, indirectCorrelativesAmount: Map<string, number>,} {
         const nodes = getNodes(result);
         const courses: Map<string, Course> = new Map();
-        const mandatoryCourseIds: string[] = [];
-        const optionalCourseIds: string[] = [];
+        const mandatoryCourseIds: Set<string> = new Set();
+        const optionalCourseIds: Set<string> = new Set();
         const indirectCorrelativesAmount: Map<string, number> = new Map();
         for (const node of nodes) {
             const course = new DatabaseCourse(node.id, deglobalizeField(node.internalId), decodeText(node.name, node.encoding), node.creditValue);
             courses.set(course.id, course);
-            (node.optional ? optionalCourseIds : mandatoryCourseIds).push(course.id);
+            (node.optional ? optionalCourseIds : mandatoryCourseIds).add(course.id);
             indirectCorrelativesAmount.set(course.id, node.indirectCorrelativesAmount);
         }
         return {
