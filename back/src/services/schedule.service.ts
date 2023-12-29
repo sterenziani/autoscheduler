@@ -332,11 +332,11 @@ export default class ScheduleService {
         const courseId = inputData.courseOfCourseClass.get(courseClassId);
         const lectures = inputData.lecturesOfCourseClass.get(courseClassId);
         const weeklyClassTimeInMinutes = inputData.weeklyClassTimeInMinutes.get(courseClassId);
-        if(!courseId || !lectures || !weeklyClassTimeInMinutes) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+        if(courseId === undefined || lectures === undefined || weeklyClassTimeInMinutes === undefined) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
 
         const isOptional = inputData.optionalCourseIds.has(courseId);
         const courseImportance = inputData.indirectCorrelativesAmount.get(courseId);
-        if (!isOptional || !courseImportance) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+        if (courseImportance === undefined) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
 
         const totalDays = new Set<DAY>(scheduleDataCache.totalDays);
         for (const lectureId of lectures) {
