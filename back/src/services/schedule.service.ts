@@ -16,8 +16,9 @@ const SECOND_IN_MS = 1000;
 const MINUTE_IN_MS = 60000;
 const TARGET_HOUR_EXCEED_RATE_LIMIT = 1.25;
 const SHUFFLE_FIXED_INDEXES = 3;
-const MAX_COURSE_COMBOS_TO_PROCESS = 1000000;
-const MAX_MS_DEADLINE_TO_PROCESS = 5*SECOND_IN_MS;
+const MAX_COURSE_COMBOS_TO_PROCESS = 10000000;
+const MAX_MS_DEADLINE_TO_PROCESS = 50*SECOND_IN_MS;
+const os = require('os');
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -66,6 +67,8 @@ export default class ScheduleService {
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         const deadline = new Date(Date.now() + MAX_MS_DEADLINE_TO_PROCESS);
         const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, deadline, MAX_COURSE_COMBOS_TO_PROCESS, randomizeCourses);
+
+        //console.log("Got combos in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
 
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
@@ -155,6 +158,7 @@ export default class ScheduleService {
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
     private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date, combinationLimit: number, randomizeCourses: boolean): CourseClass[][] {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
+
         if(randomizeCourses){
             for (let i = viableCourseClassesArray.length-1; i > SHUFFLE_FIXED_INDEXES; i--) {
                 const j = SHUFFLE_FIXED_INDEXES + Math.floor(Math.random() * (i + 1 - SHUFFLE_FIXED_INDEXES+1));
@@ -166,7 +170,6 @@ export default class ScheduleService {
         let validCombosOptionalCredits: number[] = []; // Each index contains the amount of optioanl course credits earned from the combination in the same index on validCombos
 
         // Start from most important course (at the end of array) and work our way to less important ones
-        const ccCompatibleCache: Map<string, Map<string, boolean>> = new Map();
         const startLoop = new Date().getTime()
         let index = 0;
         while(index < viableCourseClassesArray.length && new Date() < deadline && validCombos.length < combinationLimit) {
@@ -204,7 +207,6 @@ export default class ScheduleService {
                         return validCombos.concat(newValidCombos);
 
                     const combinationProposal = [cc, ...combo];
-                    const combinationProposalCredits = comboOptionalCredits + courseOptionalCredits
                     let weeklyMinutes = 0;
                     for(const courseClass of combinationProposal) {
                         const classDuration = inputData.weeklyClassTimeInMinutes.get(courseClass.id);
@@ -213,7 +215,7 @@ export default class ScheduleService {
                     }
                     const weeklyHours = weeklyMinutes/60;
 
-                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && this.isClassCombinationValid(combinationProposal, inputData, ccCompatibleCache)){
+                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && this.isClassCombinationValid(combo, cc.id, inputData.incompatibilityCache)){
                         newValidCombos.push(combinationProposal);
                         newValidCombosOptionalCredits.push(comboOptionalCredits + courseOptionalCredits);
                     }
@@ -230,74 +232,12 @@ export default class ScheduleService {
         return validCombos;
     }
 
-    // To save on memory, alphabetically earliest ID serves as the key
-    private checkClassCompatibilityCache(ccId1: string, ccId2:string, ccCompatibleCache: Map<string, Map<string, boolean>>): boolean|undefined {
-        if(ccId2 < ccId1) [ccId1, ccId2] = [ccId2, ccId1];
-        return ccCompatibleCache.get(ccId1)?.get(ccId2);
-    }
-
-    // To save on memory, alphabetically earliest ID serves as the key
-    private updateClassCompatibilityCache(ccId1: string, ccId2:string, ccCompatibleCache: Map<string, Map<string, boolean>>, value: boolean) {
-        if(ccId2 < ccId1) [ccId1, ccId2] = [ccId2, ccId1];
-
-        if(!ccCompatibleCache.get(ccId1))
-            ccCompatibleCache.set(ccId1, new Map());
-        ccCompatibleCache.get(ccId1)?.set(ccId2, value);
-    }
-
-    // Checks for lecture overlaps and building distances
-    private isClassCombinationValid(courseClasses: CourseClass[], inputData: IScheduleInputData, ccCompatibleCache: Map<string, Map<string, boolean>>): boolean {
-        for(let i=0; i < courseClasses.length-1; i++){
-            for(let j=i+1; j < courseClasses.length; j++){
-                // Check if we already compared these two courses
-                const cache = this.checkClassCompatibilityCache(courseClasses[i].id, courseClasses[j].id, ccCompatibleCache);
-                if(cache == false) return cache;
-                if(cache == true) continue;
-
-                const lectures1 = inputData.lecturesOfCourseClass.get(courseClasses[i].id);
-                const lectures2 = inputData.lecturesOfCourseClass.get(courseClasses[j].id);
-                if(!lectures1 || !lectures2){
-                    this.updateClassCompatibilityCache(courseClasses[i].id, courseClasses[j].id, ccCompatibleCache, false);
-                    return false;
-                }
-
-                for(const lectureId1 of lectures1) {
-                    const l1 = inputData.lectures.get(lectureId1);
-                    if (!l1) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-                    for(const lectureId2 of lectures2) {
-                        const l2 = inputData.lectures.get(lectureId2);
-                        if (!l2) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-
-                        // STEP 7a - Only one courseClass per Course (Guaranteed in steps 5-6)
-                        // STEP 7b - Lectures should not overlap
-                        const gap = l1.time.getGapInMinutesAgainst(l2.time);
-                        if(gap < 0){
-                            this.updateClassCompatibilityCache(courseClasses[i].id, courseClasses[j].id, ccCompatibleCache, false);
-                            return false;
-                        }
-
-                        // STEP 7c - No unavailable time between buildings
-                        const b1 = inputData.lectureBuilding.get(l1.id);
-                        const b2 = inputData.lectureBuilding.get(l2.id);
-                        if(b1 && b2 && b1 !== b2) {
-                            let distancesOfB = inputData.distances.get(b1);
-                            let distance = distancesOfB?.get(b2);
-                            if(!distance){
-                                // Check if reverse relationship is defined
-                                distancesOfB = inputData.distances.get(b2);
-                                distance = distancesOfB?.get(b1);
-                            }
-
-                            if(gap < (distance ?? DEFAULT_DISTANCE)){
-                                this.updateClassCompatibilityCache(courseClasses[i].id, courseClasses[j].id, ccCompatibleCache, false);
-                                return false;
-                            }
-                        }
-                    }
-                }
-                // These two classes are compatible
-                this.updateClassCompatibilityCache(courseClasses[i].id, courseClasses[j].id, ccCompatibleCache, true);
-            }
+    private isClassCombinationValid(courseClasses: CourseClass[], ccIdToAdd: string, cache: Map<string, Set<string>>): boolean {
+        for(let i=0; i < courseClasses.length; i++){
+            let ccId1 = courseClasses[i].id;
+            let ccId2 = ccIdToAdd;
+            if(cache.get(ccId1)?.has(ccId2) || cache.get(ccId2)?.has(ccId1))
+                return false;
         }
         return true;
     }
@@ -318,13 +258,13 @@ export default class ScheduleService {
             const classImportance = inputData.indirectCorrelativesAmount.get(courseId);
             if(classImportance === undefined) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             totalImportance += classImportance;
+            totalMinutes += inputData.weeklyClassTimeInMinutes.get(cc.id)?? 0;
 
             if(inputData.mandatoryCourseIds.includes(courseId)) amountOfMandatoryCourses++;
 
             for(const lectureId of lectures){
                 const l = inputData.lectures.get(lectureId);
                 if (!l) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-                totalMinutes += l.time.getDurationInMinutes();
                 totalDays.add(l.time.dayOfWeek);
                 if (l.time.startTime < earliestLecture) earliestLecture = l.time.startTime;;
                 if (l.time.endTime > latestLecture) latestLecture = l.time.endTime;
