@@ -118,7 +118,7 @@ export default class ScheduleService {
     // Returned groups of classes will be sorted by their course's correlatives in increasing order
     private getSortedViableCourseClassesArray(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[]): CourseClass[][] {
         const viableCourseClassesMap: Map<string, string[]> = this.getViableCourseClassesMap(inputData, unavailableTimeSlots);
-        const viableCourseIds: string[] = inputData.mandatoryCourseIds.concat(inputData.optionalCourseIds);
+        const viableCourseIds: string[] = [...inputData.mandatoryCourseIds].concat([...inputData.optionalCourseIds]);
 
         // Most important (or mandatory) courses go at the end of the array to ensure they're processed first in case of timeout
         const viableCourseClassesArray: CourseClass[][] = [];
@@ -169,7 +169,7 @@ export default class ScheduleService {
             if(!courseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             const course = inputData.courses.get(courseId);
             if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-            const courseOptionalCredits = inputData.optionalCourseIds.includes(courseId)? course.creditValue : 0;
+            const courseOptionalCredits = inputData.optionalCourseIds.has(courseId)? course.creditValue : 0;
 
             //console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs into loop, have processed " +validSchedules.length +" combinations so far. Now considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
 
@@ -221,8 +221,8 @@ export default class ScheduleService {
     }
 
     private isClassCombinationValid(courseClasses: CourseClass[], ccIdToAdd: string, cache: Map<string, Set<string>>): boolean {
-        for(let i=0; i < courseClasses.length; i++){
-            let ccId1 = courseClasses[i].id;
+        for(const cc1 of courseClasses){
+            let ccId1 = cc1.id;
             let ccId2 = ccIdToAdd;
             if(cache.get(ccId1)?.has(ccId2) || cache.get(ccId2)?.has(ccId1))
                 return false;
@@ -248,7 +248,7 @@ export default class ScheduleService {
             totalImportance += classImportance;
             totalMinutes += inputData.weeklyClassTimeInMinutes.get(cc.id)?? 0;
 
-            if(inputData.mandatoryCourseIds.includes(courseId)) amountOfMandatoryCourses++;
+            if(inputData.mandatoryCourseIds.has(courseId)) amountOfMandatoryCourses++;
 
             for(const lectureId of lectures){
                 const l = inputData.lectures.get(lectureId);
