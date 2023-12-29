@@ -215,7 +215,7 @@ export default class ScheduleService {
                     }
                     const weeklyHours = weeklyMinutes/60;
 
-                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && this.isClassCombinationValid(combinationProposal, inputData)){
+                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && this.isClassCombinationValid(combo, cc.id, inputData.incompatibilityCache)){
                         newValidCombos.push(combinationProposal);
                         newValidCombosOptionalCredits.push(comboOptionalCredits + courseOptionalCredits);
                     }
@@ -232,19 +232,12 @@ export default class ScheduleService {
         return validCombos;
     }
 
-    // Checks for lecture overlaps and building distances
-    private isClassCombinationValid(courseClasses: CourseClass[], inputData: IScheduleInputData): boolean {
-        for(let i=0; i < courseClasses.length-1; i++){
-            for(let j=i+1; j < courseClasses.length; j++){
-                let ccId1 = courseClasses[i].id;
-                let ccId2 = courseClasses[j].id;
-                if(inputData.incompatibilityCache.get(ccId1)?.has(ccId2)){
-                    return false;
-                }
-                if(inputData.incompatibilityCache.get(ccId2)?.has(ccId1)){
-                    return false;
-                }
-            }
+    private isClassCombinationValid(courseClasses: CourseClass[], ccIdToAdd: string, cache: Map<string, Set<string>>): boolean {
+        for(let i=0; i < courseClasses.length; i++){
+            let ccId1 = courseClasses[i].id;
+            let ccId2 = ccIdToAdd;
+            if(cache.get(ccId1)?.has(ccId2) || cache.get(ccId2)?.has(ccId1))
+                return false;
         }
         return true;
     }
