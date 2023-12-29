@@ -144,7 +144,7 @@ export default class ScheduleService {
 
         // convert to schedules
         const schedules: IScheduleWithScore[] = [];
-        for (const scheduleData of scheduleMap.get(targetMinutes)?.values() ?? []) {
+        for (const scheduleData of scheduleMap.get(currentMinutes-stepMinutes)?.values() ?? []) {
             const courseClasses = Array.from(scheduleData.courseClassIds);
             const schedule = this.createSchedule(courseClasses, inputData);
             const score = this.calculateScheduleScore(scheduleData, targetHours, reduceDays, prioritizeUnlocks);
