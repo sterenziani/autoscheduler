@@ -206,8 +206,6 @@ export default class ScheduleService {
                         return validCombos.concat(newValidCombos);
 
                     const combinationProposal = [cc, ...combo];
-                    if(this.isClassCombinationValid(combinationProposal, inputData))
-                        continue;
                     const combinationProposalCredits = comboOptionalCredits + courseOptionalCredits
                     let weeklyMinutes = 0;
                     for(const courseClass of combinationProposal) {
@@ -217,7 +215,7 @@ export default class ScheduleService {
                     }
                     const weeklyHours = weeklyMinutes/60;
 
-                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT){
+                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && this.isClassCombinationValid(combinationProposal, inputData)){
                         newValidCombos.push(combinationProposal);
                         newValidCombosOptionalCredits.push(comboOptionalCredits + courseOptionalCredits);
                     }
