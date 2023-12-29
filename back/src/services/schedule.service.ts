@@ -53,6 +53,10 @@ export default class ScheduleService {
         const deadline = new Date(Date.now() + MAX_MS_DEADLINE_TO_PROCESS);
         // TODO: input.data.courceClasses should already only have viable courceClasses
         const courseClasses = this.getViableCourseClasses(inputData, unavailableTimeSlots);
+
+        // Exit early if no courseClasses
+        if (courseClasses.length < 1) return [];
+
         const targetMinutes = targetHours * 60;
         const minMinutes = Math.min(...inputData.weeklyClassTimeInMinutes.values());
         const maxMinutes = Math.max(...inputData.weeklyClassTimeInMinutes.values());
@@ -78,11 +82,8 @@ export default class ScheduleService {
             let currentStepBestScore = 0;
 
             for (const currentCourseClassId of courseClasses) {
-                // Calculate this course's impact on proposed combinations' optionalCourseCredits
                 const courseId = inputData.courseOfCourseClass.get(currentCourseClassId);
                 if(!courseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-                const course = inputData.courses.get(courseId);
-                if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
 
                 const courseClassMinutes = inputData.weeklyClassTimeInMinutes.get(currentCourseClassId);
                 if (courseClassMinutes === undefined) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
@@ -263,7 +264,7 @@ export default class ScheduleService {
 
         for (let i = 1; i < valuesArray.length; i++) {
             const currentDifference = valuesArray[i] - valuesArray[i - 1];
-            minDifference = Math.min(minDifference, currentDifference);
+            if (currentDifference > 0) minDifference = Math.min(minDifference, currentDifference);
         }
 
         return minDifference;
