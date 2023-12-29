@@ -53,7 +53,7 @@ export default class ScheduleService {
         const deadline = new Date(Date.now() + MAX_MS_DEADLINE_TO_PROCESS);
         // TODO: input.data.courceClasses should already only have viable courceClasses
         const courseClasses = this.getViableCourseClasses(inputData, unavailableTimeSlots);
-        const targetMinutes = targetHours * 60;
+        const targetMinutes = Math.floor(targetHours * 60);
         const minMinutes = Math.min(...inputData.weeklyClassTimeInMinutes.values());
         const maxMinutes = Math.max(...inputData.weeklyClassTimeInMinutes.values());
         const stepMinutes = this.getStep(inputData);
