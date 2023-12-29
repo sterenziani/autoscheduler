@@ -57,7 +57,7 @@ export default class ScheduleService {
         // Exit early if no courseClasses
         if (courseClasses.length < 1) return [];
 
-        const targetMinutes = targetHours * 60;
+        const targetMinutes = Math.floor(targetHours * 60);
         const minMinutes = Math.min(...inputData.weeklyClassTimeInMinutes.values());
         const maxMinutes = Math.max(...inputData.weeklyClassTimeInMinutes.values());
         const stepMinutes = this.getStep(inputData);
@@ -145,7 +145,7 @@ export default class ScheduleService {
 
         // convert to schedules
         const schedules: IScheduleWithScore[] = [];
-        for (const scheduleData of scheduleMap.get(currentMinutes)?.values() ?? []) {
+        for (const scheduleData of scheduleMap.get(currentMinutes-stepMinutes)?.values() ?? []) {
             const courseClasses = Array.from(scheduleData.courseClassIds);
             const schedule = this.createSchedule(courseClasses, inputData);
             const score = this.calculateScheduleScore(scheduleData, targetHours, reduceDays, prioritizeUnlocks);
