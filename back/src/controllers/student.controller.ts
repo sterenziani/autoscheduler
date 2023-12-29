@@ -640,7 +640,7 @@ export class StudentController {
         const universityId = req.user.universityId!     // Can assert only for user with student role
         const programId = validateString(req.query.programId)??req.user.programId! // Accept alternate programs, but default to student's program
         const termId = validateString(req.query.termId);
-        const hours = validateInt(req.query.hours) ?? DEFAULT_TARGET_HOURS;
+        const targetHours = validateInt(req.query.targetHours) ?? DEFAULT_TARGET_HOURS;
         const reduceDays = validateBoolean(req.query.reduceDays) ?? DEFAULT_REDUCE_DAYS;
         const prioritizeUnlocks = validateBoolean(req.query.prioritizeUnlocks) ?? DEFAULT_PRIORITIZE_UNLOCKS;
         const unavailableTimesStrings = validateElemOrElemArray(req.query.unavailable, validateString);
@@ -651,7 +651,7 @@ export class StudentController {
         if (!isValidTimes(unavailableTimes, true)) return next(new GenericException(ERRORS.BAD_REQUEST.INVALID_TIMES));
 
         try {
-            const schedules: IScheduleWithScore[] = await this.schedulesService.getSchedules(studentId, universityId, programId, termId, hours, reduceDays, prioritizeUnlocks, unavailableTimes, amountToReturn);
+            const schedules: IScheduleWithScore[] = await this.schedulesService.getSchedules(studentId, universityId, programId, termId, targetHours, reduceDays, prioritizeUnlocks, unavailableTimes, amountToReturn);
             res.status(HTTP_STATUS.OK).send(ScheduleDto.schedulesToDto(schedules))
         } catch (e) {
             next(e);
