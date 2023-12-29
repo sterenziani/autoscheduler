@@ -80,7 +80,6 @@ export default class DatabaseScheduleDao extends ScheduleDao {
             );
             const distanceMap = this.parseDistanceMap(distancesResult);
 
-            console.log(courseIds)
             const combinations = await session.run(
                 'WITH $courseIds AS courseIds '+
                 'UNWIND courseIds AS courseId '+
@@ -113,7 +112,6 @@ export default class DatabaseScheduleDao extends ScheduleDao {
                     }
                 }
             }
-            console.log(sum +" incompatible tuples")
 
             // We generate return object based on queried data
             return {

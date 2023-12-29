@@ -61,7 +61,6 @@ export default class ScheduleService {
 
         // STEPS 1-4 - Get all information needed
         const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId);
-        console.log("Got DB data in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
 
         // STEP 5 - Remove courseClasses that fall inside unavailableTimeSlots (done inside getCourseClassCombinations)
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
@@ -69,7 +68,7 @@ export default class ScheduleService {
         const deadline = new Date(Date.now() + MAX_MS_DEADLINE_TO_PROCESS);
         const courseClassCombinations = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, deadline, MAX_COURSE_COMBOS_TO_PROCESS, randomizeCourses);
 
-        console.log("Got combos in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
+        //console.log("Got combos in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
 
         // STEP 8 - Calculate stats for every valid schedule
         // STEP 9 - Calculate score for each schedule
@@ -91,7 +90,7 @@ export default class ScheduleService {
                 schedules.push({schedule: schedule, score: score});
         }
 
-        console.log("Processed " +courseClassCombinations.length +" schedules (filtered down to " +schedules.length +") in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
+        //console.log("Processed " +courseClassCombinations.length +" schedules (filtered down to " +schedules.length +") in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
 
         // STEP 10 - Return sorted list of schedules by score
         return schedules.sort((a, b) =>  b.score-a.score).slice(0, amountToReturn);
@@ -158,9 +157,7 @@ export default class ScheduleService {
     // -- When deadline is passed, the function will return all valid combinations found so far
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
     private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, deadline: Date, combinationLimit: number, randomizeCourses: boolean): CourseClass[][] {
-        let startLoop = new Date().getTime()
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
-        console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs to build array");
 
         if(randomizeCourses){
             for (let i = viableCourseClassesArray.length-1; i > SHUFFLE_FIXED_INDEXES; i--) {
@@ -173,9 +170,8 @@ export default class ScheduleService {
         let validCombosOptionalCredits: number[] = []; // Each index contains the amount of optioanl course credits earned from the combination in the same index on validCombos
 
         // Start from most important course (at the end of array) and work our way to less important ones
-        startLoop = new Date().getTime()
+        const startLoop = new Date().getTime()
         let index = 0;
-        const initialFreemem = os.freemem()
         while(index < viableCourseClassesArray.length && new Date() < deadline && validCombos.length < combinationLimit) {
             // Calculate this course's impact on proposed combinations' optionalCourseCredits
             const courseId = inputData.courseOfCourseClass.get(viableCourseClassesArray[index][0].id);
@@ -185,7 +181,7 @@ export default class ScheduleService {
             const courseOptionalCredits = inputData.optionalCourseIds.includes(courseId)? course.creditValue : 0;
 
 
-            console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs into loop, have processed " +validCombos.length +" combinations so far. Now considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
+            //console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs into loop, have processed " +validCombos.length +" combinations so far. Now considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
 
 
             const newValidCombos: CourseClass[][] = [];
@@ -211,7 +207,6 @@ export default class ScheduleService {
                         return validCombos.concat(newValidCombos);
 
                     const combinationProposal = [cc, ...combo];
-                    const combinationProposalCredits = comboOptionalCredits + courseOptionalCredits
                     let weeklyMinutes = 0;
                     for(const courseClass of combinationProposal) {
                         const classDuration = inputData.weeklyClassTimeInMinutes.get(courseClass.id);
@@ -234,9 +229,6 @@ export default class ScheduleService {
             index += 1;
         }
 
-        console.log("MB occupied: " +((initialFreemem-os.freemem())/1024/1024))
-        console.log(process.memoryUsage())
-        console.log(process.cpuUsage())
         return validCombos;
     }
 
