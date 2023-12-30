@@ -7,23 +7,12 @@ import StudentService from './student.service';
 import ProgramService from './program.service';
 import TermService from './term.service';
 import CourseClass from '../models/abstract/courseClass.model';
-import {ISchedule, IScheduleWithScore} from '../interfaces/schedule.interface';
+import {ISchedule, IScheduleWithScore, IAlgorithmParams} from '../interfaces/schedule.interface';
 import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
 import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
 
-const SECOND_IN_MS = 1000;
-const MINUTE_IN_MS = 60000;
-const TARGET_HOUR_EXCEED_RATE_LIMIT = 1.25;
-const SHUFFLE_FIXED_INDEXES = 3;
-const MAX_COURSE_COMBOS_TO_PROCESS = 1000000;
-const MAX_MS_DEADLINE_TO_PROCESS = 2*SECOND_IN_MS;
-
-const MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG = 25;
-const MIN_AMOUNT_OF_COURSES_TO_PRUNE_BY_AVG = 3;
-const MIN_HOURS_TO_PRUNE_BY_AVG = 10;
-
-const MAX_AMOUNT_TO_RETURN = 25;
+const DEBUG = false;
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -32,6 +21,7 @@ export default class ScheduleService {
     private studentService!: StudentService;
     private programService!: ProgramService;
     private termService!: TermService;
+    private algorithmParams!: IAlgorithmParams;
 
     static getInstance(): ScheduleService {
         if (!ScheduleService.instance) {
@@ -48,6 +38,20 @@ export default class ScheduleService {
         this.studentService = StudentService.getInstance();
         this.termService = TermService.getInstance();
         this.programService = ProgramService.getInstance();
+        this.algorithmParams = {
+            targetHourExceedRateLimit: parseFloat(process.env.ALGORITHM_TARGET_HOUR_EXCEED_RATE_LIMIT?? '1.25'),
+            shuffleCourses: (process.env.ALGORITHM_SHUFFLE_COURSES=='true'),
+            fixedIndexesDuringShuffle: parseInt(process.env.ALGORITHM_SHUFFLE_FIXED_INDEXES?? '3'),
+            maxSchedulesToProcess: parseInt(process.env.ALGORITHM_MAX_SCHEDULES_TO_PROCESS?? '500000'),
+            maxMsDeadlineToProcess: parseFloat(process.env.ALGORITHM_MAX_MS_DEADLINE_TO_PROCESS?? '2000'),
+
+            greedyPruning: (process.env.ALGORITHM_GREEDY_PRUNING=='true'),
+            minAmountOfSchedulesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG?? '25'),
+            minAmountOfProcessedCoursesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_PROCESSED_COURSES_TO_PRUNE_BY_AVG?? '3'),
+            minHoursToPruneByAvg: parseFloat(process.env.ALGORITHM_MIN_HOURS_TO_PRUNE_BY_AVG?? '10'),
+
+            maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '25')
+        };
     }
 
     async getSchedules(
@@ -60,7 +64,6 @@ export default class ScheduleService {
         prioritizeUnlocks: boolean,
         unavailableTimeSlots: TimeRange[],
         amountToReturn: number=10,
-        randomizeCourses: boolean=false
     ): Promise<IScheduleWithScore[]> {
         const startTimestamp = new Date();
 
@@ -72,16 +75,22 @@ export default class ScheduleService {
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         // STEP 8 - Calculate stats for each valid schedule (done while combining courseClasses)
         // STEP 9 - Calculate score for each schedule (done while combining courseClasses)
-        const deadline = new Date(Date.now() + MAX_MS_DEADLINE_TO_PROCESS);
-        const schedules = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline, MAX_COURSE_COMBOS_TO_PROCESS, randomizeCourses);
-
-        //console.log("Processed " +schedules.length +" schedules in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.\n");
+        const deadline = new Date(Date.now() + this.algorithmParams.maxMsDeadlineToProcess);
+        const schedules = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline);
 
         // STEP 10 - Return sorted list of schedules by score
         const resp = schedules.sort((a, b) =>  b.score-a.score);
-        let winners = resp.filter(i => i.score == resp[0].score).length // Amount of tied winners
-        winners = Math.min(MAX_AMOUNT_TO_RETURN, winners)               // Limit to MAX_AMOUNT_TO_RETURN
-        return resp.slice(0, Math.max(amountToReturn, winners));        // Return as many as requested and then some in case of tie
+        let winners = resp.filter(i => i.score == resp[0].score).length         // Amount of tied winners
+        winners = Math.min(this.algorithmParams.maxAmountToReturn, winners)     // Limit to MAX_AMOUNT_TO_RETURN
+        const topResults = resp.slice(0, Math.max(amountToReturn, winners));    // Return as many as requested and then some in case of tie
+
+        if(DEBUG){
+            console.log("Valid schedules avg score: " +(schedules.map(i=>i.score).reduce((a, b) => a + b) / schedules.length));
+            console.log("Returned results avg score: " +(topResults.map(i=>i.score).reduce((a, b) => a + b) / topResults.length));
+            console.log("Finished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.");
+        }
+
+        return topResults;
     }
 
     private areTimeRangesCompatible(timeRangeA: TimeRange[], timeRangeB: TimeRange[]): boolean {
@@ -144,21 +153,22 @@ export default class ScheduleService {
     // Since getting all combinations takes too long, the following sacrifices have been made:
     // -- When deadline is passed, the function will return all valid combinations found so far
     // -- While valid, combinations that stray too far beyond targetHours are ignored to avoid expanding them
-    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean, deadline: Date, combinationLimit: number, randomizeCourses: boolean): IScheduleWithScore[] {
+    private getCourseClassCombinations(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean, deadline: Date): IScheduleWithScore[] {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
-        if(randomizeCourses){
-            for (let i = viableCourseClassesArray.length-1; i > SHUFFLE_FIXED_INDEXES; i--) {
-                const j = SHUFFLE_FIXED_INDEXES + Math.floor(Math.random() * (i + 1 - SHUFFLE_FIXED_INDEXES+1));
+        if(this.algorithmParams.shuffleCourses){
+            for (let i = viableCourseClassesArray.length-1; i > this.algorithmParams.fixedIndexesDuringShuffle; i--) {
+                const j = this.algorithmParams.fixedIndexesDuringShuffle + Math.floor(Math.random() * (i + 1 - this.algorithmParams.fixedIndexesDuringShuffle+1));
                 [viableCourseClassesArray[i], viableCourseClassesArray[j]] = [viableCourseClassesArray[j], viableCourseClassesArray[i]];
             }
         }
 
         let validSchedules: IScheduleWithScore[] = [];
 
+        let processedCombos = 0;
         let index = 0;
         let averageScore = 0;
         const startLoop = new Date().getTime();
-        while(index < viableCourseClassesArray.length && new Date() < deadline && validSchedules.length < combinationLimit) {
+        while(index < viableCourseClassesArray.length && new Date() < deadline && processedCombos < this.algorithmParams.maxSchedulesToProcess) {
             // Update averageScore before this course
             if(validSchedules.length > 0)
                 averageScore = validSchedules.map(i=>i.score).reduce((a, b) => a + b) / validSchedules.length;
@@ -170,12 +180,13 @@ export default class ScheduleService {
             if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
             const courseOptionalCredits = inputData.optionalCourseIds.has(courseId)? course.creditValue : 0;
 
-            //console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs into loop, have processed " +validSchedules.length +" combinations so far. Now considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
+            //if(DEBUG) console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs into loop, have processed " +processedCombos +" combinations so far. Now considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
 
             const newValidSchedules: IScheduleWithScore[] = [];
 
             // Schedules that only contain a class of our current course are a possibility
             for(const cc of viableCourseClassesArray[index]){
+                processedCombos++;
                 const schedule = this.createSchedule([cc], inputData);
                 const scheduleWithScore = {schedule: schedule, score: this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks), optionalCredits: courseOptionalCredits}
                 newValidSchedules.push(scheduleWithScore);
@@ -183,25 +194,27 @@ export default class ScheduleService {
 
             for (let i=0; i < validSchedules.length; i++) {
                 const baseSchedule = validSchedules[i].schedule;
-                const comboOptionalCredits = validSchedules[i].optionalCredits;
 
                 // Skip this course if this combo already exceeds the max amount of optional credits we can suggest
-                if(courseOptionalCredits > 0 && comboOptionalCredits > inputData.remainingOptionalCredits)
+                if(courseOptionalCredits > 0 && baseSchedule.optionalCredits > inputData.remainingOptionalCredits)
                     continue;
 
                 // If adding a class belonging to the current course to an existing combo is valid, push it to the array
                 for (const cc of viableCourseClassesArray[index]) {
-                    if(new Date() > deadline)
+                    if(new Date() > deadline || processedCombos > this.algorithmParams.maxSchedulesToProcess){        console.log();
+                        if(DEBUG) console.log((this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +(validSchedules.length+newValidSchedules.length) +" of those were used.")
                         return validSchedules.concat(newValidSchedules);
+                    }
 
+                    processedCombos++;
                     const weeklyHours = baseSchedule.totalHours + (inputData.weeklyClassTimeInMinutes.get(cc.id)?? 0)/60;
                     const combo = baseSchedule.courseClasses
 
-                    if(weeklyHours <= targetHours*TARGET_HOUR_EXCEED_RATE_LIMIT && this.isClassCombinationValid(combo, cc.id, inputData.incompatibilityCache)){
+                    if(weeklyHours <= targetHours*this.algorithmParams.targetHourExceedRateLimit && this.isClassCombinationValid(combo, cc.id, inputData.incompatibilityCache)){
                         const schedule = this.createSchedule([cc, ...combo], inputData);
                         const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks);
-                        if(score >= averageScore || validSchedules.length <= MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG || index < MIN_AMOUNT_OF_COURSES_TO_PRUNE_BY_AVG || weeklyHours <= Math.min(targetHours/2, MIN_HOURS_TO_PRUNE_BY_AVG)){
-                            newValidSchedules.push({schedule: schedule, score: score, optionalCredits: comboOptionalCredits+courseOptionalCredits});
+                        if(!this.algorithmParams.greedyPruning || score >= averageScore || weeklyHours <= Math.min(targetHours/2, this.algorithmParams.minHoursToPruneByAvg) ||  validSchedules.length <= this.algorithmParams.minAmountOfSchedulesToPruneByAvg || index < this.algorithmParams.minAmountOfProcessedCoursesToPruneByAvg){
+                            newValidSchedules.push({schedule: schedule, score: score});
                         }
                     }
                 }
@@ -212,6 +225,7 @@ export default class ScheduleService {
             validSchedules = validSchedules.concat(newValidSchedules);
             index += 1;
         }
+        if(DEBUG) console.log((this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +validSchedules.length +" of those were used.")
         return validSchedules;
     }
 
@@ -230,6 +244,7 @@ export default class ScheduleService {
         let totalDays = new Set();
         let totalImportance = 0;
         let amountOfMandatoryCourses = 0;
+        let optionalCredits = 0;
         let earliestLecture = Time.maxValue();
         let latestLecture = Time.minValue();
 
@@ -243,7 +258,13 @@ export default class ScheduleService {
             totalImportance += classImportance;
             totalMinutes += inputData.weeklyClassTimeInMinutes.get(cc.id)?? 0;
 
-            if(inputData.mandatoryCourseIds.has(courseId)) amountOfMandatoryCourses++;
+            const course = inputData.courses.get(courseId);
+            if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
+
+            if(inputData.mandatoryCourseIds.has(courseId))
+                amountOfMandatoryCourses++;
+            else
+                optionalCredits += course.creditValue;
 
             for(const lectureId of lectures){
                 const l = inputData.lectures.get(lectureId);
@@ -262,6 +283,7 @@ export default class ScheduleService {
             mandatoryRate: amountOfMandatoryCourses / courseClasses.length,
             earliestLecture: earliestLecture,
             latestLecture: latestLecture,
+            optionalCredits: optionalCredits,
         }
     }
 

@@ -33,10 +33,24 @@ export interface ISchedule {
     mandatoryRate: number;
     earliestLecture: Time;
     latestLecture: Time;
+    optionalCredits: number;
 }
+
+export interface IAlgorithmParams {
+    targetHourExceedRateLimit: number,
+    shuffleCourses: boolean,
+    fixedIndexesDuringShuffle: number,
+    maxSchedulesToProcess: number,
+    maxMsDeadlineToProcess: number,
+
+    greedyPruning: boolean,
+    minAmountOfSchedulesToPruneByAvg: number,
+    minAmountOfProcessedCoursesToPruneByAvg: number,
+    minHoursToPruneByAvg: number,
+    maxAmountToReturn: number
+};
 
 export interface IScheduleWithScore {
     schedule: ISchedule,
-    optionalCredits: number,
-    score: number
+    score: number,
 }
