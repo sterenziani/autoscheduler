@@ -37,5 +37,6 @@ export interface ISchedule {
 
 export interface IScheduleWithScore {
     schedule: ISchedule,
+    optionalCredits: number,
     score: number
 }

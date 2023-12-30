@@ -154,7 +154,6 @@ export default class ScheduleService {
         }
 
         let validSchedules: IScheduleWithScore[] = [];
-        let validSchedulesOptionalCredits: number[] = []; // Each index contains the amount of optional course credits earned from the combination in the same index on validSchedules
 
         let index = 0;
         let averageScore = 0;
@@ -174,19 +173,17 @@ export default class ScheduleService {
             //console.log("\t" +((new Date().getTime()-startLoop)/1000) +" secs into loop, have processed " +validSchedules.length +" combinations so far. Now considering combinations that include " +course.name +". Imporance: " +inputData.indirectCorrelativesAmount.get(course.id));
 
             const newValidSchedules: IScheduleWithScore[] = [];
-            const newValidSchedulesOptionalCredits: number[] = [];
 
             // Schedules that only contain a class of our current course are a possibility
             for(const cc of viableCourseClassesArray[index]){
                 const schedule = this.createSchedule([cc], inputData);
-                const scheduleWithScore = {schedule: schedule, score: this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks)}
+                const scheduleWithScore = {schedule: schedule, score: this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks), optionalCredits: courseOptionalCredits}
                 newValidSchedules.push(scheduleWithScore);
-                newValidSchedulesOptionalCredits.push(courseOptionalCredits);
             }
 
             for (let i=0; i < validSchedules.length; i++) {
                 const baseSchedule = validSchedules[i].schedule;
-                const comboOptionalCredits = validSchedulesOptionalCredits[i];
+                const comboOptionalCredits = validSchedules[i].optionalCredits;
 
                 // Skip this course if this combo already exceeds the max amount of optional credits we can suggest
                 if(courseOptionalCredits > 0 && comboOptionalCredits > inputData.remainingOptionalCredits)
@@ -204,8 +201,7 @@ export default class ScheduleService {
                         const schedule = this.createSchedule([cc, ...combo], inputData);
                         const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks);
                         if(score >= averageScore || validSchedules.length <= MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG || index < MIN_AMOUNT_OF_COURSES_TO_PRUNE_BY_AVG || weeklyHours <= Math.min(targetHours/2, MIN_HOURS_TO_PRUNE_BY_AVG)){
-                            newValidSchedules.push({schedule: schedule, score: score});
-                            newValidSchedulesOptionalCredits.push(comboOptionalCredits + courseOptionalCredits);
+                            newValidSchedules.push({schedule: schedule, score: score, optionalCredits: comboOptionalCredits+courseOptionalCredits});
                         }
                     }
                 }
@@ -214,7 +210,6 @@ export default class ScheduleService {
             // Add all new combinations that contain the current course to validShedules
             // This is done outside the loop to avoid growing validSchedules and iterating forever
             validSchedules = validSchedules.concat(newValidSchedules);
-            validSchedulesOptionalCredits = validSchedulesOptionalCredits.concat(newValidSchedulesOptionalCredits);
             index += 1;
         }
         return validSchedules;
