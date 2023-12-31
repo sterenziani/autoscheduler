@@ -13,7 +13,7 @@ import TimeRange from '../helpers/classes/timeRange.class';
 import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
 
 const DEBUG = true;
-const GENETIC_GENERATION_SIZE = 25000;
+const GENETIC_GENERATION_SIZE = 2500;
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -88,6 +88,7 @@ export default class ScheduleService {
         if(DEBUG){
             console.log("Valid schedules avg score: " +(schedules.map(i=>i.score).reduce((a, b) => a + b) / schedules.length));
             console.log("Returned results avg score: " +(topResults.map(i=>i.score).reduce((a, b) => a + b) / topResults.length));
+            console.log("Returning " +topResults.length +" results with score " +topResults[0].score +" - " +topResults[topResults.length-1].score)
             console.log("Finished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.");
         }
 
@@ -235,61 +236,62 @@ export default class ScheduleService {
         const startTimestamp = new Date();
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
 
-        let gen1: number[][] = []
+        let population: number[][] = []
         let scores: number[] = []
 
         // GENERATE GEN 1
         console.log("Gen 1")
-        for(let i=0; i < GENETIC_GENERATION_SIZE/2; i++){
+        for(let i=0; i < GENETIC_GENERATION_SIZE; i++){
             const ccArray = this.createRandomCourseClassCombination(viableCourseClassesArray);
             const s = this.buildRandomCourseClassCombinationSchedule(ccArray, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
-            gen1.push(ccArray);
+            population.push(ccArray);
             scores.push(s.score);
             processedCombos++;
         }
         this.normalize(scores)
 
+        let gen = 2;
+        while(gen <= 100){
+            let newGen: number[][] = []
+            let newScores = []
+            for(let x=0; x < GENETIC_GENERATION_SIZE/2; x++){
+                // Pick our parents using Tournament
+                let parentIndex1 = 0
+                let parentIndex2 = 0
+                for(let i=0; i < scores.length; i++) {
+                    // See if picked as parent1. If picked as a candidate, save best candidate so far
+                    if(Math.random() <= scores[i] && scores[parentIndex1] <= scores[i])
+                        parentIndex1 = i
+                    // If not picked as parent1, see if picked as parent2
+                    else if(Math.random() <= scores[i] && scores[parentIndex2] <= scores[i])
+                        parentIndex2 = i
+                }
 
-        // BREED GEN 2
-        console.log("Gen 2")
-        let gen2: number[][] = []
-        let newScores = []
-        for(let x=0; x < GENETIC_GENERATION_SIZE; x++){
-            // Pick our parents using Tournament
-            let parentIndex1 = 0
-            let parentIndex2 = 0
-            for(let i=0; i < scores.length; i++) {
-                // See if picked as parent1. If picked as a candidate, save best candidate so far
-                if(Math.random() < scores[i] && scores[parentIndex1] <= scores[i])
-                    parentIndex1 = i
-                // If not picked as parent1, see if picked as parent2
-                else if(Math.random() < scores[i] && scores[parentIndex2] <= scores[i])
-                    parentIndex2 = i
+                const [ccArray1, ccArray2] = this.breed(population[parentIndex1], population[parentIndex2], viableCourseClassesArray);
+                const s1 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+                newGen.push(ccArray1);
+                newScores.push(s1.score);
+                processedCombos++;
+
+                const s2 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+                newGen.push(ccArray2);
+                newScores.push(s2.score);
+                processedCombos++;
             }
+            population = newGen;
+            scores = newScores;
 
-            const [ccArray1, ccArray2] = this.breed(gen1[parentIndex1], gen1[parentIndex2], viableCourseClassesArray);
-            const s1 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
-            gen2.push(ccArray1);
-            newScores.push(s1.score);
-            processedCombos++;
-
-            const s2 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
-            gen2.push(ccArray2);
-            newScores.push(s2.score);
-            processedCombos++;
+            console.log("Avg score for gen " +gen +": " +(scores.reduce((a, b) => a + b) / scores.length))
+            this.normalize(scores);
+            gen++;
         }
-        gen1 = gen2;
-        scores = newScores;
-        gen2 = [];
-        newScores = []
-        this.normalize(scores);
 
         const schedules: IScheduleWithScore[] = []
         console.log("Finished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds, processed " +processedCombos +" combos");
         console.log("Preparing schedules")
         for(let i=0; i < scores.length; i++){
             if(scores[i] > 0){
-                const s = this.buildRandomCourseClassCombinationSchedule(gen1[i], inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+                const s = this.buildRandomCourseClassCombinationSchedule(population[i], inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
                 schedules.push(s)
             }
         }
