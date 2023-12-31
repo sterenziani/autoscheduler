@@ -41,10 +41,16 @@ export default class ScheduleService {
         this.algorithmParams = {
             maxSchedulesToProcess: parseInt(process.env.ALGORITHM_MAX_SCHEDULES_TO_PROCESS?? '500000'),
             maxMsDeadlineToProcess: parseFloat(process.env.ALGORITHM_MAX_MS_DEADLINE_TO_PROCESS?? '2000'),
-            maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '25'),
+            maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '10'),
             useGeneticAlgorithm: (process.env.ALGORITHM_USE_GENETIC=='true'),
+            scoreMultipliers: [
+                parseFloat(process.env.ALGORITHM_SCORE_P1_MULT?? '10'),
+                parseFloat(process.env.ALGORITHM_SCORE_P2_MULT?? '1.25'),
+                parseFloat(process.env.ALGORITHM_SCORE_P3_MULT?? '3.5'),
+                parseFloat(process.env.ALGORITHM_SCORE_P4_MULT?? '1')
+            ],
 
-            greedyPruning: (process.env.ALGORITHM_GREEDY_PRUNING=='true'),
+            greedyPruning: ((process.env.ALGORITHM_GREEDY_PRUNING?? 'true')=='true'),
             shuffleCourses: (process.env.ALGORITHM_SHUFFLE_COURSES=='true'),
             fixedIndexesDuringShuffle: parseInt(process.env.ALGORITHM_SHUFFLE_FIXED_INDEXES?? '3'),
             targetHourExceedRateLimit: parseFloat(process.env.ALGORITHM_TARGET_HOUR_EXCEED_RATE_LIMIT?? '1.25'),
@@ -55,7 +61,6 @@ export default class ScheduleService {
             generationSize: parseInt(process.env.ALGORITHM_GENETIC_GENERATION_SIZE?? '25'),
             generations: parseInt(process.env.ALGORITHM_GENERATIONS?? '2500'),
             bestPickedFromEachGeneration: parseInt(process.env.ALGORITHM_BEST_PICKED_FROM_EACH_GENERATION?? '10'),
-
         };
     }
 
@@ -430,6 +435,8 @@ export default class ScheduleService {
         const p4 = schedule.totalImportance;
         const a = (reduceDays)? 1:0;
         const b = (prioritizeUnlocks)? 1:0;
-        return 10*p1 - 1.25*p2 + a*3.5*p3 + b*p4
+
+        const m = this.algorithmParams.scoreMultipliers
+        return m[0]*p1 - m[1]*p2 + a*m[2]*p3 + b*m[3]*p4
     }
 }

@@ -41,6 +41,7 @@ export interface IAlgorithmParams {
     maxMsDeadlineToProcess: number,
     maxAmountToReturn: number,
     useGeneticAlgorithm: boolean,
+    scoreMultipliers: number[],
 
     greedyPruning: boolean,
     shuffleCourses: boolean,
