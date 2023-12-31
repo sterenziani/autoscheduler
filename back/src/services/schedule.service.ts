@@ -7,7 +7,7 @@ import StudentService from './student.service';
 import ProgramService from './program.service';
 import TermService from './term.service';
 import CourseClass from '../models/abstract/courseClass.model';
-import {ISchedule, IScheduleWithScore, IAlgorithmParams} from '../interfaces/schedule.interface';
+import {ISchedule, IScheduleWithScore, IAlgorithmParams, IGeneticIndexCombinationWithScore} from '../interfaces/schedule.interface';
 import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
 import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
@@ -39,18 +39,23 @@ export default class ScheduleService {
         this.termService = TermService.getInstance();
         this.programService = ProgramService.getInstance();
         this.algorithmParams = {
-            targetHourExceedRateLimit: parseFloat(process.env.ALGORITHM_TARGET_HOUR_EXCEED_RATE_LIMIT?? '1.25'),
-            shuffleCourses: (process.env.ALGORITHM_SHUFFLE_COURSES=='true'),
-            fixedIndexesDuringShuffle: parseInt(process.env.ALGORITHM_SHUFFLE_FIXED_INDEXES?? '3'),
             maxSchedulesToProcess: parseInt(process.env.ALGORITHM_MAX_SCHEDULES_TO_PROCESS?? '500000'),
             maxMsDeadlineToProcess: parseFloat(process.env.ALGORITHM_MAX_MS_DEADLINE_TO_PROCESS?? '2000'),
+            maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '25'),
+            useGeneticAlgorithm: (process.env.ALGORITHM_USE_GENETIC=='true'),
 
             greedyPruning: (process.env.ALGORITHM_GREEDY_PRUNING=='true'),
-            minAmountOfSchedulesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG?? '10'),
+            shuffleCourses: (process.env.ALGORITHM_SHUFFLE_COURSES=='true'),
+            fixedIndexesDuringShuffle: parseInt(process.env.ALGORITHM_SHUFFLE_FIXED_INDEXES?? '3'),
+            targetHourExceedRateLimit: parseFloat(process.env.ALGORITHM_TARGET_HOUR_EXCEED_RATE_LIMIT?? '1.25'),
+            minAmountOfSchedulesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG?? '25'),
             minAmountOfProcessedCoursesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_PROCESSED_COURSES_TO_PRUNE_BY_AVG?? '3'),
             minHoursToPruneByAvg: parseFloat(process.env.ALGORITHM_MIN_HOURS_TO_PRUNE_BY_AVG?? '3'),
 
-            maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '25')
+            generationSize: parseInt(process.env.ALGORITHM_GENETIC_GENERATION_SIZE?? '25'),
+            generations: parseInt(process.env.ALGORITHM_GENERATIONS?? '2500'),
+            bestPickedFromEachGeneration: parseInt(process.env.ALGORITHM_BEST_PICKED_FROM_EACH_GENERATION?? '10'),
+
         };
     }
 
@@ -76,7 +81,11 @@ export default class ScheduleService {
         // STEP 8 - Calculate stats for each valid schedule (done while combining courseClasses)
         // STEP 9 - Calculate score for each schedule (done while combining courseClasses)
         const deadline = new Date(Date.now() + this.algorithmParams.maxMsDeadlineToProcess);
-        const schedules = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline);
+        let schedules: IScheduleWithScore[] = []
+        if(this.algorithmParams.useGeneticAlgorithm)
+            schedules = this.getCourseClassCombinationsGenetic(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline, amountToReturn);
+        else
+            schedules = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline);
 
         // STEP 10 - Return sorted list of schedules by score
         const resp = schedules.sort((a, b) =>  b.score-a.score);
@@ -84,7 +93,7 @@ export default class ScheduleService {
         winners = Math.min(this.algorithmParams.maxAmountToReturn, winners)     // Limit to MAX_AMOUNT_TO_RETURN
         const topResults = resp.slice(0, Math.max(amountToReturn, winners));    // Return as many as requested and then some in case of tie
 
-        if(DEBUG){
+        if(DEBUG && topResults.length > 0){
             console.log("Valid schedules avg score: " +(schedules.map(i=>i.score).reduce((a, b) => a + b) / schedules.length));
             console.log("Returned results avg score: " +(topResults.map(i=>i.score).reduce((a, b) => a + b) / topResults.length));
             console.log("Returning " +topResults.length +" results with score " +topResults[0].score +" - " +topResults[topResults.length-1].score)
@@ -143,9 +152,6 @@ export default class ScheduleService {
                 if(classes.length > 0)
                     viableCourseClassesArray.push(classes);
             }
-
-            const course = inputData.courses.get(courseId);
-            if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
         }
         return viableCourseClassesArray;
     }
@@ -158,7 +164,7 @@ export default class ScheduleService {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
         if(this.algorithmParams.shuffleCourses){
             for (let i = viableCourseClassesArray.length-1; i > this.algorithmParams.fixedIndexesDuringShuffle; i--) {
-                const j = this.algorithmParams.fixedIndexesDuringShuffle + Math.floor(Math.random() * (i + 1 - this.algorithmParams.fixedIndexesDuringShuffle+1));
+                const j = this.algorithmParams.fixedIndexesDuringShuffle + Math.floor(Math.random() * (i + 1 - this.algorithmParams.fixedIndexesDuringShuffle*2));
                 [viableCourseClassesArray[i], viableCourseClassesArray[j]] = [viableCourseClassesArray[j], viableCourseClassesArray[i]];
             }
         }
@@ -203,7 +209,7 @@ export default class ScheduleService {
                 // If adding a class belonging to the current course to an existing combo is valid, push it to the array
                 for (const cc of viableCourseClassesArray[index]) {
                     if(new Date() > deadline || processedCombos > this.algorithmParams.maxSchedulesToProcess){        console.log();
-                        if(DEBUG) console.log("\n"+(this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +(validSchedules.length+newValidSchedules.length) +" of those were used.")
+                        if(DEBUG) console.log((this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +(validSchedules.length+newValidSchedules.length) +" of those were used.")
                         return validSchedules.concat(newValidSchedules);
                     }
 
@@ -228,6 +234,135 @@ export default class ScheduleService {
         }
         if(DEBUG) console.log("\n"+(this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +validSchedules.length +" of those were used.")
         return validSchedules;
+    }
+
+    private getCourseClassCombinationsGenetic(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean, deadline: Date, amountToReturn: number): IScheduleWithScore[] {
+        const startTimestamp = new Date();
+        const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
+
+        const bestCombos:Set<string> = new Set();
+        const bestSchedules: IGeneticIndexCombinationWithScore[] = [];
+
+        let processedCombos = 0;
+        let population: IGeneticIndexCombinationWithScore[] = [];
+
+        // GENERATE GEN 1
+        for(let i=0; i < this.algorithmParams.generationSize && new Date() < deadline && processedCombos < this.algorithmParams.maxSchedulesToProcess; i++){
+            const ccArray = this.createRandomCourseClassCombination(viableCourseClassesArray);
+            const s = this.buildRandomCourseClassCombinationSchedule(ccArray, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+            population.push(s);
+            processedCombos++;
+        }
+        this.updateBestSchedules(population, bestCombos, bestSchedules);
+
+        let gen = 2;
+        while(gen <= this.algorithmParams.generations){
+            let newGen: IGeneticIndexCombinationWithScore[] = [];
+            for(let x=0; x < this.algorithmParams.generationSize/2 && new Date() < deadline && processedCombos < this.algorithmParams.maxSchedulesToProcess; x++){
+                // Pick our parents using Tournament
+                let parentIndex1 = 0;
+                let parentIndex2 = 0;
+                for(let i=0; i < population.length; i++) {
+                    const currentScheduleScore = population[i].score;
+                    // If picked as a candidate parent, save best candidate so far
+                    if(Math.random() <= 0.5 && population[parentIndex1].score <= currentScheduleScore)
+                        parentIndex1 = i;
+                    // If not picked as parent1, see if picked as parent2
+                    else if(Math.random() <= 0.5 && population[parentIndex2].score <= currentScheduleScore)
+                        parentIndex2 = i;
+                }
+                const [ccArray1, ccArray2] = this.breed(population[parentIndex1].combo, population[parentIndex2].combo, viableCourseClassesArray);
+                processedCombos += 2;
+
+                const s1 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+                newGen.push(s1);
+
+                const s2 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+                newGen.push(s2);
+            }
+
+            population = newGen;
+            this.updateBestSchedules(population, bestCombos, bestSchedules);
+            gen++;
+        }
+
+        const schedules: IScheduleWithScore[] = bestSchedules
+                                                .filter(s => s.score > Number.MIN_VALUE)
+                                                .map(s => {return {
+                                                    schedule: (s.schedule?? this.createSchedule([], inputData)),
+                                                    score: s.score
+                                                }});
+
+        if(DEBUG) console.log("\nFinished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds, processed " +processedCombos +" combinations");
+        return schedules
+    }
+
+    private updateBestSchedules(population: IGeneticIndexCombinationWithScore[], bestCombos: Set<string>, bestSchedules: IGeneticIndexCombinationWithScore[]) {
+        population.sort((a, b) =>  b.score-a.score).slice(0, this.algorithmParams.bestPickedFromEachGeneration).forEach(item => {
+            if(!bestCombos.has(item.combo.toString())){
+                bestCombos.add(item.combo.toString());
+                bestSchedules.push(item);
+            }
+        });
+    }
+
+    private breed(x: number[], y: number[], viableCourseClassesArray: CourseClass[][]): number[][] {
+        const a = [...x]
+        const b = [...y]
+        for(let c=0; c < a.length; c++){
+            // If selected, swap
+            if(Math.random() < 0.5)
+                [a[c], b[c]] = [b[c], a[c]];
+
+            // Small chance of mutating class
+            if(Math.random() < 0.1)
+                a[c] = Math.floor(Math.random() * (viableCourseClassesArray[c].length+1))
+            if(Math.random() < 0.1)
+                b[c] = Math.floor(Math.random() * (viableCourseClassesArray[c].length+1))
+        }
+        return [a, b]
+    }
+
+    private createRandomCourseClassCombination(viableCourseClassesArray: CourseClass[][]): number[] {
+        const ccSelection: number[] = [];
+        for(let i=0; i < viableCourseClassesArray.length; i++){
+            const j = Math.floor(Math.random() * (viableCourseClassesArray[i].length + 1));
+            ccSelection.push(j);
+        }
+        return ccSelection;
+    }
+
+    private buildRandomCourseClassCombinationSchedule(ccArray: number[], inputData: IScheduleInputData, viableCourseClassesArray: CourseClass[][], targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean): IGeneticIndexCombinationWithScore{
+        if(this.isRandomClassCombinationValid(ccArray, viableCourseClassesArray, inputData.incompatibilityCache)){
+            const combo: CourseClass[] = []
+            for(let c = 0; c < ccArray.length; c++){
+                if(ccArray[c] < viableCourseClassesArray[c].length)
+                    combo.push(viableCourseClassesArray[c][ccArray[c]])
+            }
+            const schedule = this.createSchedule(combo, inputData)
+            const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks)
+            return {schedule: schedule, combo: ccArray, score: score}
+        }
+        return {schedule: undefined, combo: ccArray, score: Number.MIN_VALUE}
+    }
+
+    private isRandomClassCombinationValid(ccArray: number[], viableCourseClassesArray: CourseClass[][],  cache: Map<string, Set<string>>): boolean {
+        for(let c1 = 0; c1 < ccArray.length-1; c1++){
+            for(let c2 = c1; c2 < ccArray.length; c2++){
+                // If one of the courseClasses is blank, there's no problem
+                const ccIdx1 = ccArray[c1];
+                const ccIdx2 = ccArray[c2];
+                if(ccIdx1 >= viableCourseClassesArray[c1].length || ccIdx2 >= viableCourseClassesArray[c2].length)
+                    continue;
+
+                // If cache says the CCs are incompatible, return false
+                const ccId1 = viableCourseClassesArray[c1][ccIdx1].id;
+                const ccId2 = viableCourseClassesArray[c2][ccIdx2].id;
+                if(cache.get(ccId1)?.has(ccId2) || cache.get(ccId2)?.has(ccId1))
+                    return false;
+            }
+        }
+        return true;
     }
 
     private isClassCombinationValid(courseClasses: CourseClass[], ccIdToAdd: string, cache: Map<string, Set<string>>): boolean {

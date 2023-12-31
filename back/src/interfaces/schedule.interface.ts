@@ -37,20 +37,31 @@ export interface ISchedule {
 }
 
 export interface IAlgorithmParams {
-    targetHourExceedRateLimit: number,
-    shuffleCourses: boolean,
-    fixedIndexesDuringShuffle: number,
     maxSchedulesToProcess: number,
     maxMsDeadlineToProcess: number,
+    maxAmountToReturn: number,
+    useGeneticAlgorithm: boolean,
 
     greedyPruning: boolean,
+    shuffleCourses: boolean,
+    fixedIndexesDuringShuffle: number,
+    targetHourExceedRateLimit: number,
     minAmountOfSchedulesToPruneByAvg: number,
     minAmountOfProcessedCoursesToPruneByAvg: number,
     minHoursToPruneByAvg: number,
-    maxAmountToReturn: number
+
+    generationSize: number,
+    generations: number,
+    bestPickedFromEachGeneration: number
 };
 
 export interface IScheduleWithScore {
     schedule: ISchedule,
+    score: number,
+}
+
+export interface IGeneticIndexCombinationWithScore {
+    schedule: ISchedule | undefined,
+    combo: number[],
     score: number,
 }
