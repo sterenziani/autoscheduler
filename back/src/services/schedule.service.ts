@@ -46,9 +46,9 @@ export default class ScheduleService {
             maxMsDeadlineToProcess: parseFloat(process.env.ALGORITHM_MAX_MS_DEADLINE_TO_PROCESS?? '2000'),
 
             greedyPruning: (process.env.ALGORITHM_GREEDY_PRUNING=='true'),
-            minAmountOfSchedulesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG?? '25'),
+            minAmountOfSchedulesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG?? '10'),
             minAmountOfProcessedCoursesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_PROCESSED_COURSES_TO_PRUNE_BY_AVG?? '3'),
-            minHoursToPruneByAvg: parseFloat(process.env.ALGORITHM_MIN_HOURS_TO_PRUNE_BY_AVG?? '10'),
+            minHoursToPruneByAvg: parseFloat(process.env.ALGORITHM_MIN_HOURS_TO_PRUNE_BY_AVG?? '3'),
 
             maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '25')
         };
@@ -87,6 +87,7 @@ export default class ScheduleService {
         if(DEBUG){
             console.log("Valid schedules avg score: " +(schedules.map(i=>i.score).reduce((a, b) => a + b) / schedules.length));
             console.log("Returned results avg score: " +(topResults.map(i=>i.score).reduce((a, b) => a + b) / topResults.length));
+            console.log("Returning " +topResults.length +" results with score " +topResults[0].score +" - " +topResults[topResults.length-1].score)
             console.log("Finished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds.");
         }
 
@@ -202,7 +203,7 @@ export default class ScheduleService {
                 // If adding a class belonging to the current course to an existing combo is valid, push it to the array
                 for (const cc of viableCourseClassesArray[index]) {
                     if(new Date() > deadline || processedCombos > this.algorithmParams.maxSchedulesToProcess){        console.log();
-                        if(DEBUG) console.log((this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +(validSchedules.length+newValidSchedules.length) +" of those were used.")
+                        if(DEBUG) console.log("\n"+(this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +(validSchedules.length+newValidSchedules.length) +" of those were used.")
                         return validSchedules.concat(newValidSchedules);
                     }
 
@@ -225,7 +226,7 @@ export default class ScheduleService {
             validSchedules = validSchedules.concat(newValidSchedules);
             index += 1;
         }
-        if(DEBUG) console.log((this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +validSchedules.length +" of those were used.")
+        if(DEBUG) console.log("\n"+(this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +validSchedules.length +" of those were used.")
         return validSchedules;
     }
 
