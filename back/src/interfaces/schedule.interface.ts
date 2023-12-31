@@ -54,3 +54,9 @@ export interface IScheduleWithScore {
     schedule: ISchedule,
     score: number,
 }
+
+export interface IGeneticIndexCombinationWithScore {
+    schedule: ISchedule | undefined,
+    combo: number[],
+    score: number,
+}
