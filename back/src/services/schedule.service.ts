@@ -12,7 +12,8 @@ import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
 import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
 
-const DEBUG = false;
+const DEBUG = true;
+const GENETIC_GENERATION_SIZE = 25000;
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -76,7 +77,7 @@ export default class ScheduleService {
         // STEP 8 - Calculate stats for each valid schedule (done while combining courseClasses)
         // STEP 9 - Calculate score for each schedule (done while combining courseClasses)
         const deadline = new Date(Date.now() + this.algorithmParams.maxMsDeadlineToProcess);
-        const schedules = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline);
+        const schedules = this.getCourseClassCombinationsGenetic(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline);
 
         // STEP 10 - Return sorted list of schedules by score
         const resp = schedules.sort((a, b) =>  b.score-a.score);
@@ -157,7 +158,7 @@ export default class ScheduleService {
         const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
         if(this.algorithmParams.shuffleCourses){
             for (let i = viableCourseClassesArray.length-1; i > this.algorithmParams.fixedIndexesDuringShuffle; i--) {
-                const j = this.algorithmParams.fixedIndexesDuringShuffle + Math.floor(Math.random() * (i + 1 - this.algorithmParams.fixedIndexesDuringShuffle+1));
+                const j = this.algorithmParams.fixedIndexesDuringShuffle + Math.floor(Math.random() * (i + 1 - this.algorithmParams.fixedIndexesDuringShuffle*2));
                 [viableCourseClassesArray[i], viableCourseClassesArray[j]] = [viableCourseClassesArray[j], viableCourseClassesArray[i]];
             }
         }
@@ -201,7 +202,7 @@ export default class ScheduleService {
 
                 // If adding a class belonging to the current course to an existing combo is valid, push it to the array
                 for (const cc of viableCourseClassesArray[index]) {
-                    if(new Date() > deadline || processedCombos > this.algorithmParams.maxSchedulesToProcess){        console.log();
+                    if(new Date() > deadline || processedCombos > this.algorithmParams.maxSchedulesToProcess){
                         if(DEBUG) console.log((this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +(validSchedules.length+newValidSchedules.length) +" of those were used.")
                         return validSchedules.concat(newValidSchedules);
                     }
@@ -227,6 +228,142 @@ export default class ScheduleService {
         }
         if(DEBUG) console.log((this.algorithmParams.greedyPruning?"With":"Without") +" pruning, processed " +processedCombos +" schedules in total. " +validSchedules.length +" of those were used.")
         return validSchedules;
+    }
+
+    private getCourseClassCombinationsGenetic(inputData: IScheduleInputData, unavailableTimeSlots: TimeRange[], targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean, deadline: Date): IScheduleWithScore[] {
+        let processedCombos = 0;
+        const startTimestamp = new Date();
+        const viableCourseClassesArray = this.getSortedViableCourseClassesArray(inputData, unavailableTimeSlots);
+
+        let gen1: number[][] = []
+        let scores: number[] = []
+
+        // GENERATE GEN 1
+        console.log("Gen 1")
+        for(let i=0; i < GENETIC_GENERATION_SIZE/2; i++){
+            const ccArray = this.createRandomCourseClassCombination(viableCourseClassesArray);
+            const s = this.buildRandomCourseClassCombinationSchedule(ccArray, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+            gen1.push(ccArray);
+            scores.push(s.score);
+            processedCombos++;
+        }
+        this.normalize(scores)
+
+
+        // BREED GEN 2
+        console.log("Gen 2")
+        let gen2: number[][] = []
+        let newScores = []
+        for(let x=0; x < GENETIC_GENERATION_SIZE; x++){
+            // Pick our parents using Tournament
+            let parentIndex1 = 0
+            let parentIndex2 = 0
+            for(let i=0; i < scores.length; i++) {
+                // See if picked as parent1. If picked as a candidate, save best candidate so far
+                if(Math.random() < scores[i] && scores[parentIndex1] <= scores[i])
+                    parentIndex1 = i
+                // If not picked as parent1, see if picked as parent2
+                else if(Math.random() < scores[i] && scores[parentIndex2] <= scores[i])
+                    parentIndex2 = i
+            }
+
+            const [ccArray1, ccArray2] = this.breed(gen1[parentIndex1], gen1[parentIndex2], viableCourseClassesArray);
+            const s1 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+            gen2.push(ccArray1);
+            newScores.push(s1.score);
+            processedCombos++;
+
+            const s2 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+            gen2.push(ccArray2);
+            newScores.push(s2.score);
+            processedCombos++;
+        }
+        gen1 = gen2;
+        scores = newScores;
+        gen2 = [];
+        newScores = []
+        this.normalize(scores);
+
+        const schedules: IScheduleWithScore[] = []
+        console.log("Finished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds, processed " +processedCombos +" combos");
+        console.log("Preparing schedules")
+        for(let i=0; i < scores.length; i++){
+            if(scores[i] > 0){
+                const s = this.buildRandomCourseClassCombinationSchedule(gen1[i], inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
+                schedules.push(s)
+            }
+        }
+        return schedules
+    }
+
+    private normalize(arr: number[]) {
+        const min = Math.min(...arr)
+        const max = Math.max(...arr)
+        for(let i=0; i < arr.length; i++){
+            if(arr[i] == Number.MIN_VALUE)
+                arr[i] = 0;
+            else
+                arr[i] = (arr[i] - min) / (max - min);
+        }
+    }
+
+    private breed(x: number[], y: number[], viableCourseClassesArray: CourseClass[][]): number[][] {
+        const a = [...x]
+        const b = [...y]
+        for(let c=0; c < a.length; c++){
+            // If selected, swap
+            if(Math.random() < 0.5)
+                [a[c], b[c]] = [b[c], a[c]];
+
+            // Small chance of mutating class
+            if(Math.random() < 0.05)
+                a[c] = Math.floor(Math.random() * (viableCourseClassesArray[c].length*2))
+            if(Math.random() < 0.05)
+                b[c] = Math.floor(Math.random() * (viableCourseClassesArray[c].length*2))
+        }
+        return [a, b]
+    }
+
+    private createRandomCourseClassCombination(viableCourseClassesArray: CourseClass[][]): number[] {
+        const ccSelection: number[] = [];
+        for(let i=0; i < viableCourseClassesArray.length; i++){
+            const j = Math.floor(Math.random() * (viableCourseClassesArray[i].length + 1));
+            ccSelection.push(j);
+        }
+        return ccSelection;
+    }
+
+    private buildRandomCourseClassCombinationSchedule(ccArray: number[], inputData: IScheduleInputData, viableCourseClassesArray: CourseClass[][], targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean): IScheduleWithScore{
+        if(this.isRandomClassCombinationValid(ccArray, viableCourseClassesArray, inputData.incompatibilityCache)){
+            const combo: CourseClass[] = []
+            for(let c = 0; c < ccArray.length-1; c++){
+                if(ccArray[c] < viableCourseClassesArray[c].length)
+                    combo.push(viableCourseClassesArray[c][ccArray[c]])
+            }
+            const schedule = this.createSchedule(combo, inputData)
+            const score = this.calculateScheduleScore(schedule, targetHours, reduceDays, prioritizeUnlocks)
+            return {schedule, score}
+        }
+        return {schedule: this.createSchedule([], inputData), score: Number.MIN_VALUE}
+    }
+
+    private isRandomClassCombinationValid(ccArray: number[], viableCourseClassesArray: CourseClass[][],  cache: Map<string, Set<string>>): boolean {
+        for(let c1 = 0; c1 < ccArray.length-1; c1++){
+            for(let c2 = c1; c2 < ccArray.length; c2++){
+                // If one of the courseClasses is blank, there's no problem
+                const ccIdx1 = ccArray[c1];
+                const ccIdx2 = ccArray[c2];
+                if(ccIdx1 >= viableCourseClassesArray[c1].length || ccIdx2 >= viableCourseClassesArray[c2].length)
+                    continue;
+
+                // If cache says the CCs are incompatible, return false
+                const ccId1 = viableCourseClassesArray[c1][ccIdx1].id;
+                const ccId2 = viableCourseClassesArray[c2][ccIdx2].id;
+                if(cache.get(ccId1)?.has(ccId2) || cache.get(ccId2)?.has(ccId1))
+                    return false;
+            }
+        }
+        return true;
     }
 
     private isClassCombinationValid(courseClasses: CourseClass[], ccIdToAdd: string, cache: Map<string, Set<string>>): boolean {
