@@ -12,10 +12,7 @@ import Time from '../helpers/classes/time.class';
 import TimeRange from '../helpers/classes/timeRange.class';
 import { DEFAULT_DISTANCE } from '../constants/schedule.constants';
 
-const DEBUG = true;
-const GENETIC_GENERATION_SIZE = 250;
-const GENERATIONS = 100;
-const BEST_PICKED_FROM_EACH_GENERATION = 10;
+const DEBUG = false;
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -42,18 +39,23 @@ export default class ScheduleService {
         this.termService = TermService.getInstance();
         this.programService = ProgramService.getInstance();
         this.algorithmParams = {
-            targetHourExceedRateLimit: parseFloat(process.env.ALGORITHM_TARGET_HOUR_EXCEED_RATE_LIMIT?? '1.25'),
-            shuffleCourses: (process.env.ALGORITHM_SHUFFLE_COURSES=='true'),
-            fixedIndexesDuringShuffle: parseInt(process.env.ALGORITHM_SHUFFLE_FIXED_INDEXES?? '3'),
             maxSchedulesToProcess: parseInt(process.env.ALGORITHM_MAX_SCHEDULES_TO_PROCESS?? '500000'),
             maxMsDeadlineToProcess: parseFloat(process.env.ALGORITHM_MAX_MS_DEADLINE_TO_PROCESS?? '2000'),
+            maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '25'),
+            useGeneticAlgorithm: (process.env.ALGORITHM_USE_GENETIC=='true'),
 
             greedyPruning: (process.env.ALGORITHM_GREEDY_PRUNING=='true'),
+            shuffleCourses: (process.env.ALGORITHM_SHUFFLE_COURSES=='true'),
+            fixedIndexesDuringShuffle: parseInt(process.env.ALGORITHM_SHUFFLE_FIXED_INDEXES?? '3'),
+            targetHourExceedRateLimit: parseFloat(process.env.ALGORITHM_TARGET_HOUR_EXCEED_RATE_LIMIT?? '1.25'),
             minAmountOfSchedulesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG?? '25'),
             minAmountOfProcessedCoursesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_PROCESSED_COURSES_TO_PRUNE_BY_AVG?? '3'),
             minHoursToPruneByAvg: parseFloat(process.env.ALGORITHM_MIN_HOURS_TO_PRUNE_BY_AVG?? '10'),
 
-            maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN?? '25')
+            generationSize: parseInt(process.env.ALGORITHM_GENETIC_GENERATION_SIZE?? '25'),
+            generations: parseInt(process.env.ALGORITHM_GENERATIONS?? '2500'),
+            bestPickedFromEachGeneration: parseInt(process.env.ALGORITHM_BEST_PICKED_FROM_EACH_GENERATION?? '10'),
+
         };
     }
 
@@ -79,7 +81,11 @@ export default class ScheduleService {
         // STEP 8 - Calculate stats for each valid schedule (done while combining courseClasses)
         // STEP 9 - Calculate score for each schedule (done while combining courseClasses)
         const deadline = new Date(Date.now() + this.algorithmParams.maxMsDeadlineToProcess);
-        const schedules = this.getCourseClassCombinationsGenetic(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline, amountToReturn);
+        let schedules: IScheduleWithScore[] = []
+        if(this.algorithmParams.useGeneticAlgorithm)
+            schedules = this.getCourseClassCombinationsGenetic(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline, amountToReturn);
+        else
+            schedules = this.getCourseClassCombinations(inputData, unavailableTimeSlots, targetHours, reduceDays, prioritizeUnlocks, deadline);
 
         // STEP 10 - Return sorted list of schedules by score
         const resp = schedules.sort((a, b) =>  b.score-a.score);
@@ -87,7 +93,7 @@ export default class ScheduleService {
         winners = Math.min(this.algorithmParams.maxAmountToReturn, winners)     // Limit to MAX_AMOUNT_TO_RETURN
         const topResults = resp.slice(0, Math.max(amountToReturn, winners));    // Return as many as requested and then some in case of tie
 
-        if(DEBUG){
+        if(DEBUG && topResults.length > 0){
             console.log("Valid schedules avg score: " +(schedules.map(i=>i.score).reduce((a, b) => a + b) / schedules.length));
             console.log("Returned results avg score: " +(topResults.map(i=>i.score).reduce((a, b) => a + b) / topResults.length));
             console.log("Returning " +topResults.length +" results with score " +topResults[0].score +" - " +topResults[topResults.length-1].score)
@@ -146,9 +152,6 @@ export default class ScheduleService {
                 if(classes.length > 0)
                     viableCourseClassesArray.push(classes);
             }
-
-            const course = inputData.courses.get(courseId);
-            if(!course) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
         }
         return viableCourseClassesArray;
     }
@@ -244,7 +247,7 @@ export default class ScheduleService {
         let population: IGeneticIndexCombinationWithScore[] = [];
 
         // GENERATE GEN 1
-        for(let i=0; i < GENETIC_GENERATION_SIZE && new Date() < deadline; i++){
+        for(let i=0; i < this.algorithmParams.generationSize && new Date() < deadline && processedCombos < this.algorithmParams.maxSchedulesToProcess; i++){
             const ccArray = this.createRandomCourseClassCombination(viableCourseClassesArray);
             const s = this.buildRandomCourseClassCombinationSchedule(ccArray, inputData, viableCourseClassesArray, targetHours, reduceDays, prioritizeUnlocks);
             population.push(s);
@@ -253,9 +256,9 @@ export default class ScheduleService {
         this.updateBestSchedules(population, bestCombos, bestSchedules);
 
         let gen = 2;
-        while(gen <= GENERATIONS){
+        while(gen <= this.algorithmParams.generations){
             let newGen: IGeneticIndexCombinationWithScore[] = [];
-            for(let x=0; x < GENETIC_GENERATION_SIZE/2 && new Date() < deadline; x++){
+            for(let x=0; x < this.algorithmParams.generationSize/2 && new Date() < deadline && processedCombos < this.algorithmParams.maxSchedulesToProcess; x++){
                 // Pick our parents using Tournament
                 let parentIndex1 = 0;
                 let parentIndex2 = 0;
@@ -290,12 +293,12 @@ export default class ScheduleService {
                                                     score: s.score
                                                 }});
 
-        if(DEBUG) console.log("\nFinished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds, processed " +processedCombos +" combos");
+        if(DEBUG) console.log("\nFinished in " +((new Date().getTime()-startTimestamp.getTime())/1000)  +" seconds, processed " +processedCombos +" combinations");
         return schedules
     }
 
     private updateBestSchedules(population: IGeneticIndexCombinationWithScore[], bestCombos: Set<string>, bestSchedules: IGeneticIndexCombinationWithScore[]) {
-        population.sort((a, b) =>  b.score-a.score).slice(0, BEST_PICKED_FROM_EACH_GENERATION).forEach(item => {
+        population.sort((a, b) =>  b.score-a.score).slice(0, this.algorithmParams.bestPickedFromEachGeneration).forEach(item => {
             if(!bestCombos.has(item.combo.toString())){
                 bestCombos.add(item.combo.toString());
                 bestSchedules.push(item);
@@ -332,7 +335,7 @@ export default class ScheduleService {
     private buildRandomCourseClassCombinationSchedule(ccArray: number[], inputData: IScheduleInputData, viableCourseClassesArray: CourseClass[][], targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean): IGeneticIndexCombinationWithScore{
         if(this.isRandomClassCombinationValid(ccArray, viableCourseClassesArray, inputData.incompatibilityCache)){
             const combo: CourseClass[] = []
-            for(let c = 0; c < ccArray.length-1; c++){
+            for(let c = 0; c < ccArray.length; c++){
                 if(ccArray[c] < viableCourseClassesArray[c].length)
                     combo.push(viableCourseClassesArray[c][ccArray[c]])
             }
