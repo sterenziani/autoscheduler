@@ -104,12 +104,12 @@ export default class TimeRange {
         if(this.overlaps(other)) return -1;
 
         const thisDay = this.dayOfWeek*DAY_LENGTH_IN_MINUTES;
-        let thisStartMinute = thisDay + this.startTime.getValueInMinutes();
-        let thisEndMinute = thisDay + this.endTime.getValueInMinutes();
+        const thisStartMinute = thisDay + this.startTime.getValueInMinutes();
+        const thisEndMinute = thisDay + this.endTime.getValueInMinutes();
 
         const otherDay = other.dayOfWeek*DAY_LENGTH_IN_MINUTES;
-        let otherStartMinute = otherDay + other.startTime.getValueInMinutes();
-        let otherEndMinute = otherDay + other.endTime.getValueInMinutes();
+        const otherStartMinute = otherDay + other.startTime.getValueInMinutes();
+        const otherEndMinute = otherDay + other.endTime.getValueInMinutes();
 
         if(thisEndMinute <= otherStartMinute)
             return Math.min(otherStartMinute-thisEndMinute, thisStartMinute+7*DAY_LENGTH_IN_MINUTES - otherEndMinute);
