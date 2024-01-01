@@ -115,16 +115,16 @@ export default class ScheduleService {
                         // check if course is already included to otherCourseClasses
                         const otherCourseId = inputData.courseOfCourseClass.get(otherCourseClassId);
                         if (!otherCourseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-                        if (otherScheduleDataCache.courseIds.has(courseId))
+                        if (otherScheduleDataCache.courseIds.has(courseId)) continue;
     
                         // check overlaps & distance
                         if (!this.isClassCombinationValid(otherScheduleDataCache.courseClassIds, currentCourseClassId, inputData, ccCompatibleCache)) continue;
     
                         // check if better than currentBest
                         const newScheduleDataCache = this.addToScheduleDataCache(currentCourseClassId, otherScheduleDataCache, inputData);
-                        const otherScore = this.calculateScheduleScore(newScheduleDataCache, targetHours, reduceDays, prioritizeUnlocks);
-                        if (otherScore > currentStepBestScore) {
-                            currentStepBestScore = otherScore;
+                        const newScheduleDataScore = this.calculateScheduleScore(newScheduleDataCache, targetHours, reduceDays, prioritizeUnlocks);
+                        if (newScheduleDataScore > currentStepBestScore) {
+                            currentStepBestScore = newScheduleDataScore;
                             currentStepBestScheduleCache = newScheduleDataCache;
                         }
                     }
