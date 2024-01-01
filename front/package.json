@@ -41,7 +41,8 @@
     "@babel/plugin-proposal-class-properties": "npm:@babel/plugin-transform-class-properties@^7.23.3",
     "@babel/plugin-proposal-optional-chaining": "npm:@babel/plugin-transform-optional-chaining@^7.23.3",
     "@babel/plugin-proposal-nullish-coalescing-operator": "npm:@babel/plugin-transform-nullish-coalescing-operator@^7.23.3",
-    "sourcemap-codec": "npm:@jridgewell/sourcemap-codec@^1.4.15"
+    "sourcemap-codec": "npm:@jridgewell/sourcemap-codec@^1.4.15",
+    "rollup-plugin-terser": "npm:@rollup/plugin-terser@^0.4.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -87,6 +88,8 @@
     "serve": "^14.2.0"
   },
   "overrides": {
-    "svgo": "^2"
+    "svgo": "^2",
+    "rollup-plugin-terser": "npm:@rollup/plugin-terser@^0.4.4",
+    "workbox-cacheable-response": "npm:workbox-background-sync@^6.6.0"
   }
 }
