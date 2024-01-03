@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Modal, Spinner } from 'react-bootstrap';
+import { Button, Modal, Spinner, Form } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK } from '../../resources/ApiConstants';
 import CourseList from './CourseList';
@@ -143,6 +143,7 @@ function StudentCourseLog(props) {
                         <Modal.Header closeButton>
                             <Modal.Title>{t('modal.addCourse')}</Modal.Title>
                         </Modal.Header>
+                        <Form>
                         <Modal.Body>
                             <div data-testid="program-select">
                             <FormAsyncSelect
@@ -186,7 +187,7 @@ function StudentCourseLog(props) {
                         </Button>
                         {courseToAdd && courseToAdd !== ''
                         ? [
-                            <Button key="enabled-add" variant="secondary" onClick={() => {addCourse(courseToAdd)}}>
+                            <Button key="enabled-add" type="submit" variant="secondary" onClick={() => {addCourse(courseToAdd)}}>
                                 {t('modal.add')}
                             </Button>
                         ]
@@ -196,6 +197,7 @@ function StudentCourseLog(props) {
                             </Button>
                         ]}
                         </Modal.Footer>
+                        </Form>
                     </Modal>
                 </div>
             }
