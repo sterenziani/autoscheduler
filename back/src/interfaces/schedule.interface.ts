@@ -25,16 +25,21 @@ export interface IScheduleInputData {
     remainingOptionalCredits: number                    // Remaining optional course credits needed to graduate
 }
 
-export interface IScheduleData {
-    totalHours: number;
-    totalDays: number;
-    totalImportance: number;
-    mandatoryRate: number;
-    earliestLecture: Time;
-    latestLecture: Time;
+export interface IScheduleParams {
+    targetHours: number,
+    reduceDays: boolean,
+    prioritizeUnlocks: boolean,
 }
 
-export type ISchedule = {courseClasses: CourseClass[];} & IScheduleData;
+export interface ISchedule {
+    courseClasses: CourseClass[],
+    totalHours: number,
+    totalDays: number,
+    totalImportance: number,
+    mandatoryRate: number,
+    earliestLecture: Time,
+    latestLecture: Time,
+}
 
 export interface IScheduleDataCache {
     courseClassIds: Set<string>;
@@ -43,9 +48,10 @@ export interface IScheduleDataCache {
     totalDays: Set<DAY>;
     optionalCourses: number;
     totalImportance: number,
+    score: number,
 }
 
 export interface IScheduleWithScore {
     schedule: ISchedule,
-    score: number
+    score: number,
 }

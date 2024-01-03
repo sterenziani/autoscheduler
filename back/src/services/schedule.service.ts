@@ -1,4 +1,4 @@
-import { IScheduleData, IScheduleDataCache, IScheduleInputData } from '../interfaces/schedule.interface';
+import { IScheduleDataCache, IScheduleInputData, IScheduleParams } from '../interfaces/schedule.interface';
 import { ERRORS } from '../constants/error.constants';
 import GenericException from '../exceptions/generic.exception';
 import ScheduleDao from '../persistence/abstract/schedule.dao';
@@ -12,6 +12,7 @@ import { DAY } from '../constants/time.constants';
 
 const SECOND_IN_MS = 1000;
 const MAX_MS_DEADLINE_TO_PROCESS = 60*SECOND_IN_MS; // TODO reduce amount once tested
+const SAVED_RANKING = 3; // must be < 1
 
 export default class ScheduleService {
     private static instance: ScheduleService;
@@ -44,6 +45,8 @@ export default class ScheduleService {
         amountToReturn=10
     ): Promise<IScheduleWithScore[]> {
 
+        const scheduleParams: IScheduleParams = { targetHours, reduceDays, prioritizeUnlocks };
+
         // STEPS 1-4 - Get all information needed
         const inputData: IScheduleInputData = await this.dao.getScheduleInfo(universityId, programId, termId, studentId);
 
@@ -63,23 +66,25 @@ export default class ScheduleService {
         const stepMinutes = this.getStep(inputData);
         const expireMinutes = stepMinutes * Math.ceil(maxMinutes / stepMinutes);
         const ccCompatibleCache: Map<string, Map<string, boolean>> = new Map();
-        const scheduleMap: Map<number, Map<string, IScheduleDataCache>> = new Map();
+        
+        const scheduleDataMap: Map<number, IScheduleDataCache[]> = new Map();
+        const insertedCombos = new Set<string>();
+        const currentStepCache: Map<string, IScheduleDataCache> = new Map();
+        const currentBest: Map<string, IScheduleDataCache[]> = new Map();
 
         let firstMinutes = targetMinutes % stepMinutes;
         while (firstMinutes + stepMinutes < minMinutes) firstMinutes += stepMinutes;
         let currentMinutes = firstMinutes;
 
         // fill first step with empty array
-        for (const courceClassId of courseClasses) {
-            scheduleMap.set(currentMinutes, new Map());
-            scheduleMap.get(currentMinutes)?.set(courceClassId, this.generateScheduleDataCache()); 
+        scheduleDataMap.set(currentMinutes, []);
+        for (const courseClassId of courseClasses) {
+            currentBest.set(courseClassId, []);
         }
         currentMinutes+=stepMinutes;
 
         while(currentMinutes <= targetMinutes && new Date() < deadline) {
-            scheduleMap.set(currentMinutes, new Map());
-            let currentStepBestScheduleCache = this.generateScheduleDataCache();
-            let currentStepBestScore = 0;
+            scheduleDataMap.set(currentMinutes, []);
 
             for (const currentCourseClassId of courseClasses) {
                 const courseId = inputData.courseOfCourseClass.get(currentCourseClassId);
@@ -88,70 +93,70 @@ export default class ScheduleService {
                 const courseClassMinutes = inputData.weeklyClassTimeInMinutes.get(currentCourseClassId);
                 if (courseClassMinutes === undefined) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
                 // if the course can't be included we just skip this step
-                if (currentMinutes - courseClassMinutes < 0) {
-                    scheduleMap.get(currentMinutes)?.set(currentCourseClassId, this.generateScheduleDataCache());
-                    continue;
-                }
+                if (currentMinutes - courseClassMinutes < 0) continue;
 
-                let previousStepScheduleDataCache: IScheduleDataCache | undefined = scheduleMap.get(currentMinutes - stepMinutes)?.get(currentCourseClassId);
                 // if previous is empty then we want to define the set with only this value
-                if (!previousStepScheduleDataCache || previousStepScheduleDataCache.courseClassIds.size < 1) {
-                    previousStepScheduleDataCache = this.addToScheduleDataCache(currentCourseClassId, this.generateScheduleDataCache(), inputData);
+                if ((currentBest.get(currentCourseClassId)?.length ?? 0) < 1) {
+                    const firstScheduleDataCache = this.addToScheduleDataCache(currentCourseClassId, this.generateScheduleDataCache(), inputData, scheduleParams)
+                    currentBest.set(currentCourseClassId, [firstScheduleDataCache]);
+                    currentStepCache.set([currentCourseClassId].toString(), firstScheduleDataCache);
                 }
-                currentStepBestScheduleCache = previousStepScheduleDataCache;
-                currentStepBestScore = this.calculateScheduleScore(currentStepBestScheduleCache, targetHours, reduceDays, prioritizeUnlocks);
 
                 // iterate courseClasses
                 const closestStep = currentMinutes - courseClassMinutes;
                 if (closestStep > firstMinutes) {
-                    for (const otherCourseClassId of courseClasses) {
-                        const otherScheduleDataCache: IScheduleDataCache | undefined = scheduleMap.get(closestStep)?.get(otherCourseClassId);
-                        // we don't consider the other array if empty
+                    const otherSchedulesDataCache: IScheduleDataCache[] = scheduleDataMap.get(closestStep) ?? [];
+                    for (const otherScheduleDataCache of otherSchedulesDataCache) {
+                        // we don't consider the other set if empty
                         if (!otherScheduleDataCache || otherScheduleDataCache.courseClassIds.size < 1) continue;
     
                         // check if courseClass is already included
                         if (otherScheduleDataCache.courseClassIds.has(currentCourseClassId)) continue;
 
                         // check if course is already included to otherCourseClasses
-                        const otherCourseId = inputData.courseOfCourseClass.get(otherCourseClassId);
-                        if (!otherCourseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
                         if (otherScheduleDataCache.courseIds.has(courseId)) continue;
     
                         // check overlaps & distance
                         if (!this.isClassCombinationValid(otherScheduleDataCache.courseClassIds, currentCourseClassId, inputData, ccCompatibleCache)) continue;
     
                         // check if better than currentBest
-                        const newScheduleDataCache = this.addToScheduleDataCache(currentCourseClassId, otherScheduleDataCache, inputData);
-                        const newScheduleDataScore = this.calculateScheduleScore(newScheduleDataCache, targetHours, reduceDays, prioritizeUnlocks);
-                        if (newScheduleDataScore > currentStepBestScore) {
-                            currentStepBestScore = newScheduleDataScore;
-                            currentStepBestScheduleCache = newScheduleDataCache;
-                        }
+                        const newCourseClassesKey = Array.from(new Set(otherScheduleDataCache.courseClassIds).add(currentCourseClassId)).sort().toString();
+                        const newScheduleDataCache = currentStepCache.get(newCourseClassesKey) ?? this.addToScheduleDataCache(currentCourseClassId, otherScheduleDataCache, inputData, scheduleParams);
+                        this.pushToScheduleDataCacheArray(currentBest.get(currentCourseClassId)!, newScheduleDataCache);
+                        if (!currentStepCache.has(newCourseClassesKey)) currentStepCache.set(newCourseClassesKey, newScheduleDataCache);
                     }
                 }
 
                 // update best for currentCourseClassId
-                scheduleMap.get(currentMinutes)?.set(currentCourseClassId, currentStepBestScheduleCache);
+                for (const scheduleCache of currentBest.get(currentCourseClassId)!) {
+                    const currentComboKey = Array.from(scheduleCache.courseClassIds).sort().toString();
+                    // duplication check
+                    if (insertedCombos.has(currentComboKey)) continue;
+
+                    scheduleDataMap.get(currentMinutes)?.push(scheduleCache);
+                    insertedCombos.add(currentComboKey);
+                }
             }
 
             // delete no longer needed values
-            if (scheduleMap.has(currentMinutes-expireMinutes)) {
-                scheduleMap.get(currentMinutes-expireMinutes)?.clear();
-                scheduleMap.delete(currentMinutes-expireMinutes);
+            currentStepCache.clear();
+            insertedCombos.clear();
+            if (scheduleDataMap.has(currentMinutes-expireMinutes)) {
+                scheduleDataMap.delete(currentMinutes-expireMinutes);
             }
+            
             // increase currentMinutes
             currentMinutes+=stepMinutes;
         }
 
         // convert to schedules
         const schedules: IScheduleWithScore[] = [];
-        for (const scheduleData of scheduleMap.get(currentMinutes-stepMinutes)?.values() ?? []) {
+        for (const scheduleData of scheduleDataMap.get(currentMinutes-stepMinutes) ?? []) {
             const courseClasses = Array.from(scheduleData.courseClassIds);
             const schedule = this.createSchedule(courseClasses, inputData);
-            const score = this.calculateScheduleScore(scheduleData, targetHours, reduceDays, prioritizeUnlocks);
-            schedules.push({ schedule, score });
+            schedules.push({ schedule, score: scheduleData.score });
         }
-
+        
         return schedules.sort((a, b) =>  b.score-a.score).slice(0, amountToReturn);
     }
 
@@ -270,15 +275,8 @@ export default class ScheduleService {
         return minDifference;
     }
 
-    private createSchedule(courseClassIds: string[], inputData: IScheduleInputData): ISchedule {
-        return {
-            courseClasses: courseClassIds.map(ccId => inputData.courseClasses.get(ccId)).filter(cc => cc !== undefined) as CourseClass[],
-            ...this.calculateScheduleData(courseClassIds, inputData)
-        };
-    }
-
     // TODO use scheduleData instead
-    private calculateScheduleData(courseClassIds: string[], inputData: IScheduleInputData): IScheduleData {
+    private createSchedule(courseClassIds: string[], inputData: IScheduleInputData): ISchedule {
         let totalMinutes = 0;
         const totalDays = new Set();
         let totalImportance = 0;
@@ -308,13 +306,14 @@ export default class ScheduleService {
         }
 
         return {
+            courseClasses: courseClassIds.map(ccId => inputData.courseClasses.get(ccId)).filter(cc => cc !== undefined) as CourseClass[],
             totalHours: totalMinutes/60,
             totalDays: totalDays.size,
-            totalImportance: totalImportance,
+            totalImportance,
             mandatoryRate: amountOfMandatoryCourses / courseClassIds.length,
-            earliestLecture: earliestLecture,
-            latestLecture: latestLecture,
-        }
+            earliestLecture,
+            latestLecture,
+        };
     }
 
     private generateScheduleDataCache(): IScheduleDataCache {
@@ -325,10 +324,11 @@ export default class ScheduleService {
             totalImportance: 0,
             totalMinutes: 0,
             totalDays: new Set<DAY>(),
+            score: 0,
         }
     }
 
-    private addToScheduleDataCache(courseClassId: string, scheduleDataCache: IScheduleDataCache, inputData: IScheduleInputData): IScheduleDataCache {
+    private addToScheduleDataCache(courseClassId: string, scheduleDataCache: IScheduleDataCache, inputData: IScheduleInputData, scheduleParams: IScheduleParams): IScheduleDataCache {
         const courseId = inputData.courseOfCourseClass.get(courseClassId);
         const lectures = inputData.lecturesOfCourseClass.get(courseClassId);
         const weeklyClassTimeInMinutes = inputData.weeklyClassTimeInMinutes.get(courseClassId);
@@ -345,24 +345,43 @@ export default class ScheduleService {
             totalDays.add(lecture.time.dayOfWeek);
         }
 
-        return {
+        const newScheduleDataCache: IScheduleDataCache = {
             courseClassIds: (new Set<string>(scheduleDataCache.courseClassIds)).add(courseClassId),
             courseIds: (new Set<string>(scheduleDataCache.courseIds)).add(courseId),
             optionalCourses: scheduleDataCache.optionalCourses + (isOptional?1:0),
             totalImportance: scheduleDataCache.totalImportance + courseImportance,
             totalMinutes: scheduleDataCache.totalMinutes + weeklyClassTimeInMinutes,
             totalDays,
+            score: 0,
         }
+        newScheduleDataCache.score = this.calculateScheduleScore(newScheduleDataCache, scheduleParams);
+        return newScheduleDataCache;
     }
 
-    private calculateScheduleScore(scheduleDataCache: IScheduleDataCache, targetHours: number, reduceDays: boolean, prioritizeUnlocks: boolean): number {
+    // push to sorted array of SAVED_RANKING elements
+    private pushToScheduleDataCacheArray(scheduleDataCaches: IScheduleDataCache[], newScheduleDataCache: IScheduleDataCache): IScheduleDataCache[] {
+        const index = scheduleDataCaches.findIndex(sdc => sdc.score < newScheduleDataCache.score);
+        if (index === -1) {
+            scheduleDataCaches.push(newScheduleDataCache);
+        } else {
+            scheduleDataCaches.splice(index, 0, newScheduleDataCache);
+        }
+
+        // remove last element
+        if (scheduleDataCaches.length > SAVED_RANKING) {
+            scheduleDataCaches.pop();
+        }
+        return scheduleDataCaches;
+    }
+
+    private calculateScheduleScore(scheduleDataCache: IScheduleDataCache, scheduleParams: IScheduleParams): number {
         const p1 = 1 - (scheduleDataCache.optionalCourses / scheduleDataCache.courseClassIds.size);
-        const p2 = Math.abs(targetHours - (scheduleDataCache.totalMinutes / 60));
+        const p2 = Math.abs(scheduleParams.targetHours - (scheduleDataCache.totalMinutes / 60));
         const p3 = 7 - scheduleDataCache.totalDays.size;
         const p4 = scheduleDataCache.totalImportance;
-        const a = (reduceDays)? 1:0.1;
-        const b = (prioritizeUnlocks)? 1:0.2;
+        const a = (scheduleParams.reduceDays)? 1:0;
+        const b = (scheduleParams.prioritizeUnlocks)? 1:0;
 
-        return 10*p1 - 2.5*p2 + a*3.5*p3 + b*p4;
+        return 10*p1 - 1.25*p2 + a*3.5*p3 + b*p4;
     }
 }
