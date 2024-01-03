@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import AsyncSelect from 'react-select/async'
 import { components } from "react-select";
 
-const FormAsyncSelect = (props) => {
+const FormAsyncSelect = forwardRef((props, ref) => {
 
     // Testers previously complained about not being able to select the text content of AsyncSelect to overwrite it
     // This hides the selected option while the menu is open
@@ -14,8 +14,8 @@ const FormAsyncSelect = (props) => {
     }
 
     return (
-        <AsyncSelect components={{ SingleValue }} {...props}/>
+        <AsyncSelect components={{ SingleValue }} ref={ref} {...props}/>
     )
-};
+});
 
 export default FormAsyncSelect;

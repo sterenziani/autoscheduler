@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, Spinner, Form } from 'react-bootstrap';
@@ -26,6 +26,8 @@ function StudentCourseLog(props) {
     const [selectedProgramId,setselectedProgramId] = useState(student.program? student.program.id:undefined)
     const [courseToAdd,setCourseToAdd] = useState()
 
+    const courseSelectRef = useRef(null);
+
     useEffect(() => {
         const readPageInSearchParams = () => {
             const params = new URLSearchParams(search)
@@ -43,6 +45,11 @@ function StudentCourseLog(props) {
             loadCourses(requestedPage)
         }
     }, [search, courses, page, loading, error])
+
+    useEffect(() => {
+        if(showAddModal)
+            courseSelectRef.current?.focus();
+    }, [showAddModal])
 
     const changePage = (newPage) => {
         setPage(newPage)
@@ -143,7 +150,7 @@ function StudentCourseLog(props) {
                         <Modal.Header closeButton>
                             <Modal.Title>{t('modal.addCourse')}</Modal.Title>
                         </Modal.Header>
-                        <Form>
+                        <Form onSubmit={(e) => { e.preventDefault(); addCourse(courseToAdd) }}>
                         <Modal.Body>
                             <div data-testid="program-select">
                             <FormAsyncSelect
@@ -162,7 +169,7 @@ function StudentCourseLog(props) {
                             {
                                 selectedProgramId &&
                                 <div data-testid="course-select">
-                                    <FormAsyncSelect key={selectedProgramId}
+                                    <FormAsyncSelect key={selectedProgramId} ref={courseSelectRef}
                                         aria-label="course-select"
                                         className="text-black m-2"
                                         placeholder={t('forms.course')}
@@ -187,12 +194,12 @@ function StudentCourseLog(props) {
                         </Button>
                         {courseToAdd && courseToAdd !== ''
                         ? [
-                            <Button key="enabled-add" type="submit" variant="secondary" onClick={() => {addCourse(courseToAdd)}}>
+                            <Button key="enabled-add" type="submit" variant="secondary">
                                 {t('modal.add')}
                             </Button>
                         ]
                         : [
-                            <Button key="disabled-add" disabled variant="grey" onClick={() => {addCourse(courseToAdd)}}>
+                            <Button key="disabled-add" disabled variant="grey">
                                 {t('modal.add')}
                             </Button>
                         ]}
