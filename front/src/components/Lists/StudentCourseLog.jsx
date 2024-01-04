@@ -150,7 +150,7 @@ function StudentCourseLog(props) {
                         <Modal.Header closeButton>
                             <Modal.Title>{t('modal.addCourse')}</Modal.Title>
                         </Modal.Header>
-                        <Form onSubmit={(e) => { e.preventDefault(); addCourse(courseToAdd) }}>
+                        <Form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); addCourse(courseToAdd) }}>
                         <Modal.Body>
                             <div data-testid="program-select">
                             <FormAsyncSelect

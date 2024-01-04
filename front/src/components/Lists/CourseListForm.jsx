@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Row, Modal, Form, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
@@ -18,6 +18,13 @@ function CourseListForm(props) {
     const [courseToAdd, setCourseToAdd] = useState()
     const [creditRequirementToAdd, setCreditRequirementToAdd] = useState(0)
     const [error, setError] = useState()
+
+    const courseSelectRef = useRef(null)
+
+    useEffect(() => {
+        if(showAddModal)
+            courseSelectRef.current?.focus();
+    }, [showAddModal])
 
     const switchAddModal = () => {
         setShowAddModal(!showAddModal)
@@ -100,9 +107,10 @@ function CourseListForm(props) {
             <Modal.Header closeButton>
                 <Modal.Title>{t('modal.addCourse')}</Modal.Title>
             </Modal.Header>
+            <Form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); addCourse(courseToAdd) }}>
             <Modal.Body>
                 {
-                    <FormAsyncSelect key="course-select"
+                    <FormAsyncSelect key="course-select" ref={courseSelectRef}
                         className="text-black m-2"
                         placeholder={t('forms.course')}
                         cacheOptions
@@ -163,11 +171,12 @@ function CourseListForm(props) {
                 </Button>
                 {
                     courseToAdd && courseToAdd !== '' &&
-                    <Button key="enabled-add" variant="secondary" onClick={() => {addCourse()}}>
+                    <Button key="enabled-add" variant="secondary" type="submit">
                         {t('modal.add')}
                     </Button>
                 }
             </Modal.Footer>
+            </Form>
         </Modal>
         </React.Fragment>
     )
