@@ -1,5 +1,5 @@
 import { CREATED, OK, NO_CONTENT, INTERNAL_ERROR, TIMEOUT, TIMEOUT_ERROR, CONNECTION_ERROR, SERVICE_UNAVAILABLE } from '../resources/ApiConstants';
-import { DAYS, EXTRA_SUPPORTED, SUPPORTED_LOWER_LIMIT, SUPPORTED_UPPER_LIMIT, UPPER_CASE_LOWER_LIMIT, UPPER_CASE_UPPER_LIMIT } from '../resources/SystemConstants';
+import { DAYS, EXTRA_SUPPORTED, SUPPORTED_LOWER_LIMIT, SUPPORTED_UPPER_LIMIT } from '../resources/SystemConstants';
 import api from './api'
 import AuthService from './AuthService'
 const MULTI_PAGE_SEARCH_LIMIT = 20;

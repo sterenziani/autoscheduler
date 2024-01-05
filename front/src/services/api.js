@@ -1,11 +1,15 @@
 import axios from 'axios';
 import AuthService from './AuthService'
 
-const API_URL = process.env.REACT_APP_API_URL?? 'http://auto-scheduler.xyz/api'
+let apiBaseUrl = 'http://auto-scheduler.xyz/api';
+if (process.env.REACT_APP_API_URL !== undefined && process.env.REACT_APP_API_URL !== '') apiBaseUrl = process.env.REACT_APP_API_URL;
+
 const api = axios.create({
-    baseURL : API_URL,
-    timeout : 10000
-})
+    baseURL: apiBaseUrl,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+});
 
 const errorHandler = (error) => {
     return Promise.reject({ ...error })
