@@ -85,7 +85,7 @@ export interface IGeneticParams {
     bestPickedFromEachGeneration: number
 }
 
-export type ScoreMethod = (scheduleMetrics: IScheduleMetrics, scheduleParams: IScheduleParams) => number;
+export type ScoreMethod = (scheduleMetrics: IScheduleMetrics, scheduleParams: IScheduleParams, algorithmParams: IAlgorithmParams) => number;
 
 export interface IScheduleWithScore {
     schedule: ISchedule,

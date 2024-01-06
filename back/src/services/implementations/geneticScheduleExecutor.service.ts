@@ -36,7 +36,7 @@ export default class GeneticScheduleExecutorService extends ScheduleExecutorServ
             // GENERATE GEN 1
             for(let i=0; i < algorithmParams.generationSize && (!deadline || new Date() < deadline) && processedCombos < algorithmParams.maxSchedulesToProcess; i++){
                 const ccArray = this.createRandomCourseClassCombination(viableCourseClassesArray);
-                const s = this.buildRandomCourseClassCombinationSchedule(ccArray, inputData, viableCourseClassesArray, scheduleParams, scoreMethod);
+                const s = this.buildRandomCourseClassCombinationSchedule(ccArray, inputData, viableCourseClassesArray, scheduleParams, scoreMethod, algorithmParams);
                 population.push(s);
                 processedCombos++;
             }
@@ -61,10 +61,10 @@ export default class GeneticScheduleExecutorService extends ScheduleExecutorServ
                     const [ccArray1, ccArray2] = this.breed(population[parentIndex1].combo, population[parentIndex2].combo, viableCourseClassesArray);
                     processedCombos += 2;
     
-                    const s1 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, scheduleParams, scoreMethod);
+                    const s1 = this.buildRandomCourseClassCombinationSchedule(ccArray1, inputData, viableCourseClassesArray, scheduleParams, scoreMethod, algorithmParams);
                     newGen.push(s1);
     
-                    const s2 = this.buildRandomCourseClassCombinationSchedule(ccArray2, inputData, viableCourseClassesArray, scheduleParams, scoreMethod);
+                    const s2 = this.buildRandomCourseClassCombinationSchedule(ccArray2, inputData, viableCourseClassesArray, scheduleParams, scoreMethod, algorithmParams);
                     newGen.push(s2);
                 }
     
@@ -105,7 +105,7 @@ export default class GeneticScheduleExecutorService extends ScheduleExecutorServ
         return true;
     }
 
-    private buildRandomCourseClassCombinationSchedule(ccArray: number[], inputData: IScheduleInputData, viableCourseClassesArray: CourseClass[][], scheduleParams: IScheduleParams, scoreMethod: ScoreMethod): IGeneticIndexCombinationWithScore{
+    private buildRandomCourseClassCombinationSchedule(ccArray: number[], inputData: IScheduleInputData, viableCourseClassesArray: CourseClass[][], scheduleParams: IScheduleParams, scoreMethod: ScoreMethod, algorithmParams: IAlgorithmParams): IGeneticIndexCombinationWithScore{
         if(this.isRandomClassCombinationValid(ccArray, viableCourseClassesArray, inputData.incompatibilityCache)){
             const combo: string[] = [];
             for(let c = 0; c < ccArray.length; c++){
@@ -133,7 +133,7 @@ export default class GeneticScheduleExecutorService extends ScheduleExecutorServ
                 totalCourses: combo.length,
                 totalImportance: schedule.totalImportance
             }
-            const score = scoreMethod(scheduleMetrics, scheduleParams);
+            const score = scoreMethod(scheduleMetrics, scheduleParams, algorithmParams);
             return {schedule: schedule, combo: ccArray, score: score};
         }
         return {schedule: undefined, combo: ccArray, score: Number.MIN_VALUE}

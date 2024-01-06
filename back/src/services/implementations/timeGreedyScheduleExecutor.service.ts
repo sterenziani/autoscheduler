@@ -62,7 +62,7 @@ export default class TimeGreedyScheduleExecutorService extends ScheduleExecutorS
 
                 // if previous is empty then we want to define the set with only this value
                 if ((currentBest.get(currentCourseClassId)?.length ?? 0) < 1) {
-                    const firstScheduleDataCache = this.addToScheduleDataCache(currentCourseClassId, this.generateScheduleDataCache(), inputData, scheduleParams, scoreMethod);
+                    const firstScheduleDataCache = this.addToScheduleDataCache(currentCourseClassId, this.generateScheduleDataCache(), inputData, scheduleParams, scoreMethod, algorithmParams);
                     currentBest.set(currentCourseClassId, [firstScheduleDataCache]);
                     currentStepCache.set([currentCourseClassId].toString(), firstScheduleDataCache);
 
@@ -88,7 +88,7 @@ export default class TimeGreedyScheduleExecutorService extends ScheduleExecutorS
     
                         // check if better than currentBest
                         const newCourseClassesKey = Array.from(new Set(otherScheduleDataCache.courseClassIds).add(currentCourseClassId)).sort().toString();
-                        const newScheduleDataCache = currentStepCache.get(newCourseClassesKey) ?? this.addToScheduleDataCache(currentCourseClassId, otherScheduleDataCache, inputData, scheduleParams, scoreMethod);
+                        const newScheduleDataCache = currentStepCache.get(newCourseClassesKey) ?? this.addToScheduleDataCache(currentCourseClassId, otherScheduleDataCache, inputData, scheduleParams, scoreMethod, algorithmParams);
                         this.pushToScheduleDataArray(currentBest.get(currentCourseClassId)!, newScheduleDataCache, algorithmParams.bestPickedFromEachStep);
                         if (!currentStepCache.has(newCourseClassesKey)) currentStepCache.set(newCourseClassesKey, newScheduleDataCache);
 
@@ -183,7 +183,8 @@ export default class TimeGreedyScheduleExecutorService extends ScheduleExecutorS
         scheduleDataCache: IScheduleData,
         inputData: IScheduleInputData,
         scheduleParams: IScheduleParams,
-        scoreMethod: (scheduleMetrics: IScheduleMetrics, scheduleParams: IScheduleParams) => number,
+        scoreMethod: ScoreMethod,
+        algorithmParams: IAlgorithmParams
         ): IScheduleData {
         const courseId = inputData.courseOfCourseClass.get(courseClassId);
         const lectures = inputData.lecturesOfCourseClass.get(courseClassId);
@@ -208,7 +209,7 @@ export default class TimeGreedyScheduleExecutorService extends ScheduleExecutorS
             totalMinutes: scheduleDataCache.scheduleMetrics.totalMinutes + weeklyClassTimeInMinutes,
             totalDays,
         };
-        const score = scoreMethod(scheduleMetrics, scheduleParams);
+        const score = scoreMethod(scheduleMetrics, scheduleParams, algorithmParams);
         return {
             courseClassIds: (new Set<string>(scheduleDataCache.courseClassIds)).add(courseClassId),
             courseIds: (new Set<string>(scheduleDataCache.courseIds)).add(courseId),           

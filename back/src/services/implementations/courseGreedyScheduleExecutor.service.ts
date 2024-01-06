@@ -73,7 +73,7 @@ export default class CourseGreedyScheduleExecutorService extends ScheduleExecuto
                     totalCourses: 1,
                     totalImportance: schedule.totalImportance,
                 }
-                const scheduleWithScore = {schedule: schedule, score: scoreMethod(scheduleMetrics, scheduleParams), optionalCredits: courseOptionalCredits}
+                const scheduleWithScore = {schedule: schedule, score: scoreMethod(scheduleMetrics, scheduleParams, algorithmParams), optionalCredits: courseOptionalCredits}
                 newValidSchedules.push(scheduleWithScore);
             }
 
@@ -93,30 +93,31 @@ export default class CourseGreedyScheduleExecutorService extends ScheduleExecuto
 
                     processedCombos++;
                     const weeklyHours = baseSchedule.totalHours + (inputData.weeklyClassTimeInMinutes.get(cc.id)?? 0)/60;
-                    const combo = baseSchedule.courseClasses.map(cc => cc.id);
+                    const baseCombo = baseSchedule.courseClasses.map(cc => cc.id);
+                    const combo = [cc.id, ...baseCombo]
 
-                    if(weeklyHours <= scheduleParams.targetHours*algorithmParams.targetHourExceedRateLimit && this.isClassCombinationValid(combo, cc.id, inputData.incompatibilityCache)){
+                    if(weeklyHours <= scheduleParams.targetHours*algorithmParams.targetHourExceedRateLimit && this.isClassCombinationValid(baseCombo, cc.id, inputData.incompatibilityCache)){
                         const totalDays: Set<DAY> = new Set();
                         for(const ccId of combo) {
                             const courseId = inputData.courseOfCourseClass.get(ccId);
                             const lectures = inputData.lecturesOfCourseClass.get(ccId);
                             if(!courseId || !lectures) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
-                
+
                             for(const lectureId of lectures){
                                 const l = inputData.lectures.get(lectureId);
                                 if (!l) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
                                 totalDays.add(l.time.dayOfWeek);
                             }
                         }
-                        const schedule = this.createSchedule([cc.id, ...combo], inputData);
+                        const schedule = this.createSchedule(combo, inputData);
                         const scheduleMetrics: IScheduleMetrics = {
                             totalMinutes: schedule.totalHours * 60,
                             totalDays,
-                            optionalCourses: 1 - (schedule.mandatoryRate * combo.length),
+                            optionalCourses: (1-schedule.mandatoryRate) * combo.length,
                             totalCourses: combo.length,
                             totalImportance: schedule.totalImportance
                         }
-                        const score = scoreMethod(scheduleMetrics, scheduleParams);
+                        const score = scoreMethod(scheduleMetrics, scheduleParams, algorithmParams);
                         if(
                             !algorithmParams.greedyPruning ||
                             score >= averageScore ||

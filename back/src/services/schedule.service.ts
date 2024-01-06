@@ -34,7 +34,7 @@ export default class ScheduleService {
     init() {
         this.algorithmParams = {
             // common params
-            selectedAlgorithm: stringInEnum(SCHEDULE_ALGORITHM, process.env.ALGORITHM) ? process.env.ALGORITHM as SCHEDULE_ALGORITHM : SCHEDULE_ALGORITHM.GENETIC,
+            selectedAlgorithm: stringInEnum(SCHEDULE_ALGORITHM, process.env.ALGORITHM) ? process.env.ALGORITHM as SCHEDULE_ALGORITHM : SCHEDULE_ALGORITHM.COURSE_GREEDY,
             maxSchedulesToProcess: parseInt(process.env.ALGORITHM_MAX_SCHEDULES_TO_PROCESS ?? '500000'),
             maxMsDeadlineToProcess: parseFloat(process.env.ALGORITHM_MAX_MS_DEADLINE_TO_PROCESS ?? '2000'),
             maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN ?? '10'),
@@ -95,9 +95,9 @@ export default class ScheduleService {
         // STEP 8 - Calculate stats for each valid schedule (done while combining courseClasses)
         // STEP 9 - Calculate score for each schedule (done while combining courseClasses)
         const deadline = new Date(Date.now() + this.algorithmParams.maxMsDeadlineToProcess);
-        
+
         // algorithm selection
-        const selectedExecutor = this.scheduleExecutors.get(this.algorithmParams.selectedAlgorithm) ?? this.scheduleExecutors.get(SCHEDULE_ALGORITHM.GENETIC)!;
+        const selectedExecutor = this.scheduleExecutors.get(this.algorithmParams.selectedAlgorithm)!;
         const schedules: IScheduleWithScore[] = selectedExecutor.getSchedules(this.algorithmParams, this.calculateScheduleScore, scheduleParams, inputData, deadline, DEBUG);
 
         // STEP 10 - Return sorted list of schedules by score
@@ -145,7 +145,7 @@ export default class ScheduleService {
     }
 
     // defines how score is calculated
-    private calculateScheduleScore(scheduleMetrics: IScheduleMetrics, scheduleParams: IScheduleParams): number {
+    private calculateScheduleScore(scheduleMetrics: IScheduleMetrics, scheduleParams: IScheduleParams, algorithmParams: IAlgorithmParams): number {
         const p1 = 1 - (scheduleMetrics.optionalCourses / scheduleMetrics.totalCourses);
         const p2 = Math.abs(scheduleParams.targetHours - (scheduleMetrics.totalMinutes / 60));
         const p3 = 7 - scheduleMetrics.totalDays.size;
@@ -153,7 +153,7 @@ export default class ScheduleService {
         const a = (scheduleParams.reduceDays)? 1:0;
         const b = (scheduleParams.prioritizeUnlocks)? 1:0;
 
-        const m = this.algorithmParams.scoreMultipliers
+        const m = algorithmParams.scoreMultipliers
         return m[0]*p1 - m[1]*p2 + a*m[2]*p3 + b*m[3]*p4;
     }
 }
