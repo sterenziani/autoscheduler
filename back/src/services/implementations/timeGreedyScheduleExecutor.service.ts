@@ -51,7 +51,7 @@ export default class TimeGreedyScheduleExecutorService extends ScheduleExecutorS
         while(currentMinutes <= targetMinutes && processedCombos < algorithmParams.maxSchedulesToProcess && (!deadline || new Date() < deadline)) {
             scheduleDataMap.set(currentMinutes, []);
 
-            for (const currentCourseClassId of Object.keys(inputData.courseClasses)) {
+            for (const currentCourseClassId of inputData.courseClasses.keys()) {
                 const courseId = inputData.courseOfCourseClass.get(currentCourseClassId);
                 if(!courseId) throw new GenericException(ERRORS.INTERNAL_SERVER_ERROR.GENERAL);
 
