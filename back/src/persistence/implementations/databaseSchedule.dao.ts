@@ -23,6 +23,7 @@ export default class DatabaseScheduleDao extends ScheduleDao {
     };
 
     async init(): Promise<void> {
+        // Fill with init methods
     }
 
     async getScheduleInfo(universityId: string, programId: string, termId: string, studentId: string): Promise<IScheduleInputData> {
@@ -101,17 +102,6 @@ export default class DatabaseScheduleDao extends ScheduleDao {
                 {courseIds, termId}
             );
             const incompatibilityCache = this.parseIdPairs(combinations)
-
-            let sum = 0
-            for(const cc1 of courseClassInfo.courseClasses.values()){
-                for(const cc2 of courseClassInfo.courseClasses.values()){
-                    if(cc1.id < cc2.id){
-                        if(incompatibilityCache.get(cc1.id)?.has(cc2.id)){
-                            sum += 1
-                        }
-                    }
-                }
-            }
 
             // We generate return object based on queried data
             return {
