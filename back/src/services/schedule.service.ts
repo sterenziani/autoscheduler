@@ -34,7 +34,8 @@ export default class ScheduleService {
     init() {
         this.algorithmParams = {
             // common params
-            selectedAlgorithm: stringInEnum(SCHEDULE_ALGORITHM, process.env.ALGORITHM) ? process.env.ALGORITHM as SCHEDULE_ALGORITHM : SCHEDULE_ALGORITHM.COURSE_GREEDY,
+            selectedAlgorithm: stringInEnum(SCHEDULE_ALGORITHM, process.env.ALGORITHM) ? process.env.ALGORITHM as SCHEDULE_ALGORITHM : SCHEDULE_ALGORITHM.AUTO,
+            autoModeMaxCombinationsThreshold: parseInt(process.env.ALGORITHM_AUTO_MODE_MAX_COMBINATIONS_THRESHOLD ?? '100000000'),
             maxSchedulesToProcess: parseInt(process.env.ALGORITHM_MAX_SCHEDULES_TO_PROCESS ?? '500000'),
             maxMsDeadlineToProcess: parseFloat(process.env.ALGORITHM_MAX_MS_DEADLINE_TO_PROCESS ?? '2000'),
             maxAmountToReturn: parseInt(process.env.ALGORITHM_MAX_AMOUNT_TO_RETURN ?? '10'),
@@ -91,15 +92,13 @@ export default class ScheduleService {
         this.filterViableCourseClasses(inputData, unavailableTimeSlots);
 
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
-        const maxAmountOfPossibleCombinations = this.getMaxAmountOfPossibleCombinations(inputData);
-
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         // STEP 8 - Calculate stats for each valid schedule (done while combining courseClasses)
         // STEP 9 - Calculate score for each schedule (done while combining courseClasses)
         const deadline = new Date(Date.now() + this.algorithmParams.maxMsDeadlineToProcess);
 
         // algorithm selection
-        const selectedExecutor = this.scheduleExecutors.get(this.algorithmParams.selectedAlgorithm)!;
+        const selectedExecutor = this.getAlgorithmExecutor(inputData, this.algorithmParams);
         const schedules: IScheduleWithScore[] = selectedExecutor.getSchedules(this.algorithmParams, this.calculateScheduleScore, scheduleParams, inputData, deadline, DEBUG);
 
         // STEP 10 - Return sorted list of schedules by score
@@ -110,7 +109,6 @@ export default class ScheduleService {
 
         if(DEBUG && topResults.length > 0){
             console.log(`Finished executing ${selectedExecutor.getName()}`)
-            console.log(`We had ${inputData.courseClasses.size} classes across ${inputData.courses.size} courses. That's ${maxAmountOfPossibleCombinations} possible combinations`);
             console.log(`Valid schedules avg score: ${schedules.map(i=>i.score).reduce((a, b) => a + b) / schedules.length}`);
             console.log(`Returned results avg score: ${topResults.map(i=>i.score).reduce((a, b) => a + b) / topResults.length}`);
             console.log(`Returning ${topResults.length} results with score ${topResults[0].score} - ${topResults[topResults.length-1].score}`);
@@ -166,5 +164,16 @@ export default class ScheduleService {
             possibleCombos *= (inputData.courseClassesOfCourse.get(c)!.length+1);
 
         return possibleCombos - 1; // Empty schedule is not an option
+    }
+
+    private getAlgorithmExecutor(inputData: IScheduleInputData, algorithmParams: IAlgorithmParams): ScheduleExecutorService {
+        if(algorithmParams.selectedAlgorithm != SCHEDULE_ALGORITHM.AUTO)
+            return this.scheduleExecutors.get(this.algorithmParams.selectedAlgorithm)!;
+
+        const maxAmountOfPossibleCombinations = this.getMaxAmountOfPossibleCombinations(inputData);
+        if(maxAmountOfPossibleCombinations < algorithmParams.autoModeMaxCombinationsThreshold){
+            return this.scheduleExecutors.get(SCHEDULE_ALGORITHM.COURSE_GREEDY)!;
+        }
+        return this.scheduleExecutors.get(SCHEDULE_ALGORITHM.TIME_GREEDY)!;
     }
 }

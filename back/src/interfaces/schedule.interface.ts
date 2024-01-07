@@ -59,6 +59,7 @@ export type IAlgorithmParams = {
     maxMsDeadlineToProcess: number,
     maxAmountToReturn: number,
     selectedAlgorithm: SCHEDULE_ALGORITHM,
+    autoModeMaxCombinationsThreshold: number,
     scoreMultipliers: number[],
 } // append scheduleSpecific params
 & ICourseGreedyParams
