@@ -9,18 +9,26 @@ $dark: #343a40;
 $disabled: #cad2c5;
 $background: #dcf1ec;
 
+
 $color0: #ffadad; // red
 $color1: #a0c4ff; // blue
 $color2: #fdffb6; // yellow
 $color3: #caffbf; // green
+
 $color4: #ffd6a5; // orange
 $color5: #9bf6ff; // cyan
 $color6: #ffc6ff; // pink
-$color7: #bdb2ff; // purple
+$color7: #d397d3; // magenta
+
 $color8: #f1faee; // white
-$color9: #c9ada7; // brown
-$color10: #7ae582; // green
-$color11: #d397d3; // magenta
+$color9: #F5EE66; // gold
+$color10: #7ae582; // strong green
+$color11: #9966CC; // purple
+
+$color12: #D9686C; // brick
+$color13: #ACC45C; // matcha
+$color14: #7977ED; // strong blue
+$color15: #bdb2ff; // lavander
 
 // This is for tab styles
 $nav-link-padding-y: 0.5rem;
@@ -104,6 +112,38 @@ $theme-colors: (
 
 .bg-color-7 {
     background-color: $color7 !important;
+}
+
+.bg-color-8 {
+    background-color: $color8 !important;
+}
+
+.bg-color-9 {
+    background-color: $color9 !important;
+}
+
+.bg-color-10 {
+    background-color: $color10 !important;
+}
+
+.bg-color-11 {
+    background-color: $color11 !important;
+}
+
+.bg-color-12 {
+    background-color: $color12 !important;
+}
+
+.bg-color-13 {
+    background-color: $color13 !important;
+}
+
+.bg-color-14 {
+    background-color: $color14 !important;
+}
+
+.bg-color-15 {
+    background-color: $color15 !important;
 }
 
 .navbar-logo {
