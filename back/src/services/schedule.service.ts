@@ -51,7 +51,7 @@ export default class ScheduleService {
             fixedIndexesDuringShuffle: parseInt(process.env.ALGORITHM_SHUFFLE_FIXED_INDEXES ?? '3'),
             targetHourExceedRateLimit: parseFloat(process.env.ALGORITHM_TARGET_HOUR_EXCEED_RATE_LIMIT ?? '1.25'),
             minAmountOfSchedulesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_SCHEDULES_TO_PRUNE_BY_AVG ?? '25'),
-            minAmountOfProcessedCoursesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_PROCESSED_COURSES_TO_PRUNE_BY_AVG ?? '3'),
+            minAmountOfProcessedCoursesToPruneByAvg: parseInt(process.env.ALGORITHM_MIN_AMOUNT_OF_PROCESSED_COURSES_TO_PRUNE_BY_AVG ?? '2'),
             minHoursToPruneByAvg: parseFloat(process.env.ALGORITHM_MIN_HOURS_TO_PRUNE_BY_AVG ?? '3'),
 
             // time greedy
@@ -91,6 +91,8 @@ export default class ScheduleService {
         this.filterViableCourseClasses(inputData, unavailableTimeSlots);
 
         // STEP 6 - Based on those remaining courseClasses, get all possible combinations
+        const maxAmountOfPossibleCombinations = this.getMaxAmountOfPossibleCombinations(inputData);
+
         // STEP 7 - Remove invalid schedules (done while combining courseClasses)
         // STEP 8 - Calculate stats for each valid schedule (done while combining courseClasses)
         // STEP 9 - Calculate score for each schedule (done while combining courseClasses)
@@ -108,6 +110,7 @@ export default class ScheduleService {
 
         if(DEBUG && topResults.length > 0){
             console.log(`Finished executing ${selectedExecutor.getName()}`)
+            console.log(`We had ${inputData.courseClasses.size} classes across ${inputData.courses.size} courses. That's ${maxAmountOfPossibleCombinations} possible combinations`);
             console.log(`Valid schedules avg score: ${schedules.map(i=>i.score).reduce((a, b) => a + b) / schedules.length}`);
             console.log(`Returned results avg score: ${topResults.map(i=>i.score).reduce((a, b) => a + b) / topResults.length}`);
             console.log(`Returning ${topResults.length} results with score ${topResults[0].score} - ${topResults[topResults.length-1].score}`);
@@ -155,5 +158,13 @@ export default class ScheduleService {
 
         const m = algorithmParams.scoreMultipliers
         return m[0]*p1 - m[1]*p2 + a*m[2]*p3 + b*m[3]*p4;
+    }
+
+    private getMaxAmountOfPossibleCombinations(inputData: IScheduleInputData): number {
+        let possibleCombos = 1;
+        for(const c of inputData.courseClassesOfCourse.keys())
+            possibleCombos *= (inputData.courseClassesOfCourse.get(c)!.length+1);
+
+        return possibleCombos - 1; // Empty schedule is not an option
     }
 }

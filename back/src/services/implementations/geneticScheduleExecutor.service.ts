@@ -129,7 +129,7 @@ export default class GeneticScheduleExecutorService extends ScheduleExecutorServ
             const scheduleMetrics: IScheduleMetrics = {
                 totalMinutes: schedule.totalHours * 60,
                 totalDays,
-                optionalCourses: 1 - (schedule.mandatoryRate * combo.length),
+                optionalCourses: (1-schedule.mandatoryRate) * combo.length,
                 totalCourses: combo.length,
                 totalImportance: schedule.totalImportance
             }
