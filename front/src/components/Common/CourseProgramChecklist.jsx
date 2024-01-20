@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Spinner, Container, Row, Col, Form} from 'react-bootstrap';
-import { useLocation, useNavigate } from "react-router-dom";
+import { Spinner, Container, Col, Form} from 'react-bootstrap';
+import { useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
-import Pagination from '../Common/Pagination'
 import ErrorMessage from '../Common/ErrorMessage';
 import LinkButton from '../Common/LinkButton';
-import { OK, NO_CONTENT } from '../../resources/ApiConstants';
+import { OK } from '../../resources/ApiConstants';
 
 function CourseProgramChecklist(props){
     const { t } = useTranslation()
-    const navigate = useNavigate()
     const search = useLocation().search
-
-    const setProgramsData = props.setProgramsData
 
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState()
@@ -21,44 +17,43 @@ function CourseProgramChecklist(props){
     const [programs, setPrograms] = useState(null)
 
     useEffect(() => {
+        const loadPrograms = () => {
+            setLoading(true)
+            ApiService.getPrograms().then((resp) => {
+                if (resp && resp.status && resp.status !== OK)
+                    setError(resp.status)
+                else{
+                    setPrograms(resp.data)
+                    const programsData = {}
+                    for(const p of resp.data){
+                        programsData[p.id] = {
+                            isIn: false,
+                            isMandatory: false,
+                            requiredCredits: 0
+                        }
+                    }
+                    props.setProgramsData(programsData)
+                }
+                setLoading(false)
+            });
+        }
         if(!error && !programs)
             loadPrograms()
-    }, [search, programs, loading, error])
-
-    const loadPrograms = () => {
-        setLoading(true)
-        ApiService.getPrograms().then((resp) => {
-            if (resp && resp.status && resp.status !== OK)
-                setError(resp.status)
-            else{
-                setPrograms(resp.data)
-                const programsData = {}
-                for(const p of resp.data){
-                    programsData[p.id] = {
-                        isIn: false,
-                        isMandatory: false,
-                        requiredCredits: 0
-                    }
-                }
-                setProgramsData(programsData)
-            }
-            setLoading(false)
-        });
-    }
+    }, [search, programs, loading, error, props])
 
     const onChangeInProgram = (e) => {
         const programsDataCopy = Object.assign({}, props.programsData)
         const programId = e.target.getAttribute("programid")
         programsDataCopy[programId].isIn = e.target.checked
         programsDataCopy[programId].isMandatory = e.target.checked? true : false
-        setProgramsData(programsDataCopy)
+        props.setProgramsData(programsDataCopy)
     }
 
     const onChangeMandatory = (e) => {
         const programsDataCopy = Object.assign({}, props.programsData)
         const programId = e.target.getAttribute("programid")
         programsDataCopy[programId].isMandatory = e.target.checked
-        setProgramsData(programsDataCopy)
+        props.setProgramsData(programsDataCopy)
     }
 
     const onChangeRequiredCredits = (e) => {
@@ -66,7 +61,7 @@ function CourseProgramChecklist(props){
         const programsDataCopy = Object.assign({}, props.programsData);
         const programId = e.target.getAttribute("programid")
         programsDataCopy[programId].requiredCredits = newValue;
-        setProgramsData(programsDataCopy)
+        props.setProgramsData(programsDataCopy)
     }
 
     if (loading === true)
@@ -74,7 +69,7 @@ function CourseProgramChecklist(props){
     if (error)
         return <ErrorMessage status={error}/>
 
-    if(programs && programs.length == 0){
+    if(programs && programs.length === 0){
         return(
             <div key="new-course-message" className="mt-5 mb-3 display-newlines">
                 <p className="mb-0">{t('errors.noPrograms')}</p>

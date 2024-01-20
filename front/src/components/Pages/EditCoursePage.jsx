@@ -52,11 +52,31 @@ function EditCoursePage(props) {
     const [requestedProgram, setRequestedProgram] = useState()
     const [paramsProcessed, setParamsProcessed] = useState(false)
     const [programsData, setProgramsData] = useState()
+    const [referral, setReferral] = useState('home')
+    const [backtrack, setBacktrack] = useState('/')
 
     useEffect(() => {
         if(!user)
             navigate("/login")
     }, [user, navigate])
+
+    // Resets state if ID changes
+    useEffect(() => {
+        return () => {
+            setLoading(true)
+            setError()
+            setCourse()
+            setPrograms()
+            setRequirements()
+            setSelectedProgram()
+            setCoursesOfSelectedProgram()
+            setRequestedProgram()
+            setParamsProcessed()
+            setProgramsData()
+            setReferral('home')
+            setBacktrack('/')
+        }
+    }, [id]);
 
     useEffect( () => {
         const loadCourse = async () => {
@@ -93,6 +113,7 @@ function EditCoursePage(props) {
                 }
             }
         }
+
         execute()
     },[course, id, t, programs])
 
@@ -105,28 +126,42 @@ function EditCoursePage(props) {
         if(!requestedProgram && course && requirements){
             const params = new URLSearchParams(search)
             const request = params.get('program')
+            const ref = params.get('ref')
             if(!request){
                 setParamsProcessed(true)
-                return
+            } else {
+                ApiService.getProgram(request).then((resp) => {
+                    if(resp && resp.status && resp.status === NOT_FOUND){
+                        setParamsProcessed(true)
+                        return
+                    }
+                    if(resp && resp.status && resp.status !== OK){
+                        setError(resp.status)
+                        setParamsProcessed(true)
+                        return
+                    }
+                    // Select that program
+                    const program = resp.data
+                    setRequestedProgram(program)
+                    onChangePrograms(program)
+                    setParamsProcessed(true)
+                })
             }
 
-            ApiService.getProgram(request).then((resp) => {
-                if(resp && resp.status && resp.status === NOT_FOUND){
-                    setParamsProcessed(true)
-                    return
-                }
-                if(resp && resp.status && resp.status !== OK){
-                    setError(resp.status)
-                    setParamsProcessed(true)
-                    return
-                }
-                // Select that program
-                const program = resp.data
-                setRequestedProgram(program)
-                onChangePrograms(program)
-                setParamsProcessed(true)
-                return
-            })
+            switch(ref){
+                case 'coursePage':
+                    setReferral('coursePage')
+                    setBacktrack('/courses/'+course.id)
+                    break;
+                case 'form':
+                    setReferral('form')
+                    setBacktrack('/')
+                    break;
+                default:
+                    setReferral('home')
+                    setBacktrack('/')
+                    break;
+            }
         }
     // eslint-disable-next-line
     },[search, course, requirements, requestedProgram])
@@ -188,9 +223,10 @@ function EditCoursePage(props) {
             })
 
             const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, values.courseCredits, programsData, requirementIDs)
-            if(resp.status === OK || resp.status === CREATED){
+            if(resp.status === CREATED)
+                navigate("/courses/"+resp.id+"/edit?ref=form", {replace: true})
+            else if(resp.status === OK)
                 navigate("/courses/"+resp.id)
-            }
             else{
                 setError(resp.data?.code?? resp.status)
                 setSubmitting(false)
@@ -346,7 +382,9 @@ function EditCoursePage(props) {
                         !id &&
                         <CourseProgramChecklist setProgramsData={(x) => setProgramsData(x)} programsData={programsData}/>
                     }
-                    <Button className="m-3" variant="outline-dark" href={'/'}>{t("modal.cancel")}</Button>
+                    <Button className="m-3" variant="outline-dark" href={backtrack}>
+                        {referral==='form' ? t("goHome") : t("modal.cancel")}
+                    </Button>
                     <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

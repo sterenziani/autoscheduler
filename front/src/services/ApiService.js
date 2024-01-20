@@ -586,11 +586,11 @@ const saveCourse = async (id, name, internalId, creditValue, programsData, requi
     if(response.status === CREATED){
         for(const [programId, programData] of Object.entries(programsData)) {
             if(programData.isIn){
-                const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses`
-                const requirementsPayload = { "courseId": response.id, "optional": !programData.isMandatory, "requiredCredits": programData.requiredCredits }
-                const requirementsResponse = await simpleApiPostRequest(requirementsEndpoint, requirementsPayload)
-                if(requirementsResponse.status !== OK && requirementsResponse.status !== NO_CONTENT)
-                    return requirementsResponse
+                const programsEndpoint = `${universityProgramsEndpoint}/${programId}/courses`
+                const programsPayload = { "courseId": response.id, "optional": !programData.isMandatory, "requiredCredits": programData.requiredCredits }
+                const programsResponse = await simpleApiPostRequest(programsEndpoint, programsPayload)
+                if(programsResponse.status !== CREATED && programsResponse.status !== NO_CONTENT)
+                    return programsResponse
             }
         }
     }
@@ -598,7 +598,6 @@ const saveCourse = async (id, name, internalId, creditValue, programsData, requi
     // Once updated, define requirements
     if(response.status === OK){
         for(const [programId, requirementsInProgram] of Object.entries(requirementIDs)) {
-            console.log(requirementsInProgram)
             const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses/${response.id}/required-courses-collection`
             const requirementsPayload = { "requirements": requirementsInProgram }
             const requirementsResponse = await simpleApiPutRequest(requirementsEndpoint, requirementsPayload)
