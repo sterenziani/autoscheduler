@@ -346,7 +346,8 @@ function EditCoursePage(props) {
                             <p className="mb-0">{t('forms.requirementsReturnLater')}</p>
                         </div>
                     }
-                    <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
+                    <Button className="m-3" variant="outline-dark" href={'/'}>{t("modal.cancel")}</Button>
+                    <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}
             </Formik>

@@ -447,8 +447,8 @@ function EditCourseClassPage(props) {
                             </div>
                         </div>
                     </Form.Group>
-
-                    <Button className="my-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
+                    <Button className="m-3" variant="outline-dark" href={selectedCourse ? '/courses/'+selectedCourse.id : '/'}>{t("modal.cancel")}</Button>
+                    <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}
             </Formik>
