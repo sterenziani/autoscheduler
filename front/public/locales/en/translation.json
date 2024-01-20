@@ -228,6 +228,7 @@
         "areYouSureLeave": "Are you sure you want to leave? Changes you made may not be saved.",
         "cancel": "Cancel",
         "leave": "Leave",
+        "courseSavedNowEditRequiredCourses": "Your course has been saved!\nYou can now define the prerequisites under the programs you added it to, or go back home.",
         "placeholders":{
             "className":"Group X",
             "termName": "School Period 20XX-A",

@@ -223,8 +223,13 @@ function EditCoursePage(props) {
             })
 
             const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, values.courseCredits, programsData, requirementIDs)
-            if(resp.status === CREATED)
-                navigate("/courses/"+resp.id+"/edit?ref=form", {replace: true})
+            if(resp.status === CREATED){
+                const programsAdded = Object.values(programsData).filter(p => p.isIn).length
+                if(programsAdded > 0)
+                    navigate("/courses/"+resp.id+"/edit?ref=form", {replace: true})
+                else
+                    navigate("/courses/"+resp.id)
+            }
             else if(resp.status === OK)
                 navigate("/courses/"+resp.id)
             else{
@@ -278,15 +283,15 @@ function EditCoursePage(props) {
     }
 
     if(!user)
-        return <ErrorMessage status={UNAUTHORIZED}/>
+        return (<ErrorMessage status={UNAUTHORIZED}/>)
     if(user.role !== Roles.UNIVERSITY)
-        return <ErrorMessage status={FORBIDDEN}/>
+        return (<ErrorMessage status={FORBIDDEN}/>)
     if (loading === true)
-        return <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
+        return (<div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
             <Spinner animation="border" variant="primary" />
-        </div>
+        </div>)
     if (error && error !== EXISTING_COURSE_ERROR && error !== INVALID_NAME_ERROR)
-        return <ErrorMessage status={error}/>
+        return (<ErrorMessage status={error}/>)
 
     return (
         <React.Fragment>
@@ -304,36 +309,45 @@ function EditCoursePage(props) {
                     <LeavePagePrompt when={unsavedForm && !isSubmitting}/>
                     <FormObserver/>
 
-                    <FormInputField
-                        id="course-code"
-                        label="forms.courseCode" name="courseCode"
-                        placeholder="forms.placeholders.courseCode"
-                        value={values.courseCode} error={errors.courseCode}
-                        touched={touched.courseCode} onChange={handleChange} onBlur={handleBlur}
-                    />
-                    <FormInputField
-                        id="course-name"
-                        label="forms.courseName" name="courseName"
-                        placeholder="forms.placeholders.courseName"
-                        value={values.courseName} error={errors.courseName}
-                        touched={touched.courseName} onChange={handleChange} onBlur={handleBlur}
-                    />
-                    <FormInputField
-                        tooltipMessage="forms.creditsEarnedTooltip"
-                        id="program-optional-credits"
-                        label="forms.creditsEarned" name="courseCredits"
-                        type="number" placeholder="0" min="0"
-                        value={values.courseCredits} error={errors.courseCredits}
-                        touched={touched.courseCredits} onChange={handleChange} onBlur={handleBlur}
-                    />
                     {
-                        id &&
-                        <Row key="requirements-group" className='py-0 mx-auto form-row text-center'>
-                            <FormInputLabel label="forms.courseClasses"/>
-                            <div className="col-md-9 text-start">
-                                <LinkButton variant="link" className="m-0 p-0" textKey="seeClasses" href={`/courses/${id}`}/>
-                            </div>
-                        </Row>
+                        referral!=='form' &&
+                        <>
+                            <FormInputField
+                                id="course-code"
+                                label="forms.courseCode" name="courseCode"
+                                placeholder="forms.placeholders.courseCode"
+                                value={values.courseCode} error={errors.courseCode}
+                                touched={touched.courseCode} onChange={handleChange} onBlur={handleBlur}
+                            />
+                            <FormInputField
+                                id="course-name"
+                                label="forms.courseName" name="courseName"
+                                placeholder="forms.placeholders.courseName"
+                                value={values.courseName} error={errors.courseName}
+                                touched={touched.courseName} onChange={handleChange} onBlur={handleBlur}
+                            />
+                            <FormInputField
+                                tooltipMessage="forms.creditsEarnedTooltip"
+                                id="program-optional-credits"
+                                label="forms.creditsEarned" name="courseCredits"
+                                type="number" placeholder="0" min="0"
+                                value={values.courseCredits} error={errors.courseCredits}
+                                touched={touched.courseCredits} onChange={handleChange} onBlur={handleBlur}
+                            />
+                            {
+                                id &&
+                                <Row key="requirements-group" className='py-0 mx-auto form-row text-center'>
+                                    <FormInputLabel label="forms.courseClasses"/>
+                                    <div className="col-md-9 text-start">
+                                        <LinkButton variant="link" className="m-0 p-0" textKey="seeClasses" href={`/courses/${id}`}/>
+                                    </div>
+                                </Row>
+                            }
+                        </>
+                    }
+                    {
+                        referral==='form' &&
+                        <p className="mb-5 display-newlines">{t('forms.courseSavedNowEditRequiredCourses')}</p>
                     }
                     {
                         (id && programs && programs.length > 0 && paramsProcessed)? [
