@@ -46,7 +46,12 @@ function CourseList(props){
                                   key={'row-' + index} xs={1} md={4}
                                   className="border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center"
                               >
-                                  <div className="my-auto">{entry.internalId}</div>
+                                  <div className="my-auto">
+                                    <div>{entry.internalId}</div>
+                                    {
+                                        !!entry.creditValue && entry.creditValue > 0 && <div>{t('forms.courseCreditsValue', {credits: entry.creditValue})}</div>
+                                    }
+                                  </div>
                                   <div className="my-auto w-min-50">
                                       {user.role === Roles.UNIVERSITY
                                           ? [
@@ -59,8 +64,9 @@ function CourseList(props){
                                                 </a>,
                                             ]
                                           : [<div key={'nada-' + entry.id}>{entry.name}</div>]}
+
                                   </div>
-                                  <div className="d-flexmy-auto justify-content-center">
+                                  <div className="d-flex my-auto justify-content-center">
                                       {user.role === Roles.UNIVERSITY
                                           ? [
                                                 <i

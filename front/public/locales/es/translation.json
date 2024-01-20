@@ -209,6 +209,7 @@
         "programRequirements": "Para definir correlatividades, haga click sobre el nombre de la materia para la cual quiere definir correlativas.",
         "programOptionalCredits": "Créditos electivos",
         "courseRequiresCredits":"(Requiere {{credits}} créditos)",
+        "courseCreditsValue":"{{credits}} créditos",
         "mandatoryCourses":"Materias obligatorias",
         "optionalCourses":"Materias electivas",
         "optionalCoursesTooltip":"Para graduarse de esta carrera, un estudiante debe no solo aprobar todas las materias obligatorias listadas debajo, sino también ganar esta cantidad de créditos aprobando materias electivas para esta carrera.",

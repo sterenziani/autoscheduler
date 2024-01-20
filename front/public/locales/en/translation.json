@@ -209,6 +209,7 @@
         "programRequirements": "To define required courses, click on the name of the course you'd like to define requirements for.",
         "programOptionalCredits": "Optional Credits",
         "courseRequiresCredits":"(Requires {{credits}} credits)",
+        "courseCreditsValue":"{{credits}} credits",
         "mandatoryCourses":"Mandatory courses",
         "optionalCourses":"Optional courses",
         "optionalCoursesTooltip":"To graduate from this program, a student must not only pass all mandatory courses listed below, but also earn this amount of credits from this program's optional courses.",
