@@ -16,6 +16,7 @@ import Roles from '../../resources/RoleConstants';
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ErrorMessage from '../Common/ErrorMessage';
 import LinkButton from '../Common/LinkButton';
+import CourseProgramChecklist from '../Common/CourseProgramChecklist'
 
 const EXISTING_COURSE_ERROR = "COURSE_ALREADY_EXISTS"
 const INVALID_NAME_ERROR = "INVALID_NAME"
@@ -50,6 +51,7 @@ function EditCoursePage(props) {
     const [coursesOfSelectedProgram, setCoursesOfSelectedProgram] = useState()
     const [requestedProgram, setRequestedProgram] = useState()
     const [paramsProcessed, setParamsProcessed] = useState(false)
+    const [programsData, setProgramsData] = useState()
 
     useEffect(() => {
         if(!user)
@@ -185,7 +187,7 @@ function EditCoursePage(props) {
                 requirementIDs[key] = requirements[key].map(a => a.id)
             })
 
-            const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, values.courseCredits, requirementIDs)
+            const resp = await ApiService.saveCourse(id, values.courseName, values.courseCode, values.courseCredits, programsData, requirementIDs)
             if(resp.status === OK || resp.status === CREATED){
                 navigate("/courses/"+resp.id)
             }
@@ -342,9 +344,7 @@ function EditCoursePage(props) {
                     }
                     {
                         !id &&
-                        <div key="new-course-message" className="mt-5 mb-3 display-newlines">
-                            <p className="mb-0">{t('forms.requirementsReturnLater')}</p>
-                        </div>
+                        <CourseProgramChecklist setProgramsData={(x) => setProgramsData(x)} programsData={programsData}/>
                     }
                     <Button className="m-3" variant="outline-dark" href={'/'}>{t("modal.cancel")}</Button>
                     <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>

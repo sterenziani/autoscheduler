@@ -200,7 +200,9 @@
         "courseCode":"Código/ID de la materia",
         "creditsEarned":"Créditos otorgados",
         "creditsEarnedTooltip":"Cantidad de créditos que el alumno recibe al aprobar esta materia.",
-        "requirementsReturnLater": "Asegúrese de añadir esta materia a una carrera más tarde.\nLuego, regrese aquí para definir la lista de correlativas bajo esa carrera.",
+        "isCourseInProgram": "Parte del plan",
+        "isMandatory": "Materia obligatoria",
+        "requiredCredits": "Créditos requeridos",
         "requirements":"Correlativas",
         "editProgram":"Editar Carrera",
         "createProgram":"Crear Carrera",
@@ -312,8 +314,9 @@
         "503": "No pudimos conectarnos con el servidor de AutoScheduler.",
         "noTerms": "No se encontraron períodos. Cree al menos uno para crear comisiones.",
         "noBuildings": "No se encontraron sedes. Cree al menos una sede para crear comisiones.",
+        "noPrograms": "No se ha creado ninguna carrera aún.\nCuando haya creado al menos una carrera, podrá además definir correlatividades bajo ese plan de estudios.",
         "notPartOfAnyPrograms": "Esta materia no está asociada a ninguna carrera.\nAñádala a una carrera para definir sus correlativas bajo el plan de estudios de la misma.",
-        "noCoursesDefined": "No ha creado ninguna materia aún. Podrá añadir materias a esta carrera una vez que haya creado al menos una."
+        "noCoursesDefined": "No ha creado ninguna materia aún.\nCuando haya creado al menos una materia, podrá además vincular materias con esta carrera."
     },
     "noSchedulesFound": "No hubo planes encontrados para su búsqueda.",
     "noDefinedRequirements": "No hay correlativas definidas.",
@@ -323,6 +326,7 @@
     "createBuilding": "Click aquí para crear una sede",
     "createCourse": "Click aquí para crear una materia",
     "seePrograms": "Click aquí para ver sus carreras",
+    "createProgram": "Click aquí para crear una carrera",
     "seeClasses": "Click aquí para ver las comisiones de esta materia",
     "createTerm": "Click aquí para crear un período",
     "pagination": {

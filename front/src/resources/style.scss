@@ -184,10 +184,7 @@ $theme-colors: (
 
 .form-check-input:checked {
     background-color: $secondary !important;
-}
-
-.form-check-input:checked {
-    border-color: #ffffff;
+    border-color: $secondary !important;
 }
 
 .borderless-tabs {

@@ -105,7 +105,7 @@
         "terms": "TERMS",
         "courses": "COURSES",
         "buildings": "BUILDINGS",
-        "requiredCourses": "REQUIRED COURSES",
+        "requiredCourses": "PREREQUISITES",
         "courseClasses": "CLASSES"
     },
     "modal": {
@@ -117,7 +117,7 @@
         "addCourse": "Adding course",
         "creditsEarned":"Credits awarded:",
         "creditsRequired":"Required credits:",
-        "creditsRequiredHint":"If you want this course to only be suggested to students once they have earned a certain amount of credits, you can set it here.\n\nIf students can sign up for this course just by completing its required courses for this program, with no credits threshold, you may ignore this field.",
+        "creditsRequiredHint":"If you want this course to only be suggested to students once they have earned a certain amount of credits, you can set it here.\n\nIf students can sign up for this course just by completing its prerequisites for this program, with no credits threshold, you may ignore this field.",
         "areYouSureCourse": "Are you sure you want to delete course '{{code}} - {{name}}'?",
         "areYouSureProgram": "Are you sure you want to delete the program '{{code}} - {{name}}'?",
         "areYouSureClass": "Are you sure you want to delete class {{class}} for course '{{code}} - {{name}}' in term {{term}}?",
@@ -178,7 +178,7 @@
         "publish": "Publish"
     },
     "course":{
-        "pickAProgram":"Choose a program to see the required courses defined for this course under that program."
+        "pickAProgram":"Choose a program to see the prerequisites defined for this course under that program."
     },
     "forms":{
         "courseClasses":"Classes",
@@ -200,13 +200,15 @@
         "courseCode":"Course code/ID",
         "creditsEarned":"Credits awarded",
         "creditsEarnedTooltip":"Amount of creadits the student is awarded for completing this course.",
-        "requirements":"Required courses",
-        "requirementsReturnLater": "Make sure to add this course to a program later.\nThen return here to define the required courses for this course under that program.",
+        "isCourseInProgram": "Course in program",
+        "isMandatory": "Mandatory course",
+        "requiredCredits": "Credits required",
+        "requirements":"Prerequisites",
         "editProgram":"Edit Program",
         "createProgram":"Create Program",
         "programCode":"Program code/ID",
         "programName":"Program name",
-        "programRequirements": "To define required courses, click on the name of the course you'd like to define requirements for.",
+        "programRequirements": "To define prerequisites, click on the name of the course you'd like to define requirements for.",
         "programOptionalCredits": "Optional Credits",
         "courseRequiresCredits":"(Requires {{credits}} credits)",
         "courseCreditsValue":"{{credits}} credits",
@@ -312,8 +314,9 @@
         "503": "Could not connect to the AutoScheduler server.",
         "noTerms": "No terms have been found. Create at least one term to define classes for a course.",
         "noBuildings": "No buildings have been found. Create at least one building to define classes for a course.",
+        "noPrograms": "You have not created any programs yet.\nOnce you have created at least one, you will also be able to add this course to a program and define prerequisites under it.",
         "notPartOfAnyPrograms": "This course is not associated with any program yet.\nAdd it to a program's list of courses to define course requirements under that program.",
-        "noCoursesDefined": "You have not created any courses yet. You may add courses to this program once you have created at least one."
+        "noCoursesDefined": "You have not created any courses yet.\nOnce you have created at least one, you will also be able to add courses to this program."
     },
     "noSchedulesFound": "Could not find any recommended schedules for your search.",
     "noDefinedRequirements": "No requirements defined.",
@@ -323,6 +326,7 @@
     "createBuilding": "Click here to create a building",
     "createCourse": "Click here to create a course",
     "seePrograms": "Click here to see your programs",
+    "createProgram": "Click here to create a program",
     "seeClasses": "Click here to see this course's classes",
     "createTerm": "Click here to create a term",
     "pagination": {

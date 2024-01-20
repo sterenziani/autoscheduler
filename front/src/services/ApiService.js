@@ -465,7 +465,7 @@ const getProgramsOfUniversity = async (universityId, inputText) => {
     return simpleApiMultiPageGetRequest(`${universitiesEndpoint}/${universityId}/programs`, {filter: cleanInputText(inputText)})
 }
 
-const getPrograms = async (inputText) => {
+const getPrograms = async (inputText='') => {
     const endpoint = getEndpointForActiveUser(universityProgramsEndpoint)
     return simpleApiMultiPageGetRequest(endpoint, {filter: cleanInputText(inputText)})
 }
@@ -572,7 +572,7 @@ const getProgramsCourseIsIn = async (courseId, inputText) => {
     return simpleApiMultiPageGetRequest(endpoint, {filter: cleanInputText(inputText), courseId: courseId})
 }
 
-const saveCourse = async (id, name, internalId, creditValue, requirementIDs) => {
+const saveCourse = async (id, name, internalId, creditValue, programsData, requirementIDs) => {
     const payload = {
         'name': name,
         'internalId': internalId,
@@ -582,13 +582,29 @@ const saveCourse = async (id, name, internalId, creditValue, requirementIDs) => 
     if(response.status !== OK && response.status !== CREATED)
         return response
 
-    // Once created/updated, define requirements
-    for(const [programId, requirementsInProgram] of Object.entries(requirementIDs)) {
-        const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses/${response.id}/required-courses-collection`
-        const requirementsPayload = { "requirements": requirementsInProgram }
-        const requirementsResponse = await simpleApiPutRequest(requirementsEndpoint, requirementsPayload)
-        if(requirementsInProgram.length > 1 && requirementsResponse.status !== OK && requirementsResponse.status !== NO_CONTENT)
-            return requirementsResponse
+    // Once created, update programs
+    if(response.status === CREATED){
+        for(const [programId, programData] of Object.entries(programsData)) {
+            if(programData.isIn){
+                const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses`
+                const requirementsPayload = { "courseId": response.id, "optional": !programData.isMandatory, "requiredCredits": programData.requiredCredits }
+                const requirementsResponse = await simpleApiPostRequest(requirementsEndpoint, requirementsPayload)
+                if(requirementsResponse.status !== OK && requirementsResponse.status !== NO_CONTENT)
+                    return requirementsResponse
+            }
+        }
+    }
+
+    // Once updated, define requirements
+    if(response.status === OK){
+        for(const [programId, requirementsInProgram] of Object.entries(requirementIDs)) {
+            console.log(requirementsInProgram)
+            const requirementsEndpoint = `${universityProgramsEndpoint}/${programId}/courses/${response.id}/required-courses-collection`
+            const requirementsPayload = { "requirements": requirementsInProgram }
+            const requirementsResponse = await simpleApiPutRequest(requirementsEndpoint, requirementsPayload)
+            if(requirementsInProgram.length > 1 && requirementsResponse.status !== OK && requirementsResponse.status !== NO_CONTENT)
+                return requirementsResponse
+        }
     }
     return response
 }

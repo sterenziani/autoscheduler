@@ -276,7 +276,7 @@ function EditProgramPage(props) {
                             </Row>
                             </div>
                         ] : [
-                            <div key="program-no-courses-warning" className="mt-5 mb-3">
+                            <div key="program-no-courses-warning" className="mt-5 mb-3 display-newlines">
                                 <p className="mb-0">{t('errors.noCoursesDefined')}</p>
                                 <div className="text-center">
                                     <LinkButton variant="link" textKey="createCourse" href={'/courses/new'}/>
