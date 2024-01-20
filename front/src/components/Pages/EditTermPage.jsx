@@ -139,6 +139,7 @@ function EditTermPage(props) {
                             touched={touched.code} onChange={handleChange} onBlur={handleBlur}
                         />
                         <FormInputField
+                            tooltipMessage="forms.termNameTooltip"
                             id="term-name"
                             label="forms.termName" name="termName"
                             placeholder="forms.placeholders.termName"

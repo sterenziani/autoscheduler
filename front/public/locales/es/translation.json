@@ -193,6 +193,7 @@
         "startDate": "Fecha de inicio",
         "termName": "Nombre del período",
         "termCode":"Código/ID del período",
+        "termNameTooltip":"Los períodos son intervalos de tiempo donde los estudiantes inician y finalizan una materia.\n\nEstos podrían ser trimestres, semestres o años, por ejemplo.",
         "editCourse":"Editar Materia",
         "createCourse":"Crear Materia",
         "courseName":"Nombre de materia",
@@ -226,7 +227,7 @@
         "leave": "Salir",
         "placeholders":{
             "className":"Grupo X",
-            "termName": "Semestre X, Año Y",
+            "termName": "Ciclo Lectivo 20XX-A",
             "termCode":"2024-C1",
             "courseName":"Ejemplos I",
             "courseCode":"01.01",

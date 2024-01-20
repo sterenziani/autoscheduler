@@ -192,6 +192,7 @@
         "editTerm":"Edit Term",
         "startDate": "Start date",
         "termName": "Term name",
+        "termNameTooltip":"Terms are the periods within which students start and finish a course.\n\nThese could be trimesters, semesters or full years, for example.",
         "termCode":"Term code/ID",
         "editCourse":"Edit Course",
         "createCourse":"Create Course",
@@ -226,7 +227,7 @@
         "leave": "Leave",
         "placeholders":{
             "className":"Group X",
-            "termName": "Semester X, Year Y",
+            "termName": "School Period 20XX-A",
             "termCode":"2024-S1",
             "courseName":"Example 101",
             "courseCode":"01.01",
