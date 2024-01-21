@@ -201,7 +201,7 @@
         "creditsEarned":"Credits awarded",
         "creditsEarnedTooltip":"Amount of creadits the student is awarded for completing this course.",
         "isCourseInProgram": "Course in program",
-        "isMandatory": "Mandatory course",
+        "isOptional": "Optional course",
         "requiredCredits": "Credits required",
         "requirements":"Prerequisites",
         "editProgram":"Edit Program",

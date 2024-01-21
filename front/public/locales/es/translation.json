@@ -201,7 +201,7 @@
         "creditsEarned":"Créditos otorgados",
         "creditsEarnedTooltip":"Cantidad de créditos que el alumno recibe al aprobar esta materia.",
         "isCourseInProgram": "Parte del plan",
-        "isMandatory": "Materia obligatoria",
+        "isOptional": "Materia electiva",
         "requiredCredits": "Créditos requeridos",
         "requirements":"Correlativas",
         "editProgram":"Editar Carrera",

@@ -28,7 +28,7 @@ function CourseProgramChecklist(props){
                     for(const p of resp.data){
                         programsData[p.id] = {
                             isIn: false,
-                            isMandatory: false,
+                            isOptional: false,
                             requiredCredits: 0
                         }
                     }
@@ -45,14 +45,13 @@ function CourseProgramChecklist(props){
         const programsDataCopy = Object.assign({}, props.programsData)
         const programId = e.target.getAttribute("programid")
         programsDataCopy[programId].isIn = e.target.checked
-        programsDataCopy[programId].isMandatory = e.target.checked? true : false
         props.setProgramsData(programsDataCopy)
     }
 
     const onChangeMandatory = (e) => {
         const programsDataCopy = Object.assign({}, props.programsData)
         const programId = e.target.getAttribute("programid")
-        programsDataCopy[programId].isMandatory = e.target.checked
+        programsDataCopy[programId].isOptional = e.target.checked
         props.setProgramsData(programsDataCopy)
     }
 
@@ -85,7 +84,7 @@ function CourseProgramChecklist(props){
                 <div className="d-flex border-bottom border-grey list-row px-5 pb-2 pt-3 justify-content-center fw-bold">
                     <Col xs={3} md={5} className="my-auto">{t('forms.programName')}</Col>
                     <Col className="my-auto">{t('forms.isCourseInProgram')}</Col>
-                    <Col className="my-auto">{t('forms.isMandatory')}</Col>
+                    <Col className="my-auto">{t('forms.isOptional')}</Col>
                     <Col className="my-auto">{t('forms.requiredCredits')}</Col>
                 </div>
                 {programs && programs.length > 0
@@ -108,7 +107,7 @@ function CourseProgramChecklist(props){
                                     <Form.Check
                                         id={'mandatoryFor'+entry.id}
                                         programid={entry.id}
-                                        checked={props.programsData[entry.id].isMandatory}
+                                        checked={props.programsData[entry.id].isOptional}
                                         onChange={onChangeMandatory}
                                         disabled={!props.programsData[entry.id].isIn}
                                     />
@@ -120,6 +119,7 @@ function CourseProgramChecklist(props){
                                         type="number" min="0"
                                         value={props.programsData[entry.id].requiredCredits}
                                         onChange={onChangeRequiredCredits}
+                                        disabled={!props.programsData[entry.id].isIn}
                                     />
                                 </Col>
                             </div>

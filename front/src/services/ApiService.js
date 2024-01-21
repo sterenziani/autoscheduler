@@ -587,7 +587,7 @@ const saveCourse = async (id, name, internalId, creditValue, programsData, requi
         for(const [programId, programData] of Object.entries(programsData)) {
             if(programData.isIn){
                 const programsEndpoint = `${universityProgramsEndpoint}/${programId}/courses`
-                const programsPayload = { "courseId": response.id, "optional": !programData.isMandatory, "requiredCredits": programData.requiredCredits }
+                const programsPayload = { "courseId": response.id, "optional": programData.isOptional, "requiredCredits": programData.requiredCredits }
                 const programsResponse = await simpleApiPostRequest(programsEndpoint, programsPayload)
                 if(programsResponse.status !== CREATED && programsResponse.status !== NO_CONTENT)
                     return programsResponse
