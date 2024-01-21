@@ -69,14 +69,7 @@ function CourseProgramChecklist(props){
         return <ErrorMessage status={error}/>
 
     if(programs && programs.length === 0){
-        return(
-            <div key="new-course-message" className="mt-5 mb-3 display-newlines">
-                <p className="mb-0">{t('errors.noPrograms')}</p>
-                <div className="text-center">
-                    <LinkButton variant="link" textKey="createProgram" href={'/programs/new'}/>
-                </div>
-            </div>
-        )
+        return(<></>)
     }
     return (
         <React.Fragment>
