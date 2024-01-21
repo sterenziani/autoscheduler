@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
 import ErrorMessage from '../Common/ErrorMessage';
-import LinkButton from '../Common/LinkButton';
 import { OK } from '../../resources/ApiConstants';
 
 function CourseProgramChecklist(props){
