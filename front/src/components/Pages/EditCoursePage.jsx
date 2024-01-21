@@ -347,7 +347,7 @@ function EditCoursePage(props) {
                     }
                     {
                         referral==='form' &&
-                        <p className="mb-5 display-newlines">{t('forms.courseSavedNowEditRequiredCourses')}</p>
+                        <p className="mb-5 display-newlines">{t('forms.courseSavedNowEditRequiredCourses', {course: course})}</p>
                     }
                     {
                         (id && programs && programs.length > 0 && paramsProcessed)? [

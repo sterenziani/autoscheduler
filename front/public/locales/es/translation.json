@@ -228,7 +228,7 @@
         "areYouSureLeave": "¿Está seguro de que quiere salir? Los cambios que ha realizado no se guardarán.",
         "cancel": "Cancelar",
         "leave": "Salir",
-        "courseSavedNowEditRequiredCourses": "¡Su materia ha sido guardada!\nAhora puede definir las materias correlativas bajo las carreras a las cuales las agregó, o regresar al inicio.",
+        "courseSavedNowEditRequiredCourses": "¡Su materia  \"{{course.internalId}} - {{course.name}}\"  ha sido guardada!\nAhora puede definir las materias correlativas bajo las carreras a las cuales las agregó, o regresar al inicio.",
         "placeholders":{
             "className":"Grupo X",
             "termName": "Ciclo Lectivo 20XX-A",
