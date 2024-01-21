@@ -78,7 +78,7 @@ function CoursePage(props) {
                     <title>{course ? course.internalId+" - "+course.name : ''} - AutoScheduler</title>
                 </Helmet>
             </HelmetProvider>
-            <div className="container my-5">
+            <div className="container my-5 pb-5">
                 <div className="mb-3 text-center text-primary">
                     <h4 className="m-0">{course.internalId}</h4>
                     <h1 className="">{course.name}</h1>

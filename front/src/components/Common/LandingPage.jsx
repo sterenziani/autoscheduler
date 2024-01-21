@@ -22,7 +22,7 @@ function LandingPage(props) {
             </HelmetProvider>
             <div className="p-3 pb-0 text-end">
                 <h1 className="text-secondary text-center display-1 fw-bold pb-3 text-break">{t('landing.title')}</h1>
-                <Row className="container m-auto d-flex justify-content-center">
+                <Row className="container pb-5 m-auto d-flex justify-content-center">
                     <Col className="p-1 px-5 text-black">
                         <div>
                             <h5>{t('landing.subtitle')}</h5>

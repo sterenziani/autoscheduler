@@ -50,7 +50,7 @@ function SignUpPage(props) {
                     <title>AutoScheduler</title>
                 </Helmet>
             </HelmetProvider>
-            <div className="container my-5">
+            <div className="container my-5 pb-5">
                 <Tabs
                     className="borderless-tabs" fill
                     defaultActiveKey={props.login ? 'log_in' : 'i_am_student'}

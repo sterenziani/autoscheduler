@@ -202,7 +202,7 @@ function SearchResults(props) {
                 <HelmetProvider>
                     <Helmet><title>{t("results.results") +" - AutoScheduler"}</title></Helmet>
                 </HelmetProvider>
-                <div className="m-5 text-black">
+                <div className="m-5 pb-5 text-black">
                     <div className="d-flex justify-content-center align-items-center">
                         <Alert variant="primary" className="text-center">
                             <p>{t("noSchedulesFound")}</p>
@@ -217,7 +217,7 @@ function SearchResults(props) {
             <HelmetProvider>
                 <Helmet><title>{t("results.results") +" - AutoScheduler"}</title></Helmet>
             </HelmetProvider>
-            <div className="m-5 text-black ">
+            <div className="m-5 text-black pb-5">
                 <div className="text-center ">
                     <div className="d-inline-flex flex-wrap justify-content-center align-items-center">
                         {
