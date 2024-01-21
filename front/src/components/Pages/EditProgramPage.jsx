@@ -284,7 +284,7 @@ function EditProgramPage(props) {
                             </div>
                         ]
                     }
-                    <Button className="m-3" variant="outline-dark" href={'/'}>{t("modal.cancel")}</Button>
+                    <Button className="m-3" variant="outline-dark" href={'/?tab=programs'}>{t("modal.cancel")}</Button>
                     <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

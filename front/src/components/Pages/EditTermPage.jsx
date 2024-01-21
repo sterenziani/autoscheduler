@@ -153,7 +153,7 @@ function EditTermPage(props) {
                             value={values.startDate} error={errors.startDate}
                             touched={touched.startDate} onChange={handleChange} onBlur={handleBlur}
                         />
-                        <Button className="m-3" variant="outline-dark" href={'/'}>{t("modal.cancel")}</Button>
+                        <Button className="m-3" variant="outline-dark" href={'/?tab=terms'}>{t("modal.cancel")}</Button>
                         <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                     </Form>
                 )}
