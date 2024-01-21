@@ -50,7 +50,15 @@ function CourseListForm(props) {
             }
             else{
                 if(addCourseOptions){
-                    const result = addCourseOptions.filter( (c) => !unavailableCourses.find((u) => u.id === c.id) && (c.name.toLowerCase().includes(inputValue.toLowerCase()) || c.internalId.includes(inputValue.toLowerCase())) )
+                    const normalizedInputValue = inputValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+                    const result = addCourseOptions.filter( (c) => {
+                        const normalizedCname = c.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+                        return !unavailableCourses.find((u) => u.id === c.id) &&
+                        (
+                            normalizedCname.includes(normalizedInputValue) ||
+                            c.internalId.toLowerCase().includes(inputValue.toLowerCase())
+                        )
+                    })
                     callback(result)
                 }
                 else{
