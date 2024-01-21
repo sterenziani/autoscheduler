@@ -63,19 +63,19 @@ function HomePageUniversity(props) {
                         </div>
                     </Tab>
                     <Tab
-                        className="text-center" eventKey="courses"
-                        title={t('tabs.courses')} id="courses-tab"
-                    >
-                        <div className="bg-primary rounded-bottom">
-                            <UniversityCoursesList user={props.user} />
-                        </div>
-                    </Tab>
-                    <Tab
                         className="text-center" eventKey="programs"
                         title={t('tabs.programs')} id="programs-tab"
                     >
                         <div className="bg-primary rounded-bottom">
                             <UniversityProgramsList user={props.user} />
+                        </div>
+                    </Tab>
+                    <Tab
+                        className="text-center" eventKey="courses"
+                        title={t('tabs.courses')} id="courses-tab"
+                    >
+                        <div className="bg-primary rounded-bottom">
+                            <UniversityCoursesList user={props.user} />
                         </div>
                     </Tab>
                 </Tabs>
