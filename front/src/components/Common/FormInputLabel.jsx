@@ -7,7 +7,7 @@ const FormInputLabel = (props) => {
     const { label, tooltipMessage, columnWidth, tooltipIconColor, tooltipBgColor } = props
 
     return (
-        <div className={"col-md-"+(columnWidth??3)+" text-break my-auto d-flex justify-content-end"}>
+        <div className={"col-md-"+(columnWidth??3)+" text-break my-auto d-flex justify-content-start justify-content-md-end"}>
             {
                 tooltipMessage &&
                 <div className="m-auto mx-3">
@@ -19,11 +19,11 @@ const FormInputLabel = (props) => {
             {
                 props.controlId? [
                     <Form.Label className="text-end my-auto">
-                        <h5 className="my-0"><strong>{t(`${label}`)}</strong></h5>
+                        <h5 className="m-2 mx-md-0 my-md-0"><strong>{t(`${label}`)}</strong></h5>
                     </Form.Label>
                 ]:[
                     <div key={"key-"+label} className="text-end my-auto">
-                        <h5 className="my-0"><strong>{t(`${label}`)}</strong></h5>
+                        <h5 className="m-2 mx-md-0 my-md-0"><strong>{t(`${label}`)}</strong></h5>
                     </div>
                 ]
             }
