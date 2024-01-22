@@ -11,6 +11,7 @@ import { DAYS, INSTANT_DATE } from "../../resources/SystemConstants";
 
 
 function SearchForm(props) {
+    const MAX_WEEKLY_HOURS = 50
     const { t } = useTranslation()
     const navigate = useNavigate()
     const student = props.student
@@ -31,7 +32,7 @@ function SearchForm(props) {
     const onChangeHours = (e) => {
         const newValue = e.target.value? e.target.value : 0
         const paramsCopy = Object.assign({}, params);
-        paramsCopy.hours = parseInt(newValue);
+        paramsCopy.hours = parseInt(Math.min(newValue, MAX_WEEKLY_HOURS));
         setParams(paramsCopy)
     }
 
@@ -211,7 +212,7 @@ function SearchForm(props) {
                     <FormInputLabel label="search.hoursPerWeek" columnWidth={4}/>
                     <div className="col-md-8">
                         <Form.Control
-                            type="number" min="0"
+                            type="number" min="0" max={MAX_WEEKLY_HOURS}
                             value={params.hours}
                             onChange={onChangeHours}
                         />
