@@ -418,25 +418,25 @@ function EditCourseClassPage(props) {
                         <div className="col-md-9 my-auto align-items-start">
                             {
                                 lectures.map((entry, index) => (
-                                <Row key={'timerow-' + index} xs={1} md={6} className="list-row pb-2 pt-3 ms-1 justify-content-center">
-                                    <Form.Select id={'day-' + index} className="w-auto mx-3" value={lectures[index].day} onChange={onChangeDay}>
+                                <Row key={'timerow-' + index} xs={1} md={6} className="list-row container m-auto pb-2 pt-3 justify-content-center">
+                                    <Form.Select id={'day-' + index} className="col-md-2 m-2 day-timepicker" value={lectures[index].day} onChange={onChangeDay}>
                                         {DAYS.map((p) => (<option key={p} value={p}>{t('days.' + p)}</option>))}
                                     </Form.Select>
                                     <input
-                                        type="time" id={'start-' + index} className="w-auto timepicker"
+                                        type="time" id={'start-' + index} className="col-md-2 timepicker m-1 my-auto"
                                         value={lectures[index].startTime}
                                         onChange={onChangeStartTime}
                                     />
                                     <h5 className="my-auto w-auto"><strong>-</strong></h5>
                                     <input
-                                        type="time" id={'end-' + index} className="w-auto timepicker"
+                                        type="time" id={'end-' + index} className="col-md-2 timepicker m-1 my-auto"
                                         value={lectures[index].endTime}
                                         onChange={onChangeEndTime}
                                     />
-                                    <Form.Select id={'building-' + index} className="w-auto ms-1" value={lectures[index].building?.id} onChange={onChangeBuilding}>
+                                    <Form.Select id={'building-' + index} className="col-md-2 m-2 day-timepicker" value={lectures[index].building?.id} onChange={onChangeBuilding}>
                                         {buildings.map((b) => (<option key={b.id} value={b.id}>{b.internalId}</option>))}
                                     </Form.Select>
-                                    <i className="bi bi-trash-fill btn color-primary w-auto my-auto"
+                                    <i className="w-auto bi bi-trash-fill btn color-primary my-auto mx-1"
                                         id={'trash-' + index} onClick={onClickTrashCan}
                                     ></i>
                                 </Row>
