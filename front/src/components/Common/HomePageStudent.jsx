@@ -11,7 +11,7 @@ import ErrorMessage from '../Common/ErrorMessage';
 
 function HomePageStudent(props) {
     const { t } = useTranslation()
-    const startingTab = "schedule_form"
+    const startingTab = "finished_courses"
     const search = useLocation().search
     const [loading, setLoading] = useState(false)
     const [student, setStudent] = useState(null)
@@ -22,17 +22,17 @@ function HomePageStudent(props) {
             const readTabInSearchParams = () => {
                 const params = new URLSearchParams(search)
                 const requestedTab = params.get('tab')
-                if (requestedTab === "finished_courses")
+                if (requestedTab === "finished_courses" || requestedTab === "schedule_form")
                     return requestedTab
                 return startingTab
             }
 
             const requestedTab = readTabInSearchParams()
             const tabs = document.getElementsByClassName("nav-item")
-            if (requestedTab === "finished_courses")
-                tabs[0].children[0].click()
-            else
+            if (requestedTab === "schedule_form")
                 tabs[1].children[0].click()
+            else
+                tabs[0].children[0].click()
         }
     }, [search, student])
 

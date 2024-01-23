@@ -88,7 +88,14 @@ function CourseList(props){
                           )),
                       ]
                     : [
-                          <div key="empty-list">{t('emptyList')}</div>,
+                        <div key="emptyCourseListWarning" className="px-5">
+                          {
+                              user.role === Roles.UNIVERSITY && <p>{t('emptyList')}</p>
+                          }
+                          {
+                              user.role === Roles.STUDENT && <p>{t('registerFinishedCourses')}</p>
+                          }
+                        </div>,
                       ]}
             </div>
             <Modal

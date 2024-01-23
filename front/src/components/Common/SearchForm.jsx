@@ -251,18 +251,18 @@ function SearchForm(props) {
 
                 <div className='row mx-auto form-row'>
                     <FormInputLabel label="search.unavailableSlots" columnWidth={4}/>
-                    <div className="col-md-8 align-items-start">
+                    <div className="col-md-8 align-items-center">
                         { timeError && <p key="program-error" className="form-error text-center my-0">{t('forms.errors.timeRange')}</p>}
                         {params.unavailableTimeSlots.map((entry, index) => (
                             <Row
                                 key={'timerow-' + index}
                                 xs={1}
                                 md={6}
-                                className="list-row pb-2 pt-3 justify-content-center"
+                                className="list-row container m-auto pb-2 pt-3 justify-content-center"
                             >
                                 <Form.Select
                                     id={'day-' + index}
-                                    className="w-auto mx-1"
+                                    className="col-md-3 m-1 day-timepicker"
                                     value={params.unavailableTimeSlots[index].day}
                                     onChange={onChangeDay}
                                 >
@@ -275,7 +275,7 @@ function SearchForm(props) {
                                 <input
                                     type="time"
                                     id={'start-' + index}
-                                    className="w-auto timepicker"
+                                    className="col-md-3 timepicker m-1 my-auto"
                                     value={params.unavailableTimeSlots[index].startTime}
                                     onChange={onChangeStartTime}
                                 />
@@ -285,12 +285,12 @@ function SearchForm(props) {
                                 <input
                                     type="time"
                                     id={'end-' + index}
-                                    className="w-auto timepicker"
+                                    className="col-md-3 timepicker m-1 my-auto"
                                     value={params.unavailableTimeSlots[index].endTime}
                                     onChange={onChangeEndTime}
                                 />
                                 <i
-                                    className="bi bi-trash-fill btn color-white w-auto my-auto mx-2"
+                                    className="w-auto bi bi-trash-fill btn color-white my-auto mx-2"
                                     id={'trash-' + index}
                                     onClick={onClickTrashCan}
                                 ></i>

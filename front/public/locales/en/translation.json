@@ -298,6 +298,7 @@
         "submit": "Reset password"
     },
     "emptyList": "No items in this list.",
+    "registerFinishedCourses": "Please add all courses you have completed to date, then click on 'Find a Schedule'.",
     "noRequiredCourses": "This course can be taken at any point.",
     "minutes": "{{minutes}} mins",
     "edit": "Edit",

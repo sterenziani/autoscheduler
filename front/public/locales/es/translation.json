@@ -298,6 +298,7 @@
         "submit": "Reset password"
     },
     "emptyList": "No hay elementos en esta lista.",
+    "registerFinishedCourses": "Añada los cursos que haya completado hasta el momento y después haga click en 'Buscar Cronogramas'.",
     "noRequiredCourses": "Esta materia puede cursarse en cualquier momento.",
     "minutes": "{{minutes}} mins",
     "edit": "Editar",

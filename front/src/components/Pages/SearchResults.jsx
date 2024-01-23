@@ -292,7 +292,7 @@ function SearchResults(props) {
                     </ul>
                 </div>
                 <div className="text-center">
-                    <LinkButton href={'/'} textKey="results.newSearch"/>
+                    <LinkButton href={'/?tab=schedule_form'} textKey="results.newSearch"/>
                 </div>
             </div>
         </React.Fragment>
