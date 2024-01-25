@@ -396,9 +396,7 @@ function EditCoursePage(props) {
                         !id &&
                         <CourseProgramChecklist setProgramsData={(x) => setProgramsData(x)} programsData={programsData}/>
                     }
-                    <Button className="m-3" variant="outline-dark" href={backtrack}>
-                        {referral==='form' ? t("goHome") : t("modal.cancel")}
-                    </Button>
+                    <LinkButton className="m-3" variant="outline-dark" href={backtrack} textKey={referral==='form' ? "goHome" : "modal.cancel"}/>
                     <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

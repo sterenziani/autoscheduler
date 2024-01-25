@@ -4,6 +4,7 @@ import { Spinner, Row, Col } from 'react-bootstrap';
 import ApiService from '../../services/ApiService';
 import { OK } from '../../resources/ApiConstants';
 import ErrorMessage from '../Common/ErrorMessage';
+import { Link } from "react-router-dom";
 
 function CourseRequirementsList(props) {
     const { t } = useTranslation();
@@ -39,7 +40,7 @@ function CourseRequirementsList(props) {
                             {entry.internalId}
                         </Col>
                         <Col className={'text-center my-auto w-min-50 text-start'}>
-                            <a className="text-white" href={'/courses/' + entry.id}>{entry.name}</a>
+                            <Link className="text-white" to={'/courses/' + entry.id}>{entry.name}</Link>
                         </Col>
                     </Row>
                 ))

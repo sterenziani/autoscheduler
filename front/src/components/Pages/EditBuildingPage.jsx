@@ -13,6 +13,7 @@ import FormInputLabel from '../Common/FormInputLabel';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
+import LinkButton from '../Common/LinkButton';
 
 const EXISTING_BUILDING_ERROR = "BUILDING_ALREADY_EXISTS"
 const INVALID_NAME_ERROR = "INVALID_NAME"
@@ -213,7 +214,7 @@ function EditBuildingPage(props) {
                             </div>
                         </Row>
                     }
-                    <Button className="m-3" variant="outline-dark" href={'/?tab=buildings'}>{t("modal.cancel")}</Button>
+                    <LinkButton className="m-3" variant="outline-dark" textKey="modal.cancel" href={'/?tab=buildings'}/>
                     <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                 </Form>
             )}

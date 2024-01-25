@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Row, Modal, Form, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Link } from "react-router-dom";
 import FormAsyncSelect from '../Common/FormAsyncSelect';
 import ApiService from '../../services/ApiService';
 import ErrorMessage from '../Common/ErrorMessage';
@@ -90,7 +91,7 @@ function CourseListForm(props) {
                             <div className="my-auto w-min-50 justify-content-center">
                                 <Col>
                                     <Row className="justify-content-center">
-                                        <a key={'link-' + entry.id} href={'/courses/' + entry.id}>{entry.name}</a>
+                                        <Link key={'link-' + entry.id} to={'/courses/' + entry.id}>{entry.name}</Link>
                                     </Row>
                                     <Row className="justify-content-center">
                                         { (editCreditRequirements && entry.requiredCredits > 0) && t('forms.courseRequiresCredits', {credits:entry.requiredCredits}) }

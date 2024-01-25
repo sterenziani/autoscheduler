@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Modal, Row } from 'react-bootstrap';
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import ApiService from '../../services/ApiService';
@@ -55,13 +56,13 @@ function CourseList(props){
                                   <div className="my-auto w-min-50">
                                       {user.role === Roles.UNIVERSITY
                                           ? [
-                                                <a
+                                                <Link
                                                     key={'link-' + entry.id}
                                                     className="text-white"
-                                                    href={'/courses/' + entry.id}
+                                                    to={'/courses/' + entry.id}
                                                 >
                                                     {entry.name}
-                                                </a>,
+                                                </Link>,
                                             ]
                                           : [<div key={'nada-' + entry.id}>{entry.name}</div>]}
 

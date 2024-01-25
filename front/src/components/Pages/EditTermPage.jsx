@@ -11,6 +11,7 @@ import FormInputField from '../Common/FormInputField';
 import { OK, CREATED, UNAUTHORIZED, FORBIDDEN } from '../../resources/ApiConstants';
 import Roles from '../../resources/RoleConstants';
 import ErrorMessage from '../Common/ErrorMessage';
+import LinkButton from '../Common/LinkButton';
 
 const EXISTING_TERM_ERROR = "TERM_ALREADY_EXISTS"
 const INVALID_NAME_ERROR = "INVALID_NAME"
@@ -153,7 +154,7 @@ function EditTermPage(props) {
                             value={values.startDate} error={errors.startDate}
                             touched={touched.startDate} onChange={handleChange} onBlur={handleBlur}
                         />
-                        <Button className="m-3" variant="outline-dark" href={'/?tab=terms'}>{t("modal.cancel")}</Button>
+                        <LinkButton className="m-3" variant="outline-dark" textKey="modal.cancel" href={'/?tab=terms'}/>
                         <Button className="m-3" variant="secondary" type="submit" disabled={isSubmitting}>{t("forms.save")}</Button>
                     </Form>
                 )}
