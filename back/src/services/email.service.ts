@@ -21,9 +21,7 @@ export default class EmailService {
         const hbs = require("nodemailer-express-handlebars");
 
         this.transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com", // SMTP server address (usually mail.your-domain.com)
-            port: 465, // Port for SMTP (usually 465)
-            secure: true, // Usually true if connecting to port 465
+            service: 'gmail',
             auth: {
                 user: process.env.COMPANY_EMAIL, // Your email address
                 pass: process.env.COMPANY_EMAIL_PASS, // Password (for gmail, your app password)
