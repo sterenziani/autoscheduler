@@ -23,7 +23,7 @@ services:
     build:
         context: ./front
         args:
-            API_URL: 'http://auto-scheduler.xyz/api'
+            API_URL: 'http://localhost:3000/api'
             VERIFICATION_EMAIL: 'auto.scheduler.contact@gmail.com'
     ports:
       - '8080:3000'
