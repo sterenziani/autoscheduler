@@ -1,0 +1,892 @@
+#! /bin/bash
+
+### To clear courses from DB, run query:
+### MATCH (c:Course)-[:BELONGS_TO]->(u:University {id:"6520e48eb5aa5394ebd5b520"}) OPTIONAL MATCH (cc:CourseClass)-[:OF]->(c) OPTIONAL MATCH (l:Lecture)-[:OF]->(cc) DETACH DELETE c, cc, l
+
+# Get Token
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -d '{"email": "rector@itba.edu.ar", "password": "Hola1234"}' localhost:3000/api/
+token=$(cat ../setup-db-output.txt | grep "Authorization" | cut -d ':' -f2 | xargs | dos2unix)
+
+# Set Programs, Terms and Buildings
+programId1="542dc0e0-decb-45d6-bcc1-28ae2c624395"
+virtual="42e51832-0b4f-4a4f-a67c-fa4c7a1866ae"
+sdf="9c90dc38-9e29-453b-a25b-3d4d32cee971"
+sdt="66947d4c-92fd-4aeb-a81d-2ce83afe887c"
+rectorado="0ace3e6f-cd04-4448-a403-9c1140105e17"
+termId2="b75ec4cc-e6d7-4c45-a8ec-cce823b7f4c6"
+
+# Create Courses
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d '{"name":"Intro a la Informática", "internalId":"72.03", "creditValue":3}' localhost:3000/api/university/courses
+introInformatica=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d '{"name":"Algebra", "internalId":"93.58", "creditValue":9}' localhost:3000/api/university/courses
+algebra=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d '{"name":"Análisis Matemático I", "internalId":"93.26", "creditValue":6}' localhost:3000/api/university/courses
+analisisI=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d '{"name":"Metodología del Aprendizaje", "internalId":"94.24", "creditValue":3}' localhost:3000/api/university/courses
+metodologia=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Sistemas de Representación\", \"internalId\":\"31.08\", \"creditValue\":3}" localhost:3000/api/university/courses
+sistemas=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Matemática Discreta\", \"internalId\":\"93.59\", \"creditValue\":6}" localhost:3000/api/university/courses
+discreta=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Programación Imperativa\", \"internalId\":\"72.31\", \"creditValue\":9}" localhost:3000/api/university/courses
+pi=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Análisis Matemático II\", \"internalId\":\"93.28\", \"creditValue\":6}" localhost:3000/api/university/courses
+analisisII=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Física I\", \"internalId\":\"93.41\", \"creditValue\":6}" localhost:3000/api/university/courses
+fisicaI=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Química\", \"internalId\":\"12.09\", \"creditValue\":3}" localhost:3000/api/university/courses
+quimica=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Programación Orientada a Objetos\", \"internalId\":\"72.33\", \"creditValue\":6}" localhost:3000/api/university/courses
+poo=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Procesamiento de Documentos XML\", \"internalId\":\"72.32\", \"creditValue\":3}" localhost:3000/api/university/courses
+xml=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Lógica Computacional\", \"internalId\":\"93.35\", \"creditValue\":6}" localhost:3000/api/university/courses
+logica=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Física II\", \"internalId\":\"93.42\", \"creditValue\":6}" localhost:3000/api/university/courses
+fisicaII=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Arquitectura de Computadoras\", \"internalId\":\"97.35\", \"creditValue\":6}" localhost:3000/api/university/courses
+arqui=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Estructura de Datos y Algoritmos\", \"internalId\":\"82.31\", \"creditValue\":6}" localhost:3000/api/university/courses
+eda=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Física III\", \"internalId\":\"93.43\", \"creditValue\":6}" localhost:3000/api/university/courses
+fisicaIII=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Probabilidad y Estadística\", \"internalId\":\"93.24\", \"creditValue\":6}" localhost:3000/api/university/courses
+proba=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Sistemas Operativos\", \"internalId\":\"72.11\", \"creditValue\":6}" localhost:3000/api/university/courses
+so=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Ingeniería de Software I\", \"internalId\":\"72.35\", \"creditValue\":6}" localhost:3000/api/university/courses
+inge1=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Interacción Hombre-Computadora (HCI)\", \"internalId\":\"72.36\", \"creditValue\":6}" localhost:3000/api/university/courses
+hci=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Base de Datos I\", \"internalId\":\"72.37\", \"creditValue\":6}" localhost:3000/api/university/courses
+basesI=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Protocolos de Comunicación\", \"internalId\":\"72.07\", \"creditValue\":6}" localhost:3000/api/university/courses
+protos=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Proyecto de Aplicaciones Web\", \"internalId\":\"72.38\", \"creditValue\":6}" localhost:3000/api/university/courses
+paw=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Autómatas, Teoría de Lenguajes y Compiladores\", \"internalId\":\"72.39\", \"creditValue\":6}" localhost:3000/api/university/courses
+tla=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Métodos Numéricos\", \"internalId\":\"93.07\", \"creditValue\":3}" localhost:3000/api/university/courses
+metodos=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Formación General I\", \"internalId\":\"94.21\", \"creditValue\":3}" localhost:3000/api/university/courses
+forma1=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Economía para Ingenieros\", \"internalId\":\"61.23\", \"creditValue\":3}" localhost:3000/api/university/courses
+economia=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Sistemas de Inteligencia Artificial\", \"internalId\":\"72.27\", \"creditValue\":6}" localhost:3000/api/university/courses
+sia=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Ingeniería de Software II\", \"internalId\":\"72.40\", \"creditValue\":3}" localhost:3000/api/university/courses
+inge2=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Base de Datos II\", \"internalId\":\"72.41\", \"creditValue\":6}" localhost:3000/api/university/courses
+basesII=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Criptografía y Seguridad\", \"internalId\":\"72.44\", \"creditValue\":6}" localhost:3000/api/university/courses
+cripto=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Derecho para Ingenieros\", \"internalId\":\"61.32\", \"creditValue\":3}" localhost:3000/api/university/courses
+derecho=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Simulación de Sistemas\", \"internalId\":\"72.25\", \"creditValue\":6}" localhost:3000/api/university/courses
+ss=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Programación de Objetos Distribuidos\", \"internalId\":\"72.42\", \"creditValue\":3}" localhost:3000/api/university/courses
+pod=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Gestión de Proyectos Informáticos\", \"internalId\":\"72.43\", \"creditValue\":3}" localhost:3000/api/university/courses
+gpi=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Métodos Numéricos Avanzados\", \"internalId\":\"93.75\", \"creditValue\":6}" localhost:3000/api/university/courses
+mna=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Redes de Información\", \"internalId\":\"72.20\", \"creditValue\":6}" localhost:3000/api/university/courses
+redes=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Proyecto Final\", \"internalId\":\"72.45\", \"creditValue\":12}" localhost:3000/api/university/courses
+pf=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Seguridad Ocupacional y Ambiental\", \"internalId\":\"12.83\", \"creditValue\":3}" localhost:3000/api/university/courses
+soa=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Formación General III\", \"internalId\":\"94.23\", \"creditValue\":3}" localhost:3000/api/university/courses
+forma3=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Realidad Virtual\", \"internalId\":\"23.15\", \"creditValue\":3}" localhost:3000/api/university/courses
+vr=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Programación Funcional\", \"internalId\":\"72.60\", \"creditValue\":3}" localhost:3000/api/university/courses
+funcional=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Introducción a la Programación de Videojuegos\", \"internalId\":\"72.97\", \"creditValue\":3}" localhost:3000/api/university/courses
+videojuegos=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Visualización de la Información\", \"internalId\":\"72.74\", \"creditValue\":3}" localhost:3000/api/university/courses
+infovis=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Cloud Computing\", \"internalId\":\"82.08\", \"creditValue\":3}" localhost:3000/api/university/courses
+cloud=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Machine Learning\", \"internalId\":\"72.75\", \"creditValue\":3}" localhost:3000/api/university/courses
+ml=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+
+# Update program
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"mandatoryCourses\": [\
+	\"${analisisI}\", \"${algebra}\", \"${metodologia}\", \"${introInformatica}\", \"${sistemas}\", \
+	\"${pi}\", \"${discreta}\", \"${analisisII}\", \"${fisicaI}\", \
+	\"${logica}\", \"${fisicaII}\", \"${poo}\", \"${xml}\", \"${quimica}\", \
+	\"${arqui}\", \"${eda}\", \"${fisicaIII}\", \"${proba}\", \
+	\"${so}\", \"${inge1}\", \"${hci}\", \"${basesI}\", \
+	\"${paw}\", \"${protos}\", \"${tla}\", \"${metodos}\", \"${forma1}\", \
+	\"${economia}\", \"${sia}\", \"${inge2}\", \"${basesII}\", \"${cripto}\", \
+	\"${derecho}\", \"${ss}\", \"${pod}\", \"${gpi}\", \"${mna}\", \
+	\"${redes}\", \"${pf}\", \"${soa}\", \"${forma3}\"], \
+	\"optionalCourses\": [\"${vr}\", \"${funcional}\", \"${videojuegos}\", \"${infovis}\", \"${cloud}\", \"${ml}\"], \
+	\"creditRequirements\": {\"${sia}\": 140, \"${derecho}\": 144, \"${ss}\": 140, \"${pf}\": 160, \"${soa}\": 140, \"${forma3}\": 168 } \
+	}" localhost:3000/api/university/programs/${programId1}/courses-collection
+
+
+# Define course requirements
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${algebra}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${discreta}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${introInformatica}\", \"${algebra}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${pi}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${analisisI}\", \"${algebra}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${analisisII}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${analisisI}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${fisicaI}/required-courses-collection
+
+
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${pi}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${poo}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${pi}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${xml}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${algebra}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${logica}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${analisisII}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${fisicaII}/required-courses-collection
+
+
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${pi}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${arqui}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${poo}\", \"${discreta}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${eda}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${analisisII}\", \"${fisicaI}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${fisicaIII}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${analisisII}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${proba}/required-courses-collection
+
+
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${eda}\", \"${arqui}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${so}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${poo}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${inge1}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${poo}\", \"${xml}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${hci}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${logica}\", \"${eda}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${basesI}/required-courses-collection
+
+
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${so}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${protos}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${so}\", \"${basesI}\", \"${hci}\", \"${inge1}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${paw}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${eda}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${tla}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${analisisII}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${metodos}/required-courses-collection
+
+
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${proba}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${economia}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${eda}\", \"${proba}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${sia}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${inge1}\", \"${paw}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${inge2}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${so}\", \"${basesI}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${basesII}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${paw}\", \"${protos}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${cripto}/required-courses-collection
+
+
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${eda}\", \"${metodos}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${ss}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${protos}\", \"${paw}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${pod}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${metodos}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${mna}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${protos}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${redes}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${eda}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${vr}/required-courses-collection
+
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${eda}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${videojuegos}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${pi}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${infovis}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${xml}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${cloud}/required-courses-collection
+curl -X PUT -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\
+	\"requirements\": [\"${mna}\", \"${proba}\", \"${eda}\"] \
+}" localhost:3000/api/university/programs/${programId1}/courses/${ml}/required-courses-collection
+
+
+
+# Create Classes
+### COMISIONES CUATRI 1
+currentCourse=${algebra}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"11:00\", \"endTime\": \"15:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"B\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"11:00\", \"endTime\": \"15:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${introInformatica}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"17:00\", \"endTime\": \"20:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S1\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"17:00\", \"endTime\": \"20:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${analisisI}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S1\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S2\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${metodologia}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"DF\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${sistemas}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"B\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"D\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"H\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"F\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"E\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"K\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+
+### COMISIONES CUATRI 2
+currentCourse=${pi}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"08:30\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"18:00\", \"endTime\": \"20:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:30\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"18:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S1\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"09:00\", \"endTime\": \"11:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"09:00\", \"endTime\": \"12:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"18:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${analisisII}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S1\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"13:00\", \"endTime\": \"15:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"13:00\", \"endTime\": \"15:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S2\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"13:00\", \"endTime\": \"15:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${fisicaI}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"B\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"09:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"08:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"09:00\", \"endTime\": \"11:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"D\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"E\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"13:00\", \"endTime\": \"15:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"F\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"15:00\", \"endTime\": \"17:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"G\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"15:00\", \"endTime\": \"17:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"H\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"13:00\", \"endTime\": \"15:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"K\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"15:00\", \"endTime\": \"17:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${discreta}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+
+### COMISIONES CUATRI 3
+currentCourse=${quimica}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${xml}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${poo}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S2\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${logica}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"09:00\", \"endTime\": \"11:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${fisicaII}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"08:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"B\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"D\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"E\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"F\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"G\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"K\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"MN\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"09:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"08:00\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+### COMISIONES CUATRI 4
+currentCourse=${fisicaIII}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"15:00\", \"endTime\": \"17:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"B\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:30\", \"endTime\": \"16:30\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"10:00\", \"endTime\": \"12:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"18:00\", \"endTime\": \"20:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"D\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"18:00\", \"endTime\": \"20:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"E\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"09:00\", \"endTime\": \"11:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"MNP\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"09:00\", \"endTime\": \"11:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"Q\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"12:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"18:00\", \"endTime\": \"20:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${eda}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${arqui}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"16:00\", \"endTime\": \"19:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"16:00\", \"endTime\": \"19:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${proba}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"KSE\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"11:00\", \"endTime\": \"13:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+
+### COMISIONES CUATRI 5
+currentCourse=${so}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"17:00\", \"endTime\": \"19:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${hci}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"18:30\", \"endTime\": \"21:30\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"18:30\", \"endTime\": \"21:30\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${basesI}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"13:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"09:00\", \"endTime\": \"12:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${inge1}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"13:00\", \"endTime\": \"16:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+
+### COMISIONES CUATRI 6
+currentCourse=${protos}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"16:00\", \"endTime\": \"19:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"17:00\", \"endTime\": \"20:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${paw}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"19:00\", \"endTime\": \"22:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"19:00\", \"endTime\": \"22:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${tla}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"15:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"15:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdt}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${metodos}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"09:00\", \"endTime\": \"12:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"B\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"D\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"17:00\", \"endTime\": \"20:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${forma1}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"A\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"08:00\", \"endTime\": \"11:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"D\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"E\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"F\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"H\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+### COMISIONES CUATRI 7
+currentCourse=${economia}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"K\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"13:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"KM\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"19:00\", \"endTime\": \"22:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"11:00\", \"endTime\": \"14:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${sia}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"15:00\", \"endTime\": \"18:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"08:00\", \"endTime\": \"12:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${inge2}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"19:00\", \"endTime\": \"22:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${basesII}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"08:30\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"19:00\", \"endTime\": \"22:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"08:30\", \"endTime\": \"10:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${cripto}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"15:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"16:00\", \"endTime\": \"19:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+### COMISIONES CUATRI 8
+currentCourse=${derecho}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"KS\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"12:00\", \"endTime\": \"15:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"SK\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"16:00\", \"endTime\": \"19:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${ss}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"10:00\", \"endTime\": \"13:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"10:00\", \"endTime\": \"13:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${pod}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${gpi}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${rectorado}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${mna}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"13:00\", \"endTime\": \"16:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"14:00\", \"endTime\": \"17:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+
+### COMISIONES ULTIMO AÑO
+currentCourse=${redes}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 2, \"startTime\": \"17:00\", \"endTime\": \"20:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${pf}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 6, \"startTime\": \"20:00\", \"endTime\": \"21:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${soa}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"BIO\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"18:30\", \"endTime\": \"21:30\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 4, \"startTime\": \"18:30\", \"endTime\": \"21:30\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+currentCourse=${forma3}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"AB\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"18:00\", \"endTime\": \"20:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"C\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"14:00\", \"endTime\": \"16:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"KMP\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"16:00\", \"endTime\": \"18:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+
+### COMISIONES ELECTIVAS
+currentCourse=${ml}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${cloud}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"AWS\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 3, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${infovis}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"10:00\", \"endTime\": \"13:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${funcional}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 1, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${sdf}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${videojuegos}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+currentCourse=${vr}
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"S\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"18:00\", \"endTime\": \"21:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
+
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"name\":\"K\", \"termId\":\"${termId2}\"}" localhost:3000/api/university/courses/${currentCourse}/course-classes
+cc=$(cat ../setup-db-output.txt | grep "Location" | cut -d '/' -f5 | xargs | dos2unix)
+curl -D "../setup-db-output.txt" -H "Content-Type: application/json" -H "Authorization: Bearer ${token}" -d "{\"day\": 5, \"startTime\": \"15:00\", \"endTime\": \"18:00\", \"buildingId\": \"${virtual}\"}" localhost:3000/api/university/course-classes/${cc}/lectures
