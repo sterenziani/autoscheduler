@@ -85,3 +85,6 @@ Desde la raíz del repositorio, ejecute `docker compose up`
 
 ## Crear cuenta de administrador
 Para crear una cuenta con permisos de administrador, debe crear manualmente un usuario en Mongo con el rol `ADMIN`, siguiendo el formato de documento de otros usuarios ya registrados.
+
+# Tip
+Para popular la base de datos de Neo4J con datos parciales del ITBA, puede utilizar el archivo `neo4j.dump` disponible en la carpeta `utils` o modificar los IDs en el script `setup-db` y ejecutarlo para realizar llamados a la API para popular la base de datos paso por paso.
