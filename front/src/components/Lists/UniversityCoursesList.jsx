@@ -100,7 +100,7 @@ function StudentCoursesList(props){
                     { filter && <p className="pt-2">{t("search.showingResultsFor", {searchTerm:filter})}</p> }
                 </div>
             }
-            <CourseList key="course-list" reloadCourses={() => loadCourses(page)} courses={courses}/>
+            <CourseList key="course-list" reloadCourses={() => loadCourses(page, filter)} courses={courses}/>
             <Pagination page={page} links={paginationLinks} loadContent={changePage}/>
             <div className="mx-auto align-items-center plus-button-container clickable">
                 <i
